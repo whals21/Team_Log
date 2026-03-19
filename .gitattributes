@@ -1,0 +1,62 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code files - always normalize to LF
+*.cs text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Unity files
+*.unity text eol=lf
+*.prefab text eol=lf
+*.meta text eol=lf
+*.asset text eol=lf
+*.controller text eol=lf
+*.anim text eol=lf
+*.mat text eol=lf
+*.physicsMaterial2D text eol=lf
+*.physicMaterial text eol=lf
+
+# ScriptableObjects and other asset types
+*.ScriptableObject text eol=lf
+
+# Shader files
+*.shader text eol=lf
+*.cginc text eol=lf
+
+# Text files
+*.txt text eol=lf
+*.md text eol=lf
+
+# Binary files - don't touch
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.tga binary
+*.psd binary
+*.tif binary
+*.tiff binary
+*.ai binary
+*.fbx binary
+*.obj binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.aiff binary
+*.mp4 binary
+*.mov binary
+*.avi binary
+*.font binary
+*.ttf binary
+*.otf binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.exe binary
+*.apk binary
+*.aab binary

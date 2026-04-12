@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TeamLog.Characters;
+using TeamLog.Combat;
 using TeamLog.Event;
 using TeamLog.Map;
 using TeamLog.UI.Event;

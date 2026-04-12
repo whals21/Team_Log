@@ -34,10 +34,35 @@ namespace TeamLog.Combat
         private List<Character> _playerParty = new();
         private List<Character> _enemies = new();
 
+        // 외부 데이터 주입용 (맵 시스템에서 전투 시작 시 사용)
+        private static List<Character> _pendingParty;
+        private static List<Character> _pendingEnemies;
+
+        /// <summary>
+        /// 맵 시스템에서 전투 시작 시 파티와 적 데이터를 설정
+        /// </summary>
+        public static void SetBattleData(List<Character> party, List<Character> enemies)
+        {
+            _pendingParty = party;
+            _pendingEnemies = enemies;
+        }
+
+        public event System.Action<bool> OnBattleFinished; // true = 승리
+
         private void Start()
         {
-            if (_useTestData)
+            // 외부 데이터가 있으면 사용, 없으면 테스트 모드
+            if (_pendingParty != null && _pendingEnemies != null)
+            {
+                _playerParty = new List<Character>(_pendingParty);
+                _enemies = new List<Character>(_pendingEnemies);
+                _pendingParty = null;
+                _pendingEnemies = null;
+            }
+            else if (_useTestData)
+            {
                 CreateTestData();
+            }
 
             InitializeBattle();
         }
@@ -155,6 +180,8 @@ namespace TeamLog.Combat
 
             bool victory = _enemies.TrueForAll(e => e.IsDead);
             _battleUIManager?.AddLog(victory ? "전투 승리!" : "전투 패배...");
+
+            OnBattleFinished?.Invoke(victory);
         }
 
         private void OnCharacterHPChanged(Character character)

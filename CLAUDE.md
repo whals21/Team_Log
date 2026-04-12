@@ -6,29 +6,47 @@
 
 ```
 Assets/
-├── 01.Scenes/          # BattleScene, BattleUI, TestCombatScene
+├── 01.Scenes/          # BattleScene, BattleUI, TestCombatScene, MapScene
 ├── 02.Scripts/
 │   ├── Characters/     # Character, CharacterData, Components/
 │   ├── Combat/         # AI/, Draw/, StatusEffect/, Turn/
 │   ├── Skill/          # SkillData
-│   ├── UI/Battle/      # 모든 전투 UI
-│   └── Editor/         # DataGenerator, SceneBuilder
-├── 03.Data/            # ScriptableObject 에셋 (Characters/, Skills/, Prefabs/)
+│   ├── Map/            # MapNode, MapFloor, MapGenerator, GameRunState
+│   ├── Reward/         # RewardData, ItemData, RewardManager
+│   ├── Shop/           # ShopData, ShopManager
+│   ├── Event/          # EventData, EventManager
+│   ├── UI/
+│   │   ├── Battle/     # 모든 전투 UI
+│   │   ├── Map/        # MapView, MapNodeButton, MapSceneSetup
+│   │   ├── Reward/     # RewardUI, RewardCard
+│   │   ├── Shop/       # ShopUI, ShopItemSlot
+│   │   └── Event/      # EventUI
+│   └── Editor/         # DataGenerator, SceneBuilder, MapSceneBuilder
+├── 03.Data/            # ScriptableObject 에셋
 ├── 08.Resource/        # 폰트, 이미지
-└── 09.Docs/            # GameDesign.md, TestSceneGuide.md, UI_design/
+└── 09.Docs/            # 기획서, 가이드, 작업일지
 ```
 
 ## 아키텍처
 
 ### 핵심 클래스 관계
 ```
-BattleSceneSetup (진입점)
+맵 시스템 (Phase 3):
+MapSceneSetup (진입점)
+    ├── GameRunState (런 전체 상태: 층, 골드, 파티 HP 유지)
+    ├── MapFloor (단일 층 맵)
+    │   └── MapNode (노드: 타입, 위치, 연결, 방문 상태)
+    ├── MapView (맵 시각화 UI)
+    ├── EventUI / ShopUI / RewardUI (노드별 서브 UI)
+    └── MapGenerator (프록시럴 맵 생성)
+
+전투 시스템 (Phase 1-2):
+BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신)
     ├── TurnManager (턴 사이클 오케스트레이터)
     │   ├── SkillDrawSystem (가중치 랜덤 드로우)
     │   └── TurnContext (턴 상태: phase, drawn skills, action queue)
     ├── PlayerActionController (UI ↔ 전투 로직 중재자)
     ├── EnemyAIController (패턴 기반 AI, 의도 표시)
-    ├── BattleEventManager (싱글톤 이벤트 버스)
     └── BattleUIManager (UI 패널 생성/관리)
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
@@ -50,13 +68,19 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 
 ### 필수
 - **네임스페이스**: `TeamLog` 최상위, 하위는 폴더 구조 따름
-  - `TeamLog.Characters` — Character, CharacterData, Components
-  - `TeamLog.Characters` — SkillData (Skill 폴더지만 네임스페이스는 Characters)
+  - `TeamLog.Characters` — Character, CharacterData, Components, SkillData
   - `TeamLog.Combat.Turn` — TurnManager, TurnPhase, TurnContext
-  - `TeamLog.Combat.Draw` — SkillDrawSystem, SkillDrawConfig
+  - `TeamLog.Combat.Draw` — SkillDrawSystem
   - `TeamLog.Combat.AI` — EnemyAIController, EnemyActionPattern
-  - `TeamLog.Combat.StatusEffect` — EffectProcessor
-  - `TeamLog.UI.Battle` — 모든 UI 클래스
+  - `TeamLog.Map` — MapNode, MapFloor, MapGenerator, GameRunState
+  - `TeamLog.Reward` — RewardData, ItemData, RewardManager
+  - `TeamLog.Shop` — ShopData, ShopManager
+  - `TeamLog.Event` — EventData, EventManager
+  - `TeamLog.UI.Battle` — 전투 UI 클래스
+  - `TeamLog.UI.Map` — 맵 UI 클래스
+  - `TeamLog.UI.Reward` — 보상 UI 클래스
+  - `TeamLog.UI.Shop` — 상점 UI 클래스
+  - `TeamLog.UI.Event` — 이벤트 UI 클래스
   - `TeamLog.Editor` — 에디터 도구
 - **이벤트 기반 통신**: 클래스 간 직접 참조 최소화, C# event/Action 사용
 - **UI-로직 분리**: UI 클래스는 표시만, 게임 로직은 Combat/Characters 계층에
@@ -72,7 +96,7 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 
 ### 파일 배치
 - 새 스크립트는 해당 시스템 폴더에 배치
-- UI 스크립트는 항상 `02.Scripts/UI/Battle/`
+- UI 스크립트는 항상 `02.Scripts/UI/{시스템명}/` (Battle, Map, Reward, Shop, Event)
 - Editor 스크립트는 항상 `02.Scripts/Editor/`
 
 ## 가드레일 (금지 사항)
@@ -100,17 +124,16 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 
 - **Phase 1 (코어 전투)**: 완료
 - **Phase 2 (전투 완성)**: 완료 (상태이상, 적 AI, UI)
-- **Phase 3 (로그라이크 요소)**: 미착수
-  - 맵 시스템, 보상/상점, 이벤트
+- **Phase 3 (로그라이크 요소)**: 완료 (맵 시스템, 보상/상점, 이벤트)
 - **Phase 4 (폴리싱)**: 미착수
   - 사운드, 이펙트, 밸런싱
 
 ### 미구현 항목
 - MP/마나 시스템 (MPBarUI 스텁 존재)
 - 스킬 레벨/업그레이드
-- 다중 적 웨이브 / 던전 층
-- 로그라이크 맵 진행
-- 보상/상점 시스템
+- 실제 스킬/아이템 풀 데이터 (현재 더미)
+- 프리팹 UI 연결 (NodeButton, ConnectionLine, PlayerMarker, RewardCard, ShopSlot, ChoiceButton)
+- MapScene 씬 빌드 및 BuildSettings 등록
 
 ## 가비지 컬렉터 (프로젝트 청소)
 

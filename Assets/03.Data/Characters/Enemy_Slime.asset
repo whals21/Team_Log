@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_Slime
+  m_EditorClassIdentifier: 
+  _characterName: "\uC2AC\uB77C\uC784"
+  _characterClass: 0
+  _description: "\uB048\uC801\uB048\uC801\uD55C \uC824\uB9AC \uD615\uD0DC\uC758 \uBAAC\uC2A4\uD130."
+  _baseHP: 40
+  _baseATK: 8
+  _baseDEF: 2
+  _skills:
+  - {fileID: 11400000, guid: 012c79c62fdf840478c1d8d0a37fb25a, type: 2}
+  - {fileID: 11400000, guid: 4e0ab87add61e624db8d01523faa42c1, type: 2}
+  - {fileID: 11400000, guid: ad18f506b6d9aad468654a35e4b0f849, type: 2}
+  - {fileID: 11400000, guid: 8b64956629f848945b390a20fd25b561, type: 2}

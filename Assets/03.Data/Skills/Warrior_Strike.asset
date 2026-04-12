@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 359ccd898c414ec499c7b83b44f63fdd, type: 3}
+  m_Name: Warrior_Strike
+  m_EditorClassIdentifier: 
+  _skillName: "\uAC15\uD0C0"
+  _description: "\uC801\uC5D0\uAC8C \uBB3C\uB9AC \uB370\uBBF8\uC9C0\uB97C \uC785\uD799\uB2C8\uB2E4."
+  _skillType: 0
+  _targetType: 0
+  _power: 15
+  _cost: 0
+  _weight: 40
+  _statusEffect: 0
+  _effectDuration: 0
+  _effectValue: 0

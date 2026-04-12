@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_Goblin
+  m_EditorClassIdentifier: 
+  _characterName: "\uACE0\uBE14\uB9B0"
+  _characterClass: 3
+  _description: "\uAD50\uD65C\uD558\uACE0 \uBE60\uB978 \uC791\uC740 \uBAAC\uC2A4\uD130."
+  _baseHP: 50
+  _baseATK: 12
+  _baseDEF: 3
+  _skills:
+  - {fileID: 11400000, guid: 243dfb2bc5701f34aa2da84102095e48, type: 2}
+  - {fileID: 11400000, guid: dfd7a8c26becba748837974b521dfa04, type: 2}
+  - {fileID: 11400000, guid: 1cc0b1ef6b902d14eae1b0ac524eea0c, type: 2}
+  - {fileID: 11400000, guid: db65be1ecccbab84582989a699325570, type: 2}

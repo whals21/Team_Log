@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags: []
   layers:
   - Default
@@ -15,7 +15,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - Backgroud
   - 
   - 
   - 
@@ -41,3 +41,65 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: 'Character '
+    uniqueID: 2034899767
+    locked: 0
+  - name: VFX
+    uniqueID: 2284786581
+    locked: 0
+  - name: New Layer 3
+    uniqueID: 101781053
+    locked: 0
+  - name: New Layer 4
+    uniqueID: 1559927415
+    locked: 0
+  - name: New Layer 5
+    uniqueID: 3664326939
+    locked: 0
+  - name: New Layer 6
+    uniqueID: 1178190447
+    locked: 0
+  - name: New Layer 7
+    uniqueID: 2008792697
+    locked: 0
+  - name: New Layer 8
+    uniqueID: 2838454515
+    locked: 0
+  - name: New Layer 9
+    uniqueID: 3776462881
+    locked: 0
+  - name: UI_World
+    uniqueID: 2703156593
+    locked: 0
+  - name: New Layer 11
+    uniqueID: 2943284723
+    locked: 0
+  - name: New Layer 12
+    uniqueID: 2847827043
+    locked: 0
+  - name: New Layer 13
+    uniqueID: 4084663075
+    locked: 0
+  - name: New Layer 14
+    uniqueID: 2280427937
+    locked: 0
+  - name: New Layer 15
+    uniqueID: 608160679
+    locked: 0
+  - name: New Layer 16
+    uniqueID: 1415620079
+    locked: 0
+  - name: New Layer 17
+    uniqueID: 2960151783
+    locked: 0
+  - name: New Layer 18
+    uniqueID: 1514858925
+    locked: 0
+  - name: New Layer 19
+    uniqueID: 2452249517
+    locked: 0
+  - name: ' UI_Overlay'
+    uniqueID: 2286394819
+    locked: 0
+  m_RenderingLayers:
+  - Default

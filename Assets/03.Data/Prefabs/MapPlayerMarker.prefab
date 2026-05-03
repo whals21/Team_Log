@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5532406938450939131
+--- !u!1 &8159024041085194874
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,10 +8,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6985770089512989928}
-  - component: {fileID: 3404053044772540605}
-  - component: {fileID: 92054925688725635}
-  - component: {fileID: 6592785580294172836}
+  - component: {fileID: 5281715105879287762}
+  - component: {fileID: 1605558637764461858}
+  - component: {fileID: 2646854714829268580}
+  - component: {fileID: 4598462014508166619}
   m_Layer: 0
   m_Name: MapPlayerMarker
   m_TagString: Untagged
@@ -19,13 +19,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &6985770089512989928
+--- !u!224 &5281715105879287762
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5532406938450939131}
+  m_GameObject: {fileID: 8159024041085194874}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -38,21 +38,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 30, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &3404053044772540605
+--- !u!222 &1605558637764461858
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5532406938450939131}
+  m_GameObject: {fileID: 8159024041085194874}
   m_CullTransparentMesh: 1
---- !u!114 &92054925688725635
+--- !u!114 &2646854714829268580
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5532406938450939131}
+  m_GameObject: {fileID: 8159024041085194874}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -76,19 +76,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &6592785580294172836
+--- !u!114 &4598462014508166619
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5532406938450939131}
+  m_GameObject: {fileID: 8159024041085194874}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1bc7bd3533ac6e34d86e20255c544ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _markerImage: {fileID: 92054925688725635}
+  _markerImage: {fileID: 2646854714829268580}
   _pulseSpeed: 2
   _pulseMinScale: 0.9
   _pulseMaxScale: 1.1

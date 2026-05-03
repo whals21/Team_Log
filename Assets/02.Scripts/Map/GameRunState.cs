@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TeamLog.Characters;
+using TeamLog.Reward;
 
 namespace TeamLog.Map
 {
@@ -10,8 +11,13 @@ namespace TeamLog.Map
     public class GameRunState
     {
         private readonly List<Character> _playerParty;
-        private readonly List<Character> _inventory = new();
+        private readonly List<ItemData> _acquiredItems = new();
         private readonly List<string> _runHistory = new();
+        private readonly System.Random _rng = new();
+
+        // 데이터 풀 (MapSceneSetup에서 주입)
+        private List<SkillData> _skillPool;
+        private List<ItemData> _itemPool;
 
         // 맵 진행
         public int CurrentFloor { get; private set; } = 1;
@@ -25,7 +31,7 @@ namespace TeamLog.Map
         public IReadOnlyList<Character> PlayerParty => _playerParty;
 
         // 인벤토리
-        public IReadOnlyList<Character> Inventory => _inventory;
+        public IReadOnlyList<ItemData> AcquiredItems => _acquiredItems;
 
         // 이력
         public IReadOnlyList<string> RunHistory => _runHistory;
@@ -61,6 +67,7 @@ namespace TeamLog.Map
         {
             var generator = new MapGenerator();
             CurrentMap = generator.GenerateFloor(CurrentFloor);
+            CurrentMap.StartFloor();
             OnMapChanged?.Invoke(CurrentMap);
         }
 
@@ -164,6 +171,65 @@ namespace TeamLog.Map
         private void AddLog(string entry)
         {
             _runHistory.Add($"[층 {CurrentFloor}] {entry}");
+        }
+
+        /// <summary>
+        /// 스킬/아이템 데이터 풀 주입 (MapSceneSetup에서 호출)
+        /// </summary>
+        public void SetDataPools(List<SkillData> skillPool, List<ItemData> itemPool)
+        {
+            _skillPool = skillPool;
+            _itemPool = itemPool;
+        }
+
+        /// <summary>
+        /// 풀에서 랜덤 스킬 획득 — 첫 번째 생존 파티원에게 추가
+        /// </summary>
+        public SkillData AcquireRandomSkill()
+        {
+            if (_skillPool == null || _skillPool.Count == 0) return null;
+            var skill = _skillPool[_rng.Next(_skillPool.Count)];
+            foreach (var member in _playerParty)
+            {
+                if (member.IsAlive) { member.SkillInventory.AddSkill(skill); break; }
+            }
+            AddLog($"스킬 획득: {skill.SkillName}");
+            return skill;
+        }
+
+        /// <summary>
+        /// 풀에서 랜덤 아이템 획득
+        /// </summary>
+        public ItemData AcquireRandomItem()
+        {
+            if (_itemPool == null || _itemPool.Count == 0) return null;
+            var item = _itemPool[_rng.Next(_itemPool.Count)];
+            _acquiredItems.Add(item);
+            AddLog($"아이템 획득: {item.ItemName}");
+            return item;
+        }
+
+        /// <summary>
+        /// 특정 스킬 획득
+        /// </summary>
+        public void AcquireSkill(SkillData skill)
+        {
+            if (skill == null) return;
+            foreach (var member in _playerParty)
+            {
+                if (member.IsAlive) { member.SkillInventory.AddSkill(skill); break; }
+            }
+            AddLog($"스킬 획득: {skill.SkillName}");
+        }
+
+        /// <summary>
+        /// 특정 아이템 획득
+        /// </summary>
+        public void AcquireItem(ItemData item)
+        {
+            if (item == null) return;
+            _acquiredItems.Add(item);
+            AddLog($"아이템 획득: {item.ItemName}");
         }
     }
 }

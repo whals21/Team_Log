@@ -62,6 +62,7 @@ namespace TeamLog.UI.Battle
         private void CreatePlayerPanels()
         {
             ClearPanels(_playerPanels);
+            ClearContainerChildren(_playerPanelContainer);
 
             for (int i = 0; i < _playerParty.Count && i < _maxPlayerPanels; i++)
             {
@@ -81,6 +82,7 @@ namespace TeamLog.UI.Battle
         private void CreateEnemyPanels()
         {
             ClearPanels(_enemyPanels);
+            ClearContainerChildren(_enemyPanelContainer);
 
             foreach (var enemy in _enemies)
             {
@@ -103,6 +105,13 @@ namespace TeamLog.UI.Battle
                 if (panel != null) Destroy(panel.gameObject);
             }
             panels.Clear();
+        }
+
+        private void ClearContainerChildren(Transform container)
+        {
+            if (container == null) return;
+            for (int i = container.childCount - 1; i >= 0; i--)
+                Destroy(container.GetChild(i).gameObject);
         }
 
         #endregion

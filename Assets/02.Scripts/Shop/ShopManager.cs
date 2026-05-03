@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TeamLog.Characters;
 using TeamLog.Map;
 using TeamLog.Reward;
 
@@ -17,30 +18,41 @@ namespace TeamLog.Shop
         /// <summary>
         /// 랜덤 상점 슬롯 생성 (상점 노드 방문 시)
         /// </summary>
-        public List<ShopSlot> GenerateShopSlots(int floorNumber)
+        public List<ShopSlot> GenerateShopSlots(int floorNumber,
+            IReadOnlyList<SkillData> skillPool, IReadOnlyList<ItemData> itemPool)
         {
             var slots = new List<ShopSlot>();
 
             // 스킬 3개
             for (int i = 0; i < 3; i++)
             {
-                slots.Add(new ShopSlot
+                var slot = new ShopSlot
                 {
                     ContentType = ShopSlot.SlotContentType.Skill,
                     Price = GetSkillPrice(floorNumber),
                     IsSold = false
-                });
+                };
+
+                if (skillPool != null && skillPool.Count > 0)
+                    slot.Skill = skillPool[_rng.Next(skillPool.Count)];
+
+                slots.Add(slot);
             }
 
             // 아이템 2개
             for (int i = 0; i < 2; i++)
             {
-                slots.Add(new ShopSlot
+                var slot = new ShopSlot
                 {
                     ContentType = ShopSlot.SlotContentType.Item,
                     Price = GetItemPrice(floorNumber),
                     IsSold = false
-                });
+                };
+
+                if (itemPool != null && itemPool.Count > 0)
+                    slot.Item = itemPool[_rng.Next(itemPool.Count)];
+
+                slots.Add(slot);
             }
 
             return slots;
@@ -59,11 +71,11 @@ namespace TeamLog.Shop
 
             if (slot.ContentType == ShopSlot.SlotContentType.Skill)
             {
-                Debug.Log($"[ShopManager] 스킬 구매: {slot.Name}");
+                runState.AcquireSkill(slot.Skill);
             }
             else
             {
-                Debug.Log($"[ShopManager] 아이템 구매: {slot.Name}");
+                runState.AcquireItem(slot.Item);
             }
 
             return true;

@@ -29,7 +29,7 @@ namespace TeamLog.Map
             {
                 1 => new MapGenerationConfig
                 {
-                    LayerCount = 3,
+                    LayerCount = 4,
                     MinNodesPerLayer = 2,
                     MaxNodesPerLayer = 3,
                     EliteCount = 0,
@@ -39,7 +39,7 @@ namespace TeamLog.Map
                 },
                 2 => new MapGenerationConfig
                 {
-                    LayerCount = 4,
+                    LayerCount = 5,
                     MinNodesPerLayer = 2,
                     MaxNodesPerLayer = 3,
                     EliteCount = 1,
@@ -49,7 +49,7 @@ namespace TeamLog.Map
                 },
                 3 => new MapGenerationConfig
                 {
-                    LayerCount = 5,
+                    LayerCount = 6,
                     MinNodesPerLayer = 2,
                     MaxNodesPerLayer = 4,
                     EliteCount = 1,

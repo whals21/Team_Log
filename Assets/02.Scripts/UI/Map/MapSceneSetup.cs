@@ -5,7 +5,9 @@ using TeamLog.Characters;
 using TeamLog.Combat;
 using TeamLog.Event;
 using TeamLog.Map;
+using TeamLog.Reward;
 using TeamLog.UI.Event;
+using TeamLog.UI.Reward;
 using TeamLog.UI.Shop;
 
 namespace TeamLog.UI.Map
@@ -19,6 +21,7 @@ namespace TeamLog.UI.Map
         [SerializeField] private MapView _mapView;
         [SerializeField] private EventUI _eventUI;
         [SerializeField] private ShopUI _shopUI;
+        [SerializeField] private RewardUI _rewardUI;
 
         [Header("Test Mode")]
         [SerializeField] private bool _useTestData = true;
@@ -29,6 +32,10 @@ namespace TeamLog.UI.Map
 
         [Header("Test Events")]
         [SerializeField] private EventData[] _testEvents;
+
+        [Header("Data Pools")]
+        [SerializeField] private SkillData[] _skillPool;
+        [SerializeField] private ItemData[] _itemPool;
 
         private GameRunState _runState;
         private List<Character> _playerParty;
@@ -64,12 +71,17 @@ namespace TeamLog.UI.Map
 
             _runState = new GameRunState(_playerParty, startingGold: 50);
             _runState.OnMapChanged += OnMapChanged;
+            _runState.SetDataPools(
+                _skillPool != null ? new List<SkillData>(_skillPool) : new List<SkillData>(),
+                _itemPool != null ? new List<ItemData>(_itemPool) : new List<ItemData>());
 
             // 서브 UI 초기화
             if (_eventUI != null)
                 _eventUI.Initialize(_runState, OnEventComplete);
             if (_shopUI != null)
-                _shopUI.Initialize(_runState, OnShopExit);
+                _shopUI.Initialize(_runState, OnShopExit, _skillPool, _itemPool);
+            if (_rewardUI != null)
+                _rewardUI.Initialize(_runState, OnRewardComplete);
 
             _runState.StartRun();
         }
@@ -167,6 +179,12 @@ namespace TeamLog.UI.Map
         }
 
         private void OnShopExit()
+        {
+            if (_mapView != null)
+                _mapView.Refresh(_runState.Gold);
+        }
+
+        private void OnRewardComplete()
         {
             if (_mapView != null)
                 _mapView.Refresh(_runState.Gold);

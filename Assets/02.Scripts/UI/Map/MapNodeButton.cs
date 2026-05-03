@@ -69,6 +69,9 @@ namespace TeamLog.UI.Map
             // 색상
             Color nodeColor = GetNodeColor(_node.NodeType);
 
+            if (_iconImage != null)
+                _iconImage.color = nodeColor;
+
             if (_backgroundImage != null)
             {
                 _backgroundImage.color = _node.IsActive ? nodeColor :

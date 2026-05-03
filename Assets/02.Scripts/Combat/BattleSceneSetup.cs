@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Collections;
 using System.Collections.Generic;
 using TeamLog.Characters;
 using TeamLog.Combat.Turn;
@@ -182,6 +184,15 @@ namespace TeamLog.Combat
             _battleUIManager?.AddLog(victory ? "전투 승리!" : "전투 패배...");
 
             OnBattleFinished?.Invoke(victory);
+
+            StartCoroutine(BattleEndTransition());
+        }
+
+        private IEnumerator BattleEndTransition()
+        {
+            _battleUIManager?.AddLog("3초 후 맵으로 돌아갑니다...");
+            yield return new WaitForSecondsRealtime(3f);
+            SceneManager.LoadScene("MapScene");
         }
 
         private void OnCharacterHPChanged(Character character)

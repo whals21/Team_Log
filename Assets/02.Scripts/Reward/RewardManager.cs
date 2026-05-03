@@ -15,7 +15,7 @@ namespace TeamLog.Reward
         /// <summary>
         /// 전투 결과에 따라 보상 3개 생성
         /// </summary>
-        public List<RewardOffer> GenerateRewards(MapNodeType battleType)
+        public List<RewardOffer> GenerateRewards(MapNodeType battleType, GameRunState runState)
         {
             var rewards = new List<RewardOffer>();
             int goldMin, goldMax;
@@ -38,13 +38,13 @@ namespace TeamLog.Reward
 
             for (int i = 0; i < 2; i++)
             {
-                rewards.Add(GenerateRandomReward(battleType));
+                rewards.Add(GenerateRandomReward(battleType, runState));
             }
 
             return rewards;
         }
 
-        private RewardOffer GenerateRandomReward(MapNodeType battleType)
+        private RewardOffer GenerateRandomReward(MapNodeType battleType, GameRunState runState)
         {
             // 가중치: 골드 40%, 스킬 35%, 아이템 25%
             double roll = _rng.NextDouble();
@@ -57,20 +57,24 @@ namespace TeamLog.Reward
             }
             else if (roll < 0.75)
             {
+                var skill = runState.AcquireRandomSkill();
                 return new RewardOffer
                 {
                     Type = RewardType.Skill,
                     Rarity = battleType == MapNodeType.Boss ? RewardRarity.Unique : RewardRarity.Common,
-                    Description = "스킬 보상 (추후 스킬 풀에서 선택)"
+                    Description = skill != null ? $"스킬: {skill.SkillName}" : "스킬 보상 (풀 없음)",
+                    Skill = skill
                 };
             }
             else
             {
+                var item = runState.AcquireRandomItem();
                 return new RewardOffer
                 {
                     Type = RewardType.Item,
                     Rarity = battleType == MapNodeType.Elite ? RewardRarity.Rare : RewardRarity.Common,
-                    Description = "아이템 보상 (추후 아이템 풀에서 선택)"
+                    Description = item != null ? $"아이템: {item.ItemName}" : "아이템 보상 (풀 없음)",
+                    Item = item
                 };
             }
         }
@@ -98,12 +102,10 @@ namespace TeamLog.Reward
                     runState.AddGold(reward.GoldAmount);
                     break;
                 case RewardType.Skill:
-                    // 스킬 획득은 추후 SkillInventoryComponent 확장 시 구현
-                    Debug.Log($"[RewardManager] 스킬 획득: {reward.Description}");
+                    // 이미 GenerateRewards에서 획득 처리됨
                     break;
                 case RewardType.Item:
-                    // 아이템 획득은 추후 인벤토리 시스템에서 구현
-                    Debug.Log($"[RewardManager] 아이템 획득: {reward.Description}");
+                    // 이미 GenerateRewards에서 획득 처리됨
                     break;
             }
         }
@@ -118,6 +120,8 @@ namespace TeamLog.Reward
         public RewardRarity Rarity;
         public int GoldAmount;
         public string Description;
+        public SkillData Skill;
+        public ItemData Item;
 
         // 희귀도별 색상
         public Color GetRarityColor()

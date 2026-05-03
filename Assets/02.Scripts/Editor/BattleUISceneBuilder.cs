@@ -73,6 +73,42 @@ namespace TeamLog.Editor
             }
         }
 
+        [MenuItem("Tools/Battle UI/Build Battle Scene (with BG)", false, 99)]
+        public static void BuildBattleScene()
+        {
+            const string path = "Assets/01.Scenes/BattleScene.unity";
+
+            // 기존 BattleScene 로드
+            var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
+
+            // 기존 TestCombatManager (스크립트 없는 빈 오브젝트) 제거
+            var oldManager = GameObject.Find("TestCombatManager");
+            if (oldManager != null)
+                Object.DestroyImmediate(oldManager);
+
+            // BattleUICanvas가 이미 있으면 제거 (재구축)
+            var oldCanvas = GameObject.Find("BattleUICanvas");
+            if (oldCanvas != null)
+                Object.DestroyImmediate(oldCanvas);
+
+            // 한글 폰트 로드
+            _koreanFont = GetOrCreateKoreanFont();
+
+            // Canvas 생성 (Camera, EventSystem은 이미 씬에 있음)
+            var canvas = CreateCanvas(scene);
+
+            // UI 구축
+            CreateBattleUI(canvas);
+
+            // 스크립트 세팅 (BattleSceneSetup, BattleUIManager 등)
+            SetupScriptsInCurrentScene();
+
+            // 저장
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log($"[BattleSceneBuilder] BattleScene built and saved to {path}");
+            AssetDatabase.Refresh();
+        }
+
         [MenuItem("Tools/Battle UI/Build Battle UI Scene", false, 100)]
         public static void BuildBattleUIScene()
         {
@@ -691,6 +727,9 @@ namespace TeamLog.Editor
             if (actionBar != null)
                 AutoWireActionBar(actionBar);
 
+            // 9) 정적 패널 제거 (런타임에 프리팹으로 동적 생성하므로 빌더가 만든 샘플 패널은 삭제)
+            RemoveStaticPanels(leftSidebar, centerArea);
+
             EditorSceneManager.MarkSceneDirty(root.scene);
             Debug.Log("[Setup] 스크립트 세팅 완료! 씬을 저장하세요.");
         }
@@ -1245,6 +1284,23 @@ namespace TeamLog.Editor
         };
 
         #endregion
+
+        private static void RemoveStaticPanels(Transform leftSidebar, Transform centerArea)
+        {
+            if (leftSidebar != null)
+            {
+                for (int i = leftSidebar.childCount - 1; i >= 0; i--)
+                    Object.DestroyImmediate(leftSidebar.GetChild(i).gameObject);
+                Debug.Log("[Setup] LeftSidebar static panels removed");
+            }
+
+            if (centerArea != null)
+            {
+                for (int i = centerArea.childCount - 1; i >= 0; i--)
+                    Object.DestroyImmediate(centerArea.GetChild(i).gameObject);
+                Debug.Log("[Setup] CenterArea static panels removed");
+            }
+        }
 
         private static void SetPrivateField(object obj, string fieldName, object value)
         {

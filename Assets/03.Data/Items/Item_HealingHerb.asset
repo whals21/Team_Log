@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72e34cc37f51a3a4ea424a46382e6ef1, type: 3}
+  m_Name: Item_HealingHerb
+  m_EditorClassIdentifier: 
+  _itemName: "\uCE58\uC720\uC758 \uD5C8\uBE0C"
+  _description: "\uB9E4 \uD134 5 HP\uB97C \uD68C\uBCF5\uD569\uB2C8\uB2E4."
+  _itemType: 1
+  _effectType: 3
+  _effectValue: 5
+  _price: 60
+  _rarity: 0

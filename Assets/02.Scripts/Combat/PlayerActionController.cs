@@ -9,7 +9,7 @@ using TargetType = TeamLog.Characters.TargetType;
 namespace TeamLog.Combat
 {
     /// <summary>
-    /// 스킬 선택 → 타겟 선택 → 실행 흐름 중재 컨트롤러
+    /// 스킬 선택 → 타겟 선택 → 즉시 시전 흐름 중재 컨트롤러
     /// </summary>
     public class PlayerActionController
     {
@@ -84,12 +84,8 @@ namespace TeamLog.Combat
             var slot = _drawSystem.GetSlot(slotIndex);
             if (slot == null || slot.Skill == null) return;
 
-            // 이미 할당된 슬롯이면 취소
-            if (slot.IsAssigned)
-            {
-                UnassignSlot(slot);
-                return;
-            }
+            // 이미 시전된 스킬은 무시
+            if (slot.IsSelected) return;
 
             _selectedSlotIndex = slotIndex;
 
@@ -97,15 +93,15 @@ namespace TeamLog.Combat
             switch (targetType)
             {
                 case TargetType.Self:
-                    AssignTarget(slot, slot.Caster);
+                    CastImmediately(slot, slot.Caster);
                     break;
 
                 case TargetType.AllEnemies:
-                    AssignTarget(slot, null);
+                    CastImmediately(slot, null);
                     break;
 
                 case TargetType.AllAllies:
-                    AssignTarget(slot, null);
+                    CastImmediately(slot, null);
                     break;
 
                 case TargetType.SingleEnemy:
@@ -145,7 +141,7 @@ namespace TeamLog.Combat
             var slot = _drawSystem.GetSlot(_selectedSlotIndex);
             if (slot == null) return;
 
-            AssignTarget(slot, enemy);
+            CastImmediately(slot, enemy);
         }
 
         private void OnPlayerPanelClicked(int playerIndex)
@@ -159,42 +155,42 @@ namespace TeamLog.Combat
             var slot = _drawSystem.GetSlot(_selectedSlotIndex);
             if (slot == null) return;
 
-            AssignTarget(slot, player);
+            CastImmediately(slot, player);
         }
 
-        // ── Assignment ──────────────────────────────────────────────
+        // ── Immediate Cast ──────────────────────────────────────────
 
-        private void AssignTarget(DrawnSkillSlot slot, Character target)
+        private void CastImmediately(DrawnSkillSlot slot, Character target)
         {
-            int order = _actionBar.GetNextExecutionOrder();
-
+            // 슬롯 사용 표시
             slot.IsSelected = true;
-            slot.ExecutionOrder = order;
             slot.AssignedTarget = target;
 
-            _actionBar.MarkSlotAssigned(slot.SlotIndex, order);
+            // 즉시 시전
+            bool battleEnded = _turnManager.ExecuteSkillImmediately(slot.Caster, slot.Skill, target);
+
+            // UI 갱신
+            _actionBar.MarkSlotAssigned(slot.SlotIndex, _actionBar.GetNextExecutionOrder());
             _actionBar.UpdateActionSlots(_drawSystem.DrawnSlots);
 
             _targetMode = TargetMode.None;
             _selectedSlotIndex = -1;
             _uiManager.ClearAllHighlights();
 
-            _uiManager.AddLog($"[{slot.Caster.Name}] {slot.Skill.SkillName} " +
-                (target != null ? $"→ {target.Name}" : ""));
-        }
+            _uiManager.AddLog($"[{slot.Caster.Name}] {slot.Skill.SkillName}" +
+                (target != null ? $" → {target.Name}" : ""));
 
-        private void UnassignSlot(DrawnSkillSlot slot)
-        {
-            slot.Reset();
-            _actionBar.ClearSlotAssignment(slot.SlotIndex);
-            _actionBar.DecrementExecutionOrder();
-            _actionBar.UpdateActionSlots(_drawSystem.DrawnSlots);
+            // 전투 종료 시 아무것도 하지 않음
+            if (battleEnded) return;
 
-            _uiManager.ClearAllHighlights();
-            _targetMode = TargetMode.None;
-            _selectedSlotIndex = -1;
-
-            _uiManager.AddLog($"[{slot.Caster.Name}] 스킬 할당 취소");
+            // 모든 스킬 사용 완료 시 자동으로 적 턴으로 전환
+            bool allUsed = true;
+            foreach (var s in _drawSystem.DrawnSlots)
+            {
+                if (!s.IsSelected) { allUsed = false; break; }
+            }
+            if (allUsed)
+                _turnManager.ConfirmActions();
         }
     }
 }

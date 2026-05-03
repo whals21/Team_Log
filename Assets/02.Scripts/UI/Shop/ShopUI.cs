@@ -2,66 +2,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using TeamLog.Characters;
 using TeamLog.Map;
+using TeamLog.Reward;
 using TeamLog.Shop;
 
 namespace TeamLog.UI.Shop
 {
-    /// <summary>
-    /// 상점 아이템 슬롯 UI
-    /// </summary>
-    public class ShopItemSlot : MonoBehaviour
-    {
-        [SerializeField] private TextMeshProUGUI _nameLabel;
-        [SerializeField] private TextMeshProUGUI _descLabel;
-        [SerializeField] private TextMeshProUGUI _priceLabel;
-        [SerializeField] private Button _buyButton;
-        [SerializeField] private GameObject _soldOverlay;
-
-        private ShopSlot _slot;
-        private System.Action<ShopSlot> _onBuyClicked;
-
-        private void Awake()
-        {
-            if (_buyButton != null)
-                _buyButton.onClick.AddListener(OnBuy);
-        }
-
-        public void Setup(ShopSlot slot, System.Action<ShopSlot> onBuyClicked)
-        {
-            _slot = slot;
-            _onBuyClicked = onBuyClicked;
-            UpdateVisual();
-        }
-
-        public void UpdateVisual()
-        {
-            if (_slot == null) return;
-
-            if (_nameLabel != null)
-                _nameLabel.text = _slot.Name;
-            if (_descLabel != null)
-                _descLabel.text = _slot.Desc;
-            if (_priceLabel != null)
-                _priceLabel.text = $"{_slot.Price} G";
-            if (_buyButton != null)
-                _buyButton.interactable = !_slot.IsSold;
-            if (_soldOverlay != null)
-                _soldOverlay.SetActive(_slot.IsSold);
-        }
-
-        private void OnBuy()
-        {
-            _onBuyClicked?.Invoke(_slot);
-        }
-
-        private void OnDestroy()
-        {
-            if (_buyButton != null)
-                _buyButton.onClick.RemoveListener(OnBuy);
-        }
-    }
-
     /// <summary>
     /// 상점 UI — 구매 슬롯 목록 + 골드 표시 + 나가기 버튼
     /// </summary>
@@ -78,6 +25,8 @@ namespace TeamLog.UI.Shop
         private GameRunState _runState;
         private System.Action _onShopExit;
         private readonly List<ShopSlot> _currentSlots = new();
+        private IReadOnlyList<SkillData> _skillPool;
+        private IReadOnlyList<ItemData> _itemPool;
 
         private void Awake()
         {
@@ -85,10 +34,13 @@ namespace TeamLog.UI.Shop
                 _exitButton.onClick.AddListener(OnExit);
         }
 
-        public void Initialize(GameRunState runState, System.Action onShopExit)
+        public void Initialize(GameRunState runState, System.Action onShopExit,
+            IReadOnlyList<SkillData> skillPool = null, IReadOnlyList<ItemData> itemPool = null)
         {
             _runState = runState;
             _onShopExit = onShopExit;
+            _skillPool = skillPool;
+            _itemPool = itemPool;
             _shopManager = new ShopManager();
         }
 
@@ -101,7 +53,7 @@ namespace TeamLog.UI.Shop
             ClearSlots();
 
             _currentSlots.Clear();
-            var slots = _shopManager.GenerateShopSlots(floorNumber);
+            var slots = _shopManager.GenerateShopSlots(floorNumber, _skillPool, _itemPool);
             _currentSlots.AddRange(slots);
 
             if (_titleLabel != null)

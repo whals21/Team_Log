@@ -29,11 +29,18 @@ namespace TeamLog.Editor
         private static TMP_FontAsset _font;
 
         [MenuItem("TeamLog/Prefabs/Create Phase 3 Prefabs")]
-        public static void CreateAllPrefabs()
+        public static void CreateAllPrefabs() => CreateAllPrefabs(true);
+
+        [MenuItem("TeamLog/Prefabs/Force Rebuild Phase 3 Prefabs")]
+        public static void ForceRebuildPrefabs() => CreateAllPrefabs(false);
+
+        private static void CreateAllPrefabs(bool skipExisting)
         {
             _font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_SDF);
 
             EnsureFolder();
+
+            if (!skipExisting) DeleteExistingPrefabs();
 
             CreateMapNodeButtonPrefab();
             CreateMapConnectionLinePrefab();
@@ -45,6 +52,21 @@ namespace TeamLog.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("[Phase3PrefabBuilder] 프리팹 6개 생성 완료!");
+        }
+
+        private static void DeleteExistingPrefabs()
+        {
+            string[] prefabNames = {
+                "MapNodeButton", "MapConnectionLine", "MapPlayerMarker",
+                "RewardCard", "ShopItemSlot", "ChoiceButton"
+            };
+            foreach (var name in prefabNames)
+            {
+                var path = $"{PREFAB_DIR}/{name}.prefab";
+                AssetDatabase.DeleteAsset(path);
+            }
+            AssetDatabase.Refresh();
+            Debug.Log("[Phase3PrefabBuilder] 기존 프리팹 삭제 완료");
         }
 
         private static void EnsureFolder()

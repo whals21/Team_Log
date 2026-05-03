@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamLog.Characters;
 using TeamLog.Map;
+using TeamLog.Reward;
 
 namespace TeamLog.Event
 {
@@ -53,13 +54,17 @@ namespace TeamLog.Event
             // 스킬 획득
             if (outcome.GiveRandomSkill)
             {
-                Debug.Log("[EventManager] 랜덤 스킬 획득 — 추후 스킬 풀에서 선택");
+                var skill = runState.AcquireRandomSkill();
+                if (skill != null && outcome.ResultText != null)
+                    outcome.ResultText += $" ({skill.SkillName} 획득!)";
             }
 
             // 아이템 획득
             if (outcome.GiveRandomItem)
             {
-                Debug.Log("[EventManager] 랜덤 아이템 획득 — 추후 아이템 풀에서 선택");
+                var item = runState.AcquireRandomItem();
+                if (item != null && outcome.ResultText != null)
+                    outcome.ResultText += $" ({item.ItemName} 획득!)";
             }
 
             OnChoiceMade?.Invoke(choice);

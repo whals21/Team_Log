@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72e34cc37f51a3a4ea424a46382e6ef1, type: 3}
+  m_Name: Item_DEFBoost
+  m_EditorClassIdentifier: 
+  _itemName: "\uB2E8\uB2E8\uD55C \uAECD\uC9C8"
+  _description: "\uBC29\uC5B4\uB825\uC774 3 \uC99D\uAC00\uD569\uB2C8\uB2E4."
+  _itemType: 0
+  _effectType: 2
+  _effectValue: 3
+  _price: 90
+  _rarity: 0

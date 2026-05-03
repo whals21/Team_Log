@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_AbandonedChest
+  m_EditorClassIdentifier: 
+  _eventName: "\uBC84\uB824\uC9C4 \uC0C1\uC790"
+  _description: "\uAE38\uAC00\uC5D0 \uB0A1\uC740 \uC0C1\uC790\uAC00 \uB193\uC5EC
+    \uC788\uC2B5\uB2C8\uB2E4. \uC870\uC2EC\uC2A4\uB7FD\uAC8C \uC5F4\uC5B4\uBCFC\uAE4C\uC694?"
+  _eventType: 1
+  _choices:
+  - ChoiceText: "\uC870\uC2EC\uC2A4\uB7FD\uAC8C \uC5F0\uB2E4"
+    ChoiceDescription: "\uCC9C\uCC9C\uD788 \uC0C1\uC790\uB97C \uC5FD\uB2C8\uB2E4."
+    Outcome:
+      ResultText: "\uC0C1\uC790 \uC548\uC5D0 \uAE08\uD654\uAC00 \uB4E4\uC5B4 \uC788\uC5C8\uC2B5\uB2C8\uB2E4!
+        40 \uACE8\uB4DC\uB97C \uD68D\uB4DD\uD588\uC2B5\uB2C8\uB2E4."
+      GoldChange: 40
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+  - ChoiceText: "\uBB34\uC791\uC815 \uC5F0\uB2E4"
+    ChoiceDescription: "\uBE60\uB974\uAC8C \uC0C1\uC790\uB97C \uC5FD\uB2C8\uB2E4."
+    Outcome:
+      ResultText: "\uD568\uC815\uC774 \uBC1C\uB3D9\uD588\uC2B5\uB2C8\uB2E4! \uC57D\uAC04\uC758
+        \uB370\uBBF8\uC9C0\uB97C \uBC1B\uC558\uC9C0\uB9CC \uACE8\uB4DC\uB97C \uC5BB\uC5C8\uC2B5\uB2C8\uB2E4."
+      GoldChange: 25
+      HPPercentChange: -15
+      GiveRandomSkill: 0
+      GiveRandomItem: 0

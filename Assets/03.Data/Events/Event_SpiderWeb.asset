@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_SpiderWeb
+  m_EditorClassIdentifier: 
+  _eventName: "\uAC70\uBBF8\uC904 \uD568\uC815"
+  _description: "\uAC70\uB300\uD55C \uAC70\uBBF8\uC904\uC774 \uAE38\uC744 \uB9C9\uACE0
+    \uC788\uC2B5\uB2C8\uB2E4. \uC5B4\uB5BB\uAC8C \uD560\uAE4C\uC694?"
+  _eventType: 2
+  _choices:
+  - ChoiceText: "\uBD88\uD0DC\uC6B4\uB2E4"
+    ChoiceDescription: "\uD683\uBD88\uB85C \uAC70\uBBF8\uC904\uC744 \uD0DC\uC6C1\uB2C8\uB2E4."
+    Outcome:
+      ResultText: "\uAC70\uBBF8\uC904\uC774 \uD0C0\uBA74\uC11C \uC228\uACA8\uC9C4
+        \uBCF4\uBB3C\uC774 \uB4DC\uB7EC\uB0AC\uC2B5\uB2C8\uB2E4! 35 \uACE8\uB4DC\uB97C
+        \uD68D\uB4DD\uD588\uC2B5\uB2C8\uB2E4."
+      GoldChange: 35
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+  - ChoiceText: "\uB3CC\uC544\uAC04\uB2E4"
+    ChoiceDescription: "\uC548\uC804\uD558\uAC8C \uC6B0\uD68C\uD569\uB2C8\uB2E4."
+    Outcome:
+      ResultText: "\uC6B0\uD68C\uD558\uB290\uB77C \uC2DC\uAC04\uC774 \uAC78\uB838\uC9C0\uB9CC
+        \uC544\uBB34 \uC77C\uB3C4 \uC5C6\uC5C8\uC2B5\uB2C8\uB2E4."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0

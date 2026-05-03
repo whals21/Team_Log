@@ -9,6 +9,7 @@ using SkillType = TeamLog.Characters.SkillType;
 using StatType = TeamLog.Characters.StatType;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
 using StatusEffect = TeamLog.Characters.StatusEffect;
+using TargetType = TeamLog.Characters.TargetType;
 
 namespace TeamLog.Combat.Turn
 {
@@ -72,46 +73,49 @@ namespace TeamLog.Combat.Turn
             return _drawSystem.RerollAll();
         }
 
-        public void ConfirmActions()
+        /// <summary>
+        /// 스킬 즉시 시전 — 대상 클릭 시 곧바로 실행
+        /// </summary>
+        public bool ExecuteSkillImmediately(Character caster, SkillData skill, Character target)
         {
-            if (CurrentPhase != TurnPhase.PlayerAction) return;
-            BuildActionQueue();
-            _context.SetPhase(TurnPhase.Execution);
-        }
+            if (caster.IsDead) return false;
 
-        private void BuildActionQueue()
-        {
-            _context.ClearActions();
-
-            foreach (var slot in _drawSystem.DrawnSlots)
+            switch (skill.Target)
             {
-                if (slot.IsAssigned && slot.AssignedTarget != null)
-                {
-                    var action = new SkillAction(slot.Caster, slot.Skill, slot.AssignedTarget, slot.ExecutionOrder);
-                    _context.AddAction(action);
-                }
-            }
-        }
-
-        public void ExecuteActions()
-        {
-            foreach (var action in _context.ActionQueue)
-            {
-                if (action.Target != null)
-                    ExecuteSkill(action);
+                case TargetType.Self:
+                case TargetType.SingleAlly:
+                    if (target != null)
+                        ExecuteSkillInternal(caster, skill, target);
+                    break;
+                case TargetType.SingleEnemy:
+                    if (target != null && target.IsAlive)
+                        ExecuteSkillInternal(caster, skill, target);
+                    break;
+                case TargetType.AllEnemies:
+                    foreach (var enemy in _enemies)
+                        if (enemy.IsAlive) ExecuteSkillInternal(caster, skill, enemy);
+                    break;
+                case TargetType.AllAllies:
+                    foreach (var ally in _playerParty)
+                        if (ally.IsAlive) ExecuteSkillInternal(caster, skill, ally);
+                    break;
             }
 
             CheckBattleEnd();
+            return CurrentPhase == TurnPhase.BattleEnd;
         }
 
-        private void ExecuteSkill(SkillAction action)
+        public void ConfirmActions()
         {
-            if (action.Caster.IsDead || action.Target.IsDead) return;
+            if (CurrentPhase != TurnPhase.PlayerAction) return;
+            _context.SetPhase(TurnPhase.Execution);
 
-            var skill = action.Skill;
-            var caster = action.Caster;
-            var target = action.Target;
+            if (CurrentPhase != TurnPhase.BattleEnd)
+                StartEnemyTurn();
+        }
 
+        private void ExecuteSkillInternal(Character caster, SkillData skill, Character target)
+        {
             switch (skill.Type)
             {
                 case SkillType.Attack:
@@ -146,7 +150,6 @@ namespace TeamLog.Combat.Turn
         {
             if (skill.StatusEffect != global::TeamLog.Characters.StatusEffect.None)
             {
-                // StatusEffect를 StatusEffectType으로 변환
                 var effectType = (StatusEffectType)(int)skill.StatusEffect;
                 target.StatusEffects.ApplyEffect(effectType, skill.EffectDuration, skill.EffectValue);
             }

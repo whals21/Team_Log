@@ -1,0 +1,35 @@
+{
+  "env": {
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.1",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.1"
+  },
+  "permissions": {
+    "allow": [
+      "mcp__mcp-unity__get_scene_info",
+      "mcp__zai-mcp-server__analyze_image",
+      "mcp__mcp-unity__create_scene",
+      "mcp__mcp-unity__batch_execute",
+      "mcp__mcp-unity__recompile_scripts",
+      "mcp__mcp-unity__get_console_logs",
+      "mcp__mcp-unity__execute_menu_item",
+      "mcp__mcp-unity__get_gameobject",
+      "mcp__mcp-unity__send_console_log",
+      "Bash(ls:*)",
+      "mcp__mcp-unity__save_scene",
+      "Bash(python:*)",
+      "mcp__mcp-unity__update_component",
+      "mcp__mcp-unity__update_gameobject",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "Bash(git:*)",
+      "mcp__mcp-unity__load_scene",
+      "Bash(python3:*)",
+      "mcp__ide__getDiagnostics",
+      "mcp__mcp-unity__unload_scene"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "mcp-unity"
+  ]
+}

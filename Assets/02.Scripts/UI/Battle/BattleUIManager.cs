@@ -32,6 +32,7 @@ namespace TeamLog.UI.Battle
 
         [Header("Bottom Bar")]
         [SerializeField] private TextMeshProUGUI _currentTurnText;
+        [SerializeField] private ActionBarUI _actionBar;
 
         [Header("Character Popup")]
         [SerializeField] private CharacterPopupUI _characterPopup;
@@ -50,6 +51,7 @@ namespace TeamLog.UI.Battle
 
             _turnManager.OnPhaseChanged += OnPhaseChanged;
             _turnManager.OnTurnStarted += OnTurnStarted;
+            _turnManager.OnAPChanged += OnAPChanged;
 
             CreatePlayerPanels();
             CreateEnemyPanels();
@@ -165,6 +167,13 @@ namespace TeamLog.UI.Battle
             }
         }
 
+        private void OnAPChanged(int current, int max)
+        {
+            _topBar.SetAP(current, max);
+            if (_actionBar != null)
+                _actionBar.SetAPState(current);
+        }
+
         #endregion
 
         #region Public Methods
@@ -235,6 +244,7 @@ namespace TeamLog.UI.Battle
             {
                 _turnManager.OnPhaseChanged -= OnPhaseChanged;
                 _turnManager.OnTurnStarted -= OnTurnStarted;
+                _turnManager.OnAPChanged -= OnAPChanged;
             }
         }
     }

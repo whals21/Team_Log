@@ -33,6 +33,10 @@ namespace TeamLog.Combat.Turn
         public event System.Action<TurnPhase, TurnPhase> OnPhaseChanged;
         public event System.Action<int> OnTurnStarted;
         public event System.Action OnBattleEnded;
+        public event System.Action<int, int> OnAPChanged;
+
+        public int CurrentAP => _context.CurrentAP;
+        public int MaxAP => _context.MaxAP;
 
         public TurnManager(List<Character> playerParty, List<Character> enemies,
             List<EnemyAIController> enemyControllers = null, int maxRerolls = 1)
@@ -45,6 +49,7 @@ namespace TeamLog.Combat.Turn
 
             _context.OnPhaseChanged += (old, newPhase) => OnPhaseChanged?.Invoke(old, newPhase);
             _context.OnTurnStarted += turn => OnTurnStarted?.Invoke(turn);
+            _context.OnAPChanged += (current, max) => OnAPChanged?.Invoke(current, max);
         }
 
         /// <summary>
@@ -67,6 +72,10 @@ namespace TeamLog.Combat.Turn
             // 턴 시작 시 모든 캐릭터의 스탯 수정자 재계산
             foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();
             foreach (var c in _enemies) if (c.IsAlive) c.ApplyStatModifiers();
+
+            // AP 리셋: 기본 1 + 생존 파티원 수
+            int aliveCount = _playerParty.FindAll(p => p.IsAlive).Count;
+            _context.ResetAP(1 + aliveCount);
 
             ExecuteDrawPhase();
         }
@@ -96,6 +105,12 @@ namespace TeamLog.Combat.Turn
         public bool ExecuteSkillImmediately(Character caster, SkillData skill, Character target)
         {
             if (caster.IsDead) return false;
+
+            // AP 체크
+            if (!_context.CanAfford(skill.Cost))
+                return false;
+
+            _context.SpendAP(skill.Cost);
 
             switch (skill.Target)
             {

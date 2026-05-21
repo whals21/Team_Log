@@ -44,6 +44,7 @@ namespace TeamLog.UI.Battle
         private List<CharacterMiniPanel> _miniPanels = new List<CharacterMiniPanel>();
         private int _selectedSlotIndex = -1;
         private int _nextExecutionOrder;
+        private int _currentAP;
 
         public event Action<int> OnSlotSelected;
         public event Action OnSlotSelectionCancelled;
@@ -108,6 +109,7 @@ namespace TeamLog.UI.Battle
                     _actionSlots[i].SetSkill(slot.Skill, slot.Caster);
                     _actionSlots[i].SetAssigned(slot.IsAssigned);
                     _actionSlots[i].SetExecutionOrder(slot.ExecutionOrder);
+                    _actionSlots[i].SetAffordable(slot.Skill == null || slot.IsSelected || _currentAP >= slot.Skill.Cost);
                 }
                 else
                 {
@@ -212,6 +214,24 @@ namespace TeamLog.UI.Battle
         {
             if (_turnCounterText != null)
                 _turnCounterText.text = $"{current}/{total}";
+        }
+
+        public void SetAPState(int currentAP)
+        {
+            _currentAP = currentAP;
+            UpdateSlotAffordability();
+        }
+
+        private void UpdateSlotAffordability()
+        {
+            var slots = _turnManager?.DrawSystem?.DrawnSlots;
+            if (slots == null) return;
+
+            for (int i = 0; i < _actionSlots.Count && i < slots.Count; i++)
+            {
+                var skill = slots[i].Skill;
+                _actionSlots[i].SetAffordable(skill == null || slots[i].IsSelected || _currentAP >= skill.Cost);
+            }
         }
 
         public void Show()

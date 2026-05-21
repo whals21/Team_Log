@@ -12,8 +12,14 @@ namespace TeamLog.UI.Battle
         [Header("Turn Counter")]
         [SerializeField] private TextMeshProUGUI _turnCounterText;
 
+        [Header("AP Display")]
+        [SerializeField] private TextMeshProUGUI _apText;
+
         [Header("End Turn")]
         [SerializeField] private Button _endTurnButton;
+
+        private static readonly Color APNormalColor = new Color(0.96f, 0.82f, 0.25f);
+        private static readonly Color APShortageColor = new Color(0.85f, 0.2f, 0.2f);
 
         private void Start()
         {
@@ -25,6 +31,13 @@ namespace TeamLog.UI.Battle
         {
             if (_turnCounterText != null)
                 _turnCounterText.text = $"{current}/{total}";
+        }
+
+        public void SetAP(int current, int max)
+        {
+            if (_apText == null) return;
+            _apText.text = $"AP {current}/{max}";
+            _apText.color = current == 0 ? APShortageColor : APNormalColor;
         }
 
         private void OnEndTurnClicked()

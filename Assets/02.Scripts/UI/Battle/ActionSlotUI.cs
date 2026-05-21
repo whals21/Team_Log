@@ -33,6 +33,9 @@ namespace TeamLog.UI.Battle
         private SkillData _skill;
         private Character _caster;
         private ActionBarUI _parent;
+        private Color _originalSkillColor;
+        private Color _originalCostColor;
+        private bool _colorsStored;
 
         public SkillData Skill => _skill;
         public Character Caster => _caster;
@@ -63,7 +66,12 @@ namespace TeamLog.UI.Battle
             if (_skillIcon != null)
             {
                 _skillIcon.color = GetSkillColor(skill);
+                _originalSkillColor = _skillIcon.color;
+                _colorsStored = true;
             }
+
+            if (_costText != null)
+                _originalCostColor = _costText.color;
         }
 
         public void Clear()
@@ -105,6 +113,18 @@ namespace TeamLog.UI.Battle
         {
             if (_assignedOverlay != null)
                 _assignedOverlay.SetActive(assigned);
+        }
+
+        public void SetAffordable(bool affordable)
+        {
+            if (_skillIcon != null && _colorsStored)
+                _skillIcon.color = affordable ? _originalSkillColor : new Color(_originalSkillColor.r, _originalSkillColor.g, _originalSkillColor.b, 0.3f);
+
+            if (_costText != null)
+                _costText.color = affordable ? _originalCostColor : Color.red;
+
+            if (_button != null)
+                _button.interactable = affordable;
         }
 
         private Color GetSkillColor(SkillData skill)

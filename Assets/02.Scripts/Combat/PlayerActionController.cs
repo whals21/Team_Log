@@ -162,6 +162,13 @@ namespace TeamLog.Combat
 
         private void CastImmediately(DrawnSkillSlot slot, Character target)
         {
+            // AP 부족 체크 — 시전 전에 미리 확인
+            if (!_turnManager.Context.CanAfford(slot.Skill.Cost))
+            {
+                _uiManager.AddLog($"AP 부족! (필요: {slot.Skill.Cost}, 잔여: {_turnManager.Context.CurrentAP})");
+                return;
+            }
+
             // 슬롯 사용 표시
             slot.IsSelected = true;
             slot.AssignedTarget = target;

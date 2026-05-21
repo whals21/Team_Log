@@ -17,7 +17,7 @@ MonoBehaviour:
   _skillType: 2
   _targetType: 2
   _power: 10
-  _cost: 0
+  _cost: 2
   _weight: 15
   _statusEffect: 7
   _effectDuration: 2

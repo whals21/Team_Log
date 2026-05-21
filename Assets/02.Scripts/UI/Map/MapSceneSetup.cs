@@ -203,7 +203,7 @@ namespace TeamLog.UI.Map
                 default: // 일반 전투
                     if (_normalEnemyPool != null && _normalEnemyPool.Length > 0)
                     {
-                        int count = Random.Range(1, 3); // 1~2마리
+                        int count = Random.Range(1, 4); // 1~3마리
                         for (int i = 0; i < count; i++)
                             enemies.Add(new Character(_normalEnemyPool[Random.Range(0, _normalEnemyPool.Length)]));
                     }

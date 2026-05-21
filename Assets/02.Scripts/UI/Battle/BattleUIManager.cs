@@ -87,6 +87,13 @@ namespace TeamLog.UI.Battle
             foreach (var enemy in _enemies)
             {
                 var panel = Instantiate(_enemyPanelPrefab, _enemyPanelContainer);
+                // 적 패널 고정 크기 보장 (프리팹에 없을 경우 대비)
+                var le = panel.GetComponent<LayoutElement>();
+                if (le == null) le = panel.gameObject.AddComponent<LayoutElement>();
+                le.preferredWidth = 180;
+                le.minWidth = 120;
+                le.preferredHeight = 280;
+                le.minHeight = 200;
                 panel.Setup(_enemyPanels.Count, enemy.Name, character: enemy, uiManager: this);
                 panel.UpdateHP(enemy.Health.CurrentHP, enemy.Health.MaxHP);
                 panel.OnPanelClicked += OnEnemyPanelClicked;

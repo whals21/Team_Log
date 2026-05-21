@@ -257,7 +257,7 @@ namespace TeamLog.Editor
         {
             var sidebar = NewRect("LeftSidebar", parent);
             sidebar.anchorMin = Vector2.zero;
-            sidebar.anchorMax = new Vector2(0.18f, 1);
+            sidebar.anchorMax = new Vector2(0.24f, 1);
             sidebar.offsetMin = new Vector2(5, 5);
             sidebar.offsetMax = new Vector2(-2, -5);
             sidebar.gameObject.AddComponent<Image>().color = new Color(0.04f, 0.04f, 0.1f, 0.8f);
@@ -282,7 +282,7 @@ namespace TeamLog.Editor
         private static void CreatePlayerPanel(RectTransform parent, int num, string name, string hp, string skill)
         {
             var panel = NewRect($"CharPanel_{name}", parent);
-            panel.sizeDelta = new Vector2(0, 140);
+            panel.sizeDelta = new Vector2(0, 130);
             var panelImg = panel.gameObject.AddComponent<Image>();
             panelImg.color = new Color(0.06f, 0.06f, 0.14f, 0.95f);
             var ol = panel.gameObject.AddComponent<Outline>();
@@ -321,21 +321,39 @@ namespace TeamLog.Editor
             nRect.anchorMin = new Vector2(0, 1);
             nRect.anchorMax = new Vector2(1, 1);
             nRect.pivot = new Vector2(0.5f, 1);
-            nRect.anchoredPosition = new Vector2(0, -8);
-            nRect.sizeDelta = new Vector2(-60, 22);
-            AddText(nRect, name, 16, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            nRect.anchoredPosition = new Vector2(0, -32);
+            nRect.sizeDelta = new Vector2(-16, 22);
+            AddTextNoWrap(nRect, name, 15, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
 
-            // HP 바 (녹색)
-            CreateBar(panel, "HPBar", hp, 1f, AccentGreen, -38, new Vector2(-20, 22));
+            // HP 바 — 패널 하단 영역에 가로로 넓게
+            var hpBar = NewRect("HPBar", panel);
+            hpBar.anchorMin = new Vector2(0, 0);
+            hpBar.anchorMax = new Vector2(1, 0);
+            hpBar.pivot = new Vector2(0.5f, 0);
+            hpBar.anchoredPosition = new Vector2(0, 50);
+            hpBar.sizeDelta = new Vector2(-16, 20);
+            hpBar.gameObject.AddComponent<Image>().color = new Color(0.15f, 0.15f, 0.15f);
+
+            var hpFill = NewRect("Fill", hpBar);
+            hpFill.anchorMin = Vector2.zero;
+            hpFill.anchorMax = new Vector2(1f, 1f);
+            hpFill.offsetMin = new Vector2(2, 2);
+            hpFill.offsetMax = new Vector2(-2, -2);
+            hpFill.gameObject.AddComponent<Image>().color = AccentGreen;
+
+            // HP 텍스트 — 바 위에 가로로 (줄바꿈 방지)
+            var hpTxt = NewRect("Text", hpBar);
+            SetFillParent(hpTxt);
+            AddTextNoWrap(hpTxt, hp, 12, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
 
             // 퍼센트
             var pct = NewRect("Pct", panel);
-            pct.anchorMin = new Vector2(0.5f, 0);
-            pct.anchorMax = new Vector2(0.5f, 0);
+            pct.anchorMin = new Vector2(0, 0);
+            pct.anchorMax = new Vector2(1, 0);
             pct.pivot = new Vector2(0.5f, 0);
-            pct.anchoredPosition = new Vector2(0, 38);
-            pct.sizeDelta = new Vector2(80, 20);
-            AddText(pct, "100%", 12, FontStyles.Normal, TextAlignmentOptions.Center, AccentGreen);
+            pct.anchoredPosition = new Vector2(0, 34);
+            pct.sizeDelta = new Vector2(-16, 16);
+            AddTextNoWrap(pct, "100%", 11, FontStyles.Normal, TextAlignmentOptions.Center, AccentGreen);
 
             // 스킬명
             var sk = NewRect("Skill", panel);
@@ -343,8 +361,8 @@ namespace TeamLog.Editor
             sk.anchorMax = new Vector2(1, 0);
             sk.pivot = new Vector2(0.5f, 0);
             sk.anchoredPosition = new Vector2(0, 12);
-            sk.sizeDelta = new Vector2(-16, 20);
-            AddText(sk, skill, 12, FontStyles.Normal, TextAlignmentOptions.Center, TextDim);
+            sk.sizeDelta = new Vector2(-16, 18);
+            AddTextNoWrap(sk, skill, 11, FontStyles.Normal, TextAlignmentOptions.Center, TextDim);
         }
 
         #endregion
@@ -354,7 +372,7 @@ namespace TeamLog.Editor
         private static void CreateCenterArea(RectTransform parent)
         {
             var center = NewRect("CenterArea", parent);
-            center.anchorMin = new Vector2(0.18f, 0);
+            center.anchorMin = new Vector2(0.24f, 0);
             center.anchorMax = new Vector2(0.78f, 1);
             center.offsetMin = new Vector2(3, 5);
             center.offsetMax = new Vector2(-3, -5);
@@ -365,7 +383,7 @@ namespace TeamLog.Editor
             hlg.childAlignment = TextAnchor.MiddleCenter;
             hlg.childControlWidth = true;
             hlg.childControlHeight = true;
-            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = false;
 
             CreateEnemyPanel(center, "고블린", "30/30");
@@ -394,8 +412,12 @@ namespace TeamLog.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            var csf = panel.gameObject.AddComponent<ContentSizeFitter>();
-            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            // 적 패널 고정 크기 — 수에 관계없이 일정한 크기 유지
+            var le = panel.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = 180;
+            le.minWidth = 120;
+            le.preferredHeight = 280;
+            le.minHeight = 200;
 
             // 아바타
             var avatar = NewRect("Avatar", panel);
@@ -568,6 +590,17 @@ namespace TeamLog.Editor
             tmp.alignment = align;
             tmp.color = color;
             tmp.font = GetOrCreateKoreanFont();
+            return tmp;
+        }
+
+        /// <summary>
+        /// 줄바꿈 방지 텍스트 — 좁은 영역에서 세로 표시 방지
+        /// </summary>
+        private static TextMeshProUGUI AddTextNoWrap(RectTransform parent, string text, float size, FontStyles style, TextAlignmentOptions align, Color color)
+        {
+            var tmp = AddText(parent, text, size, style, align, color);
+            tmp.enableWordWrapping = false;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
             return tmp;
         }
 
@@ -884,18 +917,16 @@ namespace TeamLog.Editor
             if (leftSidebar != null)
                 SetPrivateField(uiManager, "_playerPanelContainer", leftSidebar);
 
-            // Player panel prefab - 첫 번째 패널로부터 생성
+            // Player panel prefab - 첫 번째 패널로부터 생성 (항상 덮어쓰기)
             var firstPanel = leftSidebar?.GetChild(0);
             if (firstPanel != null)
             {
                 const string prefabPath = "Assets/03.Data/Prefabs/PlayerSidebarPanel.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                if (prefab == null)
-                {
-                    if (!AssetDatabase.IsValidFolder("Assets/03.Data/Prefabs"))
-                        AssetDatabase.CreateFolder("Assets/03.Data", "Prefabs");
-                    prefab = PrefabUtility.SaveAsPrefabAsset(firstPanel.gameObject, prefabPath);
-                }
+                if (!AssetDatabase.IsValidFolder("Assets/03.Data/Prefabs"))
+                    AssetDatabase.CreateFolder("Assets/03.Data", "Prefabs");
+                // 기존 프리팹이 있으면 삭제 후 재생성
+                AssetDatabase.DeleteAsset(prefabPath);
+                var prefab = PrefabUtility.SaveAsPrefabAsset(firstPanel.gameObject, prefabPath);
                 SetPrivateField(uiManager, "_playerPanelPrefab", prefab != null ? prefab.GetComponent<PlayerSidebarPanel>() : null);
             }
 
@@ -904,18 +935,15 @@ namespace TeamLog.Editor
             if (centerArea != null)
                 SetPrivateField(uiManager, "_enemyPanelContainer", centerArea);
 
-            // Enemy panel prefab
+            // Enemy panel prefab (항상 덮어쓰기)
             var firstEnemy = centerArea?.GetChild(0);
             if (firstEnemy != null)
             {
                 const string prefabPath = "Assets/03.Data/Prefabs/EnemyDetailPanel.prefab";
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                if (prefab == null)
-                {
-                    if (!AssetDatabase.IsValidFolder("Assets/03.Data/Prefabs"))
-                        AssetDatabase.CreateFolder("Assets/03.Data", "Prefabs");
-                    prefab = PrefabUtility.SaveAsPrefabAsset(firstEnemy.gameObject, prefabPath);
-                }
+                if (!AssetDatabase.IsValidFolder("Assets/03.Data/Prefabs"))
+                    AssetDatabase.CreateFolder("Assets/03.Data", "Prefabs");
+                AssetDatabase.DeleteAsset(prefabPath);
+                var prefab = PrefabUtility.SaveAsPrefabAsset(firstEnemy.gameObject, prefabPath);
                 SetPrivateField(uiManager, "_enemyPanelPrefab", prefab != null ? prefab.GetComponent<EnemyDetailPanel>() : null);
             }
 

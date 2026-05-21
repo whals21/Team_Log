@@ -14,6 +14,7 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Image _skillIcon;
         [SerializeField] private TextMeshProUGUI _skillNameText;
         [SerializeField] private TextMeshProUGUI _costText;
+        [SerializeField] private TextMeshProUGUI _casterNameText;
         [SerializeField] private GameObject _selectionBorder;
         [SerializeField] private GameObject _executionOrderBadge;
         [SerializeField] private TextMeshProUGUI _executionOrderText;
@@ -56,6 +57,9 @@ namespace TeamLog.UI.Battle
             if (_costText != null)
                 _costText.text = skill?.Cost > 0 ? skill.Cost.ToString() : "";
 
+            if (_casterNameText != null)
+                _casterNameText.text = caster != null ? caster.Name : "";
+
             if (_skillIcon != null)
             {
                 _skillIcon.color = GetSkillColor(skill);
@@ -72,6 +76,9 @@ namespace TeamLog.UI.Battle
 
             if (_costText != null)
                 _costText.text = "";
+
+            if (_casterNameText != null)
+                _casterNameText.text = "";
 
             if (_skillIcon != null)
                 _skillIcon.color = Color.gray;

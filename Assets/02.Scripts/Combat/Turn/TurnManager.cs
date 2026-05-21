@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TeamLog.Combat.AI;
 using TeamLog.Combat.Draw;
 
 // 네임스페이스 충돌 해결
@@ -21,6 +22,7 @@ namespace TeamLog.Combat.Turn
         private readonly TurnContext _context;
         private readonly List<Character> _playerParty;
         private readonly List<Character> _enemies;
+        private readonly List<EnemyAIController> _enemyControllers;
         private readonly SkillDrawSystem _drawSystem;
 
         public TurnContext Context => _context;
@@ -32,15 +34,25 @@ namespace TeamLog.Combat.Turn
         public event System.Action<int> OnTurnStarted;
         public event System.Action OnBattleEnded;
 
-        public TurnManager(List<Character> playerParty, List<Character> enemies, int maxRerolls = 1)
+        public TurnManager(List<Character> playerParty, List<Character> enemies,
+            List<EnemyAIController> enemyControllers = null, int maxRerolls = 1)
         {
             _playerParty = playerParty;
             _enemies = enemies;
+            _enemyControllers = enemyControllers ?? new List<EnemyAIController>();
             _context = new TurnContext();
             _drawSystem = new SkillDrawSystem(playerParty, maxRerolls);
 
             _context.OnPhaseChanged += (old, newPhase) => OnPhaseChanged?.Invoke(old, newPhase);
             _context.OnTurnStarted += turn => OnTurnStarted?.Invoke(turn);
+        }
+
+        /// <summary>
+        /// 중앙화된 데미지 계산 공식
+        /// </summary>
+        public static int CalculateDamage(int attackPower, int defense)
+        {
+            return System.Math.Max(1, attackPower - defense);
         }
 
         public void StartBattle()
@@ -51,6 +63,11 @@ namespace TeamLog.Combat.Turn
         public void StartNewTurn()
         {
             _context.StartNewTurn();
+
+            // 턴 시작 시 모든 캐릭터의 스탯 수정자 재계산
+            foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();
+            foreach (var c in _enemies) if (c.IsAlive) c.ApplyStatModifiers();
+
             ExecuteDrawPhase();
         }
 
@@ -137,7 +154,7 @@ namespace TeamLog.Combat.Turn
         {
             int damage = caster.Stats.GetStat(StatType.ATK) + skill.Power;
             int defense = target.Stats.GetStat(StatType.DEF);
-            int finalDamage = System.Math.Max(1, damage - defense);
+            int finalDamage = CalculateDamage(damage, defense);
             target.Health.TakeDamage(finalDamage);
         }
 
@@ -152,6 +169,7 @@ namespace TeamLog.Combat.Turn
             {
                 var effectType = (StatusEffectType)(int)skill.StatusEffect;
                 target.StatusEffects.ApplyEffect(effectType, skill.EffectDuration, skill.EffectValue);
+                target.ApplyStatModifiers();
             }
         }
 
@@ -163,19 +181,33 @@ namespace TeamLog.Combat.Turn
 
         private void ExecuteEnemyActions()
         {
-            foreach (var enemy in _enemies)
+            // AI 컨트롤러가 있으면 패턴 기반 행동 사용
+            if (_enemyControllers.Count > 0)
             {
-                if (enemy.IsAlive)
-                    ExecuteEnemyAction(enemy);
+                foreach (var controller in _enemyControllers)
+                {
+                    if (controller.Owner.IsAlive)
+                        controller.ExecuteAction();
+                }
+            }
+            else
+            {
+                // 폴백: AI 없으면 기본 공격
+                foreach (var enemy in _enemies)
+                {
+                    if (enemy.IsAlive)
+                        ExecuteFallbackEnemyAction(enemy);
+                }
             }
 
+            ProcessTurnEnd();
             CheckBattleEnd();
 
             if (CurrentPhase != TurnPhase.BattleEnd)
                 StartNewTurn();
         }
 
-        private void ExecuteEnemyAction(Character enemy)
+        private void ExecuteFallbackEnemyAction(Character enemy)
         {
             var alivePlayers = _playerParty.FindAll(p => p.IsAlive);
             if (alivePlayers.Count == 0) return;
@@ -183,8 +215,21 @@ namespace TeamLog.Combat.Turn
             var target = alivePlayers[UnityEngine.Random.Range(0, alivePlayers.Count)];
             int damage = enemy.Stats.GetStat(StatType.ATK);
             int defense = target.Stats.GetStat(StatType.DEF);
-            int finalDamage = System.Math.Max(1, damage - defense);
+            int finalDamage = CalculateDamage(damage, defense);
             target.Health.TakeDamage(finalDamage);
+        }
+
+        /// <summary>
+        /// 턴 종료 처리 — 상태이상 DoT 적용, 지속시간 감소, 만료 효과 제거
+        /// </summary>
+        private void ProcessTurnEnd()
+        {
+            foreach (var c in _playerParty) if (c.IsAlive) c.OnTurnEnd();
+            foreach (var c in _enemies) if (c.IsAlive) c.OnTurnEnd();
+
+            // 만료된 효과 제거 후 스탯 수정자 재계산
+            foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();
+            foreach (var c in _enemies) if (c.IsAlive) c.ApplyStatModifiers();
         }
 
         private void CheckBattleEnd()

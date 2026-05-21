@@ -44,7 +44,8 @@ namespace TeamLog.Characters
 
         public void ClearModifiers()
         {
-            foreach (var key in _modifiers.Keys)
+            var keys = new List<StatType>(_modifiers.Keys);
+            foreach (var key in keys)
                 _modifiers[key] = 0;
         }
 

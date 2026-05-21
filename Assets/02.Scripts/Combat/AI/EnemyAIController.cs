@@ -1,10 +1,8 @@
 using System.Collections.Generic;
+using TeamLog.Combat.Turn;
 
 // 네임스페이스 충돌 해결
 using Character = TeamLog.Characters.Character;
-using CharacterData = TeamLog.Characters.CharacterData;
-using SkillData = TeamLog.Characters.SkillData;
-using SkillType = TeamLog.Characters.SkillType;
 using StatType = TeamLog.Characters.StatType;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
 
@@ -132,13 +130,14 @@ namespace TeamLog.Combat.AI
         {
             int attackDamage = _owner.Stats.GetStat(StatType.ATK) + damage;
             int defense = target.Stats.GetStat(StatType.DEF);
-            int finalDamage = System.Math.Max(1, attackDamage - defense);
+            int finalDamage = TurnManager.CalculateDamage(attackDamage, defense);
             target.Health.TakeDamage(finalDamage);
         }
 
         private void ApplyDefenseBuff(int value)
         {
             _owner.StatusEffects.ApplyEffect(StatusEffectType.DefenseUp, 1, value);
+            _owner.ApplyStatModifiers();
         }
 
         private void ApplySelfBuff(StatusEffectType? effect, int duration, int value)
@@ -146,6 +145,7 @@ namespace TeamLog.Combat.AI
             if (effect.HasValue && effect.Value != StatusEffectType.None)
             {
                 _owner.StatusEffects.ApplyEffect(effect.Value, duration, value);
+                _owner.ApplyStatModifiers();
             }
         }
 
@@ -154,6 +154,7 @@ namespace TeamLog.Combat.AI
             if (effect.HasValue && effect.Value != StatusEffectType.None)
             {
                 target.StatusEffects.ApplyEffect(effect.Value, duration, value);
+                target.ApplyStatModifiers();
             }
         }
     }

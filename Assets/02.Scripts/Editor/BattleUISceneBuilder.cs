@@ -12,7 +12,6 @@ namespace TeamLog.Editor
 {
     public class BattleUISceneBuilder
     {
-        private const string SCENE_PATH = "Assets/01.Scenes/BattleUI.unity";
 
         // 색상 팔레트
         private static readonly Color BgDark = new Color(0.08f, 0.08f, 0.16f);
@@ -109,50 +108,6 @@ namespace TeamLog.Editor
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Tools/Battle UI/Build Battle UI Scene", false, 100)]
-        public static void BuildBattleUIScene()
-        {
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
-            scene.name = "BattleUI";
-
-            SetupMainCamera(scene);
-            CreateEventSystem(scene);
-            var canvas = CreateCanvas(scene);
-
-            // 한글 폰트 로드/생성
-            _koreanFont = GetOrCreateKoreanFont();
-            if (_koreanFont == null)
-                Debug.LogWarning("[BattleUISceneBuilder] Failed to create Korean font");
-
-            CreateBattleUI(canvas);
-
-            EditorSceneManager.SaveScene(scene, SCENE_PATH);
-            Debug.Log($"[BattleUISceneBuilder] Scene saved to {SCENE_PATH}");
-            AssetDatabase.Refresh();
-        }
-
-        private static void SetupMainCamera(Scene scene)
-        {
-            var camera = Camera.main;
-            if (camera == null)
-            {
-                var go = new GameObject("Main Camera");
-                camera = go.AddComponent<Camera>();
-                go.tag = "MainCamera";
-            }
-            camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.backgroundColor = BgDark;
-            camera.orthographic = true;
-            camera.orthographicSize = 5.4f;
-        }
-
-        private static void CreateEventSystem(Scene scene)
-        {
-            var esGO = new GameObject("EventSystem");
-            SceneManager.MoveGameObjectToScene(esGO, scene);
-            esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
-            esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-        }
 
         private static Canvas CreateCanvas(Scene scene)
         {
@@ -186,7 +141,7 @@ namespace TeamLog.Editor
             var content = NewRect("ContentArea", root);
             content.anchorMin = Vector2.zero;
             content.anchorMax = Vector2.one;
-            content.offsetMin = new Vector2(0, 50);
+            content.offsetMin = new Vector2(0, 100);
             content.offsetMax = new Vector2(0, -60);
 
             CreateLeftSidebar(content);
@@ -225,6 +180,7 @@ namespace TeamLog.Editor
             counter.anchoredPosition = new Vector2(20, 0);
             counter.sizeDelta = new Vector2(80, 40);
             var ct = counter.gameObject.AddComponent<TextMeshProUGUI>();
+            ct.font = GetOrCreateKoreanFont();
             ct.text = "4/4";
             ct.fontSize = 28;
             ct.fontStyle = FontStyles.Bold;
@@ -250,6 +206,7 @@ namespace TeamLog.Editor
             var txt = NewRect("Text", btn);
             SetFillParent(txt);
             var t = txt.gameObject.AddComponent<TextMeshProUGUI>();
+            t.font = GetOrCreateKoreanFont();
             t.text = "턴 종료 [T]";
             t.fontSize = 18;
             t.fontStyle = FontStyles.Bold;
@@ -267,7 +224,7 @@ namespace TeamLog.Editor
             bar.anchorMin = Vector2.zero;
             bar.anchorMax = new Vector2(1, 0);
             bar.pivot = new Vector2(0.5f, 0);
-            bar.sizeDelta = new Vector2(0, 50);
+            bar.sizeDelta = new Vector2(0, 100);
             bar.gameObject.AddComponent<Image>().color = new Color(0.03f, 0.03f, 0.08f, 0.95f);
 
             var div = NewRect("Divider", bar);
@@ -278,12 +235,17 @@ namespace TeamLog.Editor
             div.gameObject.AddComponent<Image>().color = AccentRed;
 
             var turn = NewRect("CurrentTurnText", bar);
-            SetFillParent(turn);
+            turn.anchorMin = new Vector2(0, 0);
+            turn.anchorMax = new Vector2(0.15f, 1);
+            turn.offsetMin = Vector2.zero;
+            turn.offsetMax = Vector2.zero;
             var tt = turn.gameObject.AddComponent<TextMeshProUGUI>();
+            tt.font = GetOrCreateKoreanFont();
             tt.text = "쉘레이아, 턴";
-            tt.fontSize = 20;
+            tt.fontSize = 14;
             tt.fontStyle = FontStyles.Bold;
-            tt.alignment = TextAlignmentOptions.Center;
+            tt.alignment = TextAlignmentOptions.Left;
+            tt.margin = new Vector4(8, 0, 4, 0);
             tt.color = AccentYellow;
         }
 
@@ -539,6 +501,7 @@ namespace TeamLog.Editor
             log.offsetMin = new Vector2(10, 10);
             log.offsetMax = new Vector2(-10, -40);
             var lt = log.gameObject.AddComponent<TextMeshProUGUI>();
+            lt.font = GetOrCreateKoreanFont();
             lt.text = "전투가 시작되었습니다.\n\n카인이 방어막을 사용했습니다.\n\n쉘레이아의 턴입니다.";
             lt.fontSize = 14;
             lt.alignment = TextAlignmentOptions.TopLeft;
@@ -604,8 +567,7 @@ namespace TeamLog.Editor
             tmp.fontStyle = style;
             tmp.alignment = align;
             tmp.color = color;
-            if (_koreanFont != null)
-                tmp.font = _koreanFont;
+            tmp.font = GetOrCreateKoreanFont();
             return tmp;
         }
 
@@ -752,11 +714,11 @@ namespace TeamLog.Editor
 
                 var hlg = container.gameObject.AddComponent<HorizontalLayoutGroup>();
                 hlg.spacing = 8;
-                hlg.padding = new RectOffset(8, 8, 4, 4);
+                hlg.padding = new RectOffset(12, 12, 10, 10);
                 hlg.childAlignment = TextAnchor.MiddleCenter;
                 hlg.childControlWidth = true;
                 hlg.childControlHeight = true;
-                hlg.childForceExpandWidth = true;
+                hlg.childForceExpandWidth = false;
                 hlg.childForceExpandHeight = true;
             }
 
@@ -769,7 +731,7 @@ namespace TeamLog.Editor
                 detail.anchorMax = new Vector2(1, 1);
                 detail.pivot = new Vector2(0.5f, 0);
                 detail.anchoredPosition = new Vector2(0, 0);
-                detail.sizeDelta = new Vector2(0, 120);
+                detail.sizeDelta = new Vector2(0, 80);
                 detail.gameObject.SetActive(false);
                 detail.gameObject.AddComponent<Image>().color = new Color(0.04f, 0.04f, 0.1f, 0.95f);
 
@@ -807,27 +769,57 @@ namespace TeamLog.Editor
 
             var go = new GameObject("ActionSlotUI");
             var rect = go.AddComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(160, 44);
+            rect.sizeDelta = new Vector2(150, 80);
+
+            // LayoutElement로 고정 크기 지정 (childForceExpandWidth = false 환경에서 preferredSize 사용)
+            var layoutEl = go.AddComponent<LayoutElement>();
+            layoutEl.preferredWidth = 150;
+            layoutEl.preferredHeight = 80;
+            layoutEl.minWidth = 150;
+            layoutEl.minHeight = 80;
 
             go.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.18f, 0.9f);
             go.AddComponent<Outline>().effectColor = BorderRed;
             go.AddComponent<Button>();
 
-            // 스킬 아이콘
+            // 스킬 아이콘 (60x60, 좌측 중앙)
             var icon = NewRect("SkillIcon", rect);
-            icon.anchorMin = new Vector2(0, 0);
-            icon.anchorMax = new Vector2(0, 1);
+            icon.anchorMin = new Vector2(0, 0.5f);
+            icon.anchorMax = new Vector2(0, 0.5f);
             icon.pivot = new Vector2(0, 0.5f);
-            icon.sizeDelta = new Vector2(40, 0);
+            icon.anchoredPosition = new Vector2(4, 0);
+            icon.sizeDelta = new Vector2(60, 60);
             icon.gameObject.AddComponent<Image>().color = AccentRed;
 
-            // 스킬명 텍스트
+            // 스킬명 텍스트 (상단 영역, 아이콘 오른쪽)
             var nameT = NewRect("SkillNameText", rect);
-            nameT.anchorMin = new Vector2(0, 0);
+            nameT.anchorMin = new Vector2(0, 0.5f);
             nameT.anchorMax = new Vector2(1, 1);
-            nameT.offsetMin = new Vector2(44, 0);
-            nameT.offsetMax = new Vector2(-4, 0);
-            AddText(nameT, "---", 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            nameT.offsetMin = new Vector2(68, -4);
+            nameT.offsetMax = new Vector2(-32, -4);
+            AddText(nameT, "---", 16, FontStyles.Bold, TextAlignmentOptions.Left, TextWhite);
+
+            // 비용 뱃지 (우측 상단 28x28 원형)
+            var costBadge = NewRect("CostBadge", rect);
+            costBadge.anchorMin = new Vector2(1, 1);
+            costBadge.anchorMax = new Vector2(1, 1);
+            costBadge.pivot = new Vector2(1, 1);
+            costBadge.anchoredPosition = new Vector2(-4, -4);
+            costBadge.sizeDelta = new Vector2(28, 28);
+            costBadge.gameObject.AddComponent<Image>().color = new Color(0.2f, 0.4f, 0.8f, 0.9f);
+
+            // 비용 텍스트 (뱃지 내부)
+            var costT = NewRect("CostText", costBadge);
+            SetFillParent(costT);
+            AddText(costT, "0", 14, FontStyles.Bold, TextAlignmentOptions.Center, Color.black);
+
+            // 시전자명 텍스트 (하단 영역, 아이콘 오른쪽, 작은 흐린 글씨)
+            var casterT = NewRect("CasterNameText", rect);
+            casterT.anchorMin = new Vector2(0, 0);
+            casterT.anchorMax = new Vector2(1, 0.5f);
+            casterT.offsetMin = new Vector2(68, 4);
+            casterT.offsetMax = new Vector2(-8, 4);
+            AddText(casterT, "", 12, FontStyles.Normal, TextAlignmentOptions.Left, TextDim);
 
             // 선택 테두리
             var selBorder = NewRect("SelectionBorder", rect);
@@ -835,7 +827,7 @@ namespace TeamLog.Editor
             selBorder.gameObject.AddComponent<Image>().color = Color.clear;
             var selOutline = selBorder.gameObject.AddComponent<Outline>();
             selOutline.effectColor = AccentYellow;
-            selOutline.effectDistance = new Vector2(2, -2);
+            selOutline.effectDistance = new Vector2(3, -3);
             selBorder.gameObject.SetActive(false);
 
             // 실행 순서 뱃지
@@ -843,8 +835,8 @@ namespace TeamLog.Editor
             orderBadge.anchorMin = new Vector2(1, 1);
             orderBadge.anchorMax = new Vector2(1, 1);
             orderBadge.pivot = new Vector2(1, 1);
-            orderBadge.anchoredPosition = new Vector2(-2, -2);
-            orderBadge.sizeDelta = new Vector2(22, 22);
+            orderBadge.anchoredPosition = new Vector2(-2, -36);
+            orderBadge.sizeDelta = new Vector2(24, 24);
             orderBadge.gameObject.AddComponent<Image>().color = AccentYellow;
             var orderText = NewRect("OrderText", orderBadge);
             SetFillParent(orderText);
@@ -858,7 +850,18 @@ namespace TeamLog.Editor
             assigned.gameObject.SetActive(false);
 
             // ActionSlotUI 컴포넌트 추가
-            go.AddComponent<ActionSlotUI>();
+            var slotUI = go.AddComponent<ActionSlotUI>();
+
+            // 프리팹 내부 필드 자동 와이어링
+            SetPrivateField(slotUI, "_skillIcon", icon.gameObject.GetComponent<Image>());
+            SetPrivateField(slotUI, "_skillNameText", nameT.gameObject.GetComponent<TMPro.TextMeshProUGUI>());
+            SetPrivateField(slotUI, "_costText", costT.gameObject.GetComponent<TMPro.TextMeshProUGUI>());
+            SetPrivateField(slotUI, "_casterNameText", casterT.gameObject.GetComponent<TMPro.TextMeshProUGUI>());
+            SetPrivateField(slotUI, "_selectionBorder", selBorder.gameObject);
+            SetPrivateField(slotUI, "_executionOrderBadge", orderBadge.gameObject);
+            SetPrivateField(slotUI, "_executionOrderText", orderText.gameObject.GetComponent<TMPro.TextMeshProUGUI>());
+            SetPrivateField(slotUI, "_assignedOverlay", assigned.gameObject);
+            SetPrivateField(slotUI, "_button", go.GetComponent<Button>());
 
             // 프리팹 저장
             var prefab = PrefabUtility.SaveAsPrefabAsset(go, prefabPath);

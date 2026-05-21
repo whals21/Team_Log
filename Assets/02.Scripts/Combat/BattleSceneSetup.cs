@@ -116,13 +116,7 @@ namespace TeamLog.Combat
                 return;
             }
 
-            // TurnManager 생성
-            _turnManager = new TurnManager(_playerParty, _enemies, maxRerolls: 1);
-            _turnManager.OnPhaseChanged += OnPhaseChanged;
-            _turnManager.OnTurnStarted += OnTurnStarted;
-            _turnManager.OnBattleEnded += OnBattleEnded;
-
-            // 적 AI 컨트롤러 생성
+            // 적 AI 컨트롤러 생성 (TurnManager보다 먼저)
             _enemyControllers = new List<EnemyAIController>();
             foreach (var enemy in _enemies)
             {
@@ -133,6 +127,12 @@ namespace TeamLog.Combat
                 );
                 _enemyControllers.Add(new EnemyAIController(enemy, pattern, _playerParty));
             }
+
+            // TurnManager 생성 — AI 컨트롤러 전달
+            _turnManager = new TurnManager(_playerParty, _enemies, _enemyControllers, maxRerolls: 1);
+            _turnManager.OnPhaseChanged += OnPhaseChanged;
+            _turnManager.OnTurnStarted += OnTurnStarted;
+            _turnManager.OnBattleEnded += OnBattleEnded;
 
             // ActionBar 초기화
             if (_actionBar != null)
@@ -182,6 +182,8 @@ namespace TeamLog.Combat
 
             bool victory = _enemies.TrueForAll(e => e.IsDead);
             _battleUIManager?.AddLog(victory ? "전투 승리!" : "전투 패배...");
+
+            BattleResult.SetResult(victory);
 
             OnBattleFinished?.Invoke(victory);
 

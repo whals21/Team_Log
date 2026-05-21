@@ -68,7 +68,23 @@ namespace TeamLog.UI.Map
         {
             if (_nodeContainer == null || _nodeButtonPrefab == null) return;
 
-            for (int layer = 0; layer < _currentMap.Layers.Count; layer++)
+            int layerCount = _currentMap.Layers.Count;
+            if (layerCount == 0) return;
+
+            // 컨테이너 높이에 맞게 레이어 간격 자동 조정
+            float containerHeight = _nodeContainer.rect.height;
+            float effectiveLayerSpacing = _layerSpacing;
+            float totalHeight = (layerCount - 1) * effectiveLayerSpacing;
+            if (totalHeight > containerHeight * 0.9f)
+            {
+                effectiveLayerSpacing = containerHeight * 0.9f / (layerCount - 1);
+                totalHeight = (layerCount - 1) * effectiveLayerSpacing;
+            }
+
+            // 맵을 컨테이너 중앙에 배치 (상하 대칭)
+            float startY = totalHeight / 2f;
+
+            for (int layer = 0; layer < layerCount; layer++)
             {
                 var layerNodes = _currentMap.Layers[layer];
                 int nodeCount = layerNodes.Count;
@@ -83,7 +99,7 @@ namespace TeamLog.UI.Map
                     if (rectTransform != null)
                     {
                         float x = startX + i * _nodeSpacing;
-                        float y = -layer * _layerSpacing;
+                        float y = startY - layer * effectiveLayerSpacing;
                         rectTransform.anchoredPosition = new Vector2(x, y);
                     }
 

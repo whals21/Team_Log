@@ -57,7 +57,7 @@ namespace TeamLog.Reward
             }
             else if (roll < 0.75)
             {
-                var skill = runState.AcquireRandomSkill();
+                var skill = runState.PeekRandomSkill();
                 return new RewardOffer
                 {
                     Type = RewardType.Skill,
@@ -68,7 +68,7 @@ namespace TeamLog.Reward
             }
             else
             {
-                var item = runState.AcquireRandomItem();
+                var item = runState.PeekRandomItem();
                 return new RewardOffer
                 {
                     Type = RewardType.Item,
@@ -102,10 +102,10 @@ namespace TeamLog.Reward
                     runState.AddGold(reward.GoldAmount);
                     break;
                 case RewardType.Skill:
-                    // 이미 GenerateRewards에서 획득 처리됨
+                    runState.AcquireSkill(reward.Skill);
                     break;
                 case RewardType.Item:
-                    // 이미 GenerateRewards에서 획득 처리됨
+                    runState.AcquireItem(reward.Item);
                     break;
             }
         }

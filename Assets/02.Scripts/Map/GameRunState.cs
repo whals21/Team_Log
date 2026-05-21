@@ -5,11 +5,41 @@ using TeamLog.Reward;
 namespace TeamLog.Map
 {
     /// <summary>
-    /// 로그라이크 런 상태 — 순수 C# 클래스
-    /// 전체 플레이 세션의 진행 상태를 관리
+    /// 로그라이크 런 상태 — 정적 싱글톤 순수 C# 클래스
+    /// 전체 플레이 세션의 진행 상태를 관리, 씬 전환 시에도 유지
     /// </summary>
     public class GameRunState
     {
+        private static GameRunState _instance;
+
+        /// <summary>
+        /// 현재 런 인스턴스 (씬 전환 시에도 유지)
+        /// </summary>
+        public static GameRunState Instance => _instance;
+
+        /// <summary>
+        /// 새 런 생성 — 기존 인스턴스가 있으면 파괴 후 생성
+        /// </summary>
+        public static GameRunState Create(List<Character> playerParty, int startingGold = 0)
+        {
+            if (_instance != null)
+                _instance.Cleanup();
+            _instance = new GameRunState(playerParty, startingGold);
+            return _instance;
+        }
+
+        /// <summary>
+        /// 런 종료 시 인스턴스 파괴
+        /// </summary>
+        public static void Destroy()
+        {
+            if (_instance != null)
+            {
+                _instance.Cleanup();
+                _instance = null;
+            }
+        }
+
         private readonly List<Character> _playerParty;
         private readonly List<ItemData> _acquiredItems = new();
         private readonly List<string> _runHistory = new();
@@ -43,10 +73,17 @@ namespace TeamLog.Map
         public event System.Action<MapFloor> OnMapChanged;
         public event System.Action OnRunEnded;
 
-        public GameRunState(List<Character> playerParty, int startingGold = 0)
+        private GameRunState(List<Character> playerParty, int startingGold = 0)
         {
             _playerParty = new List<Character>(playerParty);
             Gold = startingGold;
+        }
+
+        private void Cleanup()
+        {
+            OnGoldChanged = null;
+            OnMapChanged = null;
+            OnRunEnded = null;
         }
 
         /// <summary>
@@ -180,6 +217,24 @@ namespace TeamLog.Map
         {
             _skillPool = skillPool;
             _itemPool = itemPool;
+        }
+
+        /// <summary>
+        /// 풀에서 랜덤 스킬 조회 (실제 획득하지 않음 — 보상 미리보기용)
+        /// </summary>
+        public SkillData PeekRandomSkill()
+        {
+            if (_skillPool == null || _skillPool.Count == 0) return null;
+            return _skillPool[_rng.Next(_skillPool.Count)];
+        }
+
+        /// <summary>
+        /// 풀에서 랜덤 아이템 조회 (실제 획득하지 않음 — 보상 미리보기용)
+        /// </summary>
+        public ItemData PeekRandomItem()
+        {
+            if (_itemPool == null || _itemPool.Count == 0) return null;
+            return _itemPool[_rng.Next(_itemPool.Count)];
         }
 
         /// <summary>

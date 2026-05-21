@@ -121,6 +121,25 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_testRogueData",
                 AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Rogue.asset"));
 
+            // EnemyData pools — Enemy_ 접두사 에셋만 필터링
+            var enemyAssets = LoadAllAssets<CharacterData>(CHAR_DIR)
+                .FindAll(a => a.name.StartsWith("Enemy_"));
+            var normalPoolProp = setupSer.FindProperty("_normalEnemyPool");
+            var elitePoolProp = setupSer.FindProperty("_eliteEnemyPool");
+            var bossPoolProp = setupSer.FindProperty("_bossEnemyPool");
+            if (normalPoolProp != null && enemyAssets.Count > 0)
+            {
+                normalPoolProp.arraySize = enemyAssets.Count;
+                elitePoolProp.arraySize = enemyAssets.Count;
+                bossPoolProp.arraySize = enemyAssets.Count;
+                for (int i = 0; i < enemyAssets.Count; i++)
+                {
+                    normalPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = enemyAssets[i];
+                    elitePoolProp.GetArrayElementAtIndex(i).objectReferenceValue = enemyAssets[i];
+                    bossPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = enemyAssets[i];
+                }
+            }
+
             // EventData
             var eventAssets = LoadAllAssets<EventData>(EVENT_DIR);
             var testEventsProp = setupSer.FindProperty("_testEvents");

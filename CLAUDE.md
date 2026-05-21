@@ -44,10 +44,13 @@ MapSceneSetup (진입점)
 BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신)
     ├── TurnManager (턴 사이클 오케스트레이터)
     │   ├── SkillDrawSystem (가중치 랜덤 드로우)
-    │   └── TurnContext (턴 상태: phase, drawn skills, action queue)
-    ├── PlayerActionController (UI ↔ 전투 로직 중재자)
+    │   └── TurnContext (턴 상태: phase, drawn skills, action queue, AP)
+    │       └── AP: 파티 공유, 매 턴 1+생존수 전량 회복, OnAPChanged 이벤트
+    ├── PlayerActionController (UI ↔ 전투 로직 중재자, AP 부족 차단)
     ├── EnemyAIController (패턴 기반 AI, 의도 표시)
-    └── BattleUIManager (UI 패널 생성/관리)
+    └── BattleUIManager (UI 패널 생성/관리, AP 이벤트 구독)
+        ├── TopBarUI (턴 카운터, AP 표시, 턴 종료 버튼)
+        └── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리)
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
     ├── HealthComponent (HP 관리, OnHPChanged/OnDeath 이벤트)
@@ -57,7 +60,12 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 ```
 
 ### 턴 사이클
-`Draw → PlayerAction → Execution → EnemyTurn → BattleEnd`
+`Draw → PlayerAction(AP 관리) → Execution → EnemyTurn → BattleEnd`
+
+### 자원 시스템
+- **AP (Action Point)**: 파티 공유 자원, 매 턴 시작 시 `1 + 생존 파티원 수` 전량 회복
+- **스킬 Cost**: 0~3 (SkillData.Cost), 사용 시 AP 차감, 부족 시 스킬 사용 불가
+- 적은 AP 시스템에서 제외 (EnemyAIController가 독립적으로 행동 결정)
 
 ### 데이터 계층
 - **CharacterData** (ScriptableObject): 이름, 클래스, 기본 스탯, 스킬 목록
@@ -152,7 +160,8 @@ Editor/
 4. **이벤트 연결** — BattleEventManager 또는 클래스 이벤트로 UI 연동
 5. **UI 구현** — `02.Scripts/UI/Battle/`에 UI 컴포넌트 작성
 6. **에디터 도구** — DataGenerator 업데이트, 필요시 SceneBuilder 수정
-7. **테스트** — TestCombatScene 또는 BattleUI 씬에서 검증
+7. **데이터-로직 연동 검증** — ScriptableObject 필드값이 로직에 실제로 반영되는지 확인
+8. **통합 테스트** — 씬 리빌드 후 엔드투엔드 검증
 
 ## 현재 개발 상태
 
@@ -163,11 +172,19 @@ Editor/
   - 사운드, 이펙트, 밸런싱
 
 ### 미구현 항목
-- MP/마나 시스템 (MPBarUI 스텁 존재)
 - 스킬 레벨/업그레이드
 - 실제 스킬/아이템 풀 데이터 (현재 더미)
 - 프리팹 UI 연결 (NodeButton, ConnectionLine, PlayerMarker, RewardCard, ShopSlot, ChoiceButton)
 - MapScene 씬 빌드 및 BuildSettings 등록
+- MPBarUI 스텁 정리 (AP로 대체 완료, 스텁 삭제 여부 결정 필요)
+
+### 세션 종료 체크리스트
+
+매 작업 세션 종료 전 반드시 수행:
+- [ ] CLAUDE.md 아키텍처 섹션 업데이트 (새 클래스/관계/이벤트 추가 시)
+- [ ] CLAUDE.md 미구현 항목 업데이트 (완료/변경/추가 항목 반영)
+- [ ] 작업 일지 기록 (`09.Docs/WorkLog/YYYY-MM-DD.md`)
+- [ ] 커밋 & 푸시
 
 ## 가비지 컬렉터 (프로젝트 청소)
 

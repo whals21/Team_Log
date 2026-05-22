@@ -3,7 +3,6 @@ using TeamLog.Combat.Turn;
 
 // 네임스페이스 충돌 해결
 using Character = TeamLog.Characters.Character;
-using StatType = TeamLog.Characters.StatType;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
 
 namespace TeamLog.Combat.AI
@@ -128,10 +127,7 @@ namespace TeamLog.Combat.AI
 
         private void AttackTarget(Character target, int damage)
         {
-            int attackDamage = _owner.Stats.GetStat(StatType.ATK) + damage;
-            int defense = target.Stats.GetStat(StatType.DEF);
-            int finalDamage = TurnManager.CalculateDamage(attackDamage, defense);
-            target.Health.TakeDamage(finalDamage);
+            TurnManager.DealDamage(_owner, target, damage);
         }
 
         private void ApplyDefenseBuff(int value)

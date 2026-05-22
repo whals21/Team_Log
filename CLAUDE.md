@@ -42,7 +42,7 @@ MapSceneSetup (진입점)
 
 전투 시스템 (Phase 1-2):
 BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신)
-    ├── TurnManager (턴 사이클 오케스트레이터)
+    ├── TurnManager (턴 사이클 오케스트레이터, DealDamage 중앙화)
     │   ├── SkillDrawSystem (가중치 랜덤 드로우)
     │   └── TurnContext (턴 상태: phase, AP)
     │       └── AP: 파티 공유, 매 턴 1+생존수 전량 회복, OnAPChanged 이벤트

@@ -40,26 +40,26 @@ namespace TeamLog.Editor
 
             CreateSkill("Warrior_Shield", "방패 방어", "이번 턴 동안 방어력이 증가합니다.",
                 SkillType.Buff, TargetType.Self, power: 10, weight: 30,
-                effect: StatusEffect.DefenseUp, duration: 1);
+                effect: StatusEffectType.DefenseUp, duration: 1);
 
             CreateSkill("Warrior_Taunt", "도발", "적의 공격을 자신에게 유도합니다.",
                 SkillType.Debuff, TargetType.SingleEnemy, power: 0, weight: 20);
 
             CreateSkill("Warrior_Rage", "분노", "다음 공격의 데미지가 증가합니다.",
                 SkillType.Buff, TargetType.Self, power: 20, weight: 10,
-                effect: StatusEffect.AttackUp, duration: 1);
+                effect: StatusEffectType.AttackUp, duration: 1);
 
             // 마법사 스킬
             CreateSkill("Mage_Fireball", "파이어볼", "적에게 불꽃 데미지를 입히고 화상을 입힙니다.",
                 SkillType.Attack, TargetType.SingleEnemy, power: 20, weight: 35,
-                effect: StatusEffect.Burn, duration: 2, effectValue: 5);
+                effect: StatusEffectType.Burn, duration: 2, effectValue: 5);
 
             CreateSkill("Mage_IceSpear", "얼음창", "적에게 얼음 데미지를 입힙니다.",
                 SkillType.Attack, TargetType.SingleEnemy, power: 15, weight: 35);
 
             CreateSkill("Mage_MagicShield", "마법 방어막", "자신의 방어력을 증가시킵니다.",
                 SkillType.Buff, TargetType.Self, power: 15, weight: 20,
-                effect: StatusEffect.DefenseUp, duration: 1);
+                effect: StatusEffectType.DefenseUp, duration: 1);
 
             CreateSkill("Mage_Meteor", "메테오", "모든 적에게 강력한 데미지를 입힙니다.",
                 SkillType.Attack, TargetType.AllEnemies, power: 30, weight: 10);
@@ -70,14 +70,14 @@ namespace TeamLog.Editor
 
             CreateSkill("Healer_Barrier", "보호막", "아군 한 명의 방어력을 증가시킵니다.",
                 SkillType.Buff, TargetType.SingleAlly, power: 15, weight: 25,
-                effect: StatusEffect.DefenseUp, duration: 2);
+                effect: StatusEffectType.DefenseUp, duration: 2);
 
             CreateSkill("Healer_Purify", "정화", "아군의 약화 효과를 제거합니다.",
                 SkillType.Buff, TargetType.SingleAlly, power: 0, weight: 20);
 
             CreateSkill("Healer_Blessing", "축복", "아군의 공격력을 증가시킵니다.",
                 SkillType.Buff, TargetType.SingleAlly, power: 10, weight: 15,
-                effect: StatusEffect.AttackUp, duration: 2);
+                effect: StatusEffectType.AttackUp, duration: 2);
 
             // 도적 스킬
             CreateSkill("Rogue_Backstab", "급소 공격", "적에게 치명타 데미지를 입힙니다.",
@@ -85,11 +85,11 @@ namespace TeamLog.Editor
 
             CreateSkill("Rogue_PoisonBlade", "독 바르기", "적에게 독 효과를 부여합니다.",
                 SkillType.Debuff, TargetType.SingleEnemy, power: 5, weight: 25,
-                effect: StatusEffect.Poison, duration: 3, effectValue: 8);
+                effect: StatusEffectType.Poison, duration: 3, effectValue: 8);
 
             CreateSkill("Rogue_Weaken", "약화", "적의 방어력을 감소시킵니다.",
                 SkillType.Debuff, TargetType.SingleEnemy, power: 0, weight: 20,
-                effect: StatusEffect.DefenseDown, duration: 2);
+                effect: StatusEffectType.DefenseDown, duration: 2);
 
             CreateSkill("Rogue_DoubleStrike", "이중 타격", "적에게 2번 공격합니다.",
                 SkillType.Attack, TargetType.SingleEnemy, power: 12, weight: 20);
@@ -100,11 +100,11 @@ namespace TeamLog.Editor
 
             CreateSkill("Slime_AcidSpit", "산성 침", "독이 섞인 공격입니다.",
                 SkillType.Attack, TargetType.SingleEnemy, power: 6, weight: 30,
-                effect: StatusEffect.Poison, duration: 2, effectValue: 3);
+                effect: StatusEffectType.Poison, duration: 2, effectValue: 3);
 
             CreateSkill("Slime_Split", "분열 준비", "방어력이 증가합니다.",
                 SkillType.Buff, TargetType.Self, power: 10, weight: 20,
-                effect: StatusEffect.DefenseUp, duration: 1);
+                effect: StatusEffectType.DefenseUp, duration: 1);
 
             CreateSkill("Slime_Jiggle", "출렁임", "아무 일도 일어나지 않습니다.",
                 SkillType.Buff, TargetType.Self, power: 0, weight: 10);
@@ -118,16 +118,16 @@ namespace TeamLog.Editor
 
             CreateSkill("Goblin_Steal", "약화 공격", "적의 공격력을 감소시킵니다.",
                 SkillType.Attack, TargetType.SingleEnemy, power: 8, weight: 20,
-                effect: StatusEffect.AttackDown, duration: 1);
+                effect: StatusEffectType.AttackDown, duration: 1);
 
             CreateSkill("Goblin_Hide", "은신", "방어력을 증가시킵니다.",
                 SkillType.Buff, TargetType.Self, power: 8, weight: 10,
-                effect: StatusEffect.DefenseUp, duration: 1);
+                effect: StatusEffectType.DefenseUp, duration: 1);
         }
 
         private static void CreateSkill(string fileName, string name, string desc,
             SkillType type, TargetType target, int power, int weight,
-            StatusEffect effect = StatusEffect.None, int duration = 0, int effectValue = 0)
+            StatusEffectType effect = StatusEffectType.None, int duration = 0, int effectValue = 0)
         {
             var skill = ScriptableObject.CreateInstance<SkillData>();
             skill.name = name;

@@ -9,7 +9,6 @@ using SkillData = TeamLog.Characters.SkillData;
 using SkillType = TeamLog.Characters.SkillType;
 using StatType = TeamLog.Characters.StatType;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
-using StatusEffect = TeamLog.Characters.StatusEffect;
 using TargetType = TeamLog.Characters.TargetType;
 
 namespace TeamLog.Combat.Turn
@@ -58,6 +57,16 @@ namespace TeamLog.Combat.Turn
         public static int CalculateDamage(int attackPower, int defense)
         {
             return System.Math.Max(1, attackPower - defense);
+        }
+
+        /// <summary>
+        /// 중앙화된 데미지 적용: 공격자 ATK + bonusPower - 대상 DEF
+        /// </summary>
+        public static void DealDamage(Character attacker, Character target, int bonusPower = 0)
+        {
+            int damage = attacker.Stats.GetStat(StatType.ATK) + bonusPower;
+            int defense = target.Stats.GetStat(StatType.DEF);
+            target.Health.TakeDamage(CalculateDamage(damage, defense));
         }
 
         public void StartBattle()
@@ -167,10 +176,7 @@ namespace TeamLog.Combat.Turn
 
         private void ExecuteAttack(Character caster, Character target, SkillData skill)
         {
-            int damage = caster.Stats.GetStat(StatType.ATK) + skill.Power;
-            int defense = target.Stats.GetStat(StatType.DEF);
-            int finalDamage = CalculateDamage(damage, defense);
-            target.Health.TakeDamage(finalDamage);
+            DealDamage(caster, target, skill.Power);
         }
 
         private void ExecuteHeal(Character target, SkillData skill)
@@ -180,10 +186,9 @@ namespace TeamLog.Combat.Turn
 
         private void ApplyEffect(SkillData skill, Character target)
         {
-            if (skill.StatusEffect != global::TeamLog.Characters.StatusEffect.None)
+            if (skill.StatusEffect != StatusEffectType.None)
             {
-                var effectType = (StatusEffectType)(int)skill.StatusEffect;
-                target.StatusEffects.ApplyEffect(effectType, skill.EffectDuration, skill.EffectValue);
+                target.StatusEffects.ApplyEffect(skill.StatusEffect, skill.EffectDuration, skill.EffectValue);
                 target.ApplyStatModifiers();
             }
         }
@@ -228,10 +233,7 @@ namespace TeamLog.Combat.Turn
             if (alivePlayers.Count == 0) return;
 
             var target = alivePlayers[UnityEngine.Random.Range(0, alivePlayers.Count)];
-            int damage = enemy.Stats.GetStat(StatType.ATK);
-            int defense = target.Stats.GetStat(StatType.DEF);
-            int finalDamage = CalculateDamage(damage, defense);
-            target.Health.TakeDamage(finalDamage);
+            DealDamage(enemy, target);
         }
 
         /// <summary>

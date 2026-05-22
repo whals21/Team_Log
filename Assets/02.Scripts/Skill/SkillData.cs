@@ -26,7 +26,7 @@ namespace TeamLog.Characters
         [SerializeField] private int _weight = 50;
 
         [Header("추가 효과")]
-        [SerializeField] private StatusEffect _statusEffect;
+        [SerializeField] private StatusEffectType _statusEffect;
         [SerializeField] private int _effectDuration;
         [SerializeField] private int _effectValue;
 
@@ -38,7 +38,7 @@ namespace TeamLog.Characters
         public int Power => _power;
         public int Cost => _cost;
         public int Weight => _weight;
-        public StatusEffect StatusEffect => _statusEffect;
+        public StatusEffectType StatusEffect => _statusEffect;
         public int EffectDuration => _effectDuration;
         public int EffectValue => _effectValue;
         #endregion
@@ -65,21 +65,5 @@ namespace TeamLog.Characters
         SingleAlly,     // 단일 아군
         AllAllies,      // 전체 아군
         Self            // 자신
-    }
-
-    /// <summary>
-    /// 상태이상 타입
-    /// </summary>
-    public enum StatusEffect
-    {
-        None,
-        Poison,     // 독
-        Burn,       // 화상
-        Stun,       // 기절
-        Bleed,      // 출혈
-        DefenseUp,  // 방어 증가
-        DefenseDown,// 방어 감소
-        AttackUp,   // 공격 증가
-        AttackDown  // 공격 감소
     }
 }

@@ -121,9 +121,8 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_testRogueData",
                 AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Rogue.asset"));
 
-            // EnemyData pools — Enemy_ 접두사 에셋만 필터링
-            var enemyAssets = LoadAllAssets<CharacterData>(CHAR_DIR)
-                .FindAll(a => a.name.StartsWith("Enemy_"));
+            // EnemyData pools — 파일명이 Enemy_ 접두사인 에셋만 필터링
+            var enemyAssets = LoadAllAssets<CharacterData>(CHAR_DIR, "Enemy_");
             var normalPoolProp = setupSer.FindProperty("_normalEnemyPool");
             var elitePoolProp = setupSer.FindProperty("_eliteEnemyPool");
             var bossPoolProp = setupSer.FindProperty("_bossEnemyPool");
@@ -357,13 +356,20 @@ namespace TeamLog.Editor
                 prop.objectReferenceValue = value;
         }
 
-        private static List<T> LoadAllAssets<T>(string folder) where T : Object
+        private static List<T> LoadAllAssets<T>(string folder, string namePrefix = null) where T : Object
         {
             var result = new List<T>();
             var guids = AssetDatabase.FindAssets("t:" + typeof(T).Name, new[] { folder });
             foreach (var guid in guids)
             {
-                var asset = AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guid));
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                // namePrefix가 지정되면 파일명(에셋 경로의 마지막 부분)으로 필터링
+                if (namePrefix != null)
+                {
+                    var fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+                    if (!fileName.StartsWith(namePrefix)) continue;
+                }
+                var asset = AssetDatabase.LoadAssetAtPath<T>(path);
                 if (asset != null) result.Add(asset);
             }
             return result;

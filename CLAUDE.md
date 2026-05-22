@@ -71,6 +71,13 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 - **CharacterData** (ScriptableObject): 이름, 클래스, 기본 스탯, 스킬 목록
 - **SkillData** (ScriptableObject): 이름, 타입, 타겟타입, 위력, 비용, 가중치, 상태이상
 - 모든 데이터는 `Assets/03.Data/`에 `TeamLog/` 메뉴로 생성
+- **DataGenerator 규칙**:
+  - `GetOrCreateAsset<T>`로 기존 에셋 로드 우선 (GUID 보존, 참조 끊김 방지)
+  - `Object.name = fileName` (에셋 파일명과 일치, Unity 경고 방지)
+  - 한국어 표시명은 `_skillName`/`_characterName` 등 private 필드에 저장
+  - 스킬 Cost 포함하여 모든 필드를 명시적으로 설정
+- **MapSceneBuilder 규칙**:
+  - 에셋 필터링은 `Object.name`이 아닌 파일 경로 기반 (`namePrefix` 파라미터)
 
 ## 코딩 규칙
 

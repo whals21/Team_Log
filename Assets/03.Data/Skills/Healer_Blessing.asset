@@ -19,6 +19,6 @@ MonoBehaviour:
   _power: 10
   _cost: 2
   _weight: 15
-  _statusEffect: 7
+  _statusEffect: 9
   _effectDuration: 2
   _effectValue: 0

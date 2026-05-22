@@ -36,63 +36,63 @@ namespace TeamLog.Editor
         {
             // 전사 스킬
             CreateSkill("Warrior_Strike", "강타", "적에게 물리 데미지를 입힙니다.",
-                SkillType.Attack, TargetType.SingleEnemy, power: 15, weight: 40);
+                SkillType.Attack, TargetType.SingleEnemy, power: 15, weight: 40, cost: 1);
 
             CreateSkill("Warrior_Shield", "방패 방어", "이번 턴 동안 방어력이 증가합니다.",
-                SkillType.Buff, TargetType.Self, power: 10, weight: 30,
+                SkillType.Buff, TargetType.Self, power: 10, weight: 30, cost: 1,
                 effect: StatusEffectType.DefenseUp, duration: 1);
 
             CreateSkill("Warrior_Taunt", "도발", "적의 공격을 자신에게 유도합니다.",
-                SkillType.Debuff, TargetType.SingleEnemy, power: 0, weight: 20);
+                SkillType.Debuff, TargetType.SingleEnemy, power: 0, weight: 20, cost: 1);
 
             CreateSkill("Warrior_Rage", "분노", "다음 공격의 데미지가 증가합니다.",
-                SkillType.Buff, TargetType.Self, power: 20, weight: 10,
+                SkillType.Buff, TargetType.Self, power: 20, weight: 10, cost: 2,
                 effect: StatusEffectType.AttackUp, duration: 1);
 
             // 마법사 스킬
             CreateSkill("Mage_Fireball", "파이어볼", "적에게 불꽃 데미지를 입히고 화상을 입힙니다.",
-                SkillType.Attack, TargetType.SingleEnemy, power: 20, weight: 35,
+                SkillType.Attack, TargetType.SingleEnemy, power: 20, weight: 35, cost: 2,
                 effect: StatusEffectType.Burn, duration: 2, effectValue: 5);
 
             CreateSkill("Mage_IceSpear", "얼음창", "적에게 얼음 데미지를 입힙니다.",
-                SkillType.Attack, TargetType.SingleEnemy, power: 15, weight: 35);
+                SkillType.Attack, TargetType.SingleEnemy, power: 15, weight: 35, cost: 1);
 
             CreateSkill("Mage_MagicShield", "마법 방어막", "자신의 방어력을 증가시킵니다.",
-                SkillType.Buff, TargetType.Self, power: 15, weight: 20,
+                SkillType.Buff, TargetType.Self, power: 15, weight: 20, cost: 1,
                 effect: StatusEffectType.DefenseUp, duration: 1);
 
             CreateSkill("Mage_Meteor", "메테오", "모든 적에게 강력한 데미지를 입힙니다.",
-                SkillType.Attack, TargetType.AllEnemies, power: 30, weight: 10);
+                SkillType.Attack, TargetType.AllEnemies, power: 30, weight: 10, cost: 3);
 
             // 힐러 스킬
             CreateSkill("Healer_Heal", "치유", "아군 한 명의 체력을 회복합니다.",
-                SkillType.Heal, TargetType.SingleAlly, power: 25, weight: 40);
+                SkillType.Heal, TargetType.SingleAlly, power: 25, weight: 40, cost: 2);
 
             CreateSkill("Healer_Barrier", "보호막", "아군 한 명의 방어력을 증가시킵니다.",
-                SkillType.Buff, TargetType.SingleAlly, power: 15, weight: 25,
+                SkillType.Buff, TargetType.SingleAlly, power: 15, weight: 25, cost: 1,
                 effect: StatusEffectType.DefenseUp, duration: 2);
 
             CreateSkill("Healer_Purify", "정화", "아군의 약화 효과를 제거합니다.",
-                SkillType.Buff, TargetType.SingleAlly, power: 0, weight: 20);
+                SkillType.Buff, TargetType.SingleAlly, power: 0, weight: 20, cost: 1);
 
             CreateSkill("Healer_Blessing", "축복", "아군의 공격력을 증가시킵니다.",
-                SkillType.Buff, TargetType.SingleAlly, power: 10, weight: 15,
+                SkillType.Buff, TargetType.SingleAlly, power: 10, weight: 15, cost: 2,
                 effect: StatusEffectType.AttackUp, duration: 2);
 
             // 도적 스킬
             CreateSkill("Rogue_Backstab", "급소 공격", "적에게 치명타 데미지를 입힙니다.",
-                SkillType.Attack, TargetType.SingleEnemy, power: 25, weight: 35);
+                SkillType.Attack, TargetType.SingleEnemy, power: 25, weight: 35, cost: 2);
 
             CreateSkill("Rogue_PoisonBlade", "독 바르기", "적에게 독 효과를 부여합니다.",
-                SkillType.Debuff, TargetType.SingleEnemy, power: 5, weight: 25,
+                SkillType.Debuff, TargetType.SingleEnemy, power: 5, weight: 25, cost: 1,
                 effect: StatusEffectType.Poison, duration: 3, effectValue: 8);
 
             CreateSkill("Rogue_Weaken", "약화", "적의 방어력을 감소시킵니다.",
-                SkillType.Debuff, TargetType.SingleEnemy, power: 0, weight: 20,
+                SkillType.Debuff, TargetType.SingleEnemy, power: 0, weight: 20, cost: 1,
                 effect: StatusEffectType.DefenseDown, duration: 2);
 
             CreateSkill("Rogue_DoubleStrike", "이중 타격", "적에게 2번 공격합니다.",
-                SkillType.Attack, TargetType.SingleEnemy, power: 12, weight: 20);
+                SkillType.Attack, TargetType.SingleEnemy, power: 12, weight: 20, cost: 1);
 
             // 적 슬라임 스킬
             CreateSkill("Slime_Tackle", "몸통박치기", "기본 공격입니다.",
@@ -126,23 +126,25 @@ namespace TeamLog.Editor
         }
 
         private static void CreateSkill(string fileName, string name, string desc,
-            SkillType type, TargetType target, int power, int weight,
+            SkillType type, TargetType target, int power, int weight, int cost = 0,
             StatusEffectType effect = StatusEffectType.None, int duration = 0, int effectValue = 0)
         {
-            var skill = ScriptableObject.CreateInstance<SkillData>();
-            skill.name = name;
+            var path = $"{SKILL_PATH}/{fileName}.asset";
+            var skill = GetOrCreateAsset<SkillData>(path);
+            skill.name = fileName;
 
             SetPrivateField(skill, "_skillName", name);
             SetPrivateField(skill, "_description", desc);
             SetPrivateField(skill, "_skillType", type);
             SetPrivateField(skill, "_targetType", target);
             SetPrivateField(skill, "_power", power);
+            SetPrivateField(skill, "_cost", cost);
             SetPrivateField(skill, "_weight", weight);
             SetPrivateField(skill, "_statusEffect", effect);
             SetPrivateField(skill, "_effectDuration", duration);
             SetPrivateField(skill, "_effectValue", effectValue);
 
-            AssetDatabase.CreateAsset(skill, $"{SKILL_PATH}/{fileName}.asset");
+            EditorUtility.SetDirty(skill);
         }
 
         #endregion
@@ -187,8 +189,9 @@ namespace TeamLog.Editor
         private static void CreateCharacter(string fileName, string name, CharacterClass charClass,
             string desc, int hp, int atk, int def, string[] skills)
         {
-            var character = ScriptableObject.CreateInstance<CharacterData>();
-            character.name = name;
+            var path = $"{CHAR_PATH}/{fileName}.asset";
+            var character = GetOrCreateAsset<CharacterData>(path);
+            character.name = fileName;
 
             SetPrivateField(character, "_characterName", name);
             SetPrivateField(character, "_characterClass", charClass);
@@ -207,7 +210,7 @@ namespace TeamLog.Editor
             }
             SetPrivateField(character, "_skills", skillList);
 
-            AssetDatabase.CreateAsset(character, $"{CHAR_PATH}/{fileName}.asset");
+            EditorUtility.SetDirty(character);
         }
 
         #endregion
@@ -217,6 +220,20 @@ namespace TeamLog.Editor
             var field = obj.GetType().GetField(fieldName,
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             field?.SetValue(obj, value);
+        }
+
+        /// <summary>
+        /// 기존 에셋을 로드하거나, 없으면 새로 생성. GUID 보존으로 참조 끊김 방지.
+        /// </summary>
+        private static T GetOrCreateAsset<T>(string path) where T : ScriptableObject
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (existing != null)
+                return existing;
+
+            var asset = ScriptableObject.CreateInstance<T>();
+            AssetDatabase.CreateAsset(asset, path);
+            return asset;
         }
 
         #region Item Data
@@ -247,8 +264,9 @@ namespace TeamLog.Editor
         private static void CreateItem(string fileName, string name, string desc,
             ItemType type, ItemEffectType effectType, int effectValue, int price, RewardRarity rarity)
         {
-            var item = ScriptableObject.CreateInstance<ItemData>();
-            item.name = name;
+            var path = $"{ITEM_PATH}/{fileName}.asset";
+            var item = GetOrCreateAsset<ItemData>(path);
+            item.name = fileName;
 
             SetPrivateField(item, "_itemName", name);
             SetPrivateField(item, "_description", desc);
@@ -258,7 +276,7 @@ namespace TeamLog.Editor
             SetPrivateField(item, "_price", price);
             SetPrivateField(item, "_rarity", rarity);
 
-            AssetDatabase.CreateAsset(item, $"{ITEM_PATH}/{fileName}.asset");
+            EditorUtility.SetDirty(item);
         }
 
         #endregion
@@ -401,15 +419,16 @@ namespace TeamLog.Editor
         private static void CreateEvent(string fileName, string name, string desc,
             TeamLog.Event.EventType type, EventChoice[] choices)
         {
-            var eventData = ScriptableObject.CreateInstance<EventData>();
-            eventData.name = name;
+            var path = $"{EVENT_PATH}/{fileName}.asset";
+            var eventData = GetOrCreateAsset<EventData>(path);
+            eventData.name = fileName;
 
             SetPrivateField(eventData, "_eventName", name);
             SetPrivateField(eventData, "_description", desc);
             SetPrivateField(eventData, "_eventType", type);
             SetPrivateField(eventData, "_choices", new List<EventChoice>(choices));
 
-            AssetDatabase.CreateAsset(eventData, $"{EVENT_PATH}/{fileName}.asset");
+            EditorUtility.SetDirty(eventData);
         }
 
         #endregion

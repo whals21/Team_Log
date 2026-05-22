@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using TeamLog.Characters;
+using TeamLog.Combat.AI;
 
 namespace TeamLog.UI.Battle
 {
@@ -49,6 +50,7 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Color _accentYellow = new Color(0.96f, 0.82f, 0.25f);
 
         private Character _currentCharacter;
+        private EnemyIntent _currentIntent;
         private List<GameObject> _spawnedEntries = new List<GameObject>();
         private int _currentTab;
 
@@ -69,9 +71,9 @@ namespace TeamLog.UI.Battle
             if (_tabSkillIndicator == null) _tabSkillIndicator = FindChild("Panel/TabArea/TabSkill/Indicator");
             if (_tabStatusIndicator == null) _tabStatusIndicator = FindChild("Panel/TabArea/TabStatus/Indicator");
             if (_skillContent == null) _skillContent = FindChild("Panel/SkillContent");
-            if (_skillEntryContainer == null) _skillEntryContainer = FindChild("Panel/SkillContent")?.transform;
+            if (_skillEntryContainer == null) _skillEntryContainer = FindChild("Panel/SkillContent/Content")?.transform;
             if (_statusContent == null) _statusContent = FindChild("Panel/StatusContent");
-            if (_statusEntryContainer == null) _statusEntryContainer = FindChild("Panel/StatusContent")?.transform;
+            if (_statusEntryContainer == null) _statusEntryContainer = FindChild("Panel/StatusContent/Content")?.transform;
             if (_backgroundButton == null) _backgroundButton = GetComponent<Button>();
 
             if (_closeButton != null)
@@ -123,7 +125,13 @@ namespace TeamLog.UI.Battle
 
         public void Show(Character character)
         {
+            Show(character, null);
+        }
+
+        public void Show(Character character, EnemyIntent intent)
+        {
             _currentCharacter = character;
+            _currentIntent = intent;
             gameObject.SetActive(true);
 
             UpdateHeader();
@@ -136,6 +144,7 @@ namespace TeamLog.UI.Battle
         {
             gameObject.SetActive(false);
             _currentCharacter = null;
+            _currentIntent = null;
         }
 
         private void UpdateHeader()
@@ -151,10 +160,14 @@ namespace TeamLog.UI.Battle
         {
             int current = _currentCharacter.Health.CurrentHP;
             int max = _currentCharacter.Health.MaxHP;
+            int shield = _currentCharacter.Health.CurrentShield;
             float ratio = max > 0 ? (float)current / max : 0f;
 
             if (_hpText != null)
-                _hpText.text = $"HP {current} / {max}";
+            {
+                string shieldText = shield > 0 ? $" (+{shield})" : "";
+                _hpText.text = $"HP {current} / {max}{shieldText}";
+            }
 
             if (_hpFillImage != null)
             {
@@ -198,6 +211,34 @@ namespace TeamLog.UI.Battle
 
             if (_currentCharacter == null || _skillEntryContainer == null) return;
 
+            // 적인 경우 "다음 행동" 섹션을 최상단에 표시
+            if (_currentIntent != null && _currentIntent.Type != EnemyIntentType.None)
+            {
+                var intentEntry = CreateEntry(_skillEntryPrefab, _skillEntryContainer);
+                if (intentEntry != null)
+                {
+                    var texts = intentEntry.GetComponentsInChildren<TextMeshProUGUI>();
+                    if (texts.Length > 0)
+                        texts[0].text = $"<b>[다음 행동]</b> {_currentIntent.GetDisplayText()}";
+
+                    // 수치 요약 줄: 위력 + 상태이상
+                    if (_currentIntent.Skill != null)
+                    {
+                        var summaryEntry = CreateEntry(null, _skillEntryContainer);
+                        if (summaryEntry != null)
+                        {
+                            var tmp = summaryEntry.GetComponent<TextMeshProUGUI>();
+                            if (tmp != null)
+                            {
+                                tmp.text = $"  {BuildSkillSummary(_currentIntent.Skill)}";
+                                tmp.fontSize = 12;
+                                tmp.color = new Color(0.85f, 0.85f, 0.6f);
+                            }
+                        }
+                    }
+                }
+            }
+
             var skills = _currentCharacter.SkillInventory.Skills;
             for (int i = 0; i < skills.Count; i++)
             {
@@ -206,9 +247,59 @@ namespace TeamLog.UI.Battle
                 {
                     var texts = entryObj.GetComponentsInChildren<TextMeshProUGUI>();
                     if (texts.Length > 0)
-                        texts[0].text = $"{skills[i].SkillName} ({skills[i].Type})";
+                        texts[0].text = FormatSkillEntry(skills[i]);
                 }
             }
+        }
+
+        /// <summary>
+        /// "[다음 행동]" 아래에 표시할 스킬 수치 요약: "위력 2 | 독 1 (2턴)"
+        /// </summary>
+        /// <summary>
+        /// "[다음 행동]" 아래에 표시할 스킬 수치 요약: "위력 3 | 독 1 (2턴)"
+        /// 공격 스킬은 ATK + Power가 최종 위력
+        /// </summary>
+        private string BuildSkillSummary(SkillData skill)
+        {
+            var parts = new List<string>();
+
+            if (skill.Power > 0)
+            {
+                string label = skill.Type switch
+                {
+                    SkillType.Attack => "위력",
+                    SkillType.Shield => "쉴드",
+                    SkillType.Heal => "회복",
+                    SkillType.Buff => "수치",
+                    SkillType.Debuff => "수치",
+                    _ => "수치"
+                };
+                // 공격 스킬은 캐릭터 ATK 포함
+                int displayPower = skill.Type == SkillType.Attack && _currentCharacter != null
+                    ? _currentCharacter.Stats.GetStat(StatType.ATK) + skill.Power
+                    : skill.Power;
+                parts.Add($"{label} {displayPower}");
+            }
+
+            if (skill.StatusEffect != StatusEffectType.None)
+            {
+                string effectName = GetEffectLabel(skill.StatusEffect);
+                string duration = skill.EffectDuration > 0 ? $" ({skill.EffectDuration}턴)" : "";
+                string value = skill.EffectValue > 0 ? $" {skill.EffectValue}" : "";
+                parts.Add($"{effectName}{value}{duration}");
+            }
+
+            return parts.Count > 0 ? string.Join(" | ", parts) : "";
+        }
+
+        /// <summary>
+        /// 스킬 목록 엔트리 포맷: "몸통박치기 — 위력 1"
+        /// </summary>
+        private string FormatSkillEntry(SkillData skill)
+        {
+            string name = skill.SkillName;
+            string detail = BuildSkillSummary(skill);
+            return string.IsNullOrEmpty(detail) ? name : $"{name} — {detail}";
         }
 
         private void PopulateStatusEffects()
@@ -247,6 +338,7 @@ namespace TeamLog.UI.Battle
                 var tmp = go.AddComponent<TextMeshProUGUI>();
                 tmp.fontSize = 14;
                 tmp.alignment = TextAlignmentOptions.Left;
+                _spawnedEntries.Add(go);
                 return go;
             }
 
@@ -257,9 +349,20 @@ namespace TeamLog.UI.Battle
 
         private void ClearEntries()
         {
+            // 빌더 샘플 엔트리 + 런타임 생성 엔트리 모두 제거
             foreach (var entry in _spawnedEntries)
                 if (entry != null) Destroy(entry);
             _spawnedEntries.Clear();
+
+            ClearContainerChildren(_skillEntryContainer);
+            ClearContainerChildren(_statusEntryContainer);
+        }
+
+        private void ClearContainerChildren(Transform container)
+        {
+            if (container == null) return;
+            for (int i = container.childCount - 1; i >= 0; i--)
+                Destroy(container.GetChild(i).gameObject);
         }
 
         private string GetClassLabel(CharacterClass cls) => cls switch

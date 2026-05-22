@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using UnityEngine.EventSystems;
+using TeamLog.Combat.AI;
 
 namespace TeamLog.UI.Battle
 {
@@ -16,6 +17,7 @@ namespace TeamLog.UI.Battle
         [SerializeField] private TextMeshProUGUI _nameText;
         [SerializeField] private TextMeshProUGUI _hpText;
         [SerializeField] private Image _hpFillImage;
+        [SerializeField] private Image _shieldFillImage;
         [SerializeField] private TextMeshProUGUI _infoText;
 
         [Header("Action Buttons")]
@@ -34,6 +36,7 @@ namespace TeamLog.UI.Battle
 
         private int _enemyIndex;
         private Characters.Character _character;
+        private EnemyIntent _intent;
         private BattleUIManager _uiManager;
 
         public int EnemyIndex => _enemyIndex;
@@ -46,6 +49,7 @@ namespace TeamLog.UI.Battle
             if (_nameText == null) _nameText = FindComponent<TextMeshProUGUI>("Name");
             if (_hpText == null) _hpText = FindComponent<TextMeshProUGUI>("HPBarContainer/HPText");
             if (_hpFillImage == null) _hpFillImage = FindComponent<Image>("HPBarContainer/Fill");
+            if (_shieldFillImage == null) _shieldFillImage = FindComponent<Image>("HPBarContainer/ShieldFill");
             if (_infoText == null) _infoText = FindComponent<TextMeshProUGUI>("Info");
             if (_guardianButton == null) _guardianButton = FindComponent<Button>("ButtonArea/Btn_가디언");
             if (_arcanaButton == null) _arcanaButton = FindComponent<Button>("ButtonArea/Btn_아크카");
@@ -86,7 +90,7 @@ namespace TeamLog.UI.Battle
             if (popup != null)
             {
                 if (_character != null)
-                    popup.Show(_character);
+                    popup.Show(_character, _intent);
                 else
                     popup.ShowSample(_nameText?.text ?? "Enemy", _hpText?.text ?? "??");
             }
@@ -111,17 +115,36 @@ namespace TeamLog.UI.Battle
                 _avatarImage.sprite = avatar;
         }
 
-        public void UpdateHP(int current, int max)
+        public void UpdateHP(int current, int max, int shield = 0)
         {
             float ratio = max > 0 ? (float)current / max : 0f;
 
             if (_hpText != null)
-                _hpText.text = $"{current}/{max}";
+            {
+                string shieldText = shield > 0 ? $" (+{shield})" : "";
+                _hpText.text = $"{current}/{max}{shieldText}";
+            }
 
             if (_hpFillImage != null)
             {
                 _hpFillImage.rectTransform.anchorMax = new Vector2(ratio, 1f);
                 _hpFillImage.color = _hpColor;
+            }
+
+            // 쉴드 바: HP 바 끝점부터 겹쳐서 표시
+            if (_shieldFillImage != null)
+            {
+                if (shield > 0 && max > 0)
+                {
+                    float shieldEnd = Mathf.Min(1f, ratio + (float)shield / max);
+                    _shieldFillImage.rectTransform.anchorMin = new Vector2(ratio, 0f);
+                    _shieldFillImage.rectTransform.anchorMax = new Vector2(shieldEnd, 1f);
+                    _shieldFillImage.gameObject.SetActive(true);
+                }
+                else
+                {
+                    _shieldFillImage.gameObject.SetActive(false);
+                }
             }
         }
 
@@ -129,6 +152,12 @@ namespace TeamLog.UI.Battle
         {
             if (_infoText != null)
                 _infoText.text = text;
+        }
+
+        public void SetIntent(EnemyIntent intent)
+        {
+            _intent = intent;
+            SetInfoText(intent?.GetDisplayText() ?? "");
         }
 
         public void SetTargetMode(bool isTargetable)

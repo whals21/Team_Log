@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Warrior_Rage
   m_EditorClassIdentifier: 
   _skillName: "\uBD84\uB178"
-  _description: "\uB2E4\uC74C \uACF5\uACA9\uC758 \uB370\uBBF8\uC9C0\uAC00 \uC99D\uAC00\uD569\uB2C8\uB2E4."
+  _description: "1\uD134 \uB3D9\uC548 \uACF5\uACA9\uB825\uC774 \uC99D\uAC00\uD569\uB2C8\uB2E4."
   _skillType: 2
   _targetType: 4
-  _power: 20
+  _power: 2
   _cost: 2
   _weight: 10
   _statusEffect: 9

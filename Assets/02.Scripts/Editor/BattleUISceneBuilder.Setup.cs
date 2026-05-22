@@ -49,6 +49,11 @@ namespace TeamLog.Editor
                 var apText = topBar.Find("APText");
                 if (apText != null)
                     SetPrivateField(topBarUI, "_apText", apText.GetComponent<TMPro.TextMeshProUGUI>());
+
+                // 리롤 카운트 텍스트 자동 연결
+                var rerollText = topBar.Find("RerollText");
+                if (rerollText != null)
+                    SetPrivateField(topBarUI, "_rerollText", rerollText.GetComponent<TMPro.TextMeshProUGUI>());
             }
 
             // 3) BottomBar에 ActionBarUI 추가
@@ -197,8 +202,8 @@ namespace TeamLog.Editor
         private static void CreateActionSlotPrefab()
         {
             const string prefabPath = "Assets/03.Data/Prefabs/ActionSlotUI.prefab";
-            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (existing != null) return;
+            // 기존 프리팹 삭제 (리롤 버튼 추가로 구조 변경)
+            AssetDatabase.DeleteAsset(prefabPath);
 
             if (!AssetDatabase.IsValidFolder("Assets/03.Data/Prefabs"))
                 AssetDatabase.CreateFolder("Assets/03.Data", "Prefabs");
@@ -283,6 +288,22 @@ namespace TeamLog.Editor
             assigned.gameObject.AddComponent<Image>().color = new Color(0.2f, 0.8f, 0.4f, 0.15f);
             assigned.gameObject.SetActive(false);
 
+            // 리롤 버튼 (우측 하단 작은 버튼)
+            var rerollBtn = NewRect("RerollBtn", rect);
+            rerollBtn.anchorMin = new Vector2(1, 0);
+            rerollBtn.anchorMax = new Vector2(1, 0);
+            rerollBtn.pivot = new Vector2(1, 0);
+            rerollBtn.anchoredPosition = new Vector2(-2, 2);
+            rerollBtn.sizeDelta = new Vector2(24, 24);
+            var rerollBtnComp = rerollBtn.gameObject.AddComponent<Button>();
+            var rerollImg = rerollBtn.gameObject.AddComponent<Image>();
+            rerollImg.color = ShieldBrown;
+            rerollBtnComp.targetGraphic = rerollImg;
+            var rerollTxt = NewRect("T", rerollBtn);
+            SetFillParent(rerollTxt);
+            AddText(rerollTxt, "↻", 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            rerollBtn.gameObject.SetActive(false);
+
             // ActionSlotUI 컴포넌트 자동 와이어링
             var slotUI = go.AddComponent<ActionSlotUI>();
             SetPrivateField(slotUI, "_skillIcon", icon.gameObject.GetComponent<Image>());
@@ -294,6 +315,7 @@ namespace TeamLog.Editor
             SetPrivateField(slotUI, "_executionOrderText", orderText.gameObject.GetComponent<TMPro.TextMeshProUGUI>());
             SetPrivateField(slotUI, "_assignedOverlay", assigned.gameObject);
             SetPrivateField(slotUI, "_button", go.GetComponent<Button>());
+            SetPrivateField(slotUI, "_rerollButton", rerollBtn.gameObject.GetComponent<Button>());
 
             var prefab = PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
             Object.DestroyImmediate(go);

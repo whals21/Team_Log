@@ -52,7 +52,8 @@ namespace TeamLog.Characters
         Attack,     // 공격
         Heal,       // 치유
         Buff,       // 버프
-        Debuff      // 디버프
+        Debuff,     // 디버프
+        Shield      // 쉴드 (일시적 보호막)
     }
 
     /// <summary>

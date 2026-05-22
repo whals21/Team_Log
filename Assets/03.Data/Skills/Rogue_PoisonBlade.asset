@@ -16,9 +16,9 @@ MonoBehaviour:
   _description: "\uC801\uC5D0\uAC8C \uB3C5 \uD6A8\uACFC\uB97C \uBD80\uC5EC\uD569\uB2C8\uB2E4."
   _skillType: 3
   _targetType: 0
-  _power: 5
+  _power: 0
   _cost: 1
   _weight: 25
   _statusEffect: 1
   _effectDuration: 3
-  _effectValue: 8
+  _effectValue: 1

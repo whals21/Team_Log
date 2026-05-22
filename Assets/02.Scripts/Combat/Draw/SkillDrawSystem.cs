@@ -20,6 +20,7 @@ namespace TeamLog.Combat.Draw
 
         public IReadOnlyList<DrawnSkillSlot> DrawnSlots => _drawnSlots;
         public int RerollsRemaining => _maxRerolls - _rerollCount;
+        public int MaxRerolls => _maxRerolls;
         public bool CanReroll => _rerollCount < _maxRerolls;
 
         public event System.Action<IReadOnlyList<DrawnSkillSlot>> OnDrawComplete;

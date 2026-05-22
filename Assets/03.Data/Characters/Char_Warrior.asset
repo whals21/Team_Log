@@ -15,10 +15,10 @@ MonoBehaviour:
   _characterName: "\uC804\uC0AC"
   _characterClass: 0
   _description: "\uADFC\uC811 \uC804\uD22C \uC804\uBB38\uAC00. \uB192\uC740 \uCCB4\uB825\uACFC
-    \uBC29\uC5B4\uB825\uC744 \uAC00\uC9D1\uB2C8\uB2E4."
-  _baseHP: 120
-  _baseATK: 12
-  _baseDEF: 8
+    \uC274\uB4DC \uC0DD\uC131 \uB2A5\uB825\uC744 \uAC00\uC9D1\uB2C8\uB2E4."
+  _baseHP: 20
+  _baseATK: 1
+  _baseDEF: 0
   _skills:
   - {fileID: 11400000, guid: a25928fc74aaa844ca3d74aaa8046395, type: 2}
   - {fileID: 11400000, guid: 31c473cf77370e94fbb29c4057ac025d, type: 2}

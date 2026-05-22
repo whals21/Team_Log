@@ -1,0 +1,25 @@
+id,displayName,description,type,target,power,cost,weight,statusEffect,effectDuration,effectValue
+Warrior_Strike,강타,적에게 물리 데미지를 입힙니다.,Attack,SingleEnemy,1,1,40,None,0,0
+Warrior_Shield,방패 방어,자신에게 쉴드를 부여합니다.,Shield,Self,4,1,30,None,0,0
+Warrior_Taunt,도발,적의 공격을 자신에게 유도합니다.,Debuff,SingleEnemy,0,1,20,None,0,0
+Warrior_Rage,분노,1턴 동안 공격력이 증가합니다.,Buff,Self,2,2,10,AttackUp,1,0
+Mage_Fireball,파이어볼,적에게 불꽃 데미지를 입히고 화상을 입힙니다.,Attack,SingleEnemy,2,2,35,Burn,2,1
+Mage_IceSpear,얼음창,적에게 얼음 데미지를 입힙니다.,Attack,SingleEnemy,1,1,35,None,0,0
+Mage_MagicShield,마법 방어막,자신에게 쉴드를 부여합니다.,Shield,Self,3,1,20,None,0,0
+Mage_Meteor,메테오,모든 적에게 강력한 데미지를 입힙니다.,Attack,AllEnemies,3,3,10,None,0,0
+Healer_Heal,치유,아군 한 명의 체력을 회복합니다.,Heal,SingleAlly,4,2,40,None,0,0
+Healer_Barrier,보호막,아군 한 명에게 쉴드를 부여합니다.,Shield,SingleAlly,5,1,25,None,0,0
+Healer_Purify,정화,아군의 약화 효과를 제거합니다.,Buff,SingleAlly,0,1,20,None,0,0
+Healer_Blessing,축복,아군의 공격력을 증가시킵니다.,Buff,SingleAlly,1,2,15,AttackUp,2,0
+Rogue_Backstab,급소 공격,적에게 치명타 데미지를 입힙니다.,Attack,SingleEnemy,2,2,35,None,0,0
+Rogue_PoisonBlade,독 바르기,적에게 독 효과를 부여합니다.,Debuff,SingleEnemy,0,1,25,Poison,3,1
+Rogue_Weaken,약화,적의 방어력을 감소시킵니다.,Debuff,SingleEnemy,0,1,20,DefenseDown,2,0
+Rogue_DoubleStrike,이중 타격,적에게 2번 공격합니다.,Attack,SingleEnemy,1,1,20,None,0,0
+Slime_Tackle,몸통박치기,기본 공격입니다.,Attack,SingleEnemy,1,0,50,None,0,0
+Slime_AcidSpit,산성 침,독이 섞인 공격입니다.,Attack,SingleEnemy,1,0,30,Poison,2,1
+Slime_Split,분열 준비,쉴드를 얻습니다.,Shield,Self,2,0,20,None,0,0
+Slime_Jiggle,출렁임,아무 일도 일어나지 않습니다.,Buff,Self,0,0,10,None,0,0
+Goblin_Scratch,긁기,빠른 공격입니다.,Attack,SingleEnemy,2,0,40,None,0,0
+Goblin_Bite,물기,강한 공격입니다.,Attack,SingleEnemy,3,0,30,None,0,0
+Goblin_Steal,약화 공격,적의 공격력을 감소시킵니다.,Attack,SingleEnemy,1,0,20,AttackDown,1,0
+Goblin_Hide,은신,쉴드를 얻습니다.,Shield,Self,2,0,10,None,0,0

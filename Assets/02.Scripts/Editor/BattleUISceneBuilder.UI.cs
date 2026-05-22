@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using TeamLog.UI.Battle;
-using TeamLog.Characters;
 
 namespace TeamLog.Editor
 {
@@ -16,8 +15,6 @@ namespace TeamLog.Editor
         private static readonly Color PopupPanelBg = new Color(0.05f, 0.05f, 0.12f, 0.98f);
         private static readonly Color PopupHeaderBg = new Color(0.04f, 0.03f, 0.08f, 0.95f);
         private static readonly Color EntryBg = new Color(0.07f, 0.07f, 0.15f, 0.9f);
-        private static readonly Color AccentPurple = new Color(0.4f, 0.15f, 0.55f);
-
         // ══════════════════════════════════════════════════════════
         //  Top Bar
         // ══════════════════════════════════════════════════════════
@@ -67,6 +64,21 @@ namespace TeamLog.Editor
             apT.fontStyle = FontStyles.Bold;
             apT.alignment = TextAlignmentOptions.Center;
             apT.color = AccentYellow;
+
+            // 리롤 카운트 표시
+            var rerollRect = NewRect("RerollText", bar);
+            rerollRect.anchorMin = new Vector2(1, 0.5f);
+            rerollRect.anchorMax = new Vector2(1, 0.5f);
+            rerollRect.pivot = new Vector2(1, 0.5f);
+            rerollRect.anchoredPosition = new Vector2(-190, 0);
+            rerollRect.sizeDelta = new Vector2(120, 40);
+            var rerollT = rerollRect.gameObject.AddComponent<TextMeshProUGUI>();
+            rerollT.font = GetOrCreateKoreanFont();
+            rerollT.text = "리롤 2/2";
+            rerollT.fontSize = 20;
+            rerollT.fontStyle = FontStyles.Bold;
+            rerollT.alignment = TextAlignmentOptions.Center;
+            rerollT.color = ShieldBrown;
 
             // 턴 종료 버튼
             var btn = NewRect("EndTurnButton", bar);
@@ -221,6 +233,14 @@ namespace TeamLog.Editor
             hpFill.offsetMax = new Vector2(-2, -2);
             hpFill.gameObject.AddComponent<Image>().color = AccentGreen;
 
+            // 쉴드 바 (HP 바 위에 겹침)
+            var shieldFill = NewRect("ShieldFill", hpBar);
+            shieldFill.anchorMin = Vector2.zero;
+            shieldFill.anchorMax = Vector2.zero;
+            shieldFill.offsetMin = new Vector2(2, 2);
+            shieldFill.offsetMax = new Vector2(-2, -2);
+            shieldFill.gameObject.AddComponent<Image>().color = ShieldBrown;
+
             var hpTxt = NewRect("Text", hpBar);
             SetFillParent(hpTxt);
             AddTextNoWrap(hpTxt, hp, 12, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
@@ -321,6 +341,14 @@ namespace TeamLog.Editor
             fill.offsetMax = new Vector2(-2, -2);
             fill.gameObject.AddComponent<Image>().color = AccentRed;
 
+            // 쉴드 바 (HP 바 위에 겹침)
+            var shieldFill = NewRect("ShieldFill", hpCont);
+            shieldFill.anchorMin = Vector2.zero;
+            shieldFill.anchorMax = Vector2.zero;
+            shieldFill.offsetMin = new Vector2(2, 2);
+            shieldFill.offsetMax = new Vector2(-2, -2);
+            shieldFill.gameObject.AddComponent<Image>().color = ShieldBrown;
+
             var hpText = NewRect("HPText", hpCont);
             SetFillParent(hpText);
             AddText(hpText, hp, 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
@@ -334,8 +362,8 @@ namespace TeamLog.Editor
             bhlg.childControlWidth = false;
             bhlg.childControlHeight = false;
 
-            CreateActionBtn(btnArea, "가디언", AccentRed);
-            CreateActionBtn(btnArea, "아크카", new Color(0.4f, 0.15f, 0.55f));
+            CreateActionBtn(btnArea, "", AccentRed);
+            CreateActionBtn(btnArea, "", new Color(0.4f, 0.15f, 0.55f));
 
             // 수량 정보
             var info = NewRect("Info", panel);
@@ -417,6 +445,7 @@ namespace TeamLog.Editor
 
         private static void CreateCharacterPopup(RectTransform parent)
         {
+            // ── 오버레이 (전체 화면 반투명 배경, 클릭으로 닫기) ──
             var overlay = NewRect("CharacterPopup", parent);
             SetFillParent(overlay);
             overlay.gameObject.SetActive(false);
@@ -428,7 +457,7 @@ namespace TeamLog.Editor
 
             overlay.gameObject.AddComponent<CharacterPopupUI>();
 
-            // 패널
+            // ── 패널 (고정 크기 520×620, 중앙, VerticalLayoutGroup으로 자동 배치) ──
             var panel = NewRect("Panel", overlay);
             panel.anchorMin = new Vector2(0.5f, 0.5f);
             panel.anchorMax = new Vector2(0.5f, 0.5f);
@@ -440,6 +469,19 @@ namespace TeamLog.Editor
             panelOl.effectColor = BorderRed;
             panelOl.effectDistance = new Vector2(2, -2);
 
+            // VerticalLayoutGroup: 자식들을 위에서부터 순서대로 자동 배치 (수동 위치 계산 불필요)
+            var panelVlg = panel.gameObject.AddComponent<VerticalLayoutGroup>();
+            panelVlg.padding = new RectOffset(12, 12, 8, 8);
+            panelVlg.spacing = 4;
+            panelVlg.childAlignment = TextAnchor.UpperCenter;
+            panelVlg.childControlWidth = true;
+            panelVlg.childControlHeight = true;
+            panelVlg.childForceExpandWidth = true;
+            panelVlg.childForceExpandHeight = false;
+
+            // ContentSizeFitter은 패널 자체에는 사용하지 않음 (고정 크기 520×620)
+            // 각 섹션은 LayoutElement로 높이 지정
+
             CreatePopupHeader(panel);
             CreatePopupHPBar(panel);
             CreatePopupStats(panel);
@@ -447,13 +489,23 @@ namespace TeamLog.Editor
             CreatePopupContent(panel);
         }
 
+        /// <summary>
+        /// LayoutElement로 높이를 지정하는 헬퍼 (VerticalLayoutGroup용)
+        /// </summary>
+        private static LayoutElement SetFixedHeight(RectTransform rect, float height)
+        {
+            var le = rect.gameObject.AddComponent<LayoutElement>();
+            le.minHeight = height;
+            le.preferredHeight = height;
+            le.flexibleHeight = 0;
+            return le;
+        }
+
         private static void CreatePopupHeader(RectTransform panel)
         {
             var header = NewRect("Header", panel);
-            header.anchorMin = new Vector2(0, 1);
-            header.anchorMax = new Vector2(1, 1);
-            header.pivot = new Vector2(0.5f, 1);
-            header.sizeDelta = new Vector2(0, 56);
+            // 수동 위치 지정 제거 — VerticalLayoutGroup이 자동 배치
+            SetFixedHeight(header, 56);
             header.gameObject.AddComponent<Image>().color = PopupHeaderBg;
 
             var portrait = NewRect("Portrait", header);
@@ -496,15 +548,11 @@ namespace TeamLog.Editor
         private static void CreatePopupHPBar(RectTransform panel)
         {
             var hpArea = NewRect("HPArea", panel);
-            hpArea.anchorMin = new Vector2(0, 1);
-            hpArea.anchorMax = new Vector2(1, 1);
-            hpArea.pivot = new Vector2(0.5f, 1);
-            hpArea.anchoredPosition = new Vector2(0, -62);
-            hpArea.sizeDelta = new Vector2(-24, 28);
+            // 수동 위치 지정 제거 — VerticalLayoutGroup이 자동 배치
+            SetFixedHeight(hpArea, 28);
 
             var hpBg = NewRect("HPBarBg", hpArea);
-            hpBg.anchorMin = Vector2.zero;
-            hpBg.anchorMax = new Vector2(1, 1);
+            SetFillParent(hpBg);
             hpBg.offsetMax = new Vector2(-80, 0);
             hpBg.gameObject.AddComponent<Image>().color = new Color(0.15f, 0.15f, 0.15f);
 
@@ -519,22 +567,21 @@ namespace TeamLog.Editor
             hpLabel.anchorMin = new Vector2(1, 0);
             hpLabel.anchorMax = new Vector2(1, 1);
             hpLabel.pivot = new Vector2(1, 0.5f);
-            hpLabel.sizeDelta = new Vector2(76, 0);
+            hpLabel.offsetMin = new Vector2(-76, 0);
+            hpLabel.offsetMax = Vector2.zero;
             AddText(hpLabel, "HP 55/55", 14, FontStyles.Bold, TextAlignmentOptions.Right, TextWhite);
         }
 
         private static void CreatePopupStats(RectTransform panel)
         {
             var statsArea = NewRect("StatsArea", panel);
-            statsArea.anchorMin = new Vector2(0, 1);
-            statsArea.anchorMax = new Vector2(1, 1);
-            statsArea.pivot = new Vector2(0.5f, 1);
-            statsArea.anchoredPosition = new Vector2(0, -94);
-            statsArea.sizeDelta = new Vector2(-24, 24);
+            // 수동 위치 지정 제거 — VerticalLayoutGroup이 자동 배치
+            SetFixedHeight(statsArea, 24);
 
             var atkRect = NewRect("ATK", statsArea);
             atkRect.anchorMin = Vector2.zero;
             atkRect.anchorMax = new Vector2(0.5f, 1);
+            atkRect.offsetMin = Vector2.zero;
             atkRect.offsetMax = new Vector2(-4, 0);
             atkRect.gameObject.AddComponent<Image>().color = EntryBg;
             AddText(NewRect("T", atkRect), "ATK 10", 14, FontStyles.Bold, TextAlignmentOptions.Center, AccentRed);
@@ -543,6 +590,7 @@ namespace TeamLog.Editor
             defRect.anchorMin = new Vector2(0.5f, 0);
             defRect.anchorMax = Vector2.one;
             defRect.offsetMin = new Vector2(4, 0);
+            defRect.offsetMax = Vector2.zero;
             defRect.gameObject.AddComponent<Image>().color = EntryBg;
             AddText(NewRect("T", defRect), "DEF 5", 14, FontStyles.Bold, TextAlignmentOptions.Center, new Color(0.3f, 0.6f, 0.9f));
         }
@@ -550,17 +598,16 @@ namespace TeamLog.Editor
         private static void CreatePopupTabs(RectTransform panel)
         {
             var tabArea = NewRect("TabArea", panel);
-            tabArea.anchorMin = new Vector2(0, 1);
-            tabArea.anchorMax = new Vector2(1, 1);
-            tabArea.pivot = new Vector2(0.5f, 1);
-            tabArea.anchoredPosition = new Vector2(0, -122);
-            tabArea.sizeDelta = new Vector2(0, 36);
+            // 수동 위치 지정 제거 — VerticalLayoutGroup이 자동 배치
+            SetFixedHeight(tabArea, 36);
             tabArea.gameObject.AddComponent<Image>().color = new Color(0.03f, 0.03f, 0.06f, 0.5f);
 
             // 탭1: 스킬 목록
             var tab1 = NewRect("TabSkill", tabArea);
             tab1.anchorMin = Vector2.zero;
             tab1.anchorMax = new Vector2(0.5f, 1);
+            tab1.offsetMin = Vector2.zero;
+            tab1.offsetMax = Vector2.zero;
             tab1.gameObject.AddComponent<Button>();
             tab1.gameObject.AddComponent<Image>().color = Color.clear;
             var t1Label = NewRect("T", tab1);
@@ -578,6 +625,8 @@ namespace TeamLog.Editor
             var tab2 = NewRect("TabStatus", tabArea);
             tab2.anchorMin = new Vector2(0.5f, 0);
             tab2.anchorMax = Vector2.one;
+            tab2.offsetMin = Vector2.zero;
+            tab2.offsetMax = Vector2.zero;
             tab2.gameObject.AddComponent<Button>();
             tab2.gameObject.AddComponent<Image>().color = Color.clear;
             var t2Label = NewRect("T", tab2);
@@ -595,14 +644,28 @@ namespace TeamLog.Editor
 
         private static void CreatePopupContent(RectTransform panel)
         {
-            // 스킬 콘텐츠
+            // ── 스킬 콘텐츠 (flexibleHeight=1로 남은 공간 자동 채움) ──
             var skillContent = NewRect("SkillContent", panel);
-            skillContent.anchorMin = new Vector2(0, 0);
-            skillContent.anchorMax = new Vector2(1, 1);
-            skillContent.offsetMin = new Vector2(12, 12);
-            skillContent.offsetMax = new Vector2(-12, -162);
+            // 수동 offset 제거 — VerticalLayoutGroup + LayoutElement flexibleHeight로 자동 배치
+            var skillLe = skillContent.gameObject.AddComponent<LayoutElement>();
+            skillLe.minHeight = 100;
+            skillLe.flexibleHeight = 1;
 
-            var skillVlg = skillContent.gameObject.AddComponent<VerticalLayoutGroup>();
+            skillContent.gameObject.AddComponent<RectMask2D>();
+            var skillScroll = skillContent.gameObject.AddComponent<ScrollRect>();
+            skillScroll.horizontal = false;
+            skillScroll.vertical = true;
+            skillScroll.scrollSensitivity = 20;
+            skillScroll.movementType = ScrollRect.MovementType.Elastic;
+
+            // 내부 Content: top-anchored, sizeDelta=(0,0)
+            var skillList = NewRect("Content", skillContent);
+            skillList.anchorMin = new Vector2(0, 1);
+            skillList.anchorMax = new Vector2(1, 1);
+            skillList.pivot = new Vector2(0.5f, 1);
+            skillList.sizeDelta = new Vector2(0, 0);
+
+            var skillVlg = skillList.gameObject.AddComponent<VerticalLayoutGroup>();
             skillVlg.spacing = 6;
             skillVlg.padding = new RectOffset(0, 0, 4, 4);
             skillVlg.childAlignment = TextAnchor.UpperCenter;
@@ -611,22 +674,33 @@ namespace TeamLog.Editor
             skillVlg.childForceExpandWidth = true;
             skillVlg.childForceExpandHeight = false;
 
-            var skillCsf = skillContent.gameObject.AddComponent<ContentSizeFitter>();
+            var skillCsf = skillList.gameObject.AddComponent<ContentSizeFitter>();
+            skillCsf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
             skillCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            CreatePopupSkillEntry(skillContent, "난도질", 1, "적 1회에게 10 피해.", SkillType.Attack);
-            CreatePopupSkillEntry(skillContent, "처엄타", 2, "적 1회에게 18 피해. 회피 +50%.", SkillType.Attack);
-            CreatePopupSkillEntry(skillContent, "연속 베기", 2, "적 1회에게 8+8 피해 (2회 공격).", SkillType.Attack);
+            skillScroll.content = skillList;
 
-            // 상태 효과 콘텐츠 (숨김)
+            // ── 상태 효과 콘텐츠 (숨김, 동일 구조) ──
             var statusContent = NewRect("StatusContent", panel);
-            statusContent.anchorMin = new Vector2(0, 0);
-            statusContent.anchorMax = new Vector2(1, 1);
-            statusContent.offsetMin = new Vector2(12, 12);
-            statusContent.offsetMax = new Vector2(-12, -162);
+            var statusLe = statusContent.gameObject.AddComponent<LayoutElement>();
+            statusLe.minHeight = 100;
+            statusLe.flexibleHeight = 1;
             statusContent.gameObject.SetActive(false);
 
-            var statusVlg = statusContent.gameObject.AddComponent<VerticalLayoutGroup>();
+            statusContent.gameObject.AddComponent<RectMask2D>();
+            var statusScroll = statusContent.gameObject.AddComponent<ScrollRect>();
+            statusScroll.horizontal = false;
+            statusScroll.vertical = true;
+            statusScroll.scrollSensitivity = 20;
+            statusScroll.movementType = ScrollRect.MovementType.Elastic;
+
+            var statusList = NewRect("Content", statusContent);
+            statusList.anchorMin = new Vector2(0, 1);
+            statusList.anchorMax = new Vector2(1, 1);
+            statusList.pivot = new Vector2(0.5f, 1);
+            statusList.sizeDelta = new Vector2(0, 0);
+
+            var statusVlg = statusList.gameObject.AddComponent<VerticalLayoutGroup>();
             statusVlg.spacing = 6;
             statusVlg.padding = new RectOffset(0, 0, 4, 4);
             statusVlg.childAlignment = TextAnchor.UpperCenter;
@@ -635,105 +709,12 @@ namespace TeamLog.Editor
             statusVlg.childForceExpandWidth = true;
             statusVlg.childForceExpandHeight = false;
 
-            CreatePopupStatusEntry(statusContent, "독", "5 (2턴)");
-            CreatePopupStatusEntry(statusContent, "공격 증가", "3 (1턴)");
+            var statusCsf = statusList.gameObject.AddComponent<ContentSizeFitter>();
+            statusCsf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            statusCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            statusScroll.content = statusList;
         }
-
-        private static void CreatePopupSkillEntry(RectTransform parent, string skillName, int level, string desc, SkillType type)
-        {
-            var entry = NewRect("SkillEntry", parent);
-            entry.sizeDelta = new Vector2(0, 72);
-            entry.gameObject.AddComponent<Image>().color = EntryBg;
-
-            // 상단: 아이콘 + 이름 + 레벨
-            var topRow = NewRect("TopRow", entry);
-            topRow.anchorMin = new Vector2(0, 0.5f);
-            topRow.anchorMax = new Vector2(1, 1);
-            topRow.offsetMin = new Vector2(8, 0);
-            topRow.offsetMax = new Vector2(-8, -4);
-
-            var icon = NewRect("Icon", topRow);
-            icon.anchorMin = new Vector2(0, 0);
-            icon.anchorMax = new Vector2(0, 1);
-            icon.pivot = new Vector2(0, 0.5f);
-            icon.sizeDelta = new Vector2(28, 28);
-            icon.gameObject.AddComponent<Image>().color = GetSkillTypeColor(type);
-
-            var nameRect = NewRect("Name", topRow);
-            nameRect.anchorMin = new Vector2(0, 0);
-            nameRect.anchorMax = new Vector2(0.7f, 1);
-            nameRect.offsetMin = new Vector2(36, 0);
-            AddText(nameRect, skillName, 15, FontStyles.Bold, TextAlignmentOptions.Left, TextWhite);
-
-            var lvlRect = NewRect("Level", topRow);
-            lvlRect.anchorMin = new Vector2(1, 0.5f);
-            lvlRect.anchorMax = new Vector2(1, 0.5f);
-            lvlRect.pivot = new Vector2(1, 0.5f);
-            lvlRect.sizeDelta = new Vector2(50, 22);
-            lvlRect.gameObject.AddComponent<Image>().color = new Color(0.12f, 0.1f, 0.02f, 0.9f);
-            var lvlTxt = NewRect("T", lvlRect);
-            SetFillParent(lvlTxt);
-            AddText(lvlTxt, $"Lv.{level}", 12, FontStyles.Bold, TextAlignmentOptions.Center, AccentYellow);
-
-            // 하단: 설명 + 타입
-            var bottomRow = NewRect("BottomRow", entry);
-            bottomRow.anchorMin = new Vector2(0, 0);
-            bottomRow.anchorMax = new Vector2(1, 0.5f);
-            bottomRow.offsetMin = new Vector2(44, 4);
-            bottomRow.offsetMax = new Vector2(-8, 0);
-
-            var descRect = NewRect("Desc", bottomRow);
-            descRect.anchorMin = Vector2.zero;
-            descRect.anchorMax = new Vector2(0.65f, 1);
-            AddText(descRect, desc, 12, FontStyles.Normal, TextAlignmentOptions.Left, TextDim);
-
-            var typeRect = NewRect("Type", bottomRow);
-            typeRect.anchorMin = new Vector2(1, 0);
-            typeRect.anchorMax = new Vector2(1, 1);
-            typeRect.pivot = new Vector2(1, 0.5f);
-            typeRect.sizeDelta = new Vector2(60, 20);
-            typeRect.gameObject.AddComponent<Image>().color = GetSkillTypeColor(type);
-            var typeTxt = NewRect("T", typeRect);
-            SetFillParent(typeTxt);
-            AddText(typeTxt, GetSkillTypeLabel(type), 11, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
-        }
-
-        private static void CreatePopupStatusEntry(RectTransform parent, string effectName, string valueText)
-        {
-            var entry = NewRect("StatusEntry", parent);
-            entry.sizeDelta = new Vector2(0, 36);
-            entry.gameObject.AddComponent<Image>().color = EntryBg;
-
-            var nameRect = NewRect("Name", entry);
-            nameRect.anchorMin = Vector2.zero;
-            nameRect.anchorMax = new Vector2(0.6f, 1);
-            nameRect.offsetMin = new Vector2(12, 0);
-            AddText(nameRect, effectName, 14, FontStyles.Bold, TextAlignmentOptions.Left, TextWhite);
-
-            var valRect = NewRect("Value", entry);
-            valRect.anchorMin = new Vector2(0.6f, 0);
-            valRect.anchorMax = Vector2.one;
-            valRect.offsetMax = new Vector2(-12, 0);
-            AddText(valRect, valueText, 13, FontStyles.Normal, TextAlignmentOptions.Right, AccentYellow);
-        }
-
-        private static Color GetSkillTypeColor(SkillType type) => type switch
-        {
-            SkillType.Attack => AccentRed,
-            SkillType.Heal => AccentGreen,
-            SkillType.Buff => AccentYellow,
-            SkillType.Debuff => AccentPurple,
-            _ => Color.gray
-        };
-
-        private static string GetSkillTypeLabel(SkillType type) => type switch
-        {
-            SkillType.Attack => "공격",
-            SkillType.Heal => "치유",
-            SkillType.Buff => "강화",
-            SkillType.Debuff => "약화",
-            _ => type.ToString()
-        };
 
         // ══════════════════════════════════════════════════════════
         //  UI 유틸리티

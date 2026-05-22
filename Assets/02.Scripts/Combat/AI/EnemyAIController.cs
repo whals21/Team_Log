@@ -1,14 +1,19 @@
 using System.Collections.Generic;
+using TeamLog.Characters;
 using TeamLog.Combat.Turn;
 
 // 네임스페이스 충돌 해결
 using Character = TeamLog.Characters.Character;
+using SkillData = TeamLog.Characters.SkillData;
+using SkillType = TeamLog.Characters.SkillType;
+using TargetType = TeamLog.Characters.TargetType;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
 
 namespace TeamLog.Combat.AI
 {
     /// <summary>
-    /// 적 AI 컨트롤러
+    /// 적 AI 컨트롤러 — SkillData 기반 행동 실행
+    /// PrepareNextAction에서 스킬+타겟을 미리 결정
     /// </summary>
     public class EnemyAIController
     {
@@ -17,7 +22,8 @@ namespace TeamLog.Combat.AI
         private readonly List<Character> _players;
 
         private EnemyIntent _currentIntent;
-        private EnemyActionNode _nextAction;
+        private SkillData _nextSkill;
+        private List<Character> _nextTargets;
 
         public Character Owner => _owner;
         public EnemyIntent CurrentIntent => _currentIntent;
@@ -29,129 +35,104 @@ namespace TeamLog.Combat.AI
             _owner = owner;
             _pattern = pattern;
             _players = players;
+            _nextTargets = new List<Character>();
         }
 
         /// <summary>
-        /// 턴 시작 시 다음 행동 결정
+        /// 턴 시작 시 다음 스킬과 타겟을 결정하여 의도 표시
         /// </summary>
         public void PrepareNextAction()
         {
-            _nextAction = _pattern.GetNextAction();
-            _currentIntent = CreateIntent(_nextAction);
+            _nextSkill = _pattern.GetNextSkill();
+            _nextTargets = ResolveTargets(_nextSkill);
+            _currentIntent = EnemyIntent.FromSkill(_nextSkill, _nextTargets, _owner);
             OnIntentChanged?.Invoke(_currentIntent);
         }
 
         /// <summary>
-        /// 준비된 행동 실행
+        /// 준비된 스킬 실행 — 미리 선택된 타겟 사용
         /// </summary>
         public void ExecuteAction()
         {
-            if (_nextAction == null) return;
+            if (_nextSkill == null) return;
 
-            var targets = SelectTargets(_nextAction.TargetCount);
-            ExecuteActionOnTargets(_nextAction, targets);
+            foreach (var target in _nextTargets)
+                ExecuteSkillInternal(_owner, _nextSkill, target);
         }
 
-        private EnemyIntent CreateIntent(EnemyActionNode action)
+        /// <summary>
+        /// SkillData.Target에 따라 타겟 리스트를 결정
+        /// </summary>
+        private List<Character> ResolveTargets(SkillData skill)
         {
-            if (action == null) return new EnemyIntent(EnemyIntentType.None);
-
-            return action.ActionType switch
-            {
-                EnemyActionType.Attack => new EnemyIntent(EnemyIntentType.Attack, action.Value),
-                EnemyActionType.HeavyAttack => new EnemyIntent(EnemyIntentType.HeavyAttack, action.Value),
-                EnemyActionType.MultiAttack => new EnemyIntent(EnemyIntentType.MultiAttack, action.Value, action.TargetCount),
-                EnemyActionType.Defend => new EnemyIntent(EnemyIntentType.Defend),
-                EnemyActionType.Buff => new EnemyIntent(EnemyIntentType.Buff, description: "강화"),
-                EnemyActionType.Debuff => new EnemyIntent(EnemyIntentType.Debuff, description: "약화"),
-                EnemyActionType.Heal => new EnemyIntent(EnemyIntentType.Heal, action.Value),
-                EnemyActionType.Summon => new EnemyIntent(EnemyIntentType.Summon),
-                EnemyActionType.Charge => new EnemyIntent(EnemyIntentType.Charge),
-                _ => new EnemyIntent(EnemyIntentType.Unknown)
-            };
-        }
-
-        private List<Character> SelectTargets(int count)
-        {
-            var alivePlayers = _players.FindAll(p => p.IsAlive);
             var targets = new List<Character>();
 
-            // 랜덤 타겟팅
-            for (int i = 0; i < count && alivePlayers.Count > 0; i++)
+            if (skill == null) return targets;
+
+            switch (skill.Target)
             {
-                int index = UnityEngine.Random.Range(0, alivePlayers.Count);
-                targets.Add(alivePlayers[index]);
+                case TargetType.SingleEnemy:
+                    var target = SelectRandomAlivePlayer();
+                    if (target != null) targets.Add(target);
+                    break;
+
+                case TargetType.AllEnemies:
+                    foreach (var player in _players)
+                        if (player.IsAlive) targets.Add(player);
+                    break;
+
+                case TargetType.Self:
+                    targets.Add(_owner);
+                    break;
+
+                case TargetType.SingleAlly:
+                    targets.Add(_owner);
+                    break;
+
+                case TargetType.AllAllies:
+                    targets.Add(_owner);
+                    break;
             }
 
             return targets;
         }
 
-        private void ExecuteActionOnTargets(EnemyActionNode action, List<Character> targets)
+        private void ExecuteSkillInternal(Character caster, SkillData skill, Character target)
         {
-            switch (action.ActionType)
+            switch (skill.Type)
             {
-                case EnemyActionType.Attack:
-                case EnemyActionType.HeavyAttack:
-                    foreach (var target in targets)
-                        AttackTarget(target, action.Value);
+                case SkillType.Attack:
+                    TurnManager.DealDamage(caster, target, skill.Power);
                     break;
-
-                case EnemyActionType.MultiAttack:
-                    foreach (var target in targets)
-                        AttackTarget(target, action.Value);
+                case SkillType.Shield:
+                    target.Health.AddShield(skill.Power);
                     break;
-
-                case EnemyActionType.Defend:
-                    ApplyDefenseBuff(action.Value);
+                case SkillType.Heal:
+                    target.Health.Heal(skill.Power);
                     break;
-
-                case EnemyActionType.Buff:
-                    ApplySelfBuff(action.ApplyEffect, action.EffectDuration, action.Value);
+                case SkillType.Buff:
+                    ApplyEffect(skill, target);
                     break;
-
-                case EnemyActionType.Debuff:
-                    foreach (var target in targets)
-                        ApplyDebuff(target, action.ApplyEffect, action.EffectDuration, action.Value);
-                    break;
-
-                case EnemyActionType.Heal:
-                    _owner.Health.Heal(action.Value);
-                    break;
-
-                case EnemyActionType.Charge:
-                    // 다음 공격 강화
-                    ApplySelfBuff(StatusEffectType.AttackUp, 1, action.Value);
+                case SkillType.Debuff:
+                    ApplyEffect(skill, target);
                     break;
             }
         }
 
-        private void AttackTarget(Character target, int damage)
+        private void ApplyEffect(SkillData skill, Character target)
         {
-            TurnManager.DealDamage(_owner, target, damage);
-        }
-
-        private void ApplyDefenseBuff(int value)
-        {
-            _owner.StatusEffects.ApplyEffect(StatusEffectType.DefenseUp, 1, value);
-            _owner.ApplyStatModifiers();
-        }
-
-        private void ApplySelfBuff(StatusEffectType? effect, int duration, int value)
-        {
-            if (effect.HasValue && effect.Value != StatusEffectType.None)
+            if (skill.StatusEffect != StatusEffectType.None)
             {
-                _owner.StatusEffects.ApplyEffect(effect.Value, duration, value);
-                _owner.ApplyStatModifiers();
-            }
-        }
-
-        private void ApplyDebuff(Character target, StatusEffectType? effect, int duration, int value)
-        {
-            if (effect.HasValue && effect.Value != StatusEffectType.None)
-            {
-                target.StatusEffects.ApplyEffect(effect.Value, duration, value);
+                target.StatusEffects.ApplyEffect(skill.StatusEffect, skill.EffectDuration, skill.EffectValue);
                 target.ApplyStatModifiers();
             }
+        }
+
+        private Character SelectRandomAlivePlayer()
+        {
+            var alive = _players.FindAll(p => p.IsAlive);
+            if (alive.Count == 0) return null;
+            return alive[UnityEngine.Random.Range(0, alive.Count)];
         }
     }
 }

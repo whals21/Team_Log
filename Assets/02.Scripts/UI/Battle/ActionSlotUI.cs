@@ -29,6 +29,9 @@ namespace TeamLog.UI.Battle
         [Header("Button")]
         [SerializeField] private Button _button;
 
+        [Header("Reroll")]
+        [SerializeField] private Button _rerollButton;
+
         private int _slotIndex;
         private SkillData _skill;
         private Character _caster;
@@ -40,6 +43,8 @@ namespace TeamLog.UI.Battle
         public SkillData Skill => _skill;
         public Character Caster => _caster;
 
+        public event System.Action<int> OnSlotRerollRequested;
+
         public void Setup(int slotIndex, ActionBarUI parent)
         {
             _slotIndex = slotIndex;
@@ -47,6 +52,9 @@ namespace TeamLog.UI.Battle
 
             if (_button != null)
                 _button.onClick.AddListener(OnClick);
+
+            if (_rerollButton != null)
+                _rerollButton.onClick.AddListener(OnRerollClick);
         }
 
         public void SetSkill(SkillData skill, Character caster)
@@ -109,12 +117,6 @@ namespace TeamLog.UI.Battle
                 _executionOrderText.text = (order + 1).ToString();
         }
 
-        public void SetAssigned(bool assigned)
-        {
-            if (_assignedOverlay != null)
-                _assignedOverlay.SetActive(assigned);
-        }
-
         public void SetAffordable(bool affordable)
         {
             if (_skillIcon != null && _colorsStored)
@@ -125,6 +127,23 @@ namespace TeamLog.UI.Battle
 
             if (_button != null)
                 _button.interactable = affordable;
+        }
+
+        public void SetRerollAvailable(bool available)
+        {
+            if (_rerollButton != null)
+                _rerollButton.gameObject.SetActive(available && _skill != null && !_isAssigned);
+        }
+
+        private bool _isAssigned;
+
+        public void SetAssigned(bool assigned)
+        {
+            _isAssigned = assigned;
+            if (_assignedOverlay != null)
+                _assignedOverlay.SetActive(assigned);
+            if (_rerollButton != null)
+                _rerollButton.gameObject.SetActive(!assigned && _skill != null);
         }
 
         private Color GetSkillColor(SkillData skill)
@@ -147,6 +166,11 @@ namespace TeamLog.UI.Battle
             {
                 _parent.SelectSlot(_slotIndex);
             }
+        }
+
+        private void OnRerollClick()
+        {
+            OnSlotRerollRequested?.Invoke(_slotIndex);
         }
     }
 }

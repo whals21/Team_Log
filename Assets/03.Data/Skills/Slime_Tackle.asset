@@ -16,7 +16,7 @@ MonoBehaviour:
   _description: "\uAE30\uBCF8 \uACF5\uACA9\uC785\uB2C8\uB2E4."
   _skillType: 0
   _targetType: 0
-  _power: 8
+  _power: 1
   _cost: 0
   _weight: 50
   _statusEffect: 0

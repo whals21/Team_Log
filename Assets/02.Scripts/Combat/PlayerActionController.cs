@@ -50,6 +50,7 @@ namespace TeamLog.Combat
             _drawSystem.OnDrawComplete += OnDrawComplete;
             _actionBar.OnSlotSelected += OnSlotSelected;
             _actionBar.OnSlotSelectionCancelled += OnSlotSelectionCancelled;
+            _actionBar.OnSlotRerollRequested += OnSlotRerollRequested;
 
             _uiManager.OnPlayerPanelClickedInternal += OnPlayerPanelClicked;
             _uiManager.OnEnemyPanelClickedInternal += OnEnemyPanelClicked;
@@ -60,9 +61,32 @@ namespace TeamLog.Combat
             _drawSystem.OnDrawComplete -= OnDrawComplete;
             _actionBar.OnSlotSelected -= OnSlotSelected;
             _actionBar.OnSlotSelectionCancelled -= OnSlotSelectionCancelled;
+            _actionBar.OnSlotRerollRequested -= OnSlotRerollRequested;
 
             _uiManager.OnPlayerPanelClickedInternal -= OnPlayerPanelClicked;
             _uiManager.OnEnemyPanelClickedInternal -= OnEnemyPanelClicked;
+        }
+
+        // ── Reroll ──────────────────────────────────────────────
+
+        private void OnSlotRerollRequested(int slotIndex)
+        {
+            if (!_drawSystem.CanReroll) return;
+
+            var slot = _drawSystem.GetSlot(slotIndex);
+            if (slot == null || slot.Skill == null || slot.IsSelected) return;
+
+            _turnManager.RerollSlot(slotIndex);
+
+            // UI 갱신
+            _actionBar.UpdateActionSlots(_drawSystem.DrawnSlots);
+            UpdateRerollUI();
+        }
+
+        private void UpdateRerollUI()
+        {
+            _actionBar.SetRerollState(_drawSystem.RerollsRemaining, _drawSystem.MaxRerolls);
+            _uiManager.UpdateRerollCount(_drawSystem.RerollsRemaining, _drawSystem.MaxRerolls);
         }
 
         // ── Draw Phase ──────────────────────────────────────────────
@@ -75,6 +99,7 @@ namespace TeamLog.Combat
             _actionBar.ResetAllAssignments();
             _actionBar.UpdateActionSlots(slots);
             _uiManager.ClearAllHighlights();
+            UpdateRerollUI();
         }
 
         // ── Slot Selection ──────────────────────────────────────────

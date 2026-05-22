@@ -30,6 +30,9 @@ namespace TeamLog.Combat
         [Header("Test Enemy Data")]
         [SerializeField] private CharacterData[] _testEnemyData;
 
+        [Header("Enemy Pattern Data")]
+        [SerializeField] private EnemyPatternData[] _enemyPatternData;
+
         private TurnManager _turnManager;
         private PlayerActionController _actionController;
         private List<EnemyAIController> _enemyControllers;
@@ -72,10 +75,10 @@ namespace TeamLog.Combat
         private void CreateTestData()
         {
             // 파티 생성 - 에셋이 있으면 사용, 없으면 기본값
-            AddPartyMember(_testWarriorData, "전사", CharacterClass.Warrior, 120, 12, 8);
-            AddPartyMember(_testMageData, "마법사", CharacterClass.Mage, 70, 18, 3);
-            AddPartyMember(_testHealerData, "힐러", CharacterClass.Healer, 80, 8, 5);
-            AddPartyMember(_testRogueData, "도적", CharacterClass.Rogue, 75, 15, 4);
+            AddPartyMember(_testWarriorData, "전사", CharacterClass.Warrior, 20, 1, 0);
+            AddPartyMember(_testMageData, "마법사", CharacterClass.Mage, 12, 2, 0);
+            AddPartyMember(_testHealerData, "힐러", CharacterClass.Healer, 14, 1, 0);
+            AddPartyMember(_testRogueData, "도적", CharacterClass.Rogue, 13, 2, 0);
 
             // 적 생성 - 에셋 배열이 있으면 사용, 없으면 기본 고블린 2마리
             if (_testEnemyData != null && _testEnemyData.Length > 0)
@@ -85,8 +88,8 @@ namespace TeamLog.Combat
             }
             else
             {
-                _enemies.Add(CreateDefaultCharacter("고블린1", CharacterClass.Rogue, 50, 12, 3));
-                _enemies.Add(CreateDefaultCharacter("고블린2", CharacterClass.Rogue, 50, 12, 3));
+                _enemies.Add(CreateDefaultCharacter("슬라임1", CharacterClass.Warrior, 10, 1, 0));
+                _enemies.Add(CreateDefaultCharacter("고블린1", CharacterClass.Rogue, 12, 2, 0));
             }
         }
 
@@ -116,20 +119,20 @@ namespace TeamLog.Combat
                 return;
             }
 
-            // 적 AI 컨트롤러 생성 (TurnManager보다 먼저)
+            // 적 AI 컨트롤러 생성 — EnemyPatternData 에셋에서 패턴 로드
             _enemyControllers = new List<EnemyAIController>();
-            foreach (var enemy in _enemies)
+            for (int i = 0; i < _enemies.Count; i++)
             {
-                var pattern = EnemyActionPattern.CreateSimpleLoop(
-                    new EnemyActionNode(EnemyActionType.Attack, 10),
-                    new EnemyActionNode(EnemyActionType.Attack, 8),
-                    new EnemyActionNode(EnemyActionType.Defend, 5)
-                );
-                _enemyControllers.Add(new EnemyAIController(enemy, pattern, _playerParty));
+                var enemy = _enemies[i];
+                var pattern = LoadEnemyPattern(i, enemy);
+                var controller = new EnemyAIController(enemy, pattern, _playerParty);
+                int index = i; // 클로저 캡처
+                controller.OnIntentChanged += intent => OnEnemyIntentChanged(index, intent);
+                _enemyControllers.Add(controller);
             }
 
             // TurnManager 생성 — AI 컨트롤러 전달
-            _turnManager = new TurnManager(_playerParty, _enemies, _enemyControllers, maxRerolls: 1);
+            _turnManager = new TurnManager(_playerParty, _enemies, _enemyControllers, maxRerolls: 2);
             _turnManager.OnPhaseChanged += OnPhaseChanged;
             _turnManager.OnTurnStarted += OnTurnStarted;
             _turnManager.OnBattleEnded += OnBattleEnded;
@@ -147,11 +150,17 @@ namespace TeamLog.Combat
                 _turnManager, _actionBar, _battleUIManager, _playerParty, _enemies);
             _actionController.Initialize();
 
-            // HP 변경 이벤트 구독
+            // HP/쉴드 변경 이벤트 구독
             foreach (var c in _playerParty)
-                c.Health.OnHPChanged += (hp, max) => OnCharacterHPChanged(c);
+            {
+                c.Health.OnHPChanged += (hp, max) => OnCharacterHealthChanged(c);
+                c.Health.OnShieldChanged += (shield) => OnCharacterHealthChanged(c);
+            }
             foreach (var c in _enemies)
-                c.Health.OnHPChanged += (hp, max) => OnCharacterHPChanged(c);
+            {
+                c.Health.OnHPChanged += (hp, max) => OnCharacterHealthChanged(c);
+                c.Health.OnShieldChanged += (shield) => OnCharacterHealthChanged(c);
+            }
 
             // 전투 시작
             _turnManager.StartBattle();
@@ -172,6 +181,11 @@ namespace TeamLog.Combat
             {
                 if (controller.Owner.IsAlive)
                     controller.PrepareNextAction();
+                else
+                {
+                    int idx = _enemyControllers.IndexOf(controller);
+                    _battleUIManager?.SetEnemyIntent(idx, null);
+                }
             }
         }
 
@@ -197,12 +211,50 @@ namespace TeamLog.Combat
             SceneManager.LoadScene("MapScene");
         }
 
-        private void OnCharacterHPChanged(Character character)
+        private void OnCharacterHealthChanged(Character character)
         {
             _battleUIManager?.UpdateAllPanels();
 
             if (character.Health.IsDead)
+            {
                 _battleUIManager?.AddLog($"{character.Name}이(가) 쓰러졌습니다.");
+
+                // 적 사망 시 의도 텍스트 제거
+                int enemyIdx = _enemies.IndexOf(character);
+                if (enemyIdx >= 0)
+                    _battleUIManager?.SetEnemyIntent(enemyIdx, null);
+            }
+        }
+
+        private EnemyActionPattern LoadEnemyPattern(int enemyIndex, Character enemy)
+        {
+            // 1. 인스펙터에 할당된 패턴 배열에서 매칭 시도
+            if (_enemyPatternData != null && enemyIndex < _enemyPatternData.Length && _enemyPatternData[enemyIndex] != null)
+                return _enemyPatternData[enemyIndex].CreateRuntimePattern();
+
+            // 2. 캐릭터 Data의 에셋 이름으로 패턴 에셋 자동 탐색 (에디터 전용)
+#if UNITY_EDITOR
+            string assetName = enemy.Data != null ? enemy.Data.name : "";
+            if (!string.IsNullOrEmpty(assetName))
+            {
+                var patternAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<EnemyPatternData>(
+                    $"Assets/03.Data/Patterns/Pattern_{assetName}.asset");
+                if (patternAsset != null)
+                    return patternAsset.CreateRuntimePattern();
+            }
+#endif
+
+            // 3. 폴백: 캐릭터 Data의 스킬 목록에서 패턴 생성
+            if (enemy.Data != null && enemy.Data.Skills.Count > 0)
+                return new EnemyActionPattern(enemy.Data.Skills);
+
+            // 4. 최종 폴백: 빈 패턴 (아무 행동도 안 함)
+            return new EnemyActionPattern(new Characters.SkillData[0]);
+        }
+
+        private void OnEnemyIntentChanged(int enemyIndex, EnemyIntent intent)
+        {
+            _battleUIManager?.SetEnemyIntent(enemyIndex, intent);
         }
 
         #endregion

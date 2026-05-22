@@ -25,6 +25,7 @@ namespace TeamLog.Editor
         private static readonly Color BorderRed = new Color(0.6f, 0.1f, 0.18f, 0.8f);
         private static readonly Color TextWhite = Color.white;
         private static readonly Color TextDim = new Color(0.7f, 0.7f, 0.75f);
+        private static readonly Color ShieldBrown = new Color(0.72f, 0.45f, 0.2f);
         private const string KOREAN_FONT_TTF = "Assets/08.Resource/Fonts/NanumGothic.ttf";
         private const string KOREAN_FONT_SDF = "Assets/08.Resource/Fonts/NanumGothic SDF.asset";
         private static TMP_FontAsset _koreanFont;

@@ -46,14 +46,14 @@ BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신)
     │   ├── SkillDrawSystem (가중치 랜덤 드로우)
     │   └── TurnContext (턴 상태: phase, AP)
     │       └── AP: 파티 공유, 매 턴 1+생존수 전량 회복, OnAPChanged 이벤트
-    ├── PlayerActionController (UI ↔ 전투 로직 중재자, AP 부족 차단)
+    ├── PlayerActionController (UI ↔ 전투 로직 중재자, AP 부족 차단, 리롤 중계)
     ├── EnemyAIController (패턴 기반 AI, 의도 표시)
-    └── BattleUIManager (UI 패널 생성/관리, AP 이벤트 구독)
-        ├── TopBarUI (턴 카운터, AP 표시)
-        └── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리)
+    └── BattleUIManager (UI 패널 생성/관리, AP/리롤 이벤트 구독)
+        ├── TopBarUI (턴 카운터, AP 표시, 리롤 카운트)
+        └── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리, 리롤 버튼)
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
-    ├── HealthComponent (HP 관리, OnHPChanged/OnDeath 이벤트)
+    ├── HealthComponent (HP/쉴드 관리, OnHPChanged/OnShieldChanged/OnDeath 이벤트)
     ├── StatComponent (ATK/DEF, base + modifier 시스템)
     ├── StatusEffectComponent (13종 상태이상 관리)
     └── SkillInventoryComponent (스킬 목록, DrawSkill 가중치 뽑기)
@@ -65,7 +65,9 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 ### 자원 시스템
 - **AP (Action Point)**: 파티 공유 자원, 매 턴 시작 시 `1 + 생존 파티원 수` 전량 회복
 - **스킬 Cost**: 0~3 (SkillData.Cost), 사용 시 AP 차감, 부족 시 스킬 사용 불가
-- 적은 AP 시스템에서 제외 (EnemyAIController가 독립적으로 행동 결정)
+- **쉴드 (Shield)**: 일시적 보호막, HP 바 위 갈색 바로 표시, 데미지를 HP보다 먼저 흡수, 턴 시작 시 리셋
+- **리롤 (Reroll)**: 턴당 2회, 개별 슬롯 리롤만 지원, 이미 사용한 슬롯은 리롤 불가
+- 적은 AP/리롤 시스템에서 제외 (EnemyAIController가 독립적으로 행동 결정)
 
 ### 데이터 계층
 - **CharacterData** (ScriptableObject): 이름, 클래스, 기본 스탯, 스킬 목록

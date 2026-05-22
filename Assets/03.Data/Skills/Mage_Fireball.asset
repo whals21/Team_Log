@@ -17,9 +17,9 @@ MonoBehaviour:
     \uD654\uC0C1\uC744 \uC785\uD799\uB2C8\uB2E4."
   _skillType: 0
   _targetType: 0
-  _power: 20
+  _power: 2
   _cost: 2
   _weight: 35
   _statusEffect: 2
   _effectDuration: 2
-  _effectValue: 5
+  _effectValue: 1

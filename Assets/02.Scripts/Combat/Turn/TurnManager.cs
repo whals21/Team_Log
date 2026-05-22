@@ -82,6 +82,10 @@ namespace TeamLog.Combat.Turn
             foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();
             foreach (var c in _enemies) if (c.IsAlive) c.ApplyStatModifiers();
 
+            // 턴 시작 시 모든 캐릭터의 쉴드 리셋
+            foreach (var c in _playerParty) if (c.IsAlive) c.Health.ResetShield();
+            foreach (var c in _enemies) if (c.IsAlive) c.Health.ResetShield();
+
             // AP 리셋: 기본 1 + 생존 파티원 수
             int aliveCount = _playerParty.FindAll(p => p.IsAlive).Count;
             _context.ResetAP(1 + aliveCount);
@@ -171,6 +175,9 @@ namespace TeamLog.Combat.Turn
                 case SkillType.Debuff:
                     ApplyEffect(skill, target);
                     break;
+                case SkillType.Shield:
+                    ExecuteShield(target, skill);
+                    break;
             }
         }
 
@@ -191,6 +198,11 @@ namespace TeamLog.Combat.Turn
                 target.StatusEffects.ApplyEffect(skill.StatusEffect, skill.EffectDuration, skill.EffectValue);
                 target.ApplyStatModifiers();
             }
+        }
+
+        private void ExecuteShield(Character target, SkillData skill)
+        {
+            target.Health.AddShield(skill.Power);
         }
 
         public void StartEnemyTurn()

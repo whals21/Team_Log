@@ -18,6 +18,7 @@ namespace TeamLog.UI.Battle
         [SerializeField] private TextMeshProUGUI _hpPercentText;
         [SerializeField] private TextMeshProUGUI _skillNameText;
         [SerializeField] private Image _hpFillImage;
+        [SerializeField] private Image _shieldFillImage;
         [SerializeField] private Button _closeButton;
         [SerializeField] private GameObject _selectionHighlight;
         [SerializeField] private Button _panelButton;
@@ -43,6 +44,7 @@ namespace TeamLog.UI.Battle
             if (_hpPercentText == null) _hpPercentText = FindComponent<TextMeshProUGUI>("Pct");
             if (_skillNameText == null) _skillNameText = FindComponent<TextMeshProUGUI>("Skill");
             if (_hpFillImage == null) _hpFillImage = FindComponent<Image>("HPBar/Fill");
+            if (_shieldFillImage == null) _shieldFillImage = FindComponent<Image>("HPBar/ShieldFill");
             if (_closeButton == null) _closeButton = FindComponent<Button>("CloseBtn");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
 
@@ -104,12 +106,15 @@ namespace TeamLog.UI.Battle
                 _skillNameText.text = skillName;
         }
 
-        public void UpdateHP(int current, int max)
+        public void UpdateHP(int current, int max, int shield = 0)
         {
             float ratio = max > 0 ? (float)current / max : 0f;
 
             if (_hpText != null)
-                _hpText.text = $"{current}/{max}";
+            {
+                string shieldText = shield > 0 ? $" (+{shield})" : "";
+                _hpText.text = $"{current}/{max}{shieldText}";
+            }
 
             if (_hpPercentText != null)
                 _hpPercentText.text = $"{Mathf.RoundToInt(ratio * 100)}%";
@@ -122,6 +127,22 @@ namespace TeamLog.UI.Battle
 
             if (_hpPercentText != null)
                 _hpPercentText.color = ratio <= _lowThreshold ? _hpLowColor : _hpNormalColor;
+
+            // 쉴드 바: HP 바 끝점부터 겹쳐서 표시
+            if (_shieldFillImage != null)
+            {
+                if (shield > 0 && max > 0)
+                {
+                    float shieldEnd = Mathf.Min(1f, ratio + (float)shield / max);
+                    _shieldFillImage.rectTransform.anchorMin = new Vector2(ratio, 0f);
+                    _shieldFillImage.rectTransform.anchorMax = new Vector2(shieldEnd, 1f);
+                    _shieldFillImage.gameObject.SetActive(true);
+                }
+                else
+                {
+                    _shieldFillImage.gameObject.SetActive(false);
+                }
+            }
         }
 
         public void SetSelected(bool selected)

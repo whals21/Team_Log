@@ -1,0 +1,7 @@
+id,displayName,class,description,hp,atk,def,skills
+Char_Warrior,전사,Warrior,근접 전투 전문가. 높은 체력과 쉴드 생성 능력을 가집니다.,20,1,0,Warrior_Strike;Warrior_Shield;Warrior_Taunt;Warrior_Rage
+Char_Mage,마법사,Mage,원소 마법의 달인. 강력한 마법 공격을 사용합니다.,12,2,0,Mage_Fireball;Mage_IceSpear;Mage_MagicShield;Mage_Meteor
+Char_Healer,힐러,Healer,치유와 보조 마법의 전문가. 파티의 생존을 돕습니다.,14,1,0,Healer_Heal;Healer_Barrier;Healer_Purify;Healer_Blessing
+Char_Rogue,도적,Rogue,민첩한 암살자. 높은 치명타와 상태이상 공격을 사용합니다.,13,2,0,Rogue_Backstab;Rogue_PoisonBlade;Rogue_Weaken;Rogue_DoubleStrike
+Enemy_Slime,슬라임,Warrior,끈적끈적한 젤리 형태의 몬스터.,10,1,0,Slime_Tackle;Slime_AcidSpit;Slime_Split;Slime_Jiggle
+Enemy_Goblin,고블린,Rogue,교활하고 빠른 작은 몬스터.,12,2,0,Goblin_Scratch;Goblin_Bite;Goblin_Steal;Goblin_Hide

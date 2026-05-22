@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Mage_MagicShield
   m_EditorClassIdentifier: 
   _skillName: "\uB9C8\uBC95 \uBC29\uC5B4\uB9C9"
-  _description: "\uC790\uC2E0\uC758 \uBC29\uC5B4\uB825\uC744 \uC99D\uAC00\uC2DC\uD0B5\uB2C8\uB2E4."
-  _skillType: 2
+  _description: "\uC790\uC2E0\uC5D0\uAC8C \uC274\uB4DC\uB97C \uBD80\uC5EC\uD569\uB2C8\uB2E4."
+  _skillType: 4
   _targetType: 4
-  _power: 15
+  _power: 3
   _cost: 1
   _weight: 20
-  _statusEffect: 7
-  _effectDuration: 1
+  _statusEffect: 0
+  _effectDuration: 0
   _effectValue: 0

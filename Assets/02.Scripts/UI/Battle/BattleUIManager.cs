@@ -4,6 +4,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using TeamLog.Characters;
+using TeamLog.Combat.AI;
 using TeamLog.Combat.Turn;
 
 namespace TeamLog.UI.Battle
@@ -181,10 +182,10 @@ namespace TeamLog.UI.Battle
         public void UpdateAllPanels()
         {
             for (int i = 0; i < _playerPanels.Count && i < _playerParty.Count; i++)
-                _playerPanels[i].UpdateHP(_playerParty[i].Health.CurrentHP, _playerParty[i].Health.MaxHP);
+                _playerPanels[i].UpdateHP(_playerParty[i].Health.CurrentHP, _playerParty[i].Health.MaxHP, _playerParty[i].Health.CurrentShield);
 
             for (int i = 0; i < _enemyPanels.Count && i < _enemies.Count; i++)
-                _enemyPanels[i].UpdateHP(_enemies[i].Health.CurrentHP, _enemies[i].Health.MaxHP);
+                _enemyPanels[i].UpdateHP(_enemies[i].Health.CurrentHP, _enemies[i].Health.MaxHP, _enemies[i].Health.CurrentShield);
         }
 
         public void AddLog(string message)
@@ -234,6 +235,31 @@ namespace TeamLog.UI.Battle
 
             foreach (var panel in _playerPanels)
                 panel.SetSelected(false);
+        }
+
+        public void SetEnemyIntentText(int enemyIndex, string text)
+        {
+            var panel = GetEnemyPanel(enemyIndex);
+            if (panel != null)
+                panel.SetInfoText(text);
+        }
+
+        public void SetEnemyIntent(int enemyIndex, EnemyIntent intent)
+        {
+            var panel = GetEnemyPanel(enemyIndex);
+            if (panel != null)
+                panel.SetIntent(intent);
+        }
+
+        public void ClearAllEnemyIntents()
+        {
+            foreach (var panel in _enemyPanels)
+                panel.SetInfoText("");
+        }
+
+        public void UpdateRerollCount(int remaining, int max)
+        {
+            _topBar?.SetRerollCount(remaining, max);
         }
 
         #endregion

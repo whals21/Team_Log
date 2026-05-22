@@ -1,0 +1,9 @@
+enemyId,order,skillId
+Enemy_Slime,0,Slime_Tackle
+Enemy_Slime,1,Slime_AcidSpit
+Enemy_Slime,2,Slime_Split
+Enemy_Slime,3,Slime_Jiggle
+Enemy_Goblin,0,Goblin_Scratch
+Enemy_Goblin,1,Goblin_Bite
+Enemy_Goblin,2,Goblin_Steal
+Enemy_Goblin,3,Goblin_Hide

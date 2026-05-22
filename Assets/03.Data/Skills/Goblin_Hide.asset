@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Goblin_Hide
   m_EditorClassIdentifier: 
   _skillName: "\uC740\uC2E0"
-  _description: "\uBC29\uC5B4\uB825\uC744 \uC99D\uAC00\uC2DC\uD0B5\uB2C8\uB2E4."
-  _skillType: 2
+  _description: "\uC274\uB4DC\uB97C \uC5BB\uC2B5\uB2C8\uB2E4."
+  _skillType: 4
   _targetType: 4
-  _power: 8
+  _power: 2
   _cost: 0
   _weight: 10
-  _statusEffect: 7
-  _effectDuration: 1
+  _statusEffect: 0
+  _effectDuration: 0
   _effectValue: 0

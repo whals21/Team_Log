@@ -16,9 +16,9 @@ MonoBehaviour:
   _characterClass: 2
   _description: "\uCE58\uC720\uC640 \uBCF4\uC870 \uB9C8\uBC95\uC758 \uC804\uBB38\uAC00.
     \uD30C\uD2F0\uC758 \uC0DD\uC874\uC744 \uB3D5\uC2B5\uB2C8\uB2E4."
-  _baseHP: 80
-  _baseATK: 8
-  _baseDEF: 5
+  _baseHP: 14
+  _baseATK: 1
+  _baseDEF: 0
   _skills:
   - {fileID: 11400000, guid: 4836e693326518a4a9bda867d38f69dd, type: 2}
   - {fileID: 11400000, guid: 04a936e3b39ebce48bbcf25eb93404a9, type: 2}

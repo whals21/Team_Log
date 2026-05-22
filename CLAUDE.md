@@ -6,10 +6,10 @@
 
 ```
 Assets/
-├── 01.Scenes/          # BattleScene, BattleUI, TestCombatScene, MapScene
+├── 01.Scenes/          # BattleScene, TestCombatScene, MapScene
 ├── 02.Scripts/
 │   ├── Characters/     # Character, CharacterData, Components/
-│   ├── Combat/         # AI/, Draw/, StatusEffect/, Turn/
+│   ├── Combat/         # AI/, Draw/, Turn/
 │   ├── Skill/          # SkillData
 │   ├── Map/            # MapNode, MapFloor, MapGenerator, GameRunState
 │   ├── Reward/         # RewardData, ItemData, RewardManager
@@ -44,12 +44,12 @@ MapSceneSetup (진입점)
 BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신)
     ├── TurnManager (턴 사이클 오케스트레이터)
     │   ├── SkillDrawSystem (가중치 랜덤 드로우)
-    │   └── TurnContext (턴 상태: phase, drawn skills, action queue, AP)
+    │   └── TurnContext (턴 상태: phase, AP)
     │       └── AP: 파티 공유, 매 턴 1+생존수 전량 회복, OnAPChanged 이벤트
     ├── PlayerActionController (UI ↔ 전투 로직 중재자, AP 부족 차단)
     ├── EnemyAIController (패턴 기반 AI, 의도 표시)
     └── BattleUIManager (UI 패널 생성/관리, AP 이벤트 구독)
-        ├── TopBarUI (턴 카운터, AP 표시, 턴 종료 버튼)
+        ├── TopBarUI (턴 카운터, AP 표시)
         └── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리)
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
@@ -175,8 +175,7 @@ Editor/
 - 스킬 레벨/업그레이드
 - 실제 스킬/아이템 풀 데이터 (현재 더미)
 - 프리팹 UI 연결 (NodeButton, ConnectionLine, PlayerMarker, RewardCard, ShopSlot, ChoiceButton)
-- MapScene 씬 빌드 및 BuildSettings 등록
-- MPBarUI 스텁 정리 (AP로 대체 완료, 스텁 삭제 여부 결정 필요)
+- EnemyDetailPanel 가디언/아크카 버튼 실제 로직 (TODO 스텁 상태)
 
 ### 세션 종료 체크리스트
 

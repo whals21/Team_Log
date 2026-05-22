@@ -139,12 +139,12 @@ namespace TeamLog.UI.Battle
 
         private void OnGuardianClicked()
         {
-            Debug.Log($"[EnemyDetailPanel] Guardian clicked on enemy {_enemyIndex}");
+            // TODO: 가디언 액션 구현 (Phase 4)
         }
 
         private void OnArcanaClicked()
         {
-            Debug.Log($"[EnemyDetailPanel] Arcana clicked on enemy {_enemyIndex}");
+            // TODO: 아크카 액션 구현 (Phase 4)
         }
     }
 }

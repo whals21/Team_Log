@@ -204,9 +204,9 @@ namespace TeamLog.UI.Battle
                 var entryObj = CreateEntry(_skillEntryPrefab, _skillEntryContainer);
                 if (entryObj != null)
                 {
-                    var entry = entryObj.GetComponent<SkillPopupEntry>();
-                    if (entry != null)
-                        entry.Setup(skills[i], 1);
+                    var texts = entryObj.GetComponentsInChildren<TextMeshProUGUI>();
+                    if (texts.Length > 0)
+                        texts[0].text = $"{skills[i].SkillName} ({skills[i].Type})";
                 }
             }
         }

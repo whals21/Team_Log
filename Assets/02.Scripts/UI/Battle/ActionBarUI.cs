@@ -18,11 +18,6 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Image _turnBadge;
         [SerializeField] private TextMeshProUGUI _turnCounterText;
 
-        [Header("Player Stats Mini")]
-        [SerializeField] private Transform _miniStatsContainer;
-        [SerializeField] private CharacterMiniPanel _miniPanelPrefab;
-        [SerializeField] private int _maxMiniPanels = 3;
-
         [Header("Action Menu")]
         [SerializeField] private Transform _actionMenuContainer;
         [SerializeField] private ActionSlotUI _actionSlotPrefab;
@@ -41,7 +36,6 @@ namespace TeamLog.UI.Battle
 
         private TurnManager _turnManager;
         private List<ActionSlotUI> _actionSlots = new List<ActionSlotUI>();
-        private List<CharacterMiniPanel> _miniPanels = new List<CharacterMiniPanel>();
         private int _selectedSlotIndex = -1;
         private int _nextExecutionOrder;
         private int _currentAP;
@@ -53,7 +47,6 @@ namespace TeamLog.UI.Battle
         {
             _turnManager = turnManager;
             CreateActionSlots();
-            CreateMiniPanels();
             BindEvents();
         }
 
@@ -69,22 +62,6 @@ namespace TeamLog.UI.Battle
                 var slot = Instantiate(_actionSlotPrefab, _actionMenuContainer);
                 slot.Setup(i, this);
                 _actionSlots.Add(slot);
-            }
-        }
-
-        private void CreateMiniPanels()
-        {
-            if (_miniStatsContainer == null || _miniPanelPrefab == null) return;
-
-            foreach (Transform child in _miniStatsContainer)
-                Destroy(child.gameObject);
-
-            _miniPanels.Clear();
-
-            for (int i = 0; i < _maxMiniPanels; i++)
-            {
-                var panel = Instantiate(_miniPanelPrefab, _miniStatsContainer);
-                _miniPanels.Add(panel);
             }
         }
 
@@ -180,15 +157,6 @@ namespace TeamLog.UI.Battle
             }
         }
 
-        public void ClearSlotAssignment(int slotIndex)
-        {
-            if (slotIndex >= 0 && slotIndex < _actionSlots.Count)
-            {
-                _actionSlots[slotIndex].SetAssigned(false);
-                _actionSlots[slotIndex].SetExecutionOrder(-1);
-            }
-        }
-
         public void ResetAllAssignments()
         {
             _nextExecutionOrder = 0;
@@ -203,11 +171,6 @@ namespace TeamLog.UI.Battle
         public int GetNextExecutionOrder()
         {
             return _nextExecutionOrder++;
-        }
-
-        public void DecrementExecutionOrder()
-        {
-            _nextExecutionOrder = System.Math.Max(0, _nextExecutionOrder - 1);
         }
 
         public void SetTurnCounter(int current, int total)

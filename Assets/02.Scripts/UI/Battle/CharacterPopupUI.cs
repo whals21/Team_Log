@@ -253,43 +253,11 @@ namespace TeamLog.UI.Battle
         }
 
         /// <summary>
-        /// "[다음 행동]" 아래에 표시할 스킬 수치 요약: "위력 2 | 독 1 (2턴)"
-        /// </summary>
-        /// <summary>
-        /// "[다음 행동]" 아래에 표시할 스킬 수치 요약: "위력 3 | 독 1 (2턴)"
-        /// 공격 스킬은 ATK + Power가 최종 위력
+        /// 스킬 수치 요약 — BattleDisplayUtil에 위임
         /// </summary>
         private string BuildSkillSummary(SkillData skill)
         {
-            var parts = new List<string>();
-
-            if (skill.Power > 0)
-            {
-                string label = skill.Type switch
-                {
-                    SkillType.Attack => "위력",
-                    SkillType.Shield => "쉴드",
-                    SkillType.Heal => "회복",
-                    SkillType.Buff => "수치",
-                    SkillType.Debuff => "수치",
-                    _ => "수치"
-                };
-                // 공격 스킬은 캐릭터 ATK 포함
-                int displayPower = skill.Type == SkillType.Attack && _currentCharacter != null
-                    ? _currentCharacter.Stats.GetStat(StatType.ATK) + skill.Power
-                    : skill.Power;
-                parts.Add($"{label} {displayPower}");
-            }
-
-            if (skill.StatusEffect != StatusEffectType.None)
-            {
-                string effectName = GetEffectLabel(skill.StatusEffect);
-                string duration = skill.EffectDuration > 0 ? $" ({skill.EffectDuration}턴)" : "";
-                string value = skill.EffectValue > 0 ? $" {skill.EffectValue}" : "";
-                parts.Add($"{effectName}{value}{duration}");
-            }
-
-            return parts.Count > 0 ? string.Join(" | ", parts) : "";
+            return BattleDisplayUtil.BuildSkillDescription(skill, _currentCharacter, " | ");
         }
 
         /// <summary>
@@ -319,7 +287,7 @@ namespace TeamLog.UI.Battle
                     var texts = entryObj.GetComponentsInChildren<TextMeshProUGUI>();
                     if (texts.Length >= 2)
                     {
-                        texts[0].text = GetEffectLabel(effect.Type);
+                        texts[0].text = BattleDisplayUtil.GetEffectLabel(effect.Type);
                         texts[1].text = $"{effect.Value} ({effect.RemainingTurns}턴)";
                     }
                 }
@@ -372,23 +340,6 @@ namespace TeamLog.UI.Battle
             CharacterClass.Healer => "치유사",
             CharacterClass.Rogue => "도적",
             _ => cls.ToString()
-        };
-
-        private string GetEffectLabel(StatusEffectType type) => type switch
-        {
-            StatusEffectType.Poison => "독",
-            StatusEffectType.Burn => "화상",
-            StatusEffectType.Stun => "기절",
-            StatusEffectType.Freeze => "빙결",
-            StatusEffectType.Sleep => "수면",
-            StatusEffectType.Bleed => "출혈",
-            StatusEffectType.DefenseUp => "방어 증가",
-            StatusEffectType.DefenseDown => "방어 감소",
-            StatusEffectType.AttackUp => "공격 증가",
-            StatusEffectType.AttackDown => "공격 감소",
-            StatusEffectType.Regeneration => "재생",
-            StatusEffectType.Shield => "보호막",
-            _ => type.ToString()
         };
     }
 }

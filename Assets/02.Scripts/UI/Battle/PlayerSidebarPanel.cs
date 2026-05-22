@@ -127,20 +127,7 @@ namespace TeamLog.UI.Battle
                 _hpPercentText.color = ratio <= _lowThreshold ? _hpLowColor : _hpNormalColor;
 
             // 쉴드 바: HP 바 끝점부터 겹쳐서 표시
-            if (_shieldFillImage != null)
-            {
-                if (shield > 0 && max > 0)
-                {
-                    float shieldEnd = Mathf.Min(1f, ratio + (float)shield / max);
-                    _shieldFillImage.rectTransform.anchorMin = new Vector2(ratio, 0f);
-                    _shieldFillImage.rectTransform.anchorMax = new Vector2(shieldEnd, 1f);
-                    _shieldFillImage.gameObject.SetActive(true);
-                }
-                else
-                {
-                    _shieldFillImage.gameObject.SetActive(false);
-                }
-            }
+            BattleDisplayUtil.UpdateShieldBar(_shieldFillImage, ratio, shield, max);
         }
 
         public void SetSelected(bool selected)

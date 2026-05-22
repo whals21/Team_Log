@@ -127,55 +127,15 @@ namespace TeamLog.UI.Battle
         {
             var parts = new List<string>();
 
-            // 기본 설명
             if (!string.IsNullOrEmpty(skill.Description))
                 parts.Add(skill.Description);
 
-            // 공격 스킬은 ATK + Power를 최종 위력으로 표시
-            if (skill.Power > 0)
-            {
-                int finalPower = skill.Type == SkillType.Attack && caster != null
-                    ? caster.Stats.GetStat(StatType.ATK) + skill.Power
-                    : skill.Power;
-
-                string label = skill.Type switch
-                {
-                    SkillType.Attack => "최종 위력",
-                    SkillType.Shield => "쉴드",
-                    SkillType.Heal => "회복량",
-                    _ => "수치"
-                };
-                parts.Add($"{label} {finalPower}");
-            }
-
-            // 상태이상 정보
-            if (skill.StatusEffect != StatusEffectType.None)
-            {
-                string effectLabel = GetEffectLabel(skill.StatusEffect);
-                string duration = skill.EffectDuration > 0 ? $" ({skill.EffectDuration}턴)" : "";
-                string value = skill.EffectValue > 0 ? $" {skill.EffectValue}" : "";
-                parts.Add($"{effectLabel}{value}{duration}");
-            }
+            string summary = BattleDisplayUtil.BuildSkillDescription(skill, caster, "  |  ");
+            if (!string.IsNullOrEmpty(summary))
+                parts.Add(summary);
 
             return string.Join("  |  ", parts);
         }
-
-        private static string GetEffectLabel(StatusEffectType type) => type switch
-        {
-            StatusEffectType.Poison => "독",
-            StatusEffectType.Burn => "화상",
-            StatusEffectType.Stun => "기절",
-            StatusEffectType.Freeze => "빙결",
-            StatusEffectType.Sleep => "수면",
-            StatusEffectType.Bleed => "출혈",
-            StatusEffectType.DefenseUp => "방어 증가",
-            StatusEffectType.DefenseDown => "방어 감소",
-            StatusEffectType.AttackUp => "공격 증가",
-            StatusEffectType.AttackDown => "공격 감소",
-            StatusEffectType.Regeneration => "재생",
-            StatusEffectType.Shield => "보호막",
-            _ => type.ToString()
-        };
 
         private void HideActionDetail()
         {

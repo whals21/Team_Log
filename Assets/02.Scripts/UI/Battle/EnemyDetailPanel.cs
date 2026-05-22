@@ -26,7 +26,6 @@ namespace TeamLog.UI.Battle
 
         [Header("Selection")]
         [SerializeField] private GameObject _targetIndicator;
-        [SerializeField] private Outline _panelOutline;
 
         [Header("Click")]
         [SerializeField] private Button _panelButton;

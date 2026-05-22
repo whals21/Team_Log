@@ -52,8 +52,6 @@ namespace TeamLog.Combat
             _pendingEnemies = enemies;
         }
 
-        public event System.Action<bool> OnBattleFinished; // true = 승리
-
         private void Start()
         {
             // 외부 데이터가 있으면 사용, 없으면 테스트 모드
@@ -198,8 +196,6 @@ namespace TeamLog.Combat
             _battleUIManager?.AddLog(victory ? "전투 승리!" : "전투 패배...");
 
             BattleResult.SetResult(victory);
-
-            OnBattleFinished?.Invoke(victory);
 
             StartCoroutine(BattleEndTransition());
         }

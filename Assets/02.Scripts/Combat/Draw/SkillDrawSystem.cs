@@ -24,7 +24,6 @@ namespace TeamLog.Combat.Draw
         public bool CanReroll => _rerollCount < _maxRerolls;
 
         public event System.Action<IReadOnlyList<DrawnSkillSlot>> OnDrawComplete;
-        public event System.Action<DrawnSkillSlot> OnSlotRerolled;
 
         public SkillDrawSystem(List<Character> party, int maxRerolls = 1)
         {
@@ -71,29 +70,10 @@ namespace TeamLog.Combat.Draw
             {
                 slot.SetSkill(newSkill);
                 _rerollCount++;
-                OnSlotRerolled?.Invoke(slot);
                 return true;
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// 전체 리롤
-        /// </summary>
-        public bool RerollAll()
-        {
-            if (!CanReroll) return false;
-
-            foreach (var slot in _drawnSlots)
-            {
-                var newSkill = slot.Caster.SkillInventory.DrawSkill();
-                if (newSkill != null)
-                    slot.SetSkill(newSkill);
-            }
-
-            _rerollCount++;
-            return true;
         }
 
         public DrawnSkillSlot GetSlot(int index)
@@ -117,8 +97,6 @@ namespace TeamLog.Combat.Draw
         public Character AssignedTarget { get; set; }
         public bool IsAssigned => AssignedTarget != null;
 
-        public event System.Action<SkillData> OnSkillChanged;
-
         public DrawnSkillSlot(Character caster, SkillData skill, int slotIndex)
         {
             Caster = caster;
@@ -129,7 +107,6 @@ namespace TeamLog.Combat.Draw
         public void SetSkill(SkillData newSkill)
         {
             Skill = newSkill;
-            OnSkillChanged?.Invoke(newSkill);
         }
 
         public void Reset()

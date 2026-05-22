@@ -14,10 +14,6 @@ namespace TeamLog.UI.Battle
     /// </summary>
     public class ActionBarUI : MonoBehaviour
     {
-        [Header("Turn Info")]
-        [SerializeField] private Image _turnBadge;
-        [SerializeField] private TextMeshProUGUI _turnCounterText;
-
         [Header("Action Menu")]
         [SerializeField] private Transform _actionMenuContainer;
         [SerializeField] private ActionSlotUI _actionSlotPrefab;
@@ -239,12 +235,6 @@ namespace TeamLog.UI.Battle
         public int GetNextExecutionOrder()
         {
             return _nextExecutionOrder++;
-        }
-
-        public void SetTurnCounter(int current, int total)
-        {
-            if (_turnCounterText != null)
-                _turnCounterText.text = $"{current}/{total}";
         }
 
         public void SetAPState(int currentAP)

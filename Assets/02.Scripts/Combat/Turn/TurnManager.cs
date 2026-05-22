@@ -106,12 +106,6 @@ namespace TeamLog.Combat.Turn
             return _drawSystem.RerollSlot(slotIndex);
         }
 
-        public bool RerollAll()
-        {
-            if (CurrentPhase != TurnPhase.PlayerAction) return false;
-            return _drawSystem.RerollAll();
-        }
-
         /// <summary>
         /// 스킬 즉시 시전 — 대상 클릭 시 곧바로 실행
         /// </summary>

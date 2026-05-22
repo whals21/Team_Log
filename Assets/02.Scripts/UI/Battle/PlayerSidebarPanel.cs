@@ -19,7 +19,6 @@ namespace TeamLog.UI.Battle
         [SerializeField] private TextMeshProUGUI _skillNameText;
         [SerializeField] private Image _hpFillImage;
         [SerializeField] private Image _shieldFillImage;
-        [SerializeField] private Button _closeButton;
         [SerializeField] private GameObject _selectionHighlight;
         [SerializeField] private Button _panelButton;
 
@@ -45,7 +44,6 @@ namespace TeamLog.UI.Battle
             if (_skillNameText == null) _skillNameText = FindComponent<TextMeshProUGUI>("Skill");
             if (_hpFillImage == null) _hpFillImage = FindComponent<Image>("HPBar/Fill");
             if (_shieldFillImage == null) _shieldFillImage = FindComponent<Image>("HPBar/ShieldFill");
-            if (_closeButton == null) _closeButton = FindComponent<Button>("CloseBtn");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
 
             // 자식 Graphic들의 raycastTarget을 꺼서 부모 Button이 클릭을 받도록 함

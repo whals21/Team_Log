@@ -194,18 +194,11 @@ namespace TeamLog.UI.Battle
                 _battleLog.AddLog(message);
         }
 
-        public PlayerSidebarPanel GetPlayerPanel(int index)
-        {
-            return index >= 0 && index < _playerPanels.Count ? _playerPanels[index] : null;
-        }
-
         public EnemyDetailPanel GetEnemyPanel(int index)
         {
             return index >= 0 && index < _enemyPanels.Count ? _enemyPanels[index] : null;
         }
 
-        public int PlayerPanelCount => _playerPanels.Count;
-        public int EnemyPanelCount => _enemyPanels.Count;
         public CharacterPopupUI CharacterPopup => _characterPopup;
 
         public void HighlightEnemyPanels(bool highlight)
@@ -237,24 +230,11 @@ namespace TeamLog.UI.Battle
                 panel.SetSelected(false);
         }
 
-        public void SetEnemyIntentText(int enemyIndex, string text)
-        {
-            var panel = GetEnemyPanel(enemyIndex);
-            if (panel != null)
-                panel.SetInfoText(text);
-        }
-
         public void SetEnemyIntent(int enemyIndex, EnemyIntent intent)
         {
             var panel = GetEnemyPanel(enemyIndex);
             if (panel != null)
                 panel.SetIntent(intent);
-        }
-
-        public void ClearAllEnemyIntents()
-        {
-            foreach (var panel in _enemyPanels)
-                panel.SetInfoText("");
         }
 
         public void UpdateRerollCount(int remaining, int max)

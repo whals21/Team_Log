@@ -11,6 +11,7 @@ using TeamLog.UI.Event;
 using TeamLog.UI.Map;
 using TeamLog.UI.Reward;
 using TeamLog.UI.Shop;
+using TeamLog.UI;
 
 namespace TeamLog.Editor
 {
@@ -50,7 +51,10 @@ namespace TeamLog.Editor
             var canvasObj = new GameObject("Canvas");
             var canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasObj.AddComponent<CanvasScaler>();
+            var scaler = canvasObj.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.matchWidthOrHeight = 0.5f;
             canvasObj.AddComponent<GraphicRaycaster>();
 
             // 배경
@@ -83,6 +87,12 @@ namespace TeamLog.Editor
             var eventPanel = BuildEventPanel(canvasObj.transform, font);
             var shopPanel = BuildShopPanel(canvasObj.transform, font);
             var rewardPanel = BuildRewardPanel(canvasObj.transform, font);
+            var confirmationDialog = BuildConfirmationDialog(canvasObj.transform, font);
+
+            // ShopUI에 ConfirmationDialog 참조 연결
+            var shopUISer = new SerializedObject(shopPanel.GetComponent<ShopUI>());
+            WireProperty(shopUISer, "_confirmationDialog", confirmationDialog.GetComponent<ConfirmationDialog>());
+            shopUISer.ApplyModifiedProperties();
 
             // ─── MapView 컴포넌트 ───
             var mapView = canvasObj.AddComponent<MapView>();
@@ -110,6 +120,7 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_eventUI", eventPanel.GetComponent<EventUI>());
             WireProperty(setupSer, "_shopUI", shopPanel.GetComponent<ShopUI>());
             WireProperty(setupSer, "_rewardUI", rewardPanel.GetComponent<RewardUI>());
+            WireProperty(setupSer, "_confirmationDialog", confirmationDialog.GetComponent<ConfirmationDialog>());
 
             // CharacterData
             WireProperty(setupSer, "_testWarriorData",
@@ -121,22 +132,36 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_testRogueData",
                 AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Rogue.asset"));
 
-            // EnemyData pools — 파일명이 Enemy_ 접두사인 에셋만 필터링
-            var enemyAssets = LoadAllAssets<CharacterData>(CHAR_DIR, "Enemy_");
+            // EnemyData pools — prefix 기반 필터링으로 normal/elite/boss 분리
             var normalPoolProp = setupSer.FindProperty("_normalEnemyPool");
             var elitePoolProp = setupSer.FindProperty("_eliteEnemyPool");
             var bossPoolProp = setupSer.FindProperty("_bossEnemyPool");
-            if (normalPoolProp != null && enemyAssets.Count > 0)
+
+            var normalEnemies = LoadAllAssets<CharacterData>(CHAR_DIR, "Enemy_");
+            normalEnemies.RemoveAll(e => e.name.StartsWith("Enemy_Elite") || e.name.StartsWith("Enemy_Boss"));
+
+            var eliteEnemies = LoadAllAssets<CharacterData>(CHAR_DIR, "Enemy_Elite");
+            var bossEnemies = LoadAllAssets<CharacterData>(CHAR_DIR, "Enemy_Boss");
+
+            if (normalPoolProp != null && normalEnemies.Count > 0)
             {
-                normalPoolProp.arraySize = enemyAssets.Count;
-                elitePoolProp.arraySize = enemyAssets.Count;
-                bossPoolProp.arraySize = enemyAssets.Count;
-                for (int i = 0; i < enemyAssets.Count; i++)
-                {
-                    normalPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = enemyAssets[i];
-                    elitePoolProp.GetArrayElementAtIndex(i).objectReferenceValue = enemyAssets[i];
-                    bossPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = enemyAssets[i];
-                }
+                normalPoolProp.arraySize = normalEnemies.Count;
+                for (int i = 0; i < normalEnemies.Count; i++)
+                    normalPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = normalEnemies[i];
+            }
+
+            if (elitePoolProp != null && eliteEnemies.Count > 0)
+            {
+                elitePoolProp.arraySize = eliteEnemies.Count;
+                for (int i = 0; i < eliteEnemies.Count; i++)
+                    elitePoolProp.GetArrayElementAtIndex(i).objectReferenceValue = eliteEnemies[i];
+            }
+
+            if (bossPoolProp != null && bossEnemies.Count > 0)
+            {
+                bossPoolProp.arraySize = bossEnemies.Count;
+                for (int i = 0; i < bossEnemies.Count; i++)
+                    bossPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = bossEnemies[i];
             }
 
             // EventData
@@ -343,6 +368,44 @@ namespace TeamLog.Editor
             ser.ApplyModifiedProperties();
 
             return overlay;
+        }
+
+        #endregion
+
+        #region Confirmation Dialog
+
+        private static GameObject BuildConfirmationDialog(Transform parent, TMP_FontAsset font)
+        {
+            var dialog = CreateFullImage("ConfirmationDialog", parent, new Color(0f, 0f, 0f, 0.6f));
+            dialog.SetActive(false);
+
+            var content = CreatePanel("Content", dialog.transform,
+                new Vector2(0.25f, 0.35f), new Vector2(0.75f, 0.65f), ContentPanel);
+
+            var message = CreateText("MessageText", content.transform, font,
+                "", 20, TextWhite, TextAlignmentOptions.Center);
+            message.enableWordWrapping = true;
+            SetAnchors(message.GetComponent<RectTransform>(),
+                new Vector2(0.05f, 0.35f), new Vector2(0.95f, 0.9f));
+
+            var yesBtn = CreateButton("YesButton", content.transform, font,
+                "예", 18, AccentGold);
+            SetAnchors(yesBtn.GetComponent<RectTransform>(),
+                new Vector2(0.05f, 0.05f), new Vector2(0.45f, 0.3f));
+
+            var noBtn = CreateButton("NoButton", content.transform, font,
+                "아니오", 18, TextDim);
+            SetAnchors(noBtn.GetComponent<RectTransform>(),
+                new Vector2(0.55f, 0.05f), new Vector2(0.95f, 0.3f));
+
+            var comp = dialog.AddComponent<ConfirmationDialog>();
+            var ser = new SerializedObject(comp);
+            WireProperty(ser, "_messageText", message);
+            WireProperty(ser, "_yesButton", yesBtn.GetComponent<Button>());
+            WireProperty(ser, "_noButton", noBtn.GetComponent<Button>());
+            ser.ApplyModifiedProperties();
+
+            return dialog;
         }
 
         #endregion

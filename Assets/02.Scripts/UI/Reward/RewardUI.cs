@@ -1,9 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using TeamLog.Reward;
 using TeamLog.Map;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Reward
 {
@@ -39,6 +41,9 @@ namespace TeamLog.UI.Reward
         public void ShowRewards(MapNodeType battleType)
         {
             gameObject.SetActive(true);
+            var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
+            cg.alpha = 0f;
+            StartCoroutine(UIAnimationHelper.FadeIn(cg));
             ClearCards();
 
             _currentRewards.Clear();
@@ -63,9 +68,13 @@ namespace TeamLog.UI.Reward
         private void OnRewardSelected(RewardOffer selected)
         {
             _rewardManager.ApplyReward(selected, _runState);
+            StartCoroutine(HideAndNotify());
+        }
 
-            // 보상 화면 닫기
-            gameObject.SetActive(false);
+        private IEnumerator HideAndNotify()
+        {
+            var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
+            yield return UIAnimationHelper.FadeOut(cg);
             _onRewardComplete?.Invoke();
         }
 

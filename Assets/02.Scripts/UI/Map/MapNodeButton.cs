@@ -75,7 +75,7 @@ namespace TeamLog.UI.Map
             if (_backgroundImage != null)
             {
                 _backgroundImage.color = _node.IsActive ? nodeColor :
-                    _node.IsVisited ? DisabledColor : DisabledColor;
+                    _node.IsVisited ? Color.Lerp(nodeColor, DisabledColor, 0.5f) : DisabledColor;
             }
 
             // 방문 오버레이

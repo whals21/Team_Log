@@ -6,6 +6,7 @@ using TeamLog.Combat;
 using TeamLog.Event;
 using TeamLog.Map;
 using TeamLog.Reward;
+using TeamLog.UI;
 using TeamLog.UI.Event;
 using TeamLog.UI.Reward;
 using TeamLog.UI.Shop;
@@ -22,6 +23,7 @@ namespace TeamLog.UI.Map
         [SerializeField] private EventUI _eventUI;
         [SerializeField] private ShopUI _shopUI;
         [SerializeField] private RewardUI _rewardUI;
+        [SerializeField] private ConfirmationDialog _confirmationDialog;
 
         [Header("Test Mode")]
         [SerializeField] private bool _useTestData = true;
@@ -44,6 +46,7 @@ namespace TeamLog.UI.Map
 
         private GameRunState _runState;
         private List<Character> _playerParty;
+        private MapNode _pendingBattleNode;
 
         private const string BattleSceneName = "BattleScene";
 
@@ -158,6 +161,37 @@ namespace TeamLog.UI.Map
         {
             if (!_runState.IsRunActive) return;
 
+            // 보스/엘리트: 이동 전 확인 다이얼로그
+            if (node.NodeType == MapNodeType.Boss || node.NodeType == MapNodeType.Elite)
+            {
+                string label = node.NodeType == MapNodeType.Boss ? "보스" : "엘리트";
+                _pendingBattleNode = node;
+                if (_confirmationDialog != null)
+                {
+                    _confirmationDialog.Show(
+                        $"강력한 {label} 적이 기다리고 있습니다.\n전투를 시작하시겠습니까?",
+                        OnBattleConfirmed,
+                        () => { _pendingBattleNode = null; });
+                }
+                else
+                {
+                    OnBattleConfirmed();
+                }
+                return;
+            }
+
+            MoveToNode(node);
+        }
+
+        private void OnBattleConfirmed()
+        {
+            if (_pendingBattleNode == null) return;
+            MoveToNode(_pendingBattleNode);
+            _pendingBattleNode = null;
+        }
+
+        private void MoveToNode(MapNode node)
+        {
             bool moved = _runState.CurrentMap.MoveToNode(node);
             if (!moved) return;
 
@@ -175,6 +209,7 @@ namespace TeamLog.UI.Map
                     break;
                 case MapNodeType.Rest:
                     _runState.RestAtCampfire();
+                    ToastUI.Show("파티가 휴식했습니다.");
                     break;
                 case MapNodeType.Event:
                     OpenEvent();
@@ -216,9 +251,14 @@ namespace TeamLog.UI.Map
                 return;
             }
 
+            // 층별 적 스케일링 적용
+            float scaling = _runState.GetFloorScaling();
+            foreach (var enemy in enemies)
+                enemy.ApplyFloorScaling(scaling);
+
             BattleSceneSetup.SetBattleData(_playerParty, enemies);
             BattleResult.SetBattleType(node.NodeType);
-            SceneManager.LoadScene(BattleSceneName);
+            SceneTransition.Instance.FadeToScene(BattleSceneName);
         }
 
         /// <summary>

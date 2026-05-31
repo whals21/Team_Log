@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,6 +7,7 @@ using TeamLog.Characters;
 using TeamLog.Map;
 using TeamLog.Reward;
 using TeamLog.Shop;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Shop
 {
@@ -20,6 +22,7 @@ namespace TeamLog.UI.Shop
         [SerializeField] private TextMeshProUGUI _goldLabel;
         [SerializeField] private TextMeshProUGUI _titleLabel;
         [SerializeField] private Button _exitButton;
+        [SerializeField] private ConfirmationDialog _confirmationDialog;
 
         private ShopManager _shopManager;
         private GameRunState _runState;
@@ -27,6 +30,7 @@ namespace TeamLog.UI.Shop
         private readonly List<ShopSlot> _currentSlots = new();
         private IReadOnlyList<SkillData> _skillPool;
         private IReadOnlyList<ItemData> _itemPool;
+        private ShopSlot _pendingPurchase;
 
         private void Awake()
         {
@@ -50,6 +54,10 @@ namespace TeamLog.UI.Shop
         public void OpenShop(int floorNumber)
         {
             gameObject.SetActive(true);
+            var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
+            cg.alpha = 0f;
+            StartCoroutine(UIAnimationHelper.FadeIn(cg));
+
             ClearSlots();
 
             _currentSlots.Clear();
@@ -70,20 +78,53 @@ namespace TeamLog.UI.Shop
                 if (shopSlot != null)
                     shopSlot.Setup(slot, OnBuyItem);
             }
+
+            RefreshAllSlots();
         }
 
         private void OnBuyItem(ShopSlot slot)
         {
+            if (slot == null || slot.IsSold) return;
+
+            if (_runState.Gold < slot.Price)
+            {
+                ToastUI.Show("골드가 부족합니다.");
+                return;
+            }
+
+            _pendingPurchase = slot;
+
+            if (_confirmationDialog != null)
+            {
+                _confirmationDialog.Show(
+                    $"{slot.Name}을(를) {slot.Price}G에 구매하시겠습니까?",
+                    OnPurchaseConfirmed);
+            }
+            else
+            {
+                OnPurchaseConfirmed();
+            }
+        }
+
+        private void OnPurchaseConfirmed()
+        {
+            if (_pendingPurchase == null) return;
+            var slot = _pendingPurchase;
+            _pendingPurchase = null;
+
             if (_shopManager.PurchaseItem(slot, _runState))
             {
                 UpdateGoldDisplay();
-
-                // 해당 슬롯 UI 갱신
-                foreach (var slotUI in _slotContainer.GetComponentsInChildren<ShopItemSlot>())
-                {
-                    slotUI.UpdateVisual();
-                }
+                RefreshAllSlots();
+                ToastUI.Show($"{slot.Name}을(를) 구매했습니다.");
             }
+        }
+
+        private void RefreshAllSlots()
+        {
+            if (_slotContainer == null || _runState == null) return;
+            foreach (var slotUI in _slotContainer.GetComponentsInChildren<ShopItemSlot>())
+                slotUI.UpdateVisual(_runState.Gold);
         }
 
         private void UpdateGoldDisplay()
@@ -94,7 +135,13 @@ namespace TeamLog.UI.Shop
 
         private void OnExit()
         {
-            gameObject.SetActive(false);
+            StartCoroutine(HideAndNotify());
+        }
+
+        private IEnumerator HideAndNotify()
+        {
+            var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
+            yield return UIAnimationHelper.FadeOut(cg);
             _onShopExit?.Invoke();
         }
 

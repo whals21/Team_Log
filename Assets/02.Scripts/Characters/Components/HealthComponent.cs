@@ -15,13 +15,16 @@ namespace TeamLog.Characters
         public int CurrentHP => _currentHP;
         public int MaxHP => _maxHP;
         public int CurrentShield => _currentShield;
-        public float HPPercent => _maxHP > 0 ? (float)_currentHP / _maxHP : 0f;
         public bool IsDead => _isDead;
         public bool IsAlive => !_isDead;
 
         public event System.Action<int, int> OnHPChanged;    // current, max
         public event System.Action<int> OnShieldChanged;     // currentShield
         public event System.Action OnDeath;
+
+        public event System.Action<int> OnDamageTaken;       // HP 실제 손실량 (쉴드 흡수 후)
+        public event System.Action<int> OnHealApplied;       // 실제 회복량
+        public event System.Action<int> OnShieldAdded;       // 쉴드 획득량
 
         public void Initialize(int maxHP)
         {
@@ -55,6 +58,7 @@ namespace TeamLog.Characters
             {
                 _currentHP = Mathf.Max(0, _currentHP - damage);
                 OnHPChanged?.Invoke(_currentHP, _maxHP);
+                OnDamageTaken?.Invoke(damage);
             }
 
             if (_currentHP <= 0)
@@ -68,8 +72,12 @@ namespace TeamLog.Characters
         {
             if (_isDead) return;
 
+            int previousHP = _currentHP;
             _currentHP = Mathf.Min(_maxHP, _currentHP + amount);
+            int actualHeal = _currentHP - previousHP;
             OnHPChanged?.Invoke(_currentHP, _maxHP);
+            if (actualHeal > 0)
+                OnHealApplied?.Invoke(actualHeal);
         }
 
         public void SetMaxHP(int newMaxHP, bool healToFull = false)
@@ -89,6 +97,7 @@ namespace TeamLog.Characters
 
             _currentShield += amount;
             OnShieldChanged?.Invoke(_currentShield);
+            OnShieldAdded?.Invoke(amount);
         }
 
         public void ResetShield()

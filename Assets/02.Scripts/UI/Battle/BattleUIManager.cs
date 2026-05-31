@@ -182,10 +182,16 @@ namespace TeamLog.UI.Battle
         public void UpdateAllPanels()
         {
             for (int i = 0; i < _playerPanels.Count && i < _playerParty.Count; i++)
+            {
                 _playerPanels[i].UpdateHP(_playerParty[i].Health.CurrentHP, _playerParty[i].Health.MaxHP, _playerParty[i].Health.CurrentShield);
+                _playerPanels[i].SetDead(_playerParty[i].IsDead);
+            }
 
             for (int i = 0; i < _enemyPanels.Count && i < _enemies.Count; i++)
+            {
                 _enemyPanels[i].UpdateHP(_enemies[i].Health.CurrentHP, _enemies[i].Health.MaxHP, _enemies[i].Health.CurrentShield);
+                _enemyPanels[i].SetDead(_enemies[i].IsDead);
+            }
         }
 
         public void AddLog(string message)
@@ -240,6 +246,23 @@ namespace TeamLog.UI.Battle
         public void UpdateRerollCount(int remaining, int max)
         {
             _topBar?.SetRerollCount(remaining, max);
+        }
+
+        public Transform GetPanelTransform(Character character)
+        {
+            if (_playerParty != null)
+            {
+                int idx = _playerParty.IndexOf(character);
+                if (idx >= 0 && idx < _playerPanels.Count)
+                    return _playerPanels[idx].transform;
+            }
+            if (_enemies != null)
+            {
+                int idx = _enemies.IndexOf(character);
+                if (idx >= 0 && idx < _enemyPanels.Count)
+                    return _enemyPanels[idx].transform;
+            }
+            return null;
         }
 
         #endregion

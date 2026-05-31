@@ -47,16 +47,28 @@ BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신)
     │   └── TurnContext (턴 상태: phase, AP)
     │       └── AP: 파티 공유, 매 턴 1+생존수 전량 회복, OnAPChanged 이벤트
     ├── PlayerActionController (UI ↔ 전투 로직 중재자, AP 부족 차단, 리롤 중계)
-    ├── EnemyAIController (패턴 기반 AI, 의도 표시)
-    └── BattleUIManager (UI 패널 생성/관리, AP/리롤 이벤트 구독)
+    ├── EnemyAIController (패턴 기반 AI, 의도 표시, Taunt 타겟 우선)
+    └── BattleUIManager (UI 패널 생성/관리, AP/리롤 이벤트 구독, GetPanelTransform)
         ├── TopBarUI (턴 카운터, AP 표시, 리롤 카운트)
-        └── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리, 리롤 버튼)
+        ├── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리, 리롤 버튼)
+        ├── BattleEndOverlay (승리/패배 오버레이 + 계속하기 버튼)
+        ├── BattleLogUI (전투 로그 표시)
+        ├── PlayerSidebarPanel / EnemyDetailPanel (사망 시 alpha=0.4)
+        └── FloatingTextUI (데미지/힐/쉴드 플로팅 텍스트, BattleSceneSetup에서 delta 이벤트로 연동)
+
+UI 시스템 (Phase 4):
+SceneTransition (씬 트랜지션 페이드, DontDestroyOnLoad 싱글톤)
+ToastUI (토스트 알림, 큐 기반, ShopUI 골드 부족/구매 성공에 활용)
+UIAnimationHelper (FadeIn/FadeOut/ScaleFromZero, EventUI/ShopUI/RewardUI 패널 전환에 적용)
+ConfirmationDialog (ShopUI 구매 확인, MapSceneSetup 보스/엘리트 전투 확인)
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
-    ├── HealthComponent (HP/쉴드 관리, OnHPChanged/OnShieldChanged/OnDeath 이벤트)
-    ├── StatComponent (ATK/DEF, base + modifier 시스템)
-    ├── StatusEffectComponent (13종 상태이상 관리)
+    ├── HealthComponent (HP/쉴드 관리, OnHPChanged/OnShieldChanged/OnDeath + delta: OnDamageTaken/OnHealApplied/OnShieldAdded)
+    ├── StatComponent (ATK/DEF, base + modifier + permanent base 증가)
+    ├── StatusEffectComponent (14종 상태이상 관리: Taunt 추가)
     └── SkillInventoryComponent (스킬 목록, DrawSkill 가중치 뽑기)
+
+ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 ```
 
 ### 턴 사이클
@@ -71,7 +83,7 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 
 ### 데이터 계층
 - **CharacterData** (ScriptableObject): 이름, 클래스, 기본 스탯, 스킬 목록
-- **SkillData** (ScriptableObject): 이름, 타입, 타겟타입, 위력, 비용, 가중치, 상태이상
+- **SkillData** (ScriptableObject): 이름, 타입(Attack/Heal/Buff/Debuff/Shield/Purify), 타겟타입, 위력, 비용, 가중치, 상태이상
 - 모든 데이터는 `Assets/03.Data/`에 `TeamLog/` 메뉴로 생성
 - **DataGenerator 규칙**:
   - `GetOrCreateAsset<T>`로 기존 에셋 로드 우선 (GUID 보존, 참조 끊김 방지)
@@ -80,6 +92,7 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
   - 스킬 Cost 포함하여 모든 필드를 명시적으로 설정
 - **MapSceneBuilder 규칙**:
   - 에셋 필터링은 `Object.name`이 아닌 파일 경로 기반 (`namePrefix` 파라미터)
+  - 적 풀 분리: normal(`Enemy_` 접두사, Elite/Boss 제외), elite(`Enemy_Elite*`), boss(`Enemy_Boss*`)
 
 ## 코딩 규칙
 
@@ -177,14 +190,19 @@ Editor/
 - **Phase 1 (코어 전투)**: 완료
 - **Phase 2 (전투 완성)**: 완료 (상태이상, 적 AI, UI)
 - **Phase 3 (로그라이크 요소)**: 완료 (맵 시스템, 보상/상점, 이벤트)
-- **Phase 4 (폴리싱)**: 미착수
-  - 사운드, 이펙트, 밸런싱
+- **Phase 4 (폴리싱)**: 진행 중
+  - 4A: 버그 수정 완료 (턴 카운터/배틀로그 와이어링, CanvasScaler)
+  - 4B: 사망 상태 + 핵심 데이터 완료 (사망 시각, 스탯 스케일업, Taunt/Purify)
+  - 4C: 데이터 확충 완료 (엘리트/보스 6종, 이벤트 6종, 층별 스케일링, 아이템 효과)
+  - 4D: UI 폴리싱 기반 완료 (씬 트랜지션, 토스트, 승리/패배 오버레이)
+  - 4E: UI 디테일 완료 (플로팅 텍스트, 패널 애니메이션, 확인 다이얼로그)
+  - 4F: UI 연동 완료 (FloatingText delta 이벤트, FadeIn/FadeOut 전환, ConfirmationDialog 활성화, 골드 부족 피드백)
+  - **잔여**: 사운드, 이펙트, 밸런싱
 
 ### 미구현 항목
 - 스킬 레벨/업그레이드
-- 실제 스킬/아이템 풀 데이터 (현재 더미)
-- 프리팹 UI 연결 (NodeButton, ConnectionLine, PlayerMarker, RewardCard, ShopSlot, ChoiceButton)
 - EnemyDetailPanel 가디언/아크카 버튼 실제 로직 (TODO 스텁 상태)
+- 사운드/이펙트 시스템
 
 ### 세션 종료 체크리스트
 

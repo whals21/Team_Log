@@ -1,9 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using TeamLog.Event;
 using TeamLog.Map;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Event
 {
@@ -46,6 +48,9 @@ namespace TeamLog.UI.Event
         {
             _currentEvent = eventData;
             gameObject.SetActive(true);
+            var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
+            cg.alpha = 0f;
+            StartCoroutine(UIAnimationHelper.FadeIn(cg));
 
             if (_resultPanel != null)
                 _resultPanel.SetActive(false);
@@ -94,7 +99,13 @@ namespace TeamLog.UI.Event
 
         private void OnResultConfirmed()
         {
-            gameObject.SetActive(false);
+            StartCoroutine(HideAndNotify());
+        }
+
+        private IEnumerator HideAndNotify()
+        {
+            var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
+            yield return UIAnimationHelper.FadeOut(cg);
             _onEventComplete?.Invoke();
         }
 

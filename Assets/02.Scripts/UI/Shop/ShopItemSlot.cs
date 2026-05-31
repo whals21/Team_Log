@@ -19,6 +19,10 @@ namespace TeamLog.UI.Shop
         private ShopSlot _slot;
         private System.Action<ShopSlot> _onBuyClicked;
 
+        private static readonly Color CantAffordPriceColor = new Color(0.7f, 0.3f, 0.3f);
+        private Color _normalPriceColor;
+        private bool _hasNormalPriceColor;
+
         private void Awake()
         {
             if (_buyButton != null)
@@ -32,7 +36,7 @@ namespace TeamLog.UI.Shop
             UpdateVisual();
         }
 
-        public void UpdateVisual()
+        public void UpdateVisual(int currentGold = int.MaxValue)
         {
             if (_slot == null) return;
 
@@ -41,9 +45,18 @@ namespace TeamLog.UI.Shop
             if (_descLabel != null)
                 _descLabel.text = _slot.Desc;
             if (_priceLabel != null)
+            {
+                if (!_hasNormalPriceColor)
+                {
+                    _normalPriceColor = _priceLabel.color;
+                    _hasNormalPriceColor = true;
+                }
                 _priceLabel.text = $"{_slot.Price} G";
+                _priceLabel.color = (_slot.IsSold || currentGold >= _slot.Price)
+                    ? _normalPriceColor : CantAffordPriceColor;
+            }
             if (_buyButton != null)
-                _buyButton.interactable = !_slot.IsSold;
+                _buyButton.interactable = !_slot.IsSold && currentGold >= _slot.Price;
             if (_soldOverlay != null)
                 _soldOverlay.SetActive(_slot.IsSold);
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TeamLog.Characters;
 using TeamLog.Combat.Turn;
 using TeamLog.Combat.AI;
+using TeamLog.UI;
 using TeamLog.UI.Battle;
 
 namespace TeamLog.Combat
@@ -17,6 +18,7 @@ namespace TeamLog.Combat
         [Header("UI References")]
         [SerializeField] private BattleUIManager _battleUIManager;
         [SerializeField] private ActionBarUI _actionBar;
+        [SerializeField] private BattleEndOverlay _battleEndOverlay;
 
         [Header("Test Mode")]
         [SerializeField] private bool _useTestData = true;
@@ -153,11 +155,17 @@ namespace TeamLog.Combat
             {
                 c.Health.OnHPChanged += (hp, max) => OnCharacterHealthChanged(c);
                 c.Health.OnShieldChanged += (shield) => OnCharacterHealthChanged(c);
+                c.Health.OnDamageTaken += amount => SpawnFloatingText(c, $"-{amount}", FloatingTextUI.DamageColor);
+                c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
+                c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
             }
             foreach (var c in _enemies)
             {
                 c.Health.OnHPChanged += (hp, max) => OnCharacterHealthChanged(c);
                 c.Health.OnShieldChanged += (shield) => OnCharacterHealthChanged(c);
+                c.Health.OnDamageTaken += amount => SpawnFloatingText(c, $"-{amount}", FloatingTextUI.DamageColor);
+                c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
+                c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
             }
 
             // 전투 시작
@@ -197,14 +205,29 @@ namespace TeamLog.Combat
 
             BattleResult.SetResult(victory);
 
+            if (_battleEndOverlay != null)
+            {
+                _battleEndOverlay.Show(victory);
+                _battleEndOverlay.OnContinueClicked += OnBattleEndContinue;
+            }
+            else
+            {
+                StartCoroutine(BattleEndTransition());
+            }
+        }
+
+        private void OnBattleEndContinue()
+        {
+            if (_battleEndOverlay != null)
+                _battleEndOverlay.OnContinueClicked -= OnBattleEndContinue;
+
             StartCoroutine(BattleEndTransition());
         }
 
         private IEnumerator BattleEndTransition()
         {
-            _battleUIManager?.AddLog("3초 후 맵으로 돌아갑니다...");
-            yield return new WaitForSecondsRealtime(3f);
-            SceneManager.LoadScene("MapScene");
+            yield return null; // 한 프레임 대기 후 트랜지션 시작
+            SceneTransition.Instance.FadeToScene("MapScene");
         }
 
         private void OnCharacterHealthChanged(Character character)
@@ -251,6 +274,13 @@ namespace TeamLog.Combat
         private void OnEnemyIntentChanged(int enemyIndex, EnemyIntent intent)
         {
             _battleUIManager?.SetEnemyIntent(enemyIndex, intent);
+        }
+
+        private void SpawnFloatingText(Character character, string message, Color color)
+        {
+            var panelTransform = _battleUIManager?.GetPanelTransform(character);
+            if (panelTransform == null) return;
+            FloatingTextUI.Spawn(panelTransform, message, color, new Vector2(0, 30));
         }
 
         #endregion

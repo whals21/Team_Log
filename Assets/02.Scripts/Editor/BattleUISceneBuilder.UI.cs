@@ -175,7 +175,7 @@ namespace TeamLog.Editor
         private static void CreatePlayerPanel(RectTransform parent, int num, string name, string hp, string skill)
         {
             var panel = NewRect($"CharPanel_{name}", parent);
-            panel.sizeDelta = new Vector2(0, 130);
+            panel.sizeDelta = new Vector2(0, 160);
             var panelImg = panel.gameObject.AddComponent<Image>();
             panelImg.color = new Color(0.06f, 0.06f, 0.14f, 0.95f);
             var ol = panel.gameObject.AddComponent<Outline>();
@@ -217,12 +217,21 @@ namespace TeamLog.Editor
             nRect.sizeDelta = new Vector2(-16, 22);
             AddTextNoWrap(nRect, name, 15, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
 
+            // ATK / DEF 스탯
+            var statsRect = NewRect("Stats", panel);
+            statsRect.anchorMin = new Vector2(0, 1);
+            statsRect.anchorMax = new Vector2(1, 1);
+            statsRect.pivot = new Vector2(0.5f, 1);
+            statsRect.anchoredPosition = new Vector2(0, -54);
+            statsRect.sizeDelta = new Vector2(-16, 18);
+            AddTextNoWrap(statsRect, "ATK 10  DEF 5", 12, FontStyles.Bold, TextAlignmentOptions.Center, TextDim);
+
             // HP 바
             var hpBar = NewRect("HPBar", panel);
             hpBar.anchorMin = new Vector2(0, 0);
             hpBar.anchorMax = new Vector2(1, 0);
             hpBar.pivot = new Vector2(0.5f, 0);
-            hpBar.anchoredPosition = new Vector2(0, 50);
+            hpBar.anchoredPosition = new Vector2(0, 60);
             hpBar.sizeDelta = new Vector2(-16, 20);
             hpBar.gameObject.AddComponent<Image>().color = new Color(0.15f, 0.15f, 0.15f);
 
@@ -250,16 +259,31 @@ namespace TeamLog.Editor
             pct.anchorMin = new Vector2(0, 0);
             pct.anchorMax = new Vector2(1, 0);
             pct.pivot = new Vector2(0.5f, 0);
-            pct.anchoredPosition = new Vector2(0, 34);
+            pct.anchoredPosition = new Vector2(0, 44);
             pct.sizeDelta = new Vector2(-16, 16);
             AddTextNoWrap(pct, "100%", 11, FontStyles.Normal, TextAlignmentOptions.Center, AccentGreen);
+
+            // 상태이상 뱃지 컨테이너
+            var statusCont = NewRect("StatusContainer", panel);
+            statusCont.anchorMin = new Vector2(0, 0);
+            statusCont.anchorMax = new Vector2(1, 0);
+            statusCont.pivot = new Vector2(0.5f, 0);
+            statusCont.anchoredPosition = new Vector2(0, 26);
+            statusCont.sizeDelta = new Vector2(-16, 18);
+            var hlg = statusCont.gameObject.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 3;
+            hlg.childAlignment = TextAnchor.MiddleLeft;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
 
             // 스킬명
             var sk = NewRect("Skill", panel);
             sk.anchorMin = new Vector2(0, 0);
             sk.anchorMax = new Vector2(1, 0);
             sk.pivot = new Vector2(0.5f, 0);
-            sk.anchoredPosition = new Vector2(0, 12);
+            sk.anchoredPosition = new Vector2(0, 8);
             sk.sizeDelta = new Vector2(-16, 18);
             AddTextNoWrap(sk, skill, 11, FontStyles.Normal, TextAlignmentOptions.Center, TextDim);
         }
@@ -353,6 +377,11 @@ namespace TeamLog.Editor
             SetFillParent(hpText);
             AddText(hpText, hp, 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
 
+            // ATK / DEF 스탯
+            var statsRect = NewRect("Stats", panel);
+            statsRect.sizeDelta = new Vector2(0, 18);
+            AddTextNoWrap(statsRect, "ATK 10  DEF 5", 12, FontStyles.Bold, TextAlignmentOptions.Center, TextDim);
+
             // 버튼 영역
             var btnArea = NewRect("ButtonArea", panel);
             btnArea.sizeDelta = new Vector2(0, 40);
@@ -369,6 +398,17 @@ namespace TeamLog.Editor
             var info = NewRect("Info", panel);
             info.sizeDelta = new Vector2(0, 22);
             AddText(info, "수량: 상시발동", 12, FontStyles.Normal, TextAlignmentOptions.Center, TextDim);
+
+            // 상태이상 뱃지 컨테이너
+            var statusCont = NewRect("StatusContainer", panel);
+            statusCont.sizeDelta = new Vector2(0, 20);
+            var shlg = statusCont.gameObject.AddComponent<HorizontalLayoutGroup>();
+            shlg.spacing = 3;
+            shlg.childAlignment = TextAnchor.MiddleCenter;
+            shlg.childControlWidth = false;
+            shlg.childControlHeight = false;
+            shlg.childForceExpandWidth = false;
+            shlg.childForceExpandHeight = false;
         }
 
         private static void CreateActionBtn(RectTransform parent, string label, Color bg)

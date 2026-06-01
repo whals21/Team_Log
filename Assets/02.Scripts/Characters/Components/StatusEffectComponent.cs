@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace TeamLog.Characters
@@ -8,6 +9,8 @@ namespace TeamLog.Characters
     public class StatusEffectComponent
     {
         private readonly Dictionary<StatusEffectType, ActiveEffect> _activeEffects = new();
+
+        public event Action OnEffectsChanged;
 
         public bool HasEffect(StatusEffectType type) => _activeEffects.ContainsKey(type);
 
@@ -20,7 +23,6 @@ namespace TeamLog.Characters
         {
             if (_activeEffects.TryGetValue(type, out var existing))
             {
-                // 기존 효과 갱신 (더 긴 쪽 사용 또는 합산)
                 existing.RemainingTurns = duration;
                 existing.Value = value;
             }
@@ -28,11 +30,14 @@ namespace TeamLog.Characters
             {
                 _activeEffects[type] = new ActiveEffect(type, duration, value);
             }
+
+            OnEffectsChanged?.Invoke();
         }
 
         public void RemoveEffect(StatusEffectType type)
         {
-            _activeEffects.Remove(type);
+            if (_activeEffects.Remove(type))
+                OnEffectsChanged?.Invoke();
         }
 
         /// <summary>
@@ -57,8 +62,10 @@ namespace TeamLog.Characters
 
         public void ClearAllEffects()
         {
+            if (_activeEffects.Count == 0) return;
             foreach (var type in new List<StatusEffectType>(_activeEffects.Keys))
-                RemoveEffect(type);
+                _activeEffects.Remove(type);
+            OnEffectsChanged?.Invoke();
         }
 
         public IEnumerable<ActiveEffect> GetAllEffects() => _activeEffects.Values;

@@ -153,19 +153,21 @@ namespace TeamLog.Combat
             // HP/쉴드 변경 이벤트 구독
             foreach (var c in _playerParty)
             {
-                c.Health.OnHPChanged += (hp, max) => OnCharacterHealthChanged(c);
-                c.Health.OnShieldChanged += (shield) => OnCharacterHealthChanged(c);
+                c.Health.OnHPChanged += (hp, max) => OnCharacterStateChanged(c);
+                c.Health.OnShieldChanged += (shield) => OnCharacterStateChanged(c);
                 c.Health.OnDamageTaken += amount => SpawnFloatingText(c, $"-{amount}", FloatingTextUI.DamageColor);
                 c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
                 c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
+                c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
             }
             foreach (var c in _enemies)
             {
-                c.Health.OnHPChanged += (hp, max) => OnCharacterHealthChanged(c);
-                c.Health.OnShieldChanged += (shield) => OnCharacterHealthChanged(c);
+                c.Health.OnHPChanged += (hp, max) => OnCharacterStateChanged(c);
+                c.Health.OnShieldChanged += (shield) => OnCharacterStateChanged(c);
                 c.Health.OnDamageTaken += amount => SpawnFloatingText(c, $"-{amount}", FloatingTextUI.DamageColor);
                 c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
                 c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
+                c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
             }
 
             // 전투 시작
@@ -230,7 +232,7 @@ namespace TeamLog.Combat
             SceneTransition.Instance.FadeToScene("MapScene");
         }
 
-        private void OnCharacterHealthChanged(Character character)
+        private void OnCharacterStateChanged(Character character)
         {
             _battleUIManager?.UpdateAllPanels();
 

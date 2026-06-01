@@ -183,14 +183,20 @@ namespace TeamLog.UI.Battle
         {
             for (int i = 0; i < _playerPanels.Count && i < _playerParty.Count; i++)
             {
-                _playerPanels[i].UpdateHP(_playerParty[i].Health.CurrentHP, _playerParty[i].Health.MaxHP, _playerParty[i].Health.CurrentShield);
-                _playerPanels[i].SetDead(_playerParty[i].IsDead);
+                var c = _playerParty[i];
+                _playerPanels[i].UpdateHP(c.Health.CurrentHP, c.Health.MaxHP, c.Health.CurrentShield);
+                _playerPanels[i].SetDead(c.IsDead);
+                _playerPanels[i].UpdateStats(c.Stats.GetStat(StatType.ATK), c.Stats.GetStat(StatType.DEF));
+                _playerPanels[i].UpdateStatusEffects(c.StatusEffects.GetAllEffects());
             }
 
             for (int i = 0; i < _enemyPanels.Count && i < _enemies.Count; i++)
             {
-                _enemyPanels[i].UpdateHP(_enemies[i].Health.CurrentHP, _enemies[i].Health.MaxHP, _enemies[i].Health.CurrentShield);
-                _enemyPanels[i].SetDead(_enemies[i].IsDead);
+                var e = _enemies[i];
+                _enemyPanels[i].UpdateHP(e.Health.CurrentHP, e.Health.MaxHP, e.Health.CurrentShield);
+                _enemyPanels[i].SetDead(e.IsDead);
+                _enemyPanels[i].UpdateStats(e.Stats.GetStat(StatType.ATK), e.Stats.GetStat(StatType.DEF));
+                _enemyPanels[i].UpdateStatusEffects(e.StatusEffects.GetAllEffects());
             }
         }
 

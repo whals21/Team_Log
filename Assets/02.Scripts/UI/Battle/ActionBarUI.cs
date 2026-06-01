@@ -43,6 +43,7 @@ namespace TeamLog.UI.Battle
             _turnManager = turnManager;
             CreateActionSlots();
             BindEvents();
+            StatusEffectBadge.OnBadgeClicked += OnBadgeClicked;
         }
 
         private void CreateActionSlots()
@@ -221,6 +222,24 @@ namespace TeamLog.UI.Battle
         public void Hide()
         {
             gameObject.SetActive(false);
+        }
+
+        private void OnBadgeClicked(string title, string description)
+        {
+            if (_actionDetailPanel == null) return;
+
+            _actionDetailPanel.SetActive(true);
+
+            if (_actionTitleText != null)
+                _actionTitleText.text = title;
+
+            if (_actionDescText != null)
+                _actionDescText.text = description;
+        }
+
+        private void OnDestroy()
+        {
+            StatusEffectBadge.OnBadgeClicked -= OnBadgeClicked;
         }
     }
 }

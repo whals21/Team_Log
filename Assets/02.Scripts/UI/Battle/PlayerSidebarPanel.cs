@@ -2,12 +2,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using TeamLog.Characters;
 
 namespace TeamLog.UI.Battle
 {
     /// <summary>
-    /// 좌측 사이드바 캐릭터 패널 (번호, 이름, HP, 스킬명)
+    /// 좌측 사이드바 캐릭터 패널 (번호, 이름, HP, 스탯, 상태이상, 스킬명)
     /// </summary>
     public class PlayerSidebarPanel : MonoBehaviour, IPointerClickHandler
     {
@@ -21,6 +23,8 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Image _shieldFillImage;
         [SerializeField] private GameObject _selectionHighlight;
         [SerializeField] private Button _panelButton;
+        [SerializeField] private TextMeshProUGUI _statText;
+        [SerializeField] private Transform _statusEffectContainer;
 
         [Header("HP Colors")]
         [SerializeField] private Color _hpNormalColor = new Color(0.15f, 0.68f, 0.38f);
@@ -45,6 +49,8 @@ namespace TeamLog.UI.Battle
             if (_skillNameText == null) _skillNameText = FindComponent<TextMeshProUGUI>("Skill");
             if (_hpFillImage == null) _hpFillImage = FindComponent<Image>("HPBar/Fill");
             if (_shieldFillImage == null) _shieldFillImage = FindComponent<Image>("HPBar/ShieldFill");
+            if (_statText == null) _statText = FindComponent<TextMeshProUGUI>("Stats");
+            if (_statusEffectContainer == null) _statusEffectContainer = transform.Find("StatusContainer");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
 
             // 자식 Graphic들의 raycastTarget을 꺼서 부모 Button이 클릭을 받도록 함
@@ -148,6 +154,24 @@ namespace TeamLog.UI.Battle
                 _canvasGroup.interactable = !isDead;
                 _canvasGroup.blocksRaycasts = !isDead;
             }
+        }
+
+        public void UpdateStats(int atk, int def)
+        {
+            if (_statText != null)
+                _statText.text = $"ATK {atk}  DEF {def}";
+        }
+
+        public void UpdateStatusEffects(IEnumerable<ActiveEffect> effects)
+        {
+            if (_statusEffectContainer == null) return;
+
+            for (int i = _statusEffectContainer.childCount - 1; i >= 0; i--)
+                Destroy(_statusEffectContainer.GetChild(i).gameObject);
+
+            if (effects == null) return;
+            foreach (var effect in effects)
+                StatusEffectBadge.Create(_statusEffectContainer, effect);
         }
     }
 }

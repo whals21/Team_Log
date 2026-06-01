@@ -2,13 +2,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using TeamLog.Combat.AI;
+using TeamLog.Characters;
 
 namespace TeamLog.UI.Battle
 {
     /// <summary>
-    /// 중앙 적 유닛 상세 패널 (아바타, 이름, HP, 버튼)
+    /// 중앙 적 유닛 상세 패널 (아바타, 이름, HP, 스탯, 상태이상, 버튼)
     /// </summary>
     public class EnemyDetailPanel : MonoBehaviour, IPointerClickHandler
     {
@@ -19,6 +21,8 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Image _hpFillImage;
         [SerializeField] private Image _shieldFillImage;
         [SerializeField] private TextMeshProUGUI _infoText;
+        [SerializeField] private TextMeshProUGUI _statText;
+        [SerializeField] private Transform _statusEffectContainer;
 
         [Header("Action Buttons")]
         [SerializeField] private Button _guardianButton;
@@ -51,6 +55,8 @@ namespace TeamLog.UI.Battle
             if (_hpFillImage == null) _hpFillImage = FindComponent<Image>("HPBarContainer/Fill");
             if (_shieldFillImage == null) _shieldFillImage = FindComponent<Image>("HPBarContainer/ShieldFill");
             if (_infoText == null) _infoText = FindComponent<TextMeshProUGUI>("Info");
+            if (_statText == null) _statText = FindComponent<TextMeshProUGUI>("Stats");
+            if (_statusEffectContainer == null) _statusEffectContainer = transform.Find("StatusContainer");
             if (_guardianButton == null) _guardianButton = FindComponent<Button>("ButtonArea/Btn_가디언");
             if (_arcanaButton == null) _arcanaButton = FindComponent<Button>("ButtonArea/Btn_아크카");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
@@ -175,6 +181,24 @@ namespace TeamLog.UI.Battle
                 _canvasGroup.interactable = !isDead;
                 _canvasGroup.blocksRaycasts = !isDead;
             }
+        }
+
+        public void UpdateStats(int atk, int def)
+        {
+            if (_statText != null)
+                _statText.text = $"ATK {atk}  DEF {def}";
+        }
+
+        public void UpdateStatusEffects(IEnumerable<ActiveEffect> effects)
+        {
+            if (_statusEffectContainer == null) return;
+
+            for (int i = _statusEffectContainer.childCount - 1; i >= 0; i--)
+                Destroy(_statusEffectContainer.GetChild(i).gameObject);
+
+            if (effects == null) return;
+            foreach (var effect in effects)
+                StatusEffectBadge.Create(_statusEffectContainer, effect);
         }
     }
 }

@@ -137,14 +137,24 @@ namespace TeamLog.Map
         /// </summary>
         private void ConnectLayers(List<MapNode> lower, List<MapNode> upper, int maxConnections)
         {
-            // 모든 하위 노드가 최소 1개 상위 노드와 연결되도록 보장
+            // 1. 모든 상위 노드가 최소 1개 하위 노드에서 도달 가능하도록 보장
             foreach (var upperNode in upper)
             {
                 int lowerIndex = _rng.Next(0, lower.Count);
                 lower[lowerIndex].AddConnection(upperNode);
             }
 
-            // 하위 노드에 추가 연결 분배
+            // 2. 모든 하위 노드가 최소 1개 상위 노드로 연결되도록 보장 (막힘 방지)
+            foreach (var lowerNode in lower)
+            {
+                if (lowerNode.Connections.Count == 0)
+                {
+                    var target = upper[_rng.Next(0, upper.Count)];
+                    lowerNode.AddConnection(target);
+                }
+            }
+
+            // 3. 하위 노드에 추가 연결 분배
             foreach (var lowerNode in lower)
             {
                 int existingConnections = lowerNode.Connections.Count;

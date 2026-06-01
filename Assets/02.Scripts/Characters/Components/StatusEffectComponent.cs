@@ -9,8 +9,6 @@ namespace TeamLog.Characters
     {
         private readonly Dictionary<StatusEffectType, ActiveEffect> _activeEffects = new();
 
-        public event System.Action<StatusEffectType, bool> OnEffectChanged; // type, applied
-
         public bool HasEffect(StatusEffectType type) => _activeEffects.ContainsKey(type);
 
         public int GetRemainingDuration(StatusEffectType type)
@@ -29,14 +27,12 @@ namespace TeamLog.Characters
             else
             {
                 _activeEffects[type] = new ActiveEffect(type, duration, value);
-                OnEffectChanged?.Invoke(type, true);
             }
         }
 
         public void RemoveEffect(StatusEffectType type)
         {
-            if (_activeEffects.Remove(type))
-                OnEffectChanged?.Invoke(type, false);
+            _activeEffects.Remove(type);
         }
 
         /// <summary>
@@ -82,7 +78,8 @@ namespace TeamLog.Characters
         AttackUp,
         AttackDown,
         Regeneration,
-        Shield
+        Shield,
+        Taunt
     }
 
     public class ActiveEffect

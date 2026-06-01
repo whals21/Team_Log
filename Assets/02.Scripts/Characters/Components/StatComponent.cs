@@ -11,8 +11,6 @@ namespace TeamLog.Characters
         private readonly Dictionary<StatType, int> _baseStats = new();
         private readonly Dictionary<StatType, int> _modifiers = new();
 
-        public event System.Action<StatType, int> OnStatChanged;
-
         public void Initialize(int baseATK, int baseDEF)
         {
             _baseStats[StatType.ATK] = baseATK;
@@ -33,13 +31,6 @@ namespace TeamLog.Characters
         public void AddModifier(StatType type, int value)
         {
             _modifiers[type] = _modifiers.GetValueOrDefault(type, 0) + value;
-            OnStatChanged?.Invoke(type, GetStat(type));
-        }
-
-        public void RemoveModifier(StatType type, int value)
-        {
-            _modifiers[type] = _modifiers.GetValueOrDefault(type, 0) - value;
-            OnStatChanged?.Invoke(type, GetStat(type));
         }
 
         public void ClearModifiers()
@@ -49,10 +40,9 @@ namespace TeamLog.Characters
                 _modifiers[key] = 0;
         }
 
-        public void ResetToBase(StatType type)
+        public void AddPermanentBase(StatType type, int value)
         {
-            _modifiers[type] = 0;
-            OnStatChanged?.Invoke(type, GetStat(type));
+            _baseStats[type] = _baseStats.GetValueOrDefault(type, 0) + value;
         }
     }
 

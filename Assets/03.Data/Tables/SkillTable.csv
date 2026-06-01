@@ -1,25 +1,49 @@
 id,displayName,description,type,target,power,cost,weight,statusEffect,effectDuration,effectValue
-Warrior_Strike,강타,적에게 물리 데미지를 입힙니다.,Attack,SingleEnemy,1,1,40,None,0,0
-Warrior_Shield,방패 방어,자신에게 쉴드를 부여합니다.,Shield,Self,4,1,30,None,0,0
-Warrior_Taunt,도발,적의 공격을 자신에게 유도합니다.,Debuff,SingleEnemy,0,1,20,None,0,0
-Warrior_Rage,분노,1턴 동안 공격력이 증가합니다.,Buff,Self,2,2,10,AttackUp,1,0
-Mage_Fireball,파이어볼,적에게 불꽃 데미지를 입히고 화상을 입힙니다.,Attack,SingleEnemy,2,2,35,Burn,2,1
-Mage_IceSpear,얼음창,적에게 얼음 데미지를 입힙니다.,Attack,SingleEnemy,1,1,35,None,0,0
-Mage_MagicShield,마법 방어막,자신에게 쉴드를 부여합니다.,Shield,Self,3,1,20,None,0,0
-Mage_Meteor,메테오,모든 적에게 강력한 데미지를 입힙니다.,Attack,AllEnemies,3,3,10,None,0,0
-Healer_Heal,치유,아군 한 명의 체력을 회복합니다.,Heal,SingleAlly,4,2,40,None,0,0
-Healer_Barrier,보호막,아군 한 명에게 쉴드를 부여합니다.,Shield,SingleAlly,5,1,25,None,0,0
-Healer_Purify,정화,아군의 약화 효과를 제거합니다.,Buff,SingleAlly,0,1,20,None,0,0
-Healer_Blessing,축복,아군의 공격력을 증가시킵니다.,Buff,SingleAlly,1,2,15,AttackUp,2,0
-Rogue_Backstab,급소 공격,적에게 치명타 데미지를 입힙니다.,Attack,SingleEnemy,2,2,35,None,0,0
-Rogue_PoisonBlade,독 바르기,적에게 독 효과를 부여합니다.,Debuff,SingleEnemy,0,1,25,Poison,3,1
-Rogue_Weaken,약화,적의 방어력을 감소시킵니다.,Debuff,SingleEnemy,0,1,20,DefenseDown,2,0
-Rogue_DoubleStrike,이중 타격,적에게 2번 공격합니다.,Attack,SingleEnemy,1,1,20,None,0,0
-Slime_Tackle,몸통박치기,기본 공격입니다.,Attack,SingleEnemy,1,0,50,None,0,0
-Slime_AcidSpit,산성 침,독이 섞인 공격입니다.,Attack,SingleEnemy,1,0,30,Poison,2,1
-Slime_Split,분열 준비,쉴드를 얻습니다.,Shield,Self,2,0,20,None,0,0
+Warrior_Strike,강타,적에게 물리 데미지를 입힙니다.,Attack,SingleEnemy,5,1,40,None,0,0
+Warrior_Shield,방패 방어,자신에게 쉴드를 부여합니다.,Shield,Self,15,1,30,None,0,0
+Warrior_Taunt,도발,적의 공격을 자신에게 유도합니다.,Buff,Self,0,1,20,Taunt,1,0
+Warrior_Rage,분노,1턴 동안 공격력이 증가합니다.,Buff,Self,4,2,10,AttackUp,1,4
+Mage_Fireball,파이어볼,적에게 불꽃 데미지를 입히고 화상을 입힙니다.,Attack,SingleEnemy,8,2,35,Burn,2,3
+Mage_IceSpear,얼음창,적에게 얼음 데미지를 입힙니다.,Attack,SingleEnemy,6,1,35,None,0,0
+Mage_MagicShield,마법 방어막,자신에게 쉴드를 부여합니다.,Shield,Self,12,1,20,None,0,0
+Mage_Meteor,메테오,모든 적에게 강력한 데미지를 입힙니다.,Attack,AllEnemies,10,3,10,None,0,0
+Healer_Heal,치유,아군 한 명의 체력을 회복합니다.,Heal,SingleAlly,15,2,40,None,0,0
+Healer_Barrier,보호막,아군 한 명에게 쉴드를 부여합니다.,Shield,SingleAlly,10,1,25,None,0,0
+Healer_Purify,정화,아군의 약화 효과를 제거합니다.,Purify,SingleAlly,0,1,20,None,0,0
+Healer_Blessing,축복,아군의 공격력을 증가시킵니다.,Buff,SingleAlly,2,2,15,AttackUp,2,3
+Rogue_Backstab,급소 공격,적에게 치명타 데미지를 입힙니다.,Attack,SingleEnemy,8,2,35,None,0,0
+Rogue_PoisonBlade,독 바르기,적에게 독 효과를 부여합니다.,Debuff,SingleEnemy,3,1,25,Poison,3,3
+Rogue_Weaken,약화,적의 방어력을 감소시킵니다.,Debuff,SingleEnemy,0,1,20,DefenseDown,2,3
+Rogue_DoubleStrike,이중 타격,적에게 2번 공격합니다.,Attack,SingleEnemy,4,1,20,None,0,0
+Slime_Tackle,몸통박치기,기본 공격입니다.,Attack,SingleEnemy,3,0,50,None,0,0
+Slime_AcidSpit,산성 침,독이 섞인 공격입니다.,Attack,SingleEnemy,2,0,30,Poison,2,2
+Slime_Split,분열 준비,쉴드를 얻습니다.,Shield,Self,5,0,20,None,0,0
 Slime_Jiggle,출렁임,아무 일도 일어나지 않습니다.,Buff,Self,0,0,10,None,0,0
-Goblin_Scratch,긁기,빠른 공격입니다.,Attack,SingleEnemy,2,0,40,None,0,0
-Goblin_Bite,물기,강한 공격입니다.,Attack,SingleEnemy,3,0,30,None,0,0
-Goblin_Steal,약화 공격,적의 공격력을 감소시킵니다.,Attack,SingleEnemy,1,0,20,AttackDown,1,0
-Goblin_Hide,은신,쉴드를 얻습니다.,Shield,Self,2,0,10,None,0,0
+Goblin_Scratch,긁기,빠른 공격입니다.,Attack,SingleEnemy,4,0,40,None,0,0
+Goblin_Bite,물기,강한 공격입니다.,Attack,SingleEnemy,6,0,30,None,0,0
+Goblin_Steal,약화 공격,적의 공격력을 감소시킵니다.,Attack,SingleEnemy,3,0,20,AttackDown,1,2
+Goblin_Hide,은신,쉴드를 얻습니다.,Shield,Self,4,0,10,None,0,0
+EliteKnight_Slash,참격,강력한 검 공격입니다.,Attack,SingleEnemy,8,0,35,None,0,0
+EliteKnight_ShieldBash,방패 들이밀기,쉴드를 얻고 적을 기절시킵니다.,Shield,Self,12,0,25,Stun,1,0
+EliteKnight_Taunt,도발,적의 공격을 유도합니다.,Buff,Self,0,0,20,Taunt,1,0
+EliteKnight_Warcry,전투 함성,공격력이 증가합니다.,Buff,Self,0,0,20,AttackUp,2,4
+EliteMage_Fireball,화염구,강력한 불꽃 공격입니다.,Attack,SingleEnemy,10,0,30,Burn,2,4
+EliteMage_Blizzard,눈보라,모든 적에게 데미지를 줍니다.,Attack,AllEnemies,6,0,25,Freeze,1,0
+EliteMage_Barrier,마법 장벽,쉴드를 얻습니다.,Shield,Self,10,0,20,None,0,0
+EliteMage_Drain,흡수,적의 생명력을 흡수합니다.,Attack,SingleEnemy,6,0,25,None,0,0
+DarkSlime_CorruptStrike,오염 공격,어둠의 힘으로 공격합니다.,Attack,SingleEnemy,7,0,30,None,0,0
+DarkSlime_PoisonCloud,독 구름,맹독을 내뿜습니다.,Debuff,AllEnemies,0,0,25,Poison,3,4
+DarkSlime_DarkShield,어둠의 방패,쉴드를 얻습니다.,Shield,Self,8,0,20,None,0,0
+DarkSlime_Absorb,흡수,체력을 회복합니다.,Heal,Self,8,0,25,None,0,0
+BossGKing_CrownStrike,왕관 강타,강력한 공격입니다.,Attack,SingleEnemy,10,0,30,None,0,0
+BossGKing_Rally,소집,부하를 소환합니다.,Buff,Self,0,0,20,AttackUp,2,5
+BossGKing_Warcry,전쟁 함성,공격력과 방어력이 증가합니다.,Buff,Self,0,0,20,AttackUp,2,4
+BossGKing_RoyalGuard,왕실 근위대,쉴드를 얻습니다.,Shield,Self,18,0,30,None,0,0
+BossDragon_Breath,드래곤 브레스,화염 브레스로 전체 공격합니다.,Attack,AllEnemies,12,0,30,Burn,2,5
+BossDragon_TailSwipe,꼬리 휘두르기,강력한 물리 공격입니다.,Attack,SingleEnemy,14,0,25,None,0,0
+BossDragon_FireStorm,화염 폭풍,모든 적에게 강력한 데미지를 줍니다.,Attack,AllEnemies,10,0,20,Burn,2,4
+BossDragon_DragonFear,드래곤 공포,적의 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,2,4
+BossDL_DarkBlade,암흑의 검,강력한 어둠 공격입니다.,Attack,SingleEnemy,16,0,30,None,0,0
+BossDL_Curse,저주,모든 적을 저주합니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,5
+BossDL_Meteor,마왕의 메테오,모든 적에게 파괴적인 데미지를 줍니다.,Attack,AllEnemies,14,0,20,None,0,0
+BossDL_DarkBarrier,암흑 방어막,강력한 쉴드를 얻습니다.,Shield,Self,20,0,25,None,0,0

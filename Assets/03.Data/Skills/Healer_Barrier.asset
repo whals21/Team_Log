@@ -16,7 +16,7 @@ MonoBehaviour:
   _description: "\uC544\uAD70 \uD55C \uBA85\uC5D0\uAC8C \uC274\uB4DC\uB97C \uBD80\uC5EC\uD569\uB2C8\uB2E4."
   _skillType: 4
   _targetType: 2
-  _power: 5
+  _power: 10
   _cost: 1
   _weight: 25
   _statusEffect: 0

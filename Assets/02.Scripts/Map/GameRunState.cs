@@ -118,6 +118,20 @@ namespace TeamLog.Map
         }
 
         /// <summary>
+        /// 층별 스케일링 배율
+        /// </summary>
+        public float GetFloorScaling()
+        {
+            return CurrentFloor switch
+            {
+                1 => 1.0f,
+                2 => 1.3f,
+                3 => 1.6f,
+                _ => 1.0f + (CurrentFloor - 1) * 0.3f
+            };
+        }
+
+        /// <summary>
         /// 골드 사용 — 성공 시 true, 부족 시 false
         /// </summary>
         public bool SpendGold(int amount)
@@ -153,22 +167,6 @@ namespace TeamLog.Map
             CurrentFloor++;
             AddLog($"층 {CurrentFloor}(으)로 진입");
             GenerateCurrentFloorMap();
-        }
-
-        /// <summary>
-        /// 파티 전체 HP 비율 (0.0 ~ 1.0)
-        /// </summary>
-        public float GetPartyHealthRatio()
-        {
-            if (_playerParty.Count == 0) return 0f;
-
-            float totalRatio = 0f;
-            foreach (var member in _playerParty)
-            {
-                if (member.IsAlive)
-                    totalRatio += (float)member.Health.CurrentHP / member.Health.MaxHP;
-            }
-            return totalRatio / _playerParty.Count;
         }
 
         /// <summary>
@@ -260,6 +258,13 @@ namespace TeamLog.Map
             if (_itemPool == null || _itemPool.Count == 0) return null;
             var item = _itemPool[_rng.Next(_itemPool.Count)];
             _acquiredItems.Add(item);
+
+            foreach (var member in _playerParty)
+            {
+                if (member.IsAlive)
+                    ItemEffectApplier.Apply(member, item);
+            }
+
             AddLog($"아이템 획득: {item.ItemName}");
             return item;
         }
@@ -278,12 +283,20 @@ namespace TeamLog.Map
         }
 
         /// <summary>
-        /// 특정 아이템 획득
+        /// 특정 아이템 획득 — 즉시 효과 적용
         /// </summary>
         public void AcquireItem(ItemData item)
         {
             if (item == null) return;
             _acquiredItems.Add(item);
+
+            // 아이템 효과를 모든 생존 파티원에 적용
+            foreach (var member in _playerParty)
+            {
+                if (member.IsAlive)
+                    ItemEffectApplier.Apply(member, item);
+            }
+
             AddLog($"아이템 획득: {item.ItemName}");
         }
     }

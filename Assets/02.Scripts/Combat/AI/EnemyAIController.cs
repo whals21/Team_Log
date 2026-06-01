@@ -116,6 +116,10 @@ namespace TeamLog.Combat.AI
                 case SkillType.Debuff:
                     ApplyEffect(skill, target);
                     break;
+                case SkillType.Purify:
+                    target.StatusEffects.ClearAllEffects();
+                    target.ApplyStatModifiers();
+                    break;
             }
         }
 
@@ -132,6 +136,12 @@ namespace TeamLog.Combat.AI
         {
             var alive = _players.FindAll(p => p.IsAlive);
             if (alive.Count == 0) return null;
+
+            // Taunt 상태인 캐릭터가 있으면 우선 타겟
+            var tauntTarget = alive.Find(p => p.StatusEffects.HasEffect(StatusEffectType.Taunt));
+            if (tauntTarget != null)
+                return tauntTarget;
+
             return alive[UnityEngine.Random.Range(0, alive.Count)];
         }
     }

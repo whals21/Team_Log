@@ -104,5 +104,18 @@ namespace TeamLog.Characters
                 }
             }
         }
+
+        /// <summary>
+        /// 층별 적 스케일링 적용
+        /// </summary>
+        public void ApplyFloorScaling(float multiplier)
+        {
+            int scaledHP = System.Math.Max(1, (int)(Health.MaxHP * multiplier));
+            Health.SetMaxHP(scaledHP, healToFull: true);
+
+            int baseATK = Stats.GetBaseStat(StatType.ATK);
+            int baseDEF = Stats.GetBaseStat(StatType.DEF);
+            Stats.Initialize((int)(baseATK * multiplier), (int)(baseDEF * multiplier));
+        }
     }
 }

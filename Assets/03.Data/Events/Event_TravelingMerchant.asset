@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_TravelingMerchant
+  m_EditorClassIdentifier: 
+  _eventName: "\uC0C1\uC778 \uB300\uD589"
+  _description: "\uC5EC\uD589 \uC911\uC778 \uC0C1\uC778\uC774 \uD2B9\uBCC4\uD55C
+    \uAC70\uB798\uB97C \uC81C\uC548\uD569\uB2C8\uB2E4."
+  _eventType: 3
+  _choices:
+  - ChoiceText: "\uD68C\uBCF5\uC57D\uC744 \uC0B0\uB2E4"
+    ChoiceDescription: "20 \uACE8\uB4DC\uB97C \uC9C0\uBD88\uD569\uB2C8\uB2E4."
+    Outcome:
+      ResultText: "\uD68C\uBCF5\uC57D\uC744 \uB9C8\uC168\uC2B5\uB2C8\uB2E4! \uD30C\uD2F0\uC6D0
+        \uC804\uC6D0\uC758 HP\uAC00 25% \uD68C\uBCF5\uB418\uC5C8\uC2B5\uB2C8\uB2E4."
+      GoldChange: -20
+      HPPercentChange: 25
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+  - ChoiceText: "\uC815\uBCF4\uB97C \uC0B0\uB2E4"
+    ChoiceDescription: "15 \uACE8\uB4DC\uB97C \uC9C0\uBD88\uD569\uB2C8\uB2E4."
+    Outcome:
+      ResultText: "\uC720\uC6A9\uD55C \uC815\uBCF4\uB97C \uC5BB\uC5C8\uC2B5\uB2C8\uB2E4!
+        \uC55E\uC73C\uB85C\uC758 \uC804\uD22C\uC5D0\uC11C \uC720\uB9AC\uD560 \uAC83\uC785\uB2C8\uB2E4."
+      GoldChange: -15
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+  - ChoiceText: "\uAC70\uC808\uD55C\uB2E4"
+    ChoiceDescription: "\uACE8\uB4DC\uB97C \uC544\uB08D\uB2C8\uB2E4."
+    Outcome:
+      ResultText: "\uC0C1\uC778\uC774 \uC544\uC26C\uC6B4 \uD45C\uC815\uC73C\uB85C
+        \uB5A0\uB0A9\uB2C8\uB2E4."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0

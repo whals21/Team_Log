@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _skillName: "\uB3C4\uBC1C"
   _description: "\uC801\uC758 \uACF5\uACA9\uC744 \uC790\uC2E0\uC5D0\uAC8C \uC720\uB3C4\uD569\uB2C8\uB2E4."
-  _skillType: 3
-  _targetType: 0
+  _skillType: 2
+  _targetType: 4
   _power: 0
   _cost: 1
   _weight: 20
-  _statusEffect: 0
-  _effectDuration: 0
+  _statusEffect: 13
+  _effectDuration: 1
   _effectValue: 0

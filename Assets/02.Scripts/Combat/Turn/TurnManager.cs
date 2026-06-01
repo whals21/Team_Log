@@ -172,6 +172,9 @@ namespace TeamLog.Combat.Turn
                 case SkillType.Shield:
                     ExecuteShield(target, skill);
                     break;
+                case SkillType.Purify:
+                    ExecutePurify(target);
+                    break;
             }
         }
 
@@ -197,6 +200,12 @@ namespace TeamLog.Combat.Turn
         private void ExecuteShield(Character target, SkillData skill)
         {
             target.Health.AddShield(skill.Power);
+        }
+
+        private void ExecutePurify(Character target)
+        {
+            target.StatusEffects.ClearAllEffects();
+            target.ApplyStatModifiers();
         }
 
         public void StartEnemyTurn()
@@ -238,7 +247,9 @@ namespace TeamLog.Combat.Turn
             var alivePlayers = _playerParty.FindAll(p => p.IsAlive);
             if (alivePlayers.Count == 0) return;
 
-            var target = alivePlayers[UnityEngine.Random.Range(0, alivePlayers.Count)];
+            // Taunt 상태인 캐릭터가 있으면 우선 타겟
+            var tauntTarget = alivePlayers.Find(p => p.StatusEffects.HasEffect(StatusEffectType.Taunt));
+            var target = tauntTarget ?? alivePlayers[UnityEngine.Random.Range(0, alivePlayers.Count)];
             DealDamage(enemy, target);
         }
 

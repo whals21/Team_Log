@@ -717,6 +717,76 @@ namespace TeamLog.Editor
         }
 
         // ══════════════════════════════════════════════════════════
+        //  Battle End Overlay
+        // ══════════════════════════════════════════════════════════
+
+        private static void CreateBattleEndOverlay(RectTransform parent)
+        {
+            var overlay = NewRect("BattleEndOverlay", parent);
+            SetFillParent(overlay);
+            var bgImg = overlay.gameObject.AddComponent<Image>();
+            bgImg.color = new Color(0, 0, 0, 0.85f);
+            bgImg.raycastTarget = true;
+            overlay.gameObject.SetActive(false);
+
+            // 중앙 컨테이너 — 크고 눈에 띄게
+            var container = NewRect("Container", overlay);
+            container.anchorMin = new Vector2(0.25f, 0.25f);
+            container.anchorMax = new Vector2(0.75f, 0.75f);
+            container.offsetMin = Vector2.zero;
+            container.offsetMax = Vector2.zero;
+            var containerBg = container.gameObject.AddComponent<Image>();
+            containerBg.color = new Color(0.1f, 0.1f, 0.2f, 0.95f);
+
+            // 결과 텍스트 — 큼직하게 상단
+            var resultRect = NewRect("ResultText", container);
+            resultRect.anchorMin = new Vector2(0f, 0.45f);
+            resultRect.anchorMax = new Vector2(1f, 0.85f);
+            resultRect.offsetMin = Vector2.zero;
+            resultRect.offsetMax = Vector2.zero;
+            var resultT = resultRect.gameObject.AddComponent<TextMeshProUGUI>();
+            resultT.font = GetOrCreateKoreanFont();
+            resultT.text = "승리!";
+            resultT.fontSize = 64;
+            resultT.fontStyle = FontStyles.Bold;
+            resultT.alignment = TextAlignmentOptions.Center;
+            resultT.color = AccentYellow;
+
+            // 계속하기 버튼 — 하단에 큼직하게
+            var btnRect = NewRect("ContinueButton", container);
+            btnRect.anchorMin = new Vector2(0.2f, 0.08f);
+            btnRect.anchorMax = new Vector2(0.8f, 0.35f);
+            btnRect.offsetMin = Vector2.zero;
+            btnRect.offsetMax = Vector2.zero;
+            // Image를 Button보다 먼저 추가해야 targetGraphic이 자동 연결됨
+            var btnImg = btnRect.gameObject.AddComponent<Image>();
+            btnImg.color = AccentRed;
+            var btn = btnRect.gameObject.AddComponent<Button>();
+            btn.targetGraphic = btnImg;
+
+            var btnLabelRect = NewRect("Label", btnRect);
+            SetFillParent(btnLabelRect);
+            var btnLabel = btnLabelRect.gameObject.AddComponent<TextMeshProUGUI>();
+            btnLabel.font = GetOrCreateKoreanFont();
+            btnLabel.text = "계속하기";
+            btnLabel.fontSize = 32;
+            btnLabel.fontStyle = FontStyles.Bold;
+            btnLabel.alignment = TextAlignmentOptions.Center;
+            btnLabel.color = TextWhite;
+
+            // BattleEndOverlay 컴포넌트
+            var endOverlay = overlay.gameObject.AddComponent<BattleEndOverlay>();
+            var ser = new UnityEditor.SerializedObject(endOverlay);
+            var resultProp = ser.FindProperty("_resultText");
+            if (resultProp != null) resultProp.objectReferenceValue = resultT;
+            var btnProp = ser.FindProperty("_continueButton");
+            if (btnProp != null) btnProp.objectReferenceValue = btn;
+            var labelProp = ser.FindProperty("_continueLabel");
+            if (labelProp != null) labelProp.objectReferenceValue = btnLabel;
+            ser.ApplyModifiedProperties();
+        }
+
+        // ══════════════════════════════════════════════════════════
         //  UI 유틸리티
         // ══════════════════════════════════════════════════════════
 

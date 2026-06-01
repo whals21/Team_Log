@@ -45,6 +45,10 @@ namespace TeamLog.Editor
                         tmp.text = "1/4";
                 }
 
+                // 턴 카운터 텍스트 자동 연결
+                if (turnCounter != null)
+                    SetPrivateField(topBarUI, "_turnCounterText", turnCounter.GetComponent<TMPro.TextMeshProUGUI>());
+
                 // AP 텍스트 자동 연결
                 var apText = topBar.Find("APText");
                 if (apText != null)
@@ -89,8 +93,14 @@ namespace TeamLog.Editor
             var rightSidebar = root.transform.Find("ContentArea/RightSidebar");
             if (rightSidebar != null)
             {
-                if (rightSidebar.GetComponent<BattleLogUI>() == null)
-                    rightSidebar.gameObject.AddComponent<BattleLogUI>();
+                var battleLogUI = rightSidebar.GetComponent<BattleLogUI>();
+                if (battleLogUI == null)
+                    battleLogUI = rightSidebar.gameObject.AddComponent<BattleLogUI>();
+
+                // LogText 자식 자동 연결
+                var logText = rightSidebar.Find("LogText");
+                if (logText != null)
+                    SetPrivateField(battleLogUI, "_logText", logText.GetComponent<TMPro.TextMeshProUGUI>());
             }
 
             // 7) BattleSceneSetup 추가
@@ -115,6 +125,15 @@ namespace TeamLog.Editor
             SetPrivateField(sceneSetup, "_testHealerData", healerData);
             SetPrivateField(sceneSetup, "_testRogueData", rogueData);
             SetPrivateField(sceneSetup, "_battleUIManager", uiManager);
+
+            // BattleEndOverlay 연결
+            var endOverlayGO = root.transform.Find("BattleEndOverlay");
+            if (endOverlayGO != null)
+            {
+                var endOverlay = endOverlayGO.GetComponent<BattleEndOverlay>();
+                if (endOverlay != null)
+                    SetPrivateField(sceneSetup, "_battleEndOverlay", endOverlay);
+            }
 
             var actionBar = bottomBar?.GetComponent<ActionBarUI>();
             if (actionBar != null)

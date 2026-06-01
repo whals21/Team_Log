@@ -15,9 +15,9 @@ MonoBehaviour:
   _characterName: "\uC2AC\uB77C\uC784"
   _characterClass: 0
   _description: "\uB048\uC801\uB048\uC801\uD55C \uC824\uB9AC \uD615\uD0DC\uC758 \uBAAC\uC2A4\uD130."
-  _baseHP: 10
-  _baseATK: 1
-  _baseDEF: 0
+  _baseHP: 30
+  _baseATK: 5
+  _baseDEF: 2
   _skills:
   - {fileID: 11400000, guid: 012c79c62fdf840478c1d8d0a37fb25a, type: 2}
   - {fileID: 11400000, guid: 4e0ab87add61e624db8d01523faa42c1, type: 2}

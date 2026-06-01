@@ -37,6 +37,7 @@ namespace TeamLog.UI.Battle
         private Characters.Character _character;
         private EnemyIntent _intent;
         private BattleUIManager _uiManager;
+        private CanvasGroup _canvasGroup;
 
         public int EnemyIndex => _enemyIndex;
         public event Action<int> OnPanelClicked;
@@ -61,6 +62,10 @@ namespace TeamLog.UI.Battle
                 if (graphic.gameObject != gameObject && graphic.GetComponent<Button>() == null)
                     graphic.raycastTarget = false;
             }
+
+            _canvasGroup = GetComponent<CanvasGroup>();
+            if (_canvasGroup == null)
+                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
 
         private void Start()
@@ -160,6 +165,16 @@ namespace TeamLog.UI.Battle
         private void OnArcanaClicked()
         {
             // TODO: 아크카 액션 구현 (Phase 4)
+        }
+
+        public void SetDead(bool isDead)
+        {
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha = isDead ? 0.4f : 1f;
+                _canvasGroup.interactable = !isDead;
+                _canvasGroup.blocksRaycasts = !isDead;
+            }
         }
     }
 }

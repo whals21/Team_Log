@@ -23,8 +23,6 @@ namespace TeamLog.UI.Battle
         [SerializeField] private GameObject _actionDetailPanel;
         [SerializeField] private TextMeshProUGUI _actionTitleText;
         [SerializeField] private TextMeshProUGUI _actionDescText;
-        [SerializeField] private Transform _effectsContainer;
-        [SerializeField] private TextMeshProUGUI _targetTypeText;
         [SerializeField] private Button _cancelButton;
 
         [Header("End Turn")]

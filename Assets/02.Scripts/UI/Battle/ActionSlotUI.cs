@@ -25,6 +25,8 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Color _healColor = new Color(0.15f, 0.68f, 0.38f);
         [SerializeField] private Color _buffColor = new Color(0.96f, 0.82f, 0.25f);
         [SerializeField] private Color _debuffColor = new Color(0.6f, 0.3f, 0.8f);
+        [SerializeField] private Color _shieldColor = new Color(0.72f, 0.45f, 0.2f);
+        [SerializeField] private Color _purifyColor = new Color(0.4f, 0.8f, 0.95f);
 
         [Header("Button")]
         [SerializeField] private Button _button;
@@ -156,6 +158,8 @@ namespace TeamLog.UI.Battle
                 SkillType.Heal => _healColor,
                 SkillType.Buff => _buffColor,
                 SkillType.Debuff => _debuffColor,
+                SkillType.Shield => _shieldColor,
+                SkillType.Purify => _purifyColor,
                 _ => Color.white
             };
         }

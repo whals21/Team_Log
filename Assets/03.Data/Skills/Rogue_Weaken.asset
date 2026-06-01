@@ -21,4 +21,4 @@ MonoBehaviour:
   _weight: 20
   _statusEffect: 8
   _effectDuration: 2
-  _effectValue: 0
+  _effectValue: 3

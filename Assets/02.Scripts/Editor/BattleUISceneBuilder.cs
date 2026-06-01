@@ -146,6 +146,7 @@ namespace TeamLog.Editor
             CreateCenterArea(content);
 
             CreateCharacterPopup(root);
+            CreateBattleEndOverlay(root);
         }
     }
 }

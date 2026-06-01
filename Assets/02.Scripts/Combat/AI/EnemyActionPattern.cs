@@ -31,15 +31,6 @@ namespace TeamLog.Combat.AI
             return skill;
         }
 
-        /// <summary>
-        /// 다음 스킬을 엿보기 (인덱스 이동 없음)
-        /// </summary>
-        public SkillData PeekNextSkill()
-        {
-            if (_skills.Count == 0) return null;
-            return _skills[_currentIndex];
-        }
-
         public void Reset()
         {
             _currentIndex = 0;

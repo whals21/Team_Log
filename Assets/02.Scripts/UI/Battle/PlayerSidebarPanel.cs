@@ -30,6 +30,7 @@ namespace TeamLog.UI.Battle
         private int _panelIndex;
         private Characters.Character _character;
         private BattleUIManager _uiManager;
+        private CanvasGroup _canvasGroup;
 
         public int PanelIndex => _panelIndex;
         public event Action<int> OnPanelClicked;
@@ -54,6 +55,9 @@ namespace TeamLog.UI.Battle
                     graphic.raycastTarget = false;
             }
 
+            _canvasGroup = GetComponent<CanvasGroup>();
+            if (_canvasGroup == null)
+                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
 
         private void Start()
@@ -134,6 +138,16 @@ namespace TeamLog.UI.Battle
         {
             if (_selectionHighlight != null)
                 _selectionHighlight.SetActive(selected);
+        }
+
+        public void SetDead(bool isDead)
+        {
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha = isDead ? 0.4f : 1f;
+                _canvasGroup.interactable = !isDead;
+                _canvasGroup.blocksRaycasts = !isDead;
+            }
         }
     }
 }

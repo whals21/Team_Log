@@ -53,7 +53,8 @@ namespace TeamLog.Characters
         Heal,       // 치유
         Buff,       // 버프
         Debuff,     // 디버프
-        Shield      // 쉴드 (일시적 보호막)
+        Shield,     // 쉴드 (일시적 보호막)
+        Purify      // 정화 (상태이상 제거)
     }
 
     /// <summary>

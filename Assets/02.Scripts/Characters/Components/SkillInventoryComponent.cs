@@ -15,8 +15,6 @@ namespace TeamLog.Characters
         public SkillData DrawnSkill => _drawnSkill;
         public int SkillCount => _skills.Count;
 
-        public event System.Action<SkillData> OnSkillDrawn;
-
         public void Initialize(IEnumerable<SkillData> skills)
         {
             _skills.Clear();
@@ -59,13 +57,11 @@ namespace TeamLog.Characters
                 if (randomValue <= cumulative)
                 {
                     _drawnSkill = skill;
-                    OnSkillDrawn?.Invoke(skill);
                     return skill;
                 }
             }
 
             _drawnSkill = _skills[0];
-            OnSkillDrawn?.Invoke(_drawnSkill);
             return _drawnSkill;
         }
 

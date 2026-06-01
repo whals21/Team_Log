@@ -27,6 +27,7 @@ namespace TeamLog.UI.Battle
             StatusEffectType.AttackDown => "공격 감소",
             StatusEffectType.Regeneration => "재생",
             StatusEffectType.Shield => "보호막",
+            StatusEffectType.Taunt => "도발",
             _ => type.ToString()
         };
 
@@ -71,6 +72,7 @@ namespace TeamLog.UI.Battle
                     SkillType.Heal => "회복",
                     SkillType.Buff => "수치",
                     SkillType.Debuff => "수치",
+                    SkillType.Purify => "수치",
                     _ => "수치"
                 };
                 parts.Add($"{label} {displayPower}");

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0914af7ca0c602241b3c3abcafabd26e, type: 3}
+  m_Name: Pattern_Enemy_EliteSkeletonCaptain
+  m_EditorClassIdentifier: 
+  _enemyId: Enemy_EliteSkeletonCaptain
+  _skills:
+  - {fileID: 11400000, guid: 201c061b3c6a9464f9fbbb7088a4393d, type: 2}
+  - {fileID: 11400000, guid: 6e2c90a4e3e74664f9eb285c68303c33, type: 2}
+  - {fileID: 11400000, guid: c4aa8a7094b85f64bbd72a4bb1857073, type: 2}
+  - {fileID: 11400000, guid: ec1e720182182f04ea5aff498d6db9fd, type: 2}

@@ -13,9 +13,6 @@ namespace TeamLog.Event
     {
         private readonly System.Random _rng = new();
 
-        public event System.Action<string> OnEventText;
-        public event System.Action<EventChoice> OnChoiceMade;
-
         /// <summary>
         /// 선택지 실행 — 결과를 GameRunState와 파티에 적용
         /// </summary>
@@ -67,7 +64,6 @@ namespace TeamLog.Event
                     outcome.ResultText += $" ({item.ItemName} 획득!)";
             }
 
-            OnChoiceMade?.Invoke(choice);
             return outcome;
         }
     }

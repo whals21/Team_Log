@@ -23,6 +23,7 @@ namespace TeamLog.Combat.Turn
         private readonly List<Character> _enemies;
         private readonly List<EnemyAIController> _enemyControllers;
         private readonly SkillDrawSystem _drawSystem;
+        private readonly int _bonusFirstTurnAP;
 
         public TurnContext Context => _context;
         public SkillDrawSystem DrawSystem => _drawSystem;
@@ -38,13 +39,14 @@ namespace TeamLog.Combat.Turn
         public int MaxAP => _context.MaxAP;
 
         public TurnManager(List<Character> playerParty, List<Character> enemies,
-            List<EnemyAIController> enemyControllers = null, int maxRerolls = 1)
+            List<EnemyAIController> enemyControllers = null, int maxRerolls = 1, int bonusFirstTurnAP = 0)
         {
             _playerParty = playerParty;
             _enemies = enemies;
             _enemyControllers = enemyControllers ?? new List<EnemyAIController>();
             _context = new TurnContext();
             _drawSystem = new SkillDrawSystem(playerParty, maxRerolls);
+            _bonusFirstTurnAP = bonusFirstTurnAP;
 
             _context.OnPhaseChanged += (old, newPhase) => OnPhaseChanged?.Invoke(old, newPhase);
             _context.OnTurnStarted += turn => OnTurnStarted?.Invoke(turn);
@@ -60,14 +62,37 @@ namespace TeamLog.Combat.Turn
         }
 
         /// <summary>
-        /// 중앙화된 데미지 적용: 공격자 ATK + bonusPower - 대상 DEF
+        /// 중앙화된 데미지 적용: 공격자 ATK + bonusPower - 대상 DEF + 특성 훅
         /// </summary>
         public static void DealDamage(Character attacker, Character target, int bonusPower = 0)
         {
             int damage = attacker.Stats.GetStat(StatType.ATK) + bonusPower;
             int defense = target.Stats.GetStat(StatType.DEF);
-            target.Health.TakeDamage(CalculateDamage(damage, defense));
+            int calculatedDamage = CalculateDamage(damage, defense);
+
+            // 대상 특성: 들어오는 데미지 수정 (Sturdy 절반)
+            calculatedDamage = target.TraitHandler.ModifyIncomingDamage(calculatedDamage);
+
+            // 회피 시 MISS 처리
+            if (calculatedDamage == 0)
+            {
+                OnAttackMissed?.Invoke(target);
+                return;
+            }
+
+            target.Health.TakeDamage(calculatedDamage);
+
+            // 공격자 특성: 피해를 입혔을 때 (Corrosive 방어감소)
+            attacker.TraitHandler.OnDamageDealtTo(target);
+
+            // 대상 특성: 피해를 받은 후 (Counter/Thorns/Rampage/ArcaneFury/Rally)
+            target.TraitHandler.OnDamageReceived(attacker, calculatedDamage);
         }
+
+        /// <summary>
+        /// 회피 발생 시 이벤트 (FloatingText "MISS" 표시용)
+        /// </summary>
+        public static event System.Action<Character> OnAttackMissed;
 
         public void StartBattle()
         {
@@ -86,9 +111,13 @@ namespace TeamLog.Combat.Turn
             foreach (var c in _playerParty) if (c.IsAlive) c.Health.ResetShield();
             foreach (var c in _enemies) if (c.IsAlive) c.Health.ResetShield();
 
-            // AP 리셋: 기본 1 + 생존 파티원 수
+            // 적 특성: 턴 시작 훅 (Regenerate, Sturdy, PhaseShift, Rampage, Shell)
+            foreach (var c in _enemies) if (c.IsAlive) c.TraitHandler.OnTurnStart(_context.TurnNumber);
+
+            // AP 리셋: 기본 1 + 생존 파티원 수 (+ 첫 턴 보너스)
             int aliveCount = _playerParty.FindAll(p => p.IsAlive).Count;
-            _context.ResetAP(1 + aliveCount);
+            int bonus = (_context.TurnNumber == 1) ? _bonusFirstTurnAP : 0;
+            _context.ResetAP(1 + aliveCount + bonus);
 
             ExecuteDrawPhase();
         }
@@ -192,6 +221,10 @@ namespace TeamLog.Combat.Turn
         {
             if (skill.StatusEffect != StatusEffectType.None)
             {
+                // Shell 특성: 매 턴 첫 상태이상 무효화
+                if (target.TraitHandler.ShouldBlockEffect())
+                    return;
+
                 target.StatusEffects.ApplyEffect(skill.StatusEffect, skill.EffectDuration, skill.EffectValue);
                 target.ApplyStatModifiers();
             }

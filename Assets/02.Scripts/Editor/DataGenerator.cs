@@ -117,13 +117,14 @@ namespace TeamLog.Editor
                 int def = csv.GetInt(i, "def");
                 string skillsRaw = csv.Get(i, "skills");
                 string[] skills = string.IsNullOrEmpty(skillsRaw) ? new string[0] : skillsRaw.Split(';');
+                var trait = ParseEnum<EnemyTrait>(csv.Get(i, "trait"));
 
-                CreateCharacter(id, displayName, charClass, desc, hp, atk, def, skills);
+                CreateCharacter(id, displayName, charClass, desc, hp, atk, def, skills, trait);
             }
         }
 
         private static void CreateCharacter(string fileName, string name, CharacterClass charClass,
-            string desc, int hp, int atk, int def, string[] skills)
+            string desc, int hp, int atk, int def, string[] skills, EnemyTrait trait = EnemyTrait.None)
         {
             var path = $"{CHAR_PATH}/{fileName}.asset";
             var character = GetOrCreateAsset<CharacterData>(path);
@@ -135,6 +136,7 @@ namespace TeamLog.Editor
             SetPrivateField(character, "_baseHP", hp);
             SetPrivateField(character, "_baseATK", atk);
             SetPrivateField(character, "_baseDEF", def);
+            SetPrivateField(character, "_enemyTrait", trait);
 
             var skillList = new List<SkillData>();
             foreach (var skillName in skills)

@@ -28,6 +28,9 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Button _guardianButton;
         [SerializeField] private Button _arcanaButton;
 
+        [Header("Trait Area")]
+        [SerializeField] private Transform _buttonArea;
+
         [Header("Selection")]
         [SerializeField] private GameObject _targetIndicator;
 
@@ -57,6 +60,7 @@ namespace TeamLog.UI.Battle
             if (_infoText == null) _infoText = FindComponent<TextMeshProUGUI>("Info");
             if (_statText == null) _statText = FindComponent<TextMeshProUGUI>("Stats");
             if (_statusEffectContainer == null) _statusEffectContainer = transform.Find("StatusContainer");
+            if (_buttonArea == null) _buttonArea = transform.Find("ButtonArea");
             if (_guardianButton == null) _guardianButton = FindComponent<Button>("ButtonArea/Btn_가디언");
             if (_arcanaButton == null) _arcanaButton = FindComponent<Button>("ButtonArea/Btn_아크카");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
@@ -76,12 +80,6 @@ namespace TeamLog.UI.Battle
 
         private void Start()
         {
-            if (_guardianButton != null)
-                _guardianButton.onClick.AddListener(OnGuardianClicked);
-
-            if (_arcanaButton != null)
-                _arcanaButton.onClick.AddListener(OnArcanaClicked);
-
             if (_panelButton != null)
             {
                 _panelButton.onClick.AddListener(() => OnPanelClicked?.Invoke(_enemyIndex));
@@ -123,6 +121,68 @@ namespace TeamLog.UI.Battle
 
             if (_avatarImage != null && avatar != null)
                 _avatarImage.sprite = avatar;
+
+            // 특성 표시: ButtonArea를 특성 전용으로 설정
+            SetupTraitArea(character);
+        }
+
+        private void SetupTraitArea(Characters.Character character)
+        {
+            if (_buttonArea == null) return;
+
+            // 기존 자식(가디언/아크카 버튼) 제거
+            for (int i = _buttonArea.childCount - 1; i >= 0; i--)
+                Destroy(_buttonArea.GetChild(i).gameObject);
+
+            var trait = character?.Data.Trait ?? EnemyTrait.None;
+            if (trait == EnemyTrait.None) return;
+
+            // 특성 라벨
+            var labelRect = new GameObject("TraitLabel").AddComponent<RectTransform>();
+            labelRect.SetParent(_buttonArea, false);
+            labelRect.sizeDelta = new Vector2(160, 32);
+
+            var bg = labelRect.gameObject.AddComponent<Image>();
+            bg.color = BattleDisplayUtil.GetTraitColor(trait);
+            bg.raycastTarget = true;
+
+            var btn = labelRect.gameObject.AddComponent<Button>();
+            btn.targetGraphic = bg;
+
+            var labelObj = new GameObject("T").AddComponent<RectTransform>();
+            labelObj.SetParent(labelRect, false);
+            labelObj.anchorMin = Vector2.zero;
+            labelObj.anchorMax = Vector2.one;
+            labelObj.offsetMin = Vector2.zero;
+            labelObj.offsetMax = Vector2.zero;
+
+            var tmp = labelObj.gameObject.AddComponent<TextMeshProUGUI>();
+            tmp.fontSize = 14;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = Color.white;
+            tmp.enableWordWrapping = false;
+            tmp.overflowMode = TextOverflowModes.Ellipsis;
+            tmp.raycastTarget = false;
+            tmp.text = BattleDisplayUtil.GetTraitLabel(trait);
+
+            var capturedTrait = trait;
+            bool showing = false;
+            btn.onClick.AddListener(() =>
+            {
+                if (showing)
+                {
+                    SetInfoText(_intent?.GetDisplayText() ?? "");
+                    showing = false;
+                }
+                else
+                {
+                    string label = BattleDisplayUtil.GetTraitLabel(capturedTrait);
+                    string desc = BattleDisplayUtil.GetTraitDescription(capturedTrait);
+                    SetInfoText($"[{label}] {desc}");
+                    showing = true;
+                }
+            });
         }
 
         public void UpdateHP(int current, int max, int shield = 0)
@@ -161,16 +221,6 @@ namespace TeamLog.UI.Battle
         {
             if (_targetIndicator != null)
                 _targetIndicator.SetActive(isTargetable);
-        }
-
-        private void OnGuardianClicked()
-        {
-            // TODO: 가디언 액션 구현 (Phase 4)
-        }
-
-        private void OnArcanaClicked()
-        {
-            // TODO: 아크카 액션 구현 (Phase 4)
         }
 
         public void SetDead(bool isDead)

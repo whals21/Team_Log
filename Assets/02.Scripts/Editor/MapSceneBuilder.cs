@@ -88,6 +88,7 @@ namespace TeamLog.Editor
             var shopPanel = BuildShopPanel(canvasObj.transform, font);
             var rewardPanel = BuildRewardPanel(canvasObj.transform, font);
             var confirmationDialog = BuildConfirmationDialog(canvasObj.transform, font);
+            var restPanel = BuildRestPanel(canvasObj.transform, font);
 
             // ShopUI에 ConfirmationDialog 참조 연결
             var shopUISer = new SerializedObject(shopPanel.GetComponent<ShopUI>());
@@ -121,6 +122,7 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_shopUI", shopPanel.GetComponent<ShopUI>());
             WireProperty(setupSer, "_rewardUI", rewardPanel.GetComponent<RewardUI>());
             WireProperty(setupSer, "_confirmationDialog", confirmationDialog.GetComponent<ConfirmationDialog>());
+            WireProperty(setupSer, "_restUI", restPanel.GetComponent<RestUI>());
 
             // CharacterData
             WireProperty(setupSer, "_testWarriorData",
@@ -132,36 +134,49 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_testRogueData",
                 AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Rogue.asset"));
 
-            // EnemyData pools — prefix 기반 필터링으로 normal/elite/boss 분리
-            var normalPoolProp = setupSer.FindProperty("_normalEnemyPool");
-            var elitePoolProp = setupSer.FindProperty("_eliteEnemyPool");
-            var bossPoolProp = setupSer.FindProperty("_bossEnemyPool");
+            // EnemyData pools — 층별(floor-based) 적 풀 구성
+            var floorPoolsProp = setupSer.FindProperty("_floorPools");
 
-            var normalEnemies = LoadAllAssets<CharacterData>(CHAR_DIR, "Enemy_");
-            normalEnemies.RemoveAll(e => e.name.StartsWith("Enemy_Elite") || e.name.StartsWith("Enemy_Boss"));
-
-            var eliteEnemies = LoadAllAssets<CharacterData>(CHAR_DIR, "Enemy_Elite");
-            var bossEnemies = LoadAllAssets<CharacterData>(CHAR_DIR, "Enemy_Boss");
-
-            if (normalPoolProp != null && normalEnemies.Count > 0)
+            // 층별 매핑 정의
+            string[][] floorNormals = new string[][]
             {
-                normalPoolProp.arraySize = normalEnemies.Count;
-                for (int i = 0; i < normalEnemies.Count; i++)
-                    normalPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = normalEnemies[i];
-            }
-
-            if (elitePoolProp != null && eliteEnemies.Count > 0)
+                new[] { "Enemy_Slime", "Enemy_Goblin", "Enemy_Wolf", "Enemy_Mushroom" },           // Floor 1: 숲
+                new[] { "Enemy_Skeleton", "Enemy_Bat", "Enemy_Mummy", "Enemy_SkeletonArcher" },    // Floor 2: 유적
+                new[] { "Enemy_Wraith", "Enemy_Shadow", "Enemy_DemonSoldier", "Enemy_Gargoyle" }   // Floor 3: 심연
+            };
+            string[][] floorElites = new string[][]
             {
-                elitePoolProp.arraySize = eliteEnemies.Count;
-                for (int i = 0; i < eliteEnemies.Count; i++)
-                    elitePoolProp.GetArrayElementAtIndex(i).objectReferenceValue = eliteEnemies[i];
-            }
+                new string[0],                                                                               // Floor 1: 엘리트 없음
+                new[] { "Enemy_EliteKnight", "Enemy_EliteMage", "Enemy_EliteDarkSlime" },                    // Floor 2
+                new[] { "Enemy_EliteGoblinShaman", "Enemy_EliteSkeletonCaptain", "Enemy_EliteDemonMage" }    // Floor 3
+            };
+            string[] floorBosses = new[] { "Enemy_BossGoblinKing", "Enemy_BossDragon", "Enemy_BossDemonLord" };
 
-            if (bossPoolProp != null && bossEnemies.Count > 0)
+            if (floorPoolsProp != null)
             {
-                bossPoolProp.arraySize = bossEnemies.Count;
-                for (int i = 0; i < bossEnemies.Count; i++)
-                    bossPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = bossEnemies[i];
+                floorPoolsProp.arraySize = 3;
+                for (int f = 0; f < 3; f++)
+                {
+                    var poolProp = floorPoolsProp.GetArrayElementAtIndex(f);
+
+                    // Normal enemies
+                    var normalProp = poolProp.FindPropertyRelative("normalEnemies");
+                    var normals = LoadAssetsByNames<CharacterData>(CHAR_DIR, floorNormals[f]);
+                    normalProp.arraySize = normals.Count;
+                    for (int i = 0; i < normals.Count; i++)
+                        normalProp.GetArrayElementAtIndex(i).objectReferenceValue = normals[i];
+
+                    // Elite enemies
+                    var eliteProp = poolProp.FindPropertyRelative("eliteEnemies");
+                    var elites = LoadAssetsByNames<CharacterData>(CHAR_DIR, floorElites[f]);
+                    eliteProp.arraySize = elites.Count;
+                    for (int i = 0; i < elites.Count; i++)
+                        eliteProp.GetArrayElementAtIndex(i).objectReferenceValue = elites[i];
+
+                    // Boss
+                    var bossAsset = AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/{floorBosses[f]}.asset");
+                    poolProp.FindPropertyRelative("boss").objectReferenceValue = bossAsset;
+                }
             }
 
             // EventData
@@ -410,6 +425,51 @@ namespace TeamLog.Editor
 
         #endregion
 
+        #region Rest Panel
+
+        private static GameObject BuildRestPanel(Transform parent, TMP_FontAsset font)
+        {
+            var overlay = CreateFullImage("RestPanel", parent, OverlayBg);
+            overlay.SetActive(false);
+
+            var content = CreatePanel("Content", overlay.transform,
+                new Vector2(0.25f, 0.2f), new Vector2(0.75f, 0.8f), ContentPanel);
+
+            // 제목
+            var title = CreateText("TitleLabel", content.transform, font,
+                "캠프파이어", 28, AccentGold, TextAlignmentOptions.Center);
+            SetAnchors(title.GetComponent<RectTransform>(),
+                new Vector2(0f, 0.82f), new Vector2(1f, 1f));
+
+            // 선택지 버튼 3개
+            var restBtn = CreateButton("RestButton", content.transform, font,
+                "휴식 — HP 30% 회복", 20, new Color(0.4f, 0.85f, 0.4f));
+            SetAnchors(restBtn.GetComponent<RectTransform>(),
+                new Vector2(0.1f, 0.55f), new Vector2(0.9f, 0.7f));
+
+            var trainBtn = CreateButton("TrainButton", content.transform, font,
+                "수련 — ATK+1 영구 증가", 20, new Color(0.85f, 0.65f, 0.25f));
+            SetAnchors(trainBtn.GetComponent<RectTransform>(),
+                new Vector2(0.1f, 0.35f), new Vector2(0.9f, 0.5f));
+
+            var meditateBtn = CreateButton("MeditateButton", content.transform, font,
+                "명상 — 다음 전투 AP+1", 20, new Color(0.45f, 0.55f, 0.9f));
+            SetAnchors(meditateBtn.GetComponent<RectTransform>(),
+                new Vector2(0.1f, 0.15f), new Vector2(0.9f, 0.3f));
+
+            var restUI = overlay.AddComponent<RestUI>();
+            var ser = new SerializedObject(restUI);
+            WireProperty(ser, "_panel", overlay);
+            WireProperty(ser, "_restButton", restBtn.GetComponent<Button>());
+            WireProperty(ser, "_trainButton", trainBtn.GetComponent<Button>());
+            WireProperty(ser, "_meditateButton", meditateBtn.GetComponent<Button>());
+            ser.ApplyModifiedProperties();
+
+            return overlay;
+        }
+
+        #endregion
+
         #region Helpers
 
         private static void WireProperty(SerializedObject ser, string property, Object value)
@@ -433,6 +493,17 @@ namespace TeamLog.Editor
                     if (!fileName.StartsWith(namePrefix)) continue;
                 }
                 var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+                if (asset != null) result.Add(asset);
+            }
+            return result;
+        }
+
+        private static List<T> LoadAssetsByNames<T>(string folder, string[] names) where T : Object
+        {
+            var result = new List<T>();
+            foreach (var name in names)
+            {
+                var asset = AssetDatabase.LoadAssetAtPath<T>($"{folder}/{name}.asset");
                 if (asset != null) result.Add(asset);
             }
             return result;

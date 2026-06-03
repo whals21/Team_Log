@@ -187,6 +187,9 @@ namespace TeamLog.Map
             OnRunEnded?.Invoke();
         }
 
+        // 휴식 노드 보너스 AP (명상 선택 시)
+        public int BonusAP { get; private set; }
+
         /// <summary>
         /// 휴식 노드 — 파티 전체 HP 회복
         /// </summary>
@@ -201,6 +204,38 @@ namespace TeamLog.Map
                 }
             }
             AddLog("캠프파이어에서 휴식 — 파티 HP 회복");
+        }
+
+        /// <summary>
+        /// 수련 — 모든 생존 파티원 ATK+1 영구 증가
+        /// </summary>
+        public void TrainAtCampfire()
+        {
+            foreach (var member in _playerParty)
+            {
+                if (member.IsAlive)
+                    member.Stats.AddPermanentBase(StatType.ATK, 1);
+            }
+            AddLog("캠프파이어에서 수련 — 파티 ATK 영구 증가");
+        }
+
+        /// <summary>
+        /// 명상 — 다음 전투 시작 시 AP+1
+        /// </summary>
+        public void MeditateAtCampfire()
+        {
+            BonusAP = 1;
+            AddLog("캠프파이어에서 명상 — 다음 전투 AP 보너스");
+        }
+
+        /// <summary>
+        /// 보너스 AP 소모 후 초기화
+        /// </summary>
+        public int ConsumeBonusAP()
+        {
+            int bonus = BonusAP;
+            BonusAP = 0;
+            return bonus;
         }
 
         private void AddLog(string entry)

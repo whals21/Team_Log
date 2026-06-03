@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_Shadow
+  m_EditorClassIdentifier: 
+  _characterName: "\uADF8\uB9BC\uC790"
+  _characterClass: 3
+  _description: "\uC5B4\uB460 \uC18D\uC5D0\uC11C \uC774\uB3D9\uD558\uB294 \uADF8\uB9BC\uC790
+    \uC554\uC0B4\uC790."
+  _baseHP: 26
+  _baseATK: 7
+  _baseDEF: 2
+  _enemyTrait: 6
+  _skills:
+  - {fileID: 11400000, guid: a06f2ea9142c1714490b1836e443c586, type: 2}
+  - {fileID: 11400000, guid: 1cfaa26c8f00d4c46890e8fef6c062cc, type: 2}
+  - {fileID: 11400000, guid: 86184660a0a184c48ad1440eec387af8, type: 2}
+  - {fileID: 11400000, guid: 1279ad8335b95604085794fca28583b8, type: 2}

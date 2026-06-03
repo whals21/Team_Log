@@ -21,8 +21,10 @@ namespace TeamLog.UI.Battle
             if (_continueButton != null)
                 _continueButton.onClick.AddListener(() => OnContinueClicked?.Invoke());
 
-            // 시작 시에는 숨김
-            gameObject.SetActive(false);
+            // 주의: 여기서 gameObject.SetActive(false) 호출 금지
+            // 씬 빌더가 이미 비활성 상태로 저장함.
+            // 런타임에 Show()로 활성화 시 Awake()가 호출되는데,
+            // 여기서 다시 비활성화하면 오버레이가 보이지 않음.
         }
 
         public void Show(bool victory)

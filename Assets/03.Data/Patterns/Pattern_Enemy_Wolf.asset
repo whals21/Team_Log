@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0914af7ca0c602241b3c3abcafabd26e, type: 3}
+  m_Name: Pattern_Enemy_Wolf
+  m_EditorClassIdentifier: 
+  _enemyId: Enemy_Wolf
+  _skills:
+  - {fileID: 11400000, guid: 39fa3ee8e12d140439410a18563ddaee, type: 2}
+  - {fileID: 11400000, guid: d7ec986a88d66a84284703013b3f1828, type: 2}
+  - {fileID: 11400000, guid: 5128bcb27310aab4db28d948c3f0edc8, type: 2}
+  - {fileID: 11400000, guid: 44eedafecd2acd34686fb8a12bf77818, type: 2}

@@ -127,6 +127,10 @@ namespace TeamLog.Combat.AI
         {
             if (skill.StatusEffect != StatusEffectType.None)
             {
+                // Shell 특성: 매 턴 첫 상태이상 무효화
+                if (target.TraitHandler.ShouldBlockEffect())
+                    return;
+
                 target.StatusEffects.ApplyEffect(skill.StatusEffect, skill.EffectDuration, skill.EffectValue);
                 target.ApplyStatModifiers();
             }
@@ -136,6 +140,16 @@ namespace TeamLog.Combat.AI
         {
             var alive = _players.FindAll(p => p.IsAlive);
             if (alive.Count == 0) return null;
+
+            // Opportunist 특성: 항상 최저 HP 타겟, Taunt 무시
+            if (_owner.TraitHandler.HasTrait && _owner.TraitHandler.Trait == EnemyTrait.Opportunist)
+            {
+                Character lowestHP = null;
+                foreach (var p in alive)
+                    if (lowestHP == null || p.Health.CurrentHP < lowestHP.Health.CurrentHP)
+                        lowestHP = p;
+                return lowestHP;
+            }
 
             // Taunt 상태인 캐릭터가 있으면 우선 타겟
             var tauntTarget = alive.Find(p => p.StatusEffects.HasEffect(StatusEffectType.Taunt));

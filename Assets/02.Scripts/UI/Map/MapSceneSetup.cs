@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,6 +15,17 @@ using TeamLog.UI.Shop;
 namespace TeamLog.UI.Map
 {
     /// <summary>
+    /// 층별 적 풀 — 각 층의 일반/엘리트/보스 적 데이터를 보관
+    /// </summary>
+    [Serializable]
+    public class FloorEnemyPool
+    {
+        public CharacterData[] normalEnemies;
+        public CharacterData[] eliteEnemies;
+        public CharacterData boss;
+    }
+
+    /// <summary>
     /// 맵 씬의 진입점 — 맵 UI, GameRunState, 노드 이벤트 처리를 연결
     /// </summary>
     public class MapSceneSetup : MonoBehaviour
@@ -24,6 +36,7 @@ namespace TeamLog.UI.Map
         [SerializeField] private ShopUI _shopUI;
         [SerializeField] private RewardUI _rewardUI;
         [SerializeField] private ConfirmationDialog _confirmationDialog;
+        [SerializeField] private RestUI _restUI;
 
         [Header("Test Mode")]
         [SerializeField] private bool _useTestData = true;
@@ -35,10 +48,8 @@ namespace TeamLog.UI.Map
         [Header("Test Events")]
         [SerializeField] private EventData[] _testEvents;
 
-        [Header("Enemy Data Pools")]
-        [SerializeField] private CharacterData[] _normalEnemyPool;
-        [SerializeField] private CharacterData[] _eliteEnemyPool;
-        [SerializeField] private CharacterData[] _bossEnemyPool;
+        [Header("Floor-based Enemy Pools")]
+        [SerializeField] private FloorEnemyPool[] _floorPools;
 
         [Header("Data Pools")]
         [SerializeField] private SkillData[] _skillPool;
@@ -121,6 +132,8 @@ namespace TeamLog.UI.Map
                 _shopUI.Initialize(_runState, OnShopExit, _skillPool, _itemPool);
             if (_rewardUI != null)
                 _rewardUI.Initialize(_runState, OnRewardComplete);
+            if (_restUI != null)
+                _restUI.Initialize(OnRestChoiceSelected);
         }
 
         /// <summary>
@@ -208,8 +221,13 @@ namespace TeamLog.UI.Map
                     StartBattle(node);
                     break;
                 case MapNodeType.Rest:
-                    _runState.RestAtCampfire();
-                    ToastUI.Show("파티가 휴식했습니다.");
+                    if (_restUI != null)
+                        _restUI.Show();
+                    else
+                    {
+                        _runState.RestAtCampfire();
+                        ToastUI.Show("파티가 휴식했습니다.");
+                    }
                     break;
                 case MapNodeType.Event:
                     OpenEvent();
@@ -222,25 +240,31 @@ namespace TeamLog.UI.Map
 
         private void StartBattle(MapNode node)
         {
-            EnsureEnemyPoolsLoaded();
+            var pool = GetFloorPool();
+            if (pool == null)
+            {
+                Debug.LogWarning("[MapSceneSetup] 층별 적 풀이 비어 있습니다.");
+                return;
+            }
+
             var enemies = new List<Character>();
 
             switch (node.NodeType)
             {
                 case MapNodeType.Boss:
-                    if (_bossEnemyPool != null && _bossEnemyPool.Length > 0)
-                        enemies.Add(new Character(_bossEnemyPool[Random.Range(0, _bossEnemyPool.Length)]));
+                    if (pool.boss != null)
+                        enemies.Add(new Character(pool.boss));
                     break;
                 case MapNodeType.Elite:
-                    if (_eliteEnemyPool != null && _eliteEnemyPool.Length > 0)
-                        enemies.Add(new Character(_eliteEnemyPool[Random.Range(0, _eliteEnemyPool.Length)]));
+                    if (pool.eliteEnemies != null && pool.eliteEnemies.Length > 0)
+                        enemies.Add(new Character(pool.eliteEnemies[UnityEngine.Random.Range(0, pool.eliteEnemies.Length)]));
                     break;
                 default: // 일반 전투
-                    if (_normalEnemyPool != null && _normalEnemyPool.Length > 0)
+                    if (pool.normalEnemies != null && pool.normalEnemies.Length > 0)
                     {
-                        int count = Random.Range(1, 4); // 1~3마리
+                        int count = UnityEngine.Random.Range(1, 4); // 1~3마리
                         for (int i = 0; i < count; i++)
-                            enemies.Add(new Character(_normalEnemyPool[Random.Range(0, _normalEnemyPool.Length)]));
+                            enemies.Add(new Character(pool.normalEnemies[UnityEngine.Random.Range(0, pool.normalEnemies.Length)]));
                     }
                     break;
             }
@@ -256,22 +280,39 @@ namespace TeamLog.UI.Map
             foreach (var enemy in enemies)
                 enemy.ApplyFloorScaling(scaling);
 
-            BattleSceneSetup.SetBattleData(_playerParty, enemies);
+            int bonusAP = _runState.ConsumeBonusAP();
+            BattleSceneSetup.SetBattleData(_playerParty, enemies, bonusAP);
             BattleResult.SetBattleType(node.NodeType);
             SceneTransition.Instance.FadeToScene(BattleSceneName);
         }
 
-        /// <summary>
-        /// 인스펙터 연결 누락 시 경고 로그
-        /// </summary>
-        private void EnsureEnemyPoolsLoaded()
+        private FloorEnemyPool GetFloorPool()
         {
-            bool allEmpty = (_normalEnemyPool == null || _normalEnemyPool.Length == 0)
-                && (_eliteEnemyPool == null || _eliteEnemyPool.Length == 0)
-                && (_bossEnemyPool == null || _bossEnemyPool.Length == 0);
+            if (_floorPools == null || _floorPools.Length == 0) return null;
+            int index = System.Math.Clamp(_runState.CurrentFloor - 1, 0, _floorPools.Length - 1);
+            return _floorPools[index];
+        }
 
-            if (allEmpty)
-                Debug.LogWarning("[MapSceneSetup] 적 풀이 비어 있습니다. 인스펙터에 Enemy_ 에셋을 연결하세요.");
+        private void OnRestChoiceSelected(int choice)
+        {
+            switch (choice)
+            {
+                case 0: // 휴식
+                    _runState.RestAtCampfire();
+                    ToastUI.Show("파티가 휴식하여 HP를 회복했습니다.");
+                    break;
+                case 1: // 수련
+                    _runState.TrainAtCampfire();
+                    ToastUI.Show("파티가 수련하여 공격력이 영구 증가했습니다.");
+                    break;
+                case 2: // 명상
+                    _runState.MeditateAtCampfire();
+                    ToastUI.Show("파티가 명상하여 다음 전투 AP 보너스를 얻었습니다.");
+                    break;
+            }
+
+            if (_mapView != null)
+                _mapView.Refresh(_runState.Gold);
         }
 
         private void OpenEvent()
@@ -281,7 +322,7 @@ namespace TeamLog.UI.Map
             // 테스트 이벤트 데이터 있으면 사용, 없으면 스킵
             if (_testEvents != null && _testEvents.Length > 0)
             {
-                int index = Random.Range(0, _testEvents.Length);
+                int index = UnityEngine.Random.Range(0, _testEvents.Length);
                 _eventUI.ShowEvent(_testEvents[index]);
             }
         }

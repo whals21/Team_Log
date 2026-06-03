@@ -14,11 +14,6 @@ namespace TeamLog.Characters
 
         public bool HasEffect(StatusEffectType type) => _activeEffects.ContainsKey(type);
 
-        public int GetRemainingDuration(StatusEffectType type)
-        {
-            return _activeEffects.TryGetValue(type, out var effect) ? effect.RemainingTurns : 0;
-        }
-
         public void ApplyEffect(StatusEffectType type, int duration, int value)
         {
             if (_activeEffects.TryGetValue(type, out var existing))

@@ -30,10 +30,5 @@ namespace TeamLog.Combat.AI
             _currentIndex = (_currentIndex + 1) % _skills.Count;
             return skill;
         }
-
-        public void Reset()
-        {
-            _currentIndex = 0;
-        }
     }
 }

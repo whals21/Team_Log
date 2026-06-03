@@ -19,6 +19,7 @@ MonoBehaviour:
   _baseHP: 150
   _baseATK: 14
   _baseDEF: 8
+  _enemyTrait: 10
   _skills:
   - {fileID: 11400000, guid: 2a71579c30f6e4348bde847f0cb219da, type: 2}
   - {fileID: 11400000, guid: 8fc3b5b20ce28d147b194c47cb5d6b8e, type: 2}

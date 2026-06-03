@@ -9,11 +9,8 @@ namespace TeamLog.Characters
     public class SkillInventoryComponent
     {
         private readonly List<SkillData> _skills = new();
-        private SkillData _drawnSkill;
 
         public IReadOnlyList<SkillData> Skills => _skills;
-        public SkillData DrawnSkill => _drawnSkill;
-        public int SkillCount => _skills.Count;
 
         public void Initialize(IEnumerable<SkillData> skills)
         {
@@ -39,10 +36,7 @@ namespace TeamLog.Characters
         public SkillData DrawSkill()
         {
             if (_skills.Count == 0)
-            {
-                _drawnSkill = null;
                 return null;
-            }
 
             int totalWeight = 0;
             foreach (var skill in _skills)
@@ -55,19 +49,10 @@ namespace TeamLog.Characters
             {
                 cumulative += skill.Weight;
                 if (randomValue <= cumulative)
-                {
-                    _drawnSkill = skill;
                     return skill;
-                }
             }
 
-            _drawnSkill = _skills[0];
-            return _drawnSkill;
-        }
-
-        public void ClearDrawnSkill()
-        {
-            _drawnSkill = null;
+            return _skills[0];
         }
     }
 }

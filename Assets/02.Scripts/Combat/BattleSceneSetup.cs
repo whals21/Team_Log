@@ -44,32 +44,38 @@ namespace TeamLog.Combat
         // 외부 데이터 주입용 (맵 시스템에서 전투 시작 시 사용)
         private static List<Character> _pendingParty;
         private static List<Character> _pendingEnemies;
+        private static int _pendingBonusAP;
 
         /// <summary>
         /// 맵 시스템에서 전투 시작 시 파티와 적 데이터를 설정
         /// </summary>
-        public static void SetBattleData(List<Character> party, List<Character> enemies)
+        public static void SetBattleData(List<Character> party, List<Character> enemies, int bonusAP = 0)
         {
             _pendingParty = party;
             _pendingEnemies = enemies;
+            _pendingBonusAP = bonusAP;
         }
 
         private void Start()
         {
+            int bonusAP = 0;
+
             // 외부 데이터가 있으면 사용, 없으면 테스트 모드
             if (_pendingParty != null && _pendingEnemies != null)
             {
                 _playerParty = new List<Character>(_pendingParty);
                 _enemies = new List<Character>(_pendingEnemies);
+                bonusAP = _pendingBonusAP;
                 _pendingParty = null;
                 _pendingEnemies = null;
+                _pendingBonusAP = 0;
             }
             else if (_useTestData)
             {
                 CreateTestData();
             }
 
-            InitializeBattle();
+            InitializeBattle(bonusAP);
         }
 
         private void CreateTestData()
@@ -111,7 +117,7 @@ namespace TeamLog.Combat
             return character;
         }
 
-        private void InitializeBattle()
+        private void InitializeBattle(int bonusAP = 0)
         {
             if (_playerParty.Count == 0 || _enemies.Count == 0)
             {
@@ -132,7 +138,7 @@ namespace TeamLog.Combat
             }
 
             // TurnManager 생성 — AI 컨트롤러 전달
-            _turnManager = new TurnManager(_playerParty, _enemies, _enemyControllers, maxRerolls: 2);
+            _turnManager = new TurnManager(_playerParty, _enemies, _enemyControllers, maxRerolls: 2, bonusFirstTurnAP: bonusAP);
             _turnManager.OnPhaseChanged += OnPhaseChanged;
             _turnManager.OnTurnStarted += OnTurnStarted;
             _turnManager.OnBattleEnded += OnBattleEnded;
@@ -169,6 +175,9 @@ namespace TeamLog.Combat
                 c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
                 c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
             }
+
+            // 특성: 회피 시 MISS 플로팅 텍스트
+            TurnManager.OnAttackMissed += (target) => SpawnFloatingText(target, "MISS", FloatingTextUI.DamageColor);
 
             // 전투 시작
             _turnManager.StartBattle();

@@ -26,6 +26,11 @@ namespace TeamLog.Characters
         public event System.Action<int> OnHealApplied;       // 실제 회복량
         public event System.Action<int> OnShieldAdded;       // 쉴드 획득량
 
+        /// <summary>
+        /// 사망 직전 호출. true 반환 시 HP=1로 생존 (Immortal 특성용)
+        /// </summary>
+        public event System.Func<bool> OnPreDeath;
+
         public void Initialize(int maxHP)
         {
             _maxHP = maxHP;
@@ -63,8 +68,17 @@ namespace TeamLog.Characters
 
             if (_currentHP <= 0)
             {
-                _isDead = true;
-                OnDeath?.Invoke();
+                // 사망 방지 특성 체크 (Immortal 등)
+                if (OnPreDeath != null && OnPreDeath.Invoke())
+                {
+                    _currentHP = 1;
+                    OnHPChanged?.Invoke(_currentHP, _maxHP);
+                }
+                else
+                {
+                    _isDead = true;
+                    OnDeath?.Invoke();
+                }
             }
         }
 

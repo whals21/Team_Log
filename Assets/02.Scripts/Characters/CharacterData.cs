@@ -20,6 +20,9 @@ namespace TeamLog.Characters
         [SerializeField] private int _baseATK = 10;
         [SerializeField] private int _baseDEF = 5;
 
+        [Header("적 특성")]
+        [SerializeField] private EnemyTrait _enemyTrait;
+
         [Header("스킬")]
         [SerializeField] private List<SkillData> _skills = new List<SkillData>(4);
 
@@ -31,6 +34,7 @@ namespace TeamLog.Characters
         public int BaseATK => _baseATK;
         public int BaseDEF => _baseDEF;
         public IReadOnlyList<SkillData> Skills => _skills;
+        public EnemyTrait Trait => _enemyTrait;
         #endregion
     }
 

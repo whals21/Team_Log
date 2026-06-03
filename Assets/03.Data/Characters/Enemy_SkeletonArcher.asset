@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_SkeletonArcher
+  m_EditorClassIdentifier: 
+  _characterName: "\uD574\uACE8 \uAD81\uC218"
+  _characterClass: 3
+  _description: "\uC815\uD655\uD55C \uC0AC\uACA9\uC744 \uD558\uB294 \uC5B8\uB370\uB4DC
+    \uAD81\uC218."
+  _baseHP: 28
+  _baseATK: 8
+  _baseDEF: 1
+  _enemyTrait: 2
+  _skills:
+  - {fileID: 11400000, guid: 0f9213fcaf10ffc44a1adcee57d61761, type: 2}
+  - {fileID: 11400000, guid: ccf934fde8d15a64eb6c5e0c39f0eb6d, type: 2}
+  - {fileID: 11400000, guid: 47faee95934db514eabe6fcfc6b3acde, type: 2}
+  - {fileID: 11400000, guid: a9719fa400e151042a86d172fce8b12e, type: 2}

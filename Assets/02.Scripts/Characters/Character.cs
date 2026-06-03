@@ -14,6 +14,7 @@ namespace TeamLog.Characters
         public StatComponent Stats { get; }
         public StatusEffectComponent StatusEffects { get; }
         public SkillInventoryComponent SkillInventory { get; }
+        public EnemyTraitHandler TraitHandler { get; }
 
         // 프로퍼티
         public CharacterData Data => _data;
@@ -31,6 +32,11 @@ namespace TeamLog.Characters
             Stats = new StatComponent();
             StatusEffects = new StatusEffectComponent();
             SkillInventory = new SkillInventoryComponent();
+            TraitHandler = new EnemyTraitHandler(data.Trait, this);
+
+            // 특성 사망 방지 훅 연결
+            if (TraitHandler.HasTrait)
+                Health.OnPreDeath += () => TraitHandler.PreventDeath();
 
             InitializeComponents();
         }

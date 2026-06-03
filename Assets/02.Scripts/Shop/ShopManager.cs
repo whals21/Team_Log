@@ -13,8 +13,6 @@ namespace TeamLog.Shop
     {
         private readonly System.Random _rng = new();
 
-        public event System.Action<int> OnGoldChanged;
-
         /// <summary>
         /// 랜덤 상점 슬롯 생성 (상점 노드 방문 시)
         /// </summary>
@@ -67,7 +65,6 @@ namespace TeamLog.Shop
             if (!runState.SpendGold(slot.Price)) return false;
 
             slot.IsSold = true;
-            OnGoldChanged?.Invoke(runState.Gold);
 
             if (slot.ContentType == ShopSlot.SlotContentType.Skill)
             {
@@ -87,7 +84,6 @@ namespace TeamLog.Shop
         public void SellSkill(int sellPrice, GameRunState runState)
         {
             runState.AddGold(sellPrice);
-            OnGoldChanged?.Invoke(runState.Gold);
         }
 
         private int GetSkillPrice(int floorNumber)

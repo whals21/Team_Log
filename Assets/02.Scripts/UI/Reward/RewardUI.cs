@@ -73,9 +73,13 @@ namespace TeamLog.UI.Reward
 
         private IEnumerator HideAndNotify()
         {
+            // 콜백을 FadeOut보다 먼저 호출해야 함.
+            // FadeOut이 gameObject를 SetActive(false)하면 코루틴이 즉시 종료되어
+            // 이후 코드가 실행되지 않기 때문.
+            _onRewardComplete?.Invoke();
+
             var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
             yield return UIAnimationHelper.FadeOut(cg);
-            _onRewardComplete?.Invoke();
         }
 
         private void ClearCards()

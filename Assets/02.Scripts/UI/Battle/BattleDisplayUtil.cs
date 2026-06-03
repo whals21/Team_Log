@@ -76,6 +76,70 @@ namespace TeamLog.UI.Battle
             _ => "알 수 없는 상태 효과입니다."
         };
 
+        #region Trait Display
+
+        public static string GetTraitLabel(EnemyTrait trait) => trait switch
+        {
+            // 일반 적
+            EnemyTrait.Regenerate => "재생",
+            EnemyTrait.Opportunist => "약자 노림",
+            EnemyTrait.PhaseShift => "위상 변이",
+            EnemyTrait.Counter => "반격",
+            EnemyTrait.Thorns => "가시",
+            EnemyTrait.Shell => "껍질",
+            // 엘리트
+            EnemyTrait.Sturdy => "견고",
+            EnemyTrait.ArcaneFury => "마력 폭주",
+            EnemyTrait.Corrosive => "부식",
+            // 보스
+            EnemyTrait.Rally => "소집령",
+            EnemyTrait.Rampage => "연소",
+            EnemyTrait.Immortal => "불사",
+            _ => ""
+        };
+
+        public static Color GetTraitColor(EnemyTrait trait) => trait switch
+        {
+            // 일반 적
+            EnemyTrait.Regenerate => new Color(0.1f, 0.5f, 0.5f),      // 청록 (회복)
+            EnemyTrait.Opportunist => new Color(0.6f, 0.15f, 0.15f),   // 빨강 (약자 노림)
+            EnemyTrait.PhaseShift => new Color(0.3f, 0.3f, 0.7f),      // 파랑 (변이)
+            EnemyTrait.Counter => new Color(0.7f, 0.35f, 0.1f),        // 주황 (반격)
+            EnemyTrait.Thorns => new Color(0.15f, 0.55f, 0.2f),        // 녹색 (가시)
+            EnemyTrait.Shell => new Color(0.5f, 0.45f, 0.35f),         // 갈색 (껍질)
+            // 엘리트
+            EnemyTrait.Sturdy => new Color(0.4f, 0.4f, 0.5f),          // 강철색
+            EnemyTrait.ArcaneFury => new Color(0.4f, 0.15f, 0.6f),     // 보라 (마법)
+            EnemyTrait.Corrosive => new Color(0.3f, 0.5f, 0.15f),      // 녹색 (부식)
+            // 보스
+            EnemyTrait.Rally => new Color(0.7f, 0.6f, 0.1f),           // 금색 (소집령)
+            EnemyTrait.Rampage => new Color(0.7f, 0.15f, 0.1f),        // 빨강 (연소)
+            EnemyTrait.Immortal => new Color(0.55f, 0.1f, 0.55f),      // 진보라 (불사)
+            _ => new Color(0.4f, 0.4f, 0.4f)
+        };
+
+        public static string GetTraitDescription(EnemyTrait trait) => trait switch
+        {
+            // 일반 적
+            EnemyTrait.Regenerate => "턴 시작 시 HP 5 회복. 독/화상 상태면 회복 불가.",
+            EnemyTrait.Opportunist => "항상 HP가 가장 낮은 대상을 공격합니다. (도발 무시)",
+            EnemyTrait.PhaseShift => "홀수 턴: 방어력 +4 / 짝수 턴: 공격력 +4",
+            EnemyTrait.Counter => "피격 시 공격자에게 3 고정 데미지 반격.",
+            EnemyTrait.Thorns => "피격 시 받은 피해의 30%를 공격자에게 반사.",
+            EnemyTrait.Shell => "매 턴 첫 번째 상태이상을 무효화합니다.",
+            // 엘리트
+            EnemyTrait.Sturdy => "매 턴 첫 번째 공격의 데미지를 50% 감소시킵니다.",
+            EnemyTrait.ArcaneFury => "HP가 50% 이하가 되면 즉시 공격력 +5.",
+            EnemyTrait.Corrosive => "피해를 입힌 대상에게 방어 감소 디버프를 부여합니다.",
+            // 보스
+            EnemyTrait.Rally => "HP 50% 이하 시 공격력 +8, 방어력 +4 획득 (2턴).",
+            EnemyTrait.Rampage => "피해를 입지 않은 턴마다 공격력 +3 누적. 피해를 입으면 초기화.",
+            EnemyTrait.Immortal => "치명적 피해 시 HP 1로 생존합니다. (1회)",
+            _ => ""
+        };
+
+        #endregion
+
         /// <summary>
         /// 쉴드 바 앵커 갱신 — HP 바 끝점부터 겹쳐서 표시
         /// </summary>

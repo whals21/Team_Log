@@ -164,6 +164,9 @@ namespace TeamLog.Combat
                 c.Health.OnDamageTaken += amount => SpawnFloatingText(c, $"-{amount}", FloatingTextUI.DamageColor);
                 c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
                 c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
+                c.Health.OnDamageTaken += _ => _battleUIManager?.FlashPanelForCharacter(c);
+                c.Health.OnDamageTaken += _ => AudioManager.Instance.PlayAttackHit();
+                c.Health.OnHealApplied += _ => AudioManager.Instance.PlayHeal();
                 c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
             }
             foreach (var c in _enemies)
@@ -173,6 +176,9 @@ namespace TeamLog.Combat
                 c.Health.OnDamageTaken += amount => SpawnFloatingText(c, $"-{amount}", FloatingTextUI.DamageColor);
                 c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
                 c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
+                c.Health.OnDamageTaken += _ => _battleUIManager?.FlashPanelForCharacter(c);
+                c.Health.OnDamageTaken += _ => AudioManager.Instance.PlayAttackHit();
+                c.Health.OnHealApplied += _ => AudioManager.Instance.PlayHeal();
                 c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
             }
 

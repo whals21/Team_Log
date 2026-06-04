@@ -7,6 +7,7 @@ using TeamLog.Characters;
 using TeamLog.Combat.AI;
 using TeamLog.Event;
 using TeamLog.Reward;
+using TeamLog.UI;
 
 namespace TeamLog.Editor
 {
@@ -36,6 +37,8 @@ namespace TeamLog.Editor
             GenerateEnemyPatternData();
             GenerateItemData();
             GenerateEventData();
+            GenerateUIPalette();
+            GenerateAudioPalette();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -557,6 +560,41 @@ namespace TeamLog.Editor
             SetPrivateField(eventData, "_choices", new List<EventChoice>(choices));
 
             EditorUtility.SetDirty(eventData);
+        }
+
+        #endregion
+
+        #region UI Palette
+
+        private static void GenerateUIPalette()
+        {
+            const string path = "Assets/03.Data/UIPalette.asset";
+            var palette = GetOrCreateAsset<UIPalette>(path);
+            palette.name = "UIPalette";
+            EditorUtility.SetDirty(palette);
+            Debug.Log("[DataGenerator] UIPalette asset ensured.");
+        }
+
+        #endregion
+
+        #region Audio Palette
+
+        private static void GenerateAudioPalette()
+        {
+            const string path = "Assets/03.Data/AudioPalette.asset";
+            var palette = GetOrCreateAsset<AudioPalette>(path);
+            palette.name = "AudioPalette";
+
+            // 기본 엔트리 보장
+            if (palette.entries == null || palette.entries.Count == 0)
+            {
+                var names = new[] { "AttackHit", "Heal", "UIClick", "Victory", "Defeat" };
+                foreach (var n in names)
+                    palette.entries.Add(new AudioPalette.AudioEntry { name = n, clip = null });
+            }
+
+            EditorUtility.SetDirty(palette);
+            Debug.Log("[DataGenerator] AudioPalette asset ensured.");
         }
 
         #endregion

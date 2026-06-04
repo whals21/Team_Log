@@ -58,5 +58,61 @@ namespace TeamLog.UI
             if (cg == null) cg = go.AddComponent<CanvasGroup>();
             return cg;
         }
+
+        /// <summary>
+        /// RectTransform의 anchorMax.x를 트윈 애니메이션 (HP 바용)
+        /// </summary>
+        public static IEnumerator TweenAnchorMaxX(RectTransform rt, float targetX, float duration = 0.3f)
+        {
+            float startX = rt.anchorMax.x;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                // ease-out
+                t = 1f - (1f - t) * (1f - t);
+                rt.anchorMax = new Vector2(Mathf.Lerp(startX, targetX, t), rt.anchorMax.y);
+                yield return null;
+            }
+            rt.anchorMax = new Vector2(targetX, rt.anchorMax.y);
+        }
+
+        /// <summary>
+        /// 피격 플래시 — Image를 지정 색상으로 깜빡임
+        /// </summary>
+        public static IEnumerator FlashColor(Image img, Color flashColor, float duration = 0.15f)
+        {
+            if (img == null) yield break;
+            Color original = img.color;
+            img.color = flashColor;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                img.color = Color.Lerp(flashColor, original, t);
+                yield return null;
+            }
+            img.color = original;
+        }
+
+        /// <summary>
+        /// CanvasGroup의 alpha를 서서히 변경 (사망 페이드아웃용)
+        /// </summary>
+        public static IEnumerator FadeToAlpha(CanvasGroup cg, float targetAlpha, float duration = 0.5f)
+        {
+            if (cg == null) yield break;
+            float startAlpha = cg.alpha;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                cg.alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
+                yield return null;
+            }
+            cg.alpha = targetAlpha;
+        }
     }
 }

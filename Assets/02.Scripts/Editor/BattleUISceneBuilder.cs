@@ -26,6 +26,31 @@ namespace TeamLog.Editor
         private static readonly Color TextWhite = Color.white;
         private static readonly Color TextDim = new Color(0.7f, 0.7f, 0.75f);
         private static readonly Color ShieldBrown = new Color(0.72f, 0.45f, 0.2f);
+
+        // ── GUI 에셋 스프라이트 경로 ──
+        private const string SPRITE_BASE = "Assets/Layer Lab/GUI Pro-CasualGame/ResourcesData/Sprites/Components";
+        private const string SPRITE_TOPBAR = SPRITE_BASE + "/Frame/PanelFrame03_Topbar.png";
+        private const string SPRITE_BOTTOM = SPRITE_BASE + "/Frame/PanelFrame06_Bottom.png";
+        private const string SPRITE_PLAYER_PANEL = SPRITE_BASE + "/Frame/BasicFrame_Round12_Gradient.png";
+        private const string SPRITE_ENEMY_PANEL = SPRITE_BASE + "/Frame/CardFrame03_Single_Blue.png";
+        private const string SPRITE_HP_BG = SPRITE_BASE + "/Slider/Slider_Basic04_Bg.png";
+        private const string SPRITE_HP_FILL_GREEN = SPRITE_BASE + "/Slider/Slider_Basic04_Fill_Green.png";
+        private const string SPRITE_HP_FILL_RED = SPRITE_BASE + "/Slider/Slider_Basic04_Fill_Red.png";
+        private const string SPRITE_ENDTURN_BTN = SPRITE_BASE + "/Button/Button01_175_Red.png";
+        private const string SPRITE_LOG_SIDEBAR = SPRITE_BASE + "/Frame/ListFrame03_Single_Bg_Blue.png";
+        private const string SPRITE_BADGE_BG = SPRITE_BASE + "/Button/Button_Circle128_Dark.png";
+        private const string SPRITE_CARD_BORDER = SPRITE_BASE + "/Frame/CardFrame01_Border.png";
+        private const string SPRITE_CARD_GRADIENT = SPRITE_BASE + "/Frame/CardFrame01_Gradient.png";
+
+        // ── 스킬 아이콘 스프라이트 경로 ──
+        private const string ICON_BASE = SPRITE_BASE;
+        private const string ICON_ATTACK = ICON_BASE + "/Icon_ItemIcons/128/Icon_Sword.png";
+        private const string ICON_HEAL = ICON_BASE + "/Icon_ItemIcons/128/Icon_Heart.png";
+        private const string ICON_SHIELD = ICON_BASE + "/Icon_ItemIcons/128/Icon_Shield.png";
+        private const string ICON_BUFF = ICON_BASE + "/Icon_RuneIcons/256/RuneIcon0_Buff.png";
+        private const string ICON_DEBUFF = ICON_BASE + "/Icon_RuneIcons/256/RuneIcon0_Debuff.png";
+        private const string ICON_PURIFY = ICON_BASE + "/Icon_RuneIcons/256/RuneIcon0_Ball_Health.png";
+
         private const string KOREAN_FONT_TTF = "Assets/08.Resource/Fonts/NanumGothic.ttf";
         private const string KOREAN_FONT_SDF = "Assets/08.Resource/Fonts/NanumGothic SDF.asset";
         private static TMP_FontAsset _koreanFont;
@@ -147,6 +172,7 @@ namespace TeamLog.Editor
 
             CreateCharacterPopup(root);
             CreateBattleEndOverlay(root);
+            CreateTooltipUI(root);
         }
     }
 }

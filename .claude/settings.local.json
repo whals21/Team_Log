@@ -25,7 +25,20 @@
       "mcp__mcp-unity__load_scene",
       "Bash(python3:*)",
       "mcp__ide__getDiagnostics",
-      "mcp__mcp-unity__unload_scene"
+      "mcp__mcp-unity__unload_scene",
+      "Bash(find:*)",
+      "WebSearch",
+      "mcp__web-reader__webReader",
+      "Bash(powershell:*)",
+      "mcp__mcp-unity__select_gameobject",
+      "mcp__godot-mcp-ultimate__godot_analyze_scene",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "mcp__mcp-unity__run_tests",
+      "Bash(echo === $asset ===:*)",
+      "Bash(do echo:*)",
+      "Bash(sed:*)",
+      "Bash(done)"
     ]
   },
   "enableAllProjectMcpServers": true,

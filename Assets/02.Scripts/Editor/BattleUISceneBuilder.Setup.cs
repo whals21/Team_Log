@@ -58,6 +58,18 @@ namespace TeamLog.Editor
                 var rerollText = topBar.Find("RerollText");
                 if (rerollText != null)
                     SetPrivateField(topBarUI, "_rerollText", rerollText.GetComponent<TMPro.TextMeshProUGUI>());
+
+                // PartyStatusWidget 자동 연결
+                var partyWidget = topBar.GetComponent<PartyStatusWidget>();
+                if (partyWidget != null)
+                {
+                    var partyHP = topBar.Find("PartyHP");
+                    var partyGold = topBar.Find("PartyGold");
+                    if (partyHP != null)
+                        SetPrivateField(partyWidget, "_hpText", partyHP.GetComponent<TMPro.TextMeshProUGUI>());
+                    if (partyGold != null)
+                        SetPrivateField(partyWidget, "_goldText", partyGold.GetComponent<TMPro.TextMeshProUGUI>());
+                }
             }
 
             // 3) BottomBar에 ActionBarUI 추가
@@ -98,9 +110,14 @@ namespace TeamLog.Editor
                     battleLogUI = rightSidebar.gameObject.AddComponent<BattleLogUI>();
 
                 // LogText 자식 자동 연결
-                var logText = rightSidebar.Find("LogText");
+                var logText = rightSidebar.Find("Viewport/LogText");
                 if (logText != null)
                     SetPrivateField(battleLogUI, "_logText", logText.GetComponent<TMPro.TextMeshProUGUI>());
+
+                // ScrollRect 자동 연결
+                var scrollRect = rightSidebar.GetComponent<ScrollRect>();
+                if (scrollRect != null)
+                    SetPrivateField(battleLogUI, "_scrollRect", scrollRect);
             }
 
             // 7) BattleSceneSetup 추가
@@ -248,7 +265,12 @@ namespace TeamLog.Editor
             icon.pivot = new Vector2(0, 0.5f);
             icon.anchoredPosition = new Vector2(4, 0);
             icon.sizeDelta = new Vector2(60, 60);
-            icon.gameObject.AddComponent<Image>().color = AccentRed;
+            var iconImg = icon.gameObject.AddComponent<Image>();
+            iconImg.color = AccentRed;
+            // 기본 아이콘 스프라이트 (Attack)
+            var defaultIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_ATTACK);
+            if (defaultIcon != null)
+                iconImg.sprite = defaultIcon;
 
             // 스킬명
             var nameT = NewRect("SkillNameText", rect);

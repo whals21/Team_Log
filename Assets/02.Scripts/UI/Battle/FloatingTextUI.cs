@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Battle
 {
@@ -85,8 +86,8 @@ namespace TeamLog.UI.Battle
             return floating;
         }
 
-        public static readonly Color DamageColor = new Color(0.85f, 0.2f, 0.2f);
-        public static readonly Color HealColor = new Color(0.15f, 0.68f, 0.38f);
-        public static readonly Color ShieldColor = new Color(0.72f, 0.45f, 0.2f);
+        public static Color DamageColor => UIPalette.Default.DamageColor;
+        public static Color HealColor => UIPalette.Default.HealColor;
+        public static Color ShieldColor => UIPalette.Default.ShieldColor;
     }
 }

@@ -56,6 +56,27 @@ namespace TeamLog.UI.Battle
         };
 
         /// <summary>
+        /// 상태이상 타입 → 한국어 이니셜 (색맹 지원용)
+        /// </summary>
+        public static string GetEffectInitial(StatusEffectType type) => type switch
+        {
+            StatusEffectType.Poison => "독",
+            StatusEffectType.Burn => "화",
+            StatusEffectType.Stun => "기",
+            StatusEffectType.Freeze => "빙",
+            StatusEffectType.Sleep => "수",
+            StatusEffectType.Bleed => "출",
+            StatusEffectType.DefenseUp => "방↑",
+            StatusEffectType.DefenseDown => "방↓",
+            StatusEffectType.AttackUp => "공↑",
+            StatusEffectType.AttackDown => "공↓",
+            StatusEffectType.Regeneration => "재",
+            StatusEffectType.Shield => "쉴",
+            StatusEffectType.Taunt => "도",
+            _ => ""
+        };
+
+        /// <summary>
         /// 상태이상 타입 → 설명 문구
         /// </summary>
         public static string GetEffectDescription(StatusEffectType type) => type switch

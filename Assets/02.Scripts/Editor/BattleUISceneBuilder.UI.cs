@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEditor;
 using TMPro;
 using TeamLog.UI.Battle;
 
@@ -26,7 +27,15 @@ namespace TeamLog.Editor
             bar.anchorMax = new Vector2(1, 1);
             bar.pivot = new Vector2(0.5f, 1);
             bar.sizeDelta = new Vector2(0, 60);
-            bar.gameObject.AddComponent<Image>().color = new Color(0.03f, 0.03f, 0.08f, 0.95f);
+            var topBarImg = bar.gameObject.AddComponent<Image>();
+            var topBarSprite = LoadSprite(SPRITE_TOPBAR);
+            if (topBarSprite != null)
+            {
+                topBarImg.sprite = topBarSprite;
+                Set9Slice(topBarImg);
+            }
+            else
+                topBarImg.color = new Color(0.03f, 0.03f, 0.08f, 0.95f);
 
             // 하단 구분선
             var div = NewRect("Divider", bar);
@@ -70,7 +79,7 @@ namespace TeamLog.Editor
             rerollRect.anchorMin = new Vector2(1, 0.5f);
             rerollRect.anchorMax = new Vector2(1, 0.5f);
             rerollRect.pivot = new Vector2(1, 0.5f);
-            rerollRect.anchoredPosition = new Vector2(-190, 0);
+            rerollRect.anchoredPosition = new Vector2(-310, 0);
             rerollRect.sizeDelta = new Vector2(120, 40);
             var rerollT = rerollRect.gameObject.AddComponent<TextMeshProUGUI>();
             rerollT.font = GetOrCreateKoreanFont();
@@ -79,6 +88,38 @@ namespace TeamLog.Editor
             rerollT.fontStyle = FontStyles.Bold;
             rerollT.alignment = TextAlignmentOptions.Center;
             rerollT.color = ShieldBrown;
+
+            // 파티 상태 위젯 (HP 총합, 골드, 층)
+            var partyHP = NewRect("PartyHP", bar);
+            partyHP.anchorMin = new Vector2(1, 0.5f);
+            partyHP.anchorMax = new Vector2(1, 0.5f);
+            partyHP.pivot = new Vector2(1, 0.5f);
+            partyHP.anchoredPosition = new Vector2(-180, 0);
+            partyHP.sizeDelta = new Vector2(80, 30);
+            var partyHPT = partyHP.gameObject.AddComponent<TextMeshProUGUI>();
+            partyHPT.font = GetOrCreateKoreanFont();
+            partyHPT.text = "HP 200/200";
+            partyHPT.fontSize = 16;
+            partyHPT.fontStyle = FontStyles.Bold;
+            partyHPT.alignment = TextAlignmentOptions.Center;
+            partyHPT.color = AccentGreen;
+
+            var partyGold = NewRect("PartyGold", bar);
+            partyGold.anchorMin = new Vector2(1, 0.5f);
+            partyGold.anchorMax = new Vector2(1, 0.5f);
+            partyGold.pivot = new Vector2(1, 0.5f);
+            partyGold.anchoredPosition = new Vector2(-100, 0);
+            partyGold.sizeDelta = new Vector2(70, 30);
+            var partyGoldT = partyGold.gameObject.AddComponent<TextMeshProUGUI>();
+            partyGoldT.font = GetOrCreateKoreanFont();
+            partyGoldT.text = "100G";
+            partyGoldT.fontSize = 16;
+            partyGoldT.fontStyle = FontStyles.Bold;
+            partyGoldT.alignment = TextAlignmentOptions.Center;
+            partyGoldT.color = AccentYellow;
+
+            // PartyStatusWidget 컴포넌트를 TopBar에 추가
+            bar.gameObject.AddComponent<PartyStatusWidget>();
 
             // 턴 종료 버튼
             var btn = NewRect("EndTurnButton", bar);
@@ -89,7 +130,14 @@ namespace TeamLog.Editor
             btn.sizeDelta = new Vector2(160, 40);
             var b = btn.gameObject.AddComponent<Button>();
             var bImg = btn.gameObject.AddComponent<Image>();
-            bImg.color = AccentRed;
+            var endTurnSprite = LoadSprite(SPRITE_ENDTURN_BTN);
+            if (endTurnSprite != null)
+            {
+                bImg.sprite = endTurnSprite;
+                Set9Slice(bImg);
+            }
+            else
+                bImg.color = AccentRed;
             b.targetGraphic = bImg;
             var c = b.colors;
             c.highlightedColor = new Color(0.9f, 0.2f, 0.3f);
@@ -118,7 +166,15 @@ namespace TeamLog.Editor
             bar.anchorMax = new Vector2(1, 0);
             bar.pivot = new Vector2(0.5f, 0);
             bar.sizeDelta = new Vector2(0, 100);
-            bar.gameObject.AddComponent<Image>().color = new Color(0.03f, 0.03f, 0.08f, 0.95f);
+            var bottomBarImg = bar.gameObject.AddComponent<Image>();
+            var bottomSprite = LoadSprite(SPRITE_BOTTOM);
+            if (bottomSprite != null)
+            {
+                bottomBarImg.sprite = bottomSprite;
+                Set9Slice(bottomBarImg);
+            }
+            else
+                bottomBarImg.color = new Color(0.03f, 0.03f, 0.08f, 0.95f);
 
             var div = NewRect("Divider", bar);
             div.anchorMin = new Vector2(0, 1);
@@ -153,7 +209,15 @@ namespace TeamLog.Editor
             sidebar.anchorMax = new Vector2(0.24f, 1);
             sidebar.offsetMin = new Vector2(5, 5);
             sidebar.offsetMax = new Vector2(-2, -5);
-            sidebar.gameObject.AddComponent<Image>().color = new Color(0.04f, 0.04f, 0.1f, 0.8f);
+            var leftImg = sidebar.gameObject.AddComponent<Image>();
+            var leftSprite = LoadSprite(SPRITE_LOG_SIDEBAR);
+            if (leftSprite != null)
+            {
+                leftImg.sprite = leftSprite;
+                Set9Slice(leftImg);
+            }
+            else
+                leftImg.color = new Color(0.04f, 0.04f, 0.1f, 0.8f);
 
             var vlg = sidebar.gameObject.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 8;
@@ -177,13 +241,25 @@ namespace TeamLog.Editor
             var panel = NewRect($"CharPanel_{name}", parent);
             panel.sizeDelta = new Vector2(0, 160);
             var panelImg = panel.gameObject.AddComponent<Image>();
-            panelImg.color = new Color(0.06f, 0.06f, 0.14f, 0.95f);
+            var playerSprite = LoadSprite(SPRITE_PLAYER_PANEL);
+            if (playerSprite != null)
+            {
+                panelImg.sprite = playerSprite;
+                Set9Slice(panelImg);
+            }
+            else
+                panelImg.color = new Color(0.06f, 0.06f, 0.14f, 0.95f);
             var ol = panel.gameObject.AddComponent<Outline>();
             ol.effectColor = BorderRed;
             ol.effectDistance = new Vector2(1, -1);
 
             var panelBtn = panel.gameObject.AddComponent<Button>();
             panelBtn.targetGraphic = panelImg;
+
+            // 그림자
+            var shadow = panel.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0, 0, 0, 0.3f);
+            shadow.effectDistance = new Vector2(3, -3);
 
             // 번호 뱃지
             var badge = NewRect("NumberBadge", panel);
@@ -254,6 +330,23 @@ namespace TeamLog.Editor
             SetFillParent(hpTxt);
             AddTextNoWrap(hpTxt, hp, 12, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
 
+            // HP 라벨 (색맹 지원)
+            var hpLabel = NewRect("HPLabel", hpBar);
+            hpLabel.anchorMin = new Vector2(0, 0);
+            hpLabel.anchorMax = new Vector2(0, 1);
+            hpLabel.pivot = new Vector2(0, 0.5f);
+            hpLabel.anchoredPosition = new Vector2(4, 0);
+            hpLabel.sizeDelta = new Vector2(22, 0);
+            var hpl = hpLabel.gameObject.AddComponent<TextMeshProUGUI>();
+            hpl.font = GetOrCreateKoreanFont();
+            hpl.text = "HP";
+            hpl.fontSize = 9;
+            hpl.fontStyle = FontStyles.Bold;
+            hpl.alignment = TextAlignmentOptions.Left;
+            hpl.color = new Color(1, 1, 1, 0.6f);
+            hpl.raycastTarget = false;
+            hpl.enableWordWrapping = false;
+
             // 퍼센트
             var pct = NewRect("Pct", panel);
             pct.anchorMin = new Vector2(0, 0);
@@ -317,13 +410,25 @@ namespace TeamLog.Editor
         {
             var panel = NewRect($"Enemy_{name}", parent);
             var panelImg = panel.gameObject.AddComponent<Image>();
-            panelImg.color = new Color(0.06f, 0.04f, 0.08f, 0.95f);
+            var enemySprite = LoadSprite(SPRITE_ENEMY_PANEL);
+            if (enemySprite != null)
+            {
+                panelImg.sprite = enemySprite;
+                Set9Slice(panelImg);
+            }
+            else
+                panelImg.color = new Color(0.06f, 0.04f, 0.08f, 0.95f);
             var ol = panel.gameObject.AddComponent<Outline>();
             ol.effectColor = BorderRed;
             ol.effectDistance = new Vector2(2, -2);
 
             var panelBtn = panel.gameObject.AddComponent<Button>();
             panelBtn.targetGraphic = panelImg;
+
+            // 그림자
+            var shadow = panel.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0, 0, 0, 0.3f);
+            shadow.effectDistance = new Vector2(3, -3);
 
             var vlg = panel.gameObject.AddComponent<VerticalLayoutGroup>();
             vlg.spacing = 6;
@@ -376,6 +481,23 @@ namespace TeamLog.Editor
             var hpText = NewRect("HPText", hpCont);
             SetFillParent(hpText);
             AddText(hpText, hp, 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+
+            // HP 라벨 (색맹 지원)
+            var ehpLabel = NewRect("HPLabel", hpCont);
+            ehpLabel.anchorMin = new Vector2(0, 0);
+            ehpLabel.anchorMax = new Vector2(0, 1);
+            ehpLabel.pivot = new Vector2(0, 0.5f);
+            ehpLabel.anchoredPosition = new Vector2(4, 0);
+            ehpLabel.sizeDelta = new Vector2(22, 0);
+            var ehpl = ehpLabel.gameObject.AddComponent<TextMeshProUGUI>();
+            ehpl.font = GetOrCreateKoreanFont();
+            ehpl.text = "HP";
+            ehpl.fontSize = 10;
+            ehpl.fontStyle = FontStyles.Bold;
+            ehpl.alignment = TextAlignmentOptions.Left;
+            ehpl.color = new Color(1, 1, 1, 0.6f);
+            ehpl.raycastTarget = false;
+            ehpl.enableWordWrapping = false;
 
             // ATK / DEF 스탯
             var statsRect = NewRect("Stats", panel);
@@ -436,7 +558,15 @@ namespace TeamLog.Editor
             sidebar.anchorMax = new Vector2(1, 1);
             sidebar.offsetMin = new Vector2(2, 5);
             sidebar.offsetMax = new Vector2(-5, -5);
-            sidebar.gameObject.AddComponent<Image>().color = new Color(0.04f, 0.04f, 0.1f, 0.8f);
+            var sidebarImg = sidebar.gameObject.AddComponent<Image>();
+            var logSprite = LoadSprite(SPRITE_LOG_SIDEBAR);
+            if (logSprite != null)
+            {
+                sidebarImg.sprite = logSprite;
+                Set9Slice(sidebarImg);
+            }
+            else
+                sidebarImg.color = new Color(0.04f, 0.04f, 0.1f, 0.8f);
             var ol = sidebar.gameObject.AddComponent<Outline>();
             ol.effectColor = BorderRed;
             ol.effectDistance = new Vector2(1, -1);
@@ -461,12 +591,21 @@ namespace TeamLog.Editor
             div.sizeDelta = new Vector2(0, 2);
             div.gameObject.AddComponent<Image>().color = AccentRed;
 
-            // 로그 텍스트
-            var log = NewRect("LogText", sidebar);
-            log.anchorMin = Vector2.zero;
-            log.anchorMax = Vector2.one;
-            log.offsetMin = new Vector2(10, 10);
-            log.offsetMax = new Vector2(-10, -40);
+            // 로그 텍스트 (ScrollRect 포함)
+            // Viewport
+            var viewport = NewRect("Viewport", sidebar);
+            viewport.anchorMin = Vector2.zero;
+            viewport.anchorMax = Vector2.one;
+            viewport.offsetMin = new Vector2(2, 2);
+            viewport.offsetMax = new Vector2(-2, -40);
+            viewport.gameObject.AddComponent<RectMask2D>();
+
+            // Content (로그 텍스트)
+            var log = NewRect("LogText", viewport);
+            log.anchorMin = new Vector2(0, 1);
+            log.anchorMax = new Vector2(1, 1);
+            log.pivot = new Vector2(0.5f, 1);
+            log.sizeDelta = new Vector2(0, 0);
             var lt = log.gameObject.AddComponent<TextMeshProUGUI>();
             lt.font = GetOrCreateKoreanFont();
             lt.text = "전투가 시작되었습니다.\n\n카인이 방어막을 사용했습니다.\n\n쉘레이아의 턴입니다.";
@@ -474,9 +613,22 @@ namespace TeamLog.Editor
             lt.alignment = TextAlignmentOptions.TopLeft;
             lt.color = TextDim;
             lt.enableWordWrapping = true;
-            lt.overflowMode = TextOverflowModes.Ellipsis;
+            lt.overflowMode = TextOverflowModes.Overflow;
             if (_koreanFont != null)
                 lt.font = _koreanFont;
+
+            var csf = log.gameObject.AddComponent<ContentSizeFitter>();
+            csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            // ScrollRect
+            var scrollRect = sidebar.gameObject.AddComponent<ScrollRect>();
+            scrollRect.content = log;
+            scrollRect.viewport = viewport;
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.scrollSensitivity = 20;
         }
 
         // ══════════════════════════════════════════════════════════
@@ -776,7 +928,17 @@ namespace TeamLog.Editor
             container.offsetMin = Vector2.zero;
             container.offsetMax = Vector2.zero;
             var containerBg = container.gameObject.AddComponent<Image>();
-            containerBg.color = new Color(0.1f, 0.1f, 0.2f, 0.95f);
+            var borderSprite = LoadSprite(SPRITE_CARD_BORDER);
+            if (borderSprite != null)
+            {
+                containerBg.sprite = borderSprite;
+                Set9Slice(containerBg);
+            }
+            else
+                containerBg.color = new Color(0.1f, 0.1f, 0.2f, 0.95f);
+
+            // CanvasGroup 추가 (애니메이션용)
+            container.gameObject.AddComponent<CanvasGroup>();
 
             // 결과 텍스트 — 큼직하게 상단
             var resultRect = NewRect("ResultText", container);
@@ -824,6 +986,61 @@ namespace TeamLog.Editor
             var labelProp = ser.FindProperty("_continueLabel");
             if (labelProp != null) labelProp.objectReferenceValue = btnLabel;
             ser.ApplyModifiedProperties();
+        }
+
+        // ══════════════════════════════════════════════════════════
+        //  Tooltip UI
+        // ══════════════════════════════════════════════════════════
+
+        private static void CreateTooltipUI(RectTransform parent)
+        {
+            var tooltip = NewRect("TooltipUI", parent);
+            tooltip.sizeDelta = new Vector2(280, 0);
+            tooltip.pivot = new Vector2(0, 1);
+
+            var tooltipBg = tooltip.gameObject.AddComponent<Image>();
+            tooltipBg.color = new Color(0.02f, 0.02f, 0.06f, 0.95f);
+            tooltipBg.raycastTarget = false;
+
+            var outline = tooltip.gameObject.AddComponent<Outline>();
+            outline.effectColor = AccentYellow;
+            outline.effectDistance = new Vector2(1, -1);
+
+            var vlg = tooltip.gameObject.AddComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(10, 10, 8, 8);
+            vlg.spacing = 4;
+            vlg.childAlignment = TextAnchor.UpperLeft;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            var csf = tooltip.gameObject.AddComponent<ContentSizeFitter>();
+            csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var title = NewRect("Title", tooltip);
+            var tt = title.gameObject.AddComponent<TextMeshProUGUI>();
+            tt.font = GetOrCreateKoreanFont();
+            tt.text = "";
+            tt.fontSize = 15;
+            tt.fontStyle = FontStyles.Bold;
+            tt.alignment = TextAlignmentOptions.Left;
+            tt.color = AccentYellow;
+            tt.raycastTarget = false;
+
+            var desc = NewRect("Desc", tooltip);
+            var dt = desc.gameObject.AddComponent<TextMeshProUGUI>();
+            dt.font = GetOrCreateKoreanFont();
+            dt.text = "";
+            dt.fontSize = 13;
+            dt.alignment = TextAlignmentOptions.Left;
+            dt.color = TextWhite;
+            dt.enableWordWrapping = true;
+            dt.raycastTarget = false;
+
+            tooltip.gameObject.AddComponent<TooltipUI>();
+            tooltip.gameObject.SetActive(false);
         }
 
         // ══════════════════════════════════════════════════════════
@@ -891,6 +1108,21 @@ namespace TeamLog.Editor
             tmp.enableWordWrapping = false;
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             return tmp;
+        }
+
+        private static Sprite LoadSprite(string path)
+        {
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (sprite == null)
+                Debug.LogWarning($"[BattleUISceneBuilder] Sprite not found: {path}");
+            return sprite;
+        }
+
+        private static void Set9Slice(Image img)
+        {
+            if (img?.sprite == null) return;
+            // 9-slice를 위해 Image.type을 Sliced로 설정
+            img.type = Image.Type.Sliced;
         }
     }
 }

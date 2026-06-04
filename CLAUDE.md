@@ -52,18 +52,23 @@ BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신, bonusAP �
     ├── EnemyAIController (패턴 기반 AI, 의도 표시, Taunt 타겟 우선)
     └── BattleUIManager (UI 패널 생성/관리, AP/리롤 이벤트 구독, GetPanelTransform)
         ├── TopBarUI (턴 카운터, AP 표시, 리롤 카운트)
-        ├── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리, 리롤 버튼)
-        ├── BattleEndOverlay (승리/패배 오버레이 + 계속하기 버튼)
-        ├── BattleLogUI (전투 로그 표시)
-        ├── PlayerSidebarPanel / EnemyDetailPanel (사망 시 alpha=0.4, ButtonArea에 특성 표시)
-        ├── FloatingTextUI (데미지/힐/쉴드/MISS 플로팅 텍스트, BattleSceneSetup에서 delta 이벤트로 연동)
-        └── StatusEffectBadge (상태이상 뱃지, 클릭 시 Info 영역에 설명 표시)
+        ├── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리, 리롤 버튼, 툴팁)
+        ├── BattleEndOverlay (승리/패배 오버레이 + ScaleFromZero/FadeIn 애니메이션)
+        ├── BattleLogUI (LogEntryType 색상 코딩, ScrollRect 자동 스크롤)
+        ├── PlayerSidebarPanel / EnemyDetailPanel (HP 트윈 애니메이션, 피격 플래시, 사망 페이드아웃, ButtonArea에 특성 표시)
+        ├── FloatingTextUI (데미지/힐/쉴드/MISS 플로팅 텍스트, UIPalette 색상 참조)
+        ├── StatusEffectBadge (한국어 이니셜 + 툴팁)
+        ├── TooltipUI / TooltipTarget (호버 툴팁 시스템)
+        └── PartyStatusWidget (총 HP, 골드 표시)
 
 UI 시스템 (Phase 4):
 SceneTransition (씬 트랜지션 페이드, DontDestroyOnLoad 싱글톤)
 ToastUI (토스트 알림, 큐 기반, ShopUI 골드 부족/구매 성공에 활용)
-UIAnimationHelper (FadeIn/FadeOut/ScaleFromZero, EventUI/ShopUI/RewardUI 패널 전환에 적용)
+UIAnimationHelper (FadeIn/FadeOut/ScaleFromZero/TweenAnchorMaxX/FlashColor/FadeToAlpha)
 ConfirmationDialog (ShopUI 구매 확인, MapSceneSetup 보스/엘리트 전투 확인)
+UIPalette (색상 설계 토큰 SO, Default 정적 프로퍼티)
+AudioManager (DontDestroyOnLoad 사운드 싱글톤)
+AudioPalette (오디오 클립 매핑 SO)
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
     ├── HealthComponent (HP/쉴드 관리, OnHPChanged/OnShieldChanged/OnDeath + delta: OnDamageTaken/OnHealApplied/OnShieldAdded, OnPreDeath 사망 방지)
@@ -248,12 +253,14 @@ private IEnumerator HideAndNotify()
   - 4G: 적 특성 시스템 완료 (8종 패시브 특성, TraitHandler 훅, TraitBadge UI, MISS 플로팅 텍스트)
   - 4H: 층별 적 풀 + 신규 적 9종 + 휴식 선택지 완료 (FloorEnemyPool 3층 분리, RestUI 3선택지, BonusAP 파이프라인)
   - 4I: 버그 수정 2건 + 자동화 테스트 인프라 완료 (BattleEndOverlay/RewardUI 버그, 61개 단위 테스트, 어셈블리 분리)
-  - **잔여**: 사운드, 이펙트, 밸런싱
+  - 4K: UI 종합 개선 완료 (UIPalette 토큰, HP 트윈/플래시/페이드 애니메이션, 색맹 이니셜, 툴팁 시스템, 로그 색상 코딩+스크롤, GUI 에셋 스프라이트, 베지에 곡선 연결선, 파티 상태 위젯, 사운드 시스템)
+  - **잔여**: 이펙트, 밸런싱
 
 ### 미구현 항목
 - 스킬 레벨/업그레이드
 - EnemyDetailPanel 가디언/아크카 버튼 실제 로직 (TODO 스텁 상태)
-- 사운드/이펙트 시스템
+- 이펙트 시스템 (파티클 등)
+- AudioPalette 실제 오디오 클립 파일 (현재 빈 슬롯)
 
 ### 세션 종료 체크리스트
 

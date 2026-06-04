@@ -2,10 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using TeamLog.Combat.AI;
 using TeamLog.Characters;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Battle
 {
@@ -45,6 +47,8 @@ namespace TeamLog.UI.Battle
         private EnemyIntent _intent;
         private BattleUIManager _uiManager;
         private CanvasGroup _canvasGroup;
+        private Image _panelBgImage;
+        private Coroutine _hpTween;
 
         public int EnemyIndex => _enemyIndex;
         public event Action<int> OnPanelClicked;
@@ -76,6 +80,7 @@ namespace TeamLog.UI.Battle
             _canvasGroup = GetComponent<CanvasGroup>();
             if (_canvasGroup == null)
                 _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            _panelBgImage = GetComponent<Image>();
         }
 
         private void Start()
@@ -197,7 +202,8 @@ namespace TeamLog.UI.Battle
 
             if (_hpFillImage != null)
             {
-                _hpFillImage.rectTransform.anchorMax = new Vector2(ratio, 1f);
+                if (_hpTween != null) StopCoroutine(_hpTween);
+                _hpTween = StartCoroutine(UIAnimationHelper.TweenAnchorMaxX(_hpFillImage.rectTransform, ratio, 0.3f));
                 _hpFillImage.color = _hpColor;
             }
 
@@ -227,10 +233,30 @@ namespace TeamLog.UI.Battle
         {
             if (_canvasGroup != null)
             {
-                _canvasGroup.alpha = isDead ? 0.4f : 1f;
-                _canvasGroup.interactable = !isDead;
-                _canvasGroup.blocksRaycasts = !isDead;
+                if (isDead)
+                {
+                    StartCoroutine(DeathFadeRoutine());
+                }
+                else
+                {
+                    _canvasGroup.alpha = 1f;
+                    _canvasGroup.interactable = true;
+                    _canvasGroup.blocksRaycasts = true;
+                }
             }
+        }
+
+        private IEnumerator DeathFadeRoutine()
+        {
+            yield return UIAnimationHelper.FadeToAlpha(_canvasGroup, 0.4f, 0.5f);
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
+        }
+
+        public void FlashHit()
+        {
+            if (_panelBgImage != null)
+                StartCoroutine(UIAnimationHelper.FlashColor(_panelBgImage, Color.white, 0.15f));
         }
 
         public void UpdateStats(int atk, int def)

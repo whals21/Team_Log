@@ -200,10 +200,10 @@ namespace TeamLog.UI.Battle
             }
         }
 
-        public void AddLog(string message)
+        public void AddLog(string message, LogEntryType type = LogEntryType.System)
         {
             if (_battleLog != null)
-                _battleLog.AddLog(message);
+                _battleLog.AddLog(message, type);
         }
 
         public EnemyDetailPanel GetEnemyPanel(int index)
@@ -252,6 +252,25 @@ namespace TeamLog.UI.Battle
         public void UpdateRerollCount(int remaining, int max)
         {
             _topBar?.SetRerollCount(remaining, max);
+        }
+
+        public void FlashPanelForCharacter(Character character)
+        {
+            if (_playerParty != null)
+            {
+                int idx = _playerParty.IndexOf(character);
+                if (idx >= 0 && idx < _playerPanels.Count)
+                {
+                    _playerPanels[idx].FlashHit();
+                    return;
+                }
+            }
+            if (_enemies != null)
+            {
+                int idx = _enemies.IndexOf(character);
+                if (idx >= 0 && idx < _enemyPanels.Count)
+                    _enemyPanels[idx].FlashHit();
+            }
         }
 
         public Transform GetPanelTransform(Character character)

@@ -49,11 +49,18 @@ namespace TeamLog.UI.Battle
             tmp.raycastTarget = false;
 
             string name = BattleDisplayUtil.GetEffectLabel(effect.Type);
-            tmp.text = effect.RemainingTurns > 0 ? $"{name}{effect.RemainingTurns}" : name;
+            string initial = BattleDisplayUtil.GetEffectInitial(effect.Type);
+            tmp.text = effect.RemainingTurns > 0 ? $"{initial}{effect.RemainingTurns}" : initial;
 
             var badge = go.AddComponent<StatusEffectBadge>();
             badge._effect = effect;
             btn.onClick.AddListener(badge.OnClick);
+
+            // 툴팁 추가
+            var tooltip = go.AddComponent<TooltipTarget>();
+            string tooltipTitle = BattleDisplayUtil.GetEffectLabel(effect.Type);
+            string tooltipDesc = BattleDisplayUtil.GetEffectDescription(effect.Type);
+            tooltip.SetContent(tooltipTitle, tooltipDesc);
 
             return badge;
         }

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using TeamLog.Characters;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Battle
 {
@@ -82,6 +83,15 @@ namespace TeamLog.UI.Battle
 
             if (_costText != null)
                 _originalCostColor = _costText.color;
+
+            // 툴팁 설정
+            if (skill != null)
+            {
+                var tooltip = GetComponent<TooltipTarget>();
+                if (tooltip == null) tooltip = gameObject.AddComponent<TooltipTarget>();
+                string desc = BattleDisplayUtil.BuildSkillDescription(skill, caster);
+                tooltip.SetContent(skill.SkillName, desc);
+            }
         }
 
         public void Clear()
@@ -151,15 +161,16 @@ namespace TeamLog.UI.Battle
         private Color GetSkillColor(SkillData skill)
         {
             if (skill == null) return Color.gray;
+            var palette = UIPalette.Default;
 
             return skill.Type switch
             {
-                SkillType.Attack => _attackColor,
-                SkillType.Heal => _healColor,
-                SkillType.Buff => _buffColor,
-                SkillType.Debuff => _debuffColor,
-                SkillType.Shield => _shieldColor,
-                SkillType.Purify => _purifyColor,
+                SkillType.Attack => palette.SkillAttack,
+                SkillType.Heal => palette.SkillHeal,
+                SkillType.Buff => palette.SkillBuff,
+                SkillType.Debuff => palette.SkillDebuff,
+                SkillType.Shield => palette.SkillShield,
+                SkillType.Purify => palette.SkillPurify,
                 _ => Color.white
             };
         }
@@ -169,6 +180,7 @@ namespace TeamLog.UI.Battle
             if (_skill != null && _parent != null)
             {
                 _parent.SelectSlot(_slotIndex);
+                AudioManager.Instance.PlayUIClick();
             }
         }
 

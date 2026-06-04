@@ -135,6 +135,10 @@ namespace TeamLog.UI.Map
                     var lineObj = Instantiate(_connectionLinePrefab, _lineContainer);
                     var line = lineObj.GetComponent<MapConnectionLine>();
 
+                    // CubicBezierLine 컴포넌트가 없으면 추가
+                    if (line != null && line.GetComponent<CubicBezierLine>() == null)
+                        lineObj.AddComponent<CubicBezierLine>();
+
                     if (line != null)
                     {
                         line.Setup(node, connected);

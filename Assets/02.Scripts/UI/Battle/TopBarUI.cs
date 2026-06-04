@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Battle
 {
@@ -17,10 +18,10 @@ namespace TeamLog.UI.Battle
         [Header("Reroll Display")]
         [SerializeField] private TextMeshProUGUI _rerollText;
 
-        private static readonly Color APNormalColor = new Color(0.96f, 0.82f, 0.25f);
-        private static readonly Color APShortageColor = new Color(0.85f, 0.2f, 0.2f);
-        private static readonly Color RerollNormalColor = new Color(0.72f, 0.45f, 0.2f);
-        private static readonly Color RerollEmptyColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+        private static Color APNormalColor => UIPalette.Default.APNormal;
+        private static Color APShortageColor => UIPalette.Default.APShortage;
+        private static Color RerollNormalColor => UIPalette.Default.RerollNormal;
+        private static Color RerollEmptyColor => UIPalette.Default.RerollEmpty;
 
         public void SetTurnCounter(int current, int total)
         {

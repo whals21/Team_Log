@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using System.Collections;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Battle
 {
@@ -13,6 +15,8 @@ namespace TeamLog.UI.Battle
         [SerializeField] private TextMeshProUGUI _resultText;
         [SerializeField] private Button _continueButton;
         [SerializeField] private TextMeshProUGUI _continueLabel;
+        private CanvasGroup _containerCanvasGroup;
+        private RectTransform _container;
 
         public event Action OnContinueClicked;
 
@@ -41,6 +45,28 @@ namespace TeamLog.UI.Battle
                 _continueLabel.text = "계속하기";
 
             gameObject.SetActive(true);
+
+            // 사운드
+            if (victory)
+                AudioManager.Instance.PlayVictory();
+            else
+                AudioManager.Instance.PlayDefeat();
+
+            // 컨테이너에 애니메이션 적용
+            if (_container == null)
+                _container = transform.Find("Container") as RectTransform;
+            if (_container != null)
+            {
+                _containerCanvasGroup = UIAnimationHelper.EnsureCanvasGroup(_container.gameObject);
+                StartCoroutine(ShowAnimation());
+            }
+        }
+
+        private IEnumerator ShowAnimation()
+        {
+            yield return UIAnimationHelper.ScaleFromZero(_container, 0.4f);
+            if (_containerCanvasGroup != null)
+                yield return UIAnimationHelper.FadeIn(_containerCanvasGroup, 0.3f);
         }
 
         public void Hide()

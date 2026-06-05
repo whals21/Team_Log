@@ -342,7 +342,7 @@ namespace TeamLog.Editor
             rerollBtnComp.targetGraphic = rerollImg;
             var rerollTxt = NewRect("T", rerollBtn);
             SetFillParent(rerollTxt);
-            AddText(rerollTxt, "↻", 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            AddText(rerollTxt, "R", 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
             rerollBtn.gameObject.SetActive(false);
 
             // ActionSlotUI 컴포넌트 자동 와이어링

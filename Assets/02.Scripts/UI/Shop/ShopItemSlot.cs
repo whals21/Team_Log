@@ -13,6 +13,7 @@ namespace TeamLog.UI.Shop
         [SerializeField] private TextMeshProUGUI _nameLabel;
         [SerializeField] private TextMeshProUGUI _descLabel;
         [SerializeField] private TextMeshProUGUI _priceLabel;
+        [SerializeField] private Image _iconImage;
         [SerializeField] private Button _buyButton;
         [SerializeField] private GameObject _soldOverlay;
 
@@ -33,6 +34,13 @@ namespace TeamLog.UI.Shop
         {
             _slot = slot;
             _onBuyClicked = onBuyClicked;
+
+            if (_iconImage != null)
+            {
+                _iconImage.sprite = slot.Icon;
+                _iconImage.enabled = slot.Icon != null;
+            }
+
             UpdateVisual();
         }
 

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -50,7 +49,7 @@ namespace TeamLog.UI.Event
             gameObject.SetActive(true);
             var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
             cg.alpha = 0f;
-            StartCoroutine(UIAnimationHelper.FadeIn(cg));
+            UIAnimationHelper.FadeIn(cg);
 
             if (_resultPanel != null)
                 _resultPanel.SetActive(false);
@@ -87,6 +86,8 @@ namespace TeamLog.UI.Event
             var outcome = _eventManager.ProcessChoice(_currentEvent, choiceIndex, _runState);
             if (outcome == null) return;
 
+            AudioManager.Instance.PlayUIClick();
+
             // 선택지 숨기고 결과 표시
             ClearChoices();
 
@@ -99,14 +100,15 @@ namespace TeamLog.UI.Event
 
         private void OnResultConfirmed()
         {
-            StartCoroutine(HideAndNotify());
+            AudioManager.Instance.PlayUIConfirm();
+            HideAndNotify();
         }
 
-        private IEnumerator HideAndNotify()
+        private void HideAndNotify()
         {
+            _onEventComplete?.Invoke(); // FadeOut이 SetActive(false)하므로 콜백을 먼저 실행
             var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
-            yield return UIAnimationHelper.FadeOut(cg);
-            _onEventComplete?.Invoke();
+            UIAnimationHelper.FadeOut(cg);
         }
 
         private void ClearChoices()

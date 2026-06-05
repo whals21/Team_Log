@@ -208,6 +208,8 @@ namespace TeamLog.UI.Map
             bool moved = _runState.CurrentMap.MoveToNode(node);
             if (!moved) return;
 
+            AudioManager.Instance.PlayUINodeClick();
+
             // UI 갱신
             if (_mapView != null)
                 _mapView.Refresh(_runState.Gold);
@@ -295,6 +297,7 @@ namespace TeamLog.UI.Map
 
         private void OnRestChoiceSelected(int choice)
         {
+            AudioManager.Instance.PlayUIConfirm();
             switch (choice)
             {
                 case 0: // 휴식

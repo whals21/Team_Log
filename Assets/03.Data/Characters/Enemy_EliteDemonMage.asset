@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: Enemy_EliteDemonMage
   m_EditorClassIdentifier: 
   _characterName: "\uC545\uB9C8 \uB9C8\uBC95\uC0AC"
-  _characterClass: 1
-  _description: "\uC9C0\uC625\uC758 \uB9C8\uBC95\uC744 \uB2E4\uB8E8\uB294 \uC545\uB9C8
-    \uB9C8\uBC95\uC0AC."
-  _baseHP: 50
-  _baseATK: 16
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 48
+  _baseATK: 14
   _baseDEF: 2
   _enemyTrait: 5
   _skills:

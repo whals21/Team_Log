@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: Char_Mage
   m_EditorClassIdentifier: 
   _characterName: "\uB9C8\uBC95\uC0AC"
-  _characterClass: 1
-  _description: "\uC6D0\uC18C \uB9C8\uBC95\uC758 \uB2EC\uC778. \uAC15\uB825\uD55C
-    \uB9C8\uBC95 \uACF5\uACA9\uC744 \uC0AC\uC6A9\uD569\uB2C8\uB2E4."
-  _baseHP: 55
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 70
   _baseATK: 12
   _baseDEF: 2
   _enemyTrait: 0

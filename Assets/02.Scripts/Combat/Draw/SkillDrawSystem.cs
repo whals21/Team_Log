@@ -24,6 +24,7 @@ namespace TeamLog.Combat.Draw
         public bool CanReroll => _rerollCount < _maxRerolls;
 
         public event System.Action<IReadOnlyList<DrawnSkillSlot>> OnDrawComplete;
+        public event System.Action OnSlotRerolled;
 
         public SkillDrawSystem(List<Character> party, int maxRerolls = 1)
         {
@@ -70,6 +71,7 @@ namespace TeamLog.Combat.Draw
             {
                 slot.SetSkill(newSkill);
                 _rerollCount++;
+                OnSlotRerolled?.Invoke();
                 return true;
             }
 

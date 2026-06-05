@@ -94,6 +94,11 @@ namespace TeamLog.Combat.Turn
         /// </summary>
         public static event System.Action<Character> OnAttackMissed;
 
+        /// <summary>
+        /// 스킬 효과 적용 후 이벤트 — 스킬 타입별 사운드/VFX 분기용
+        /// </summary>
+        public static event System.Action<SkillData, Character> OnSkillApplied;
+
         public void StartBattle()
         {
             StartNewTurn();
@@ -205,6 +210,8 @@ namespace TeamLog.Combat.Turn
                     ExecutePurify(target);
                     break;
             }
+
+            OnSkillApplied?.Invoke(skill, target);
         }
 
         private void ExecuteAttack(Character caster, Character target, SkillData skill)

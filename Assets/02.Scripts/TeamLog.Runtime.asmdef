@@ -2,7 +2,11 @@
     "name": "TeamLog.Runtime",
     "rootNamespace": "TeamLog",
     "references": [
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "MotionTitlesPack.Runtime",
+        "StompyRobot.SRDebugger",
+        "StompyRobot.SRF"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

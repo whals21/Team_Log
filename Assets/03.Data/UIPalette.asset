@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de9deed7cd31f914b854f656b1ec8d9c, type: 3}
+  m_Name: UIPalette
+  m_EditorClassIdentifier: 
+  BgDark: {r: 0.08, g: 0.08, b: 0.16, a: 1}
+  BgPanel: {r: 0.04, g: 0.04, b: 0.1, a: 0.8}
+  BgPanelLight: {r: 0.06, g: 0.06, b: 0.14, a: 0.95}
+  BgTopBar: {r: 0.03, g: 0.03, b: 0.08, a: 0.95}
+  AccentRed: {r: 0.77, g: 0.12, b: 0.23, a: 1}
+  AccentGreen: {r: 0.15, g: 0.68, b: 0.38, a: 1}
+  AccentYellow: {r: 0.96, g: 0.82, b: 0.25, a: 1}
+  TextWhite: {r: 1, g: 1, b: 1, a: 1}
+  TextDim: {r: 0.7, g: 0.7, b: 0.75, a: 1}
+  HPNormal: {r: 0.15, g: 0.68, b: 0.38, a: 1}
+  HPLow: {r: 1, g: 0.5, b: 0, a: 1}
+  HPLowThreshold: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  HPEnemy: {r: 0.77, g: 0.12, b: 0.23, a: 1}
+  ShieldBrown: {r: 0.72, g: 0.45, b: 0.2, a: 1}
+  DamageColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  HealColor: {r: 0.15, g: 0.68, b: 0.38, a: 1}
+  ShieldColor: {r: 0.72, g: 0.45, b: 0.2, a: 1}
+  APNormal: {r: 0.96, g: 0.82, b: 0.25, a: 1}
+  APShortage: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  RerollNormal: {r: 0.72, g: 0.45, b: 0.2, a: 1}
+  RerollEmpty: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+  SkillAttack: {r: 0.77, g: 0.12, b: 0.23, a: 1}
+  SkillHeal: {r: 0.15, g: 0.68, b: 0.38, a: 1}
+  SkillBuff: {r: 0.96, g: 0.82, b: 0.25, a: 1}
+  SkillDebuff: {r: 0.6, g: 0.3, b: 0.8, a: 1}
+  SkillShield: {r: 0.72, g: 0.45, b: 0.2, a: 1}
+  SkillPurify: {r: 0.4, g: 0.8, b: 0.95, a: 1}
+  BorderRed: {r: 0.6, g: 0.1, b: 0.18, a: 0.8}
+  LogDamage: {r: 0.85, g: 0.3, b: 0.3, a: 1}
+  LogHeal: {r: 0.3, g: 0.8, b: 0.5, a: 1}
+  LogBuff: {r: 0.9, g: 0.8, b: 0.3, a: 1}
+  LogDebuff: {r: 0.7, g: 0.4, b: 0.9, a: 1}
+  LogSystem: {r: 0.7, g: 0.7, b: 0.75, a: 1}

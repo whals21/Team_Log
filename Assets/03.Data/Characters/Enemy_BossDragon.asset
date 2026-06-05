@@ -13,12 +13,11 @@ MonoBehaviour:
   m_Name: Enemy_BossDragon
   m_EditorClassIdentifier: 
   _characterName: "\uB4DC\uB798\uACE4"
-  _characterClass: 1
-  _description: "\uACE0\uB300\uC758 \uBD89\uC740 \uB4DC\uB798\uACE4. \uD30C\uAD34\uC801\uC778
-    \uBE0C\uB808\uC2A4\uB97C \uC0AC\uC6A9\uD569\uB2C8\uB2E4."
-  _baseHP: 200
-  _baseATK: 18
-  _baseDEF: 6
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 160
+  _baseATK: 15
+  _baseDEF: 5
   _enemyTrait: 11
   _skills:
   - {fileID: 11400000, guid: 9c4959ed99abaa44da6207c041d23f71, type: 2}

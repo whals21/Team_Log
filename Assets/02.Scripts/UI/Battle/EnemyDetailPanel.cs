@@ -2,12 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using TeamLog.Combat.AI;
 using TeamLog.Characters;
 using TeamLog.UI;
+using DG.Tweening;
 
 namespace TeamLog.UI.Battle
 {
@@ -48,7 +48,7 @@ namespace TeamLog.UI.Battle
         private BattleUIManager _uiManager;
         private CanvasGroup _canvasGroup;
         private Image _panelBgImage;
-        private Coroutine _hpTween;
+        private Tween _hpTween;
 
         public int EnemyIndex => _enemyIndex;
         public event Action<int> OnPanelClicked;
@@ -202,8 +202,8 @@ namespace TeamLog.UI.Battle
 
             if (_hpFillImage != null)
             {
-                if (_hpTween != null) StopCoroutine(_hpTween);
-                _hpTween = StartCoroutine(UIAnimationHelper.TweenAnchorMaxX(_hpFillImage.rectTransform, ratio, 0.3f));
+                if (_hpTween != null) _hpTween.Kill();
+                _hpTween = UIAnimationHelper.TweenAnchorMaxX(_hpFillImage.rectTransform, ratio, 0.3f);
                 _hpFillImage.color = _hpColor;
             }
 
@@ -235,7 +235,11 @@ namespace TeamLog.UI.Battle
             {
                 if (isDead)
                 {
-                    StartCoroutine(DeathFadeRoutine());
+                    UIAnimationHelper.FadeToAlpha(_canvasGroup, 0.4f, 0.5f).OnComplete(() =>
+                    {
+                        _canvasGroup.interactable = false;
+                        _canvasGroup.blocksRaycasts = false;
+                    });
                 }
                 else
                 {
@@ -246,17 +250,10 @@ namespace TeamLog.UI.Battle
             }
         }
 
-        private IEnumerator DeathFadeRoutine()
-        {
-            yield return UIAnimationHelper.FadeToAlpha(_canvasGroup, 0.4f, 0.5f);
-            _canvasGroup.interactable = false;
-            _canvasGroup.blocksRaycasts = false;
-        }
-
         public void FlashHit()
         {
             if (_panelBgImage != null)
-                StartCoroutine(UIAnimationHelper.FlashColor(_panelBgImage, Color.white, 0.15f));
+                UIAnimationHelper.FlashColor(_panelBgImage, Color.white, 0.15f);
         }
 
         public void UpdateStats(int atk, int def)

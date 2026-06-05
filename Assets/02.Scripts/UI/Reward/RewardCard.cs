@@ -11,6 +11,7 @@ namespace TeamLog.UI.Reward
     public class RewardCard : MonoBehaviour
     {
         [SerializeField] private Image _backgroundImage;
+        [SerializeField] private Image _iconImage;
         [SerializeField] private TextMeshProUGUI _titleLabel;
         [SerializeField] private TextMeshProUGUI _descLabel;
         [SerializeField] private Button _button;
@@ -36,6 +37,19 @@ namespace TeamLog.UI.Reward
                 RewardType.Item => "아이템",
                 _ => "보상"
             };
+
+            // 아이콘 표시
+            if (_iconImage != null)
+            {
+                Sprite icon = offer.Type switch
+                {
+                    RewardType.Skill => offer.Skill?.Icon,
+                    RewardType.Item => offer.Item?.Icon,
+                    _ => null
+                };
+                _iconImage.sprite = icon;
+                _iconImage.enabled = icon != null;
+            }
 
             if (_titleLabel != null)
             {

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,6 +5,7 @@ using TMPro;
 using TeamLog.Reward;
 using TeamLog.Map;
 using TeamLog.UI;
+using TeamLog.Characters;
 
 namespace TeamLog.UI.Reward
 {
@@ -43,7 +43,7 @@ namespace TeamLog.UI.Reward
             gameObject.SetActive(true);
             var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
             cg.alpha = 0f;
-            StartCoroutine(UIAnimationHelper.FadeIn(cg));
+            UIAnimationHelper.FadeIn(cg);
             ClearCards();
 
             _currentRewards.Clear();
@@ -67,19 +67,23 @@ namespace TeamLog.UI.Reward
 
         private void OnRewardSelected(RewardOffer selected)
         {
+            if (selected.Type == RewardType.Gold)
+                AudioManager.Instance.PlayUIGoldEarn();
+            else
+                AudioManager.Instance.PlayUIConfirm();
+
             _rewardManager.ApplyReward(selected, _runState);
-            StartCoroutine(HideAndNotify());
+            HideAndNotify();
         }
 
-        private IEnumerator HideAndNotify()
+        private void HideAndNotify()
         {
             // 콜백을 FadeOut보다 먼저 호출해야 함.
-            // FadeOut이 gameObject를 SetActive(false)하면 코루틴이 즉시 종료되어
-            // 이후 코드가 실행되지 않기 때문.
+            // FadeOut이 SetActive(false)하면 이후 코드가 실행되지 않기 때문.
             _onRewardComplete?.Invoke();
 
             var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
-            yield return UIAnimationHelper.FadeOut(cg);
+            UIAnimationHelper.FadeOut(cg);
         }
 
         private void ClearCards()

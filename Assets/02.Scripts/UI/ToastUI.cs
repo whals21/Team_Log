@@ -78,6 +78,7 @@ namespace TeamLog.UI
             Instance._messageQueue.Enqueue(message);
             if (!Instance._isShowing)
                 Instance.StartCoroutine(Instance.ShowNext());
+            AudioManager.Instance.PlayUIToast();
         }
 
         private IEnumerator ShowNext()

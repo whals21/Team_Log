@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using TeamLog.UI;
 
 namespace TeamLog.UI
 {
@@ -30,11 +31,13 @@ namespace TeamLog.UI
             _onCancel = onCancel;
             if (_messageText != null) _messageText.text = message;
             gameObject.SetActive(true);
+            AudioManager.Instance.PlayUIWarning();
         }
 
         private void OnYes()
         {
             gameObject.SetActive(false);
+            AudioManager.Instance.PlayUIConfirm();
             _onConfirm?.Invoke();
             _onConfirm = null;
             _onCancel = null;
@@ -43,6 +46,7 @@ namespace TeamLog.UI
         private void OnNo()
         {
             gameObject.SetActive(false);
+            AudioManager.Instance.PlayUICancel();
             _onCancel?.Invoke();
             _onConfirm = null;
             _onCancel = null;

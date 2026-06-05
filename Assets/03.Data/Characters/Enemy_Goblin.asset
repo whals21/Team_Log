@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Enemy_Goblin
   m_EditorClassIdentifier: 
   _characterName: "\uACE0\uBE14\uB9B0"
-  _characterClass: 3
-  _description: "\uAD50\uD65C\uD558\uACE0 \uBE60\uB978 \uC791\uC740 \uBAAC\uC2A4\uD130."
-  _baseHP: 35
-  _baseATK: 7
+  _characterClass: 0
+  _description: Rogue
+  _baseHP: 30
+  _baseATK: 6
   _baseDEF: 1
   _enemyTrait: 2
   _skills:

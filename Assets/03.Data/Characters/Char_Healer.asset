@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: Char_Healer
   m_EditorClassIdentifier: 
   _characterName: "\uD790\uB7EC"
-  _characterClass: 2
-  _description: "\uCE58\uC720\uC640 \uBCF4\uC870 \uB9C8\uBC95\uC758 \uC804\uBB38\uAC00.
-    \uD30C\uD2F0\uC758 \uC0DD\uC874\uC744 \uB3D5\uC2B5\uB2C8\uB2E4."
-  _baseHP: 65
-  _baseATK: 6
+  _characterClass: 0
+  _description: Healer
+  _baseHP: 80
+  _baseATK: 5
   _baseDEF: 3
   _enemyTrait: 0
   _skills:

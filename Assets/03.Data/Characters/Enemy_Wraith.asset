@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Enemy_Wraith
   m_EditorClassIdentifier: 
   _characterName: "\uB9DD\uB839"
-  _characterClass: 1
-  _description: "\uCC28\uAC00\uC6B4 \uAE30\uC6B4\uC744 \uD488\uC740 \uB9DD\uB839."
-  _baseHP: 30
-  _baseATK: 9
-  _baseDEF: 1
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 35
+  _baseATK: 8
+  _baseDEF: 2
   _enemyTrait: 3
   _skills:
   - {fileID: 11400000, guid: 94d9147f76cca5a40b2aebc6df3b5031, type: 2}

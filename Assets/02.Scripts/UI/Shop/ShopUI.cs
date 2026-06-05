@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -56,7 +55,8 @@ namespace TeamLog.UI.Shop
             gameObject.SetActive(true);
             var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
             cg.alpha = 0f;
-            StartCoroutine(UIAnimationHelper.FadeIn(cg));
+            UIAnimationHelper.FadeIn(cg);
+            AudioManager.Instance.PlayUIShopOpen();
 
             ClearSlots();
 
@@ -89,6 +89,7 @@ namespace TeamLog.UI.Shop
             if (_runState.Gold < slot.Price)
             {
                 ToastUI.Show("골드가 부족합니다.");
+                AudioManager.Instance.PlayUIWarning();
                 return;
             }
 
@@ -116,6 +117,8 @@ namespace TeamLog.UI.Shop
             {
                 UpdateGoldDisplay();
                 RefreshAllSlots();
+                AudioManager.Instance.PlayUIShopPurchase();
+                AudioManager.Instance.PlayUIGoldSpend();
                 ToastUI.Show($"{slot.Name}을(를) 구매했습니다.");
             }
         }
@@ -135,14 +138,14 @@ namespace TeamLog.UI.Shop
 
         private void OnExit()
         {
-            StartCoroutine(HideAndNotify());
+            HideAndNotify();
         }
 
-        private IEnumerator HideAndNotify()
+        private void HideAndNotify()
         {
+            _onShopExit?.Invoke(); // FadeOut이 SetActive(false)하므로 콜백을 먼저 실행
             var cg = UIAnimationHelper.EnsureCanvasGroup(gameObject);
-            yield return UIAnimationHelper.FadeOut(cg);
-            _onShopExit?.Invoke();
+            UIAnimationHelper.FadeOut(cg);
         }
 
         private void ClearSlots()

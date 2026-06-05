@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
-using System.Collections;
 using TeamLog.UI;
+using DG.Tweening;
 
 namespace TeamLog.UI.Battle
 {
@@ -58,15 +58,11 @@ namespace TeamLog.UI.Battle
             if (_container != null)
             {
                 _containerCanvasGroup = UIAnimationHelper.EnsureCanvasGroup(_container.gameObject);
-                StartCoroutine(ShowAnimation());
+                var s = DOTween.Sequence().SetUpdate(true);
+                s.Append(UIAnimationHelper.ScaleFromZero(_container, 0.4f));
+                if (_containerCanvasGroup != null)
+                    s.Append(UIAnimationHelper.FadeIn(_containerCanvasGroup, 0.3f));
             }
-        }
-
-        private IEnumerator ShowAnimation()
-        {
-            yield return UIAnimationHelper.ScaleFromZero(_container, 0.4f);
-            if (_containerCanvasGroup != null)
-                yield return UIAnimationHelper.FadeIn(_containerCanvasGroup, 0.3f);
         }
 
         public void Hide()

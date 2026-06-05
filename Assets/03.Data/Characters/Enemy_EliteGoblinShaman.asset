@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: Enemy_EliteGoblinShaman
   m_EditorClassIdentifier: 
   _characterName: "\uACE0\uBE14\uB9B0 \uC8FC\uC220\uC0AC"
-  _characterClass: 1
-  _description: "\uAC15\uB825\uD55C \uC8FC\uC220\uC744 \uC0AC\uC6A9\uD558\uB294 \uACE0\uBE14\uB9B0
-    \uC0E4\uBA3C."
-  _baseHP: 60
-  _baseATK: 13
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 55
+  _baseATK: 12
   _baseDEF: 3
   _enemyTrait: 3
   _skills:

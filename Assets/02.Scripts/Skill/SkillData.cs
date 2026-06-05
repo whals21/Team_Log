@@ -25,6 +25,9 @@ namespace TeamLog.Characters
         [Range(1, 100)]
         [SerializeField] private int _weight = 50;
 
+        [Header("아이콘")]
+        [SerializeField] private Sprite _icon;
+
         [Header("추가 효과")]
         [SerializeField] private StatusEffectType _statusEffect;
         [SerializeField] private int _effectDuration;
@@ -38,6 +41,7 @@ namespace TeamLog.Characters
         public int Power => _power;
         public int Cost => _cost;
         public int Weight => _weight;
+        public Sprite Icon => _icon;
         public StatusEffectType StatusEffect => _statusEffect;
         public int EffectDuration => _effectDuration;
         public int EffectValue => _effectValue;

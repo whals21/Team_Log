@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _characterName: "\uBBF8\uB77C"
   _characterClass: 0
-  _description: "\uACE0\uB300\uC758 \uBB34\uB364\uC5D0\uC11C \uAE68\uC5B4\uB09C \uBBF8\uB77C."
-  _baseHP: 35
+  _description: Warrior
+  _baseHP: 40
   _baseATK: 6
   _baseDEF: 3
   _enemyTrait: 1

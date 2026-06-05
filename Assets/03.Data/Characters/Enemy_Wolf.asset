@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: Enemy_Wolf
   m_EditorClassIdentifier: 
   _characterName: "\uB291\uB300"
-  _characterClass: 3
-  _description: "\uB0A0\uCE74\uB85C\uC6B4 \uC774\uBE68\uC744 \uAC00\uC9C4 \uC0AC\uB098\uC6B4
-    \uB291\uB300."
-  _baseHP: 28
-  _baseATK: 8
+  _characterClass: 0
+  _description: Rogue
+  _baseHP: 24
+  _baseATK: 7
   _baseDEF: 1
   _enemyTrait: 4
   _skills:

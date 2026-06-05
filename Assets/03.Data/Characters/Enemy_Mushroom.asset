@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Enemy_Mushroom
   m_EditorClassIdentifier: 
   _characterName: "\uB3C5\uBC84\uC12F"
-  _characterClass: 1
-  _description: "\uD3EC\uC790\uB97C \uBFDC\uC5B4\uB0B4\uB294 \uAC70\uB300\uD55C \uB3C5\uBC84\uC12F."
-  _baseHP: 25
-  _baseATK: 4
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 22
+  _baseATK: 3
   _baseDEF: 2
   _enemyTrait: 5
   _skills:

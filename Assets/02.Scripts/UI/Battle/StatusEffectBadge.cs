@@ -16,6 +16,8 @@ namespace TeamLog.UI.Battle
 
         public static event Action<string, string> OnBadgeClicked;
 
+        private static TMP_FontAsset s_cachedFont;
+
         private ActiveEffect _effect;
 
         public static StatusEffectBadge Create(Transform parent, ActiveEffect effect)
@@ -41,6 +43,16 @@ namespace TeamLog.UI.Battle
 
             var tmp = labelObj.AddComponent<TextMeshProUGUI>();
             tmp.fontSize = BadgeFontSize;
+
+            // 폰트 캐시: 부모 계층에서 NanumGothic SDF 탐색
+            if (s_cachedFont == null)
+            {
+                var existing = parent.GetComponentInParent<TextMeshProUGUI>();
+                if (existing != null && existing.font != null)
+                    s_cachedFont = existing.font;
+            }
+            if (s_cachedFont != null)
+                tmp.font = s_cachedFont;
             tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.color = Color.white;

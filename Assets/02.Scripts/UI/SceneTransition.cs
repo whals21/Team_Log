@@ -58,6 +58,7 @@ namespace TeamLog.UI
         /// </summary>
         public void FadeToScene(string sceneName, float duration = DefaultDuration)
         {
+            AudioManager.Instance.PlayUITransition();
             StartCoroutine(FadeRoutine(sceneName, duration));
         }
 

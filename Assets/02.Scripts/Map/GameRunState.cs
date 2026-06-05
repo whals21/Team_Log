@@ -238,6 +238,11 @@ namespace TeamLog.Map
             return bonus;
         }
 
+        /// <summary>
+        /// 저장 복원용 — BonusAP 설정
+        /// </summary>
+        public void RestoreBonusAP(int bonus) => BonusAP = bonus;
+
         private void AddLog(string entry)
         {
             _runHistory.Add($"[층 {CurrentFloor}] {entry}");

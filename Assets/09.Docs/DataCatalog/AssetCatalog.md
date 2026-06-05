@@ -1,7 +1,7 @@
 # 서드파티 에셋 카탈로그
 
-> 최종 갱신: 2026-06-04
-> 총 에셋: 21종 (VFX 4, SFX 3, UI/스프라이트 7, 프레임워크 7)
+> 최종 갱신: 2026-06-06
+> 총 에셋: 20종 (VFX 3, SFX 3, UI/스프라이트 7, 프레임워크 6)
 
 ---
 
@@ -126,48 +126,6 @@ Epic Toon FX/
 | 힐러 마법 | BlueShoot, Star |
 
 ---
-
-### 1.4 Feel (More Mountains Feedbacks)
-
-| 항목 | 내용 |
-|------|------|
-| 경로 | `Assets/Feel/` |
-| 버전 | v5.9.1 |
-| 규모 | 200+ 스크립트, 120+ MMF_ 피드백 타입, 40+ 스프링 클래스 |
-| 도큐먼트 | https://feel-docs.moremountains.com/ |
-
-#### 핵심 아키텍처
-
-```
-MMF_Player (중심 컴포넌트)
-  └── MMF_* 자식 피드백들
-      └── PlayFeedbacks() 호출 → 모든 자식 피드백 순차/병렬 실행
-
-채널 시스템: MMF_* (송신) ↔ MM*Shaker (수신) — 느슨한 결합
-스프링 시스템: 물리 기반 탄성 애니메이션 (40종)
-```
-
-#### Team Log 활용 매핑
-
-| 게임 이벤트 | 추천 피드백 | 우선순위 |
-|-------------|-------------|----------|
-| **크리티컬 히트** | MMF_FreezeFrame (히트스탑) | 높음 |
-| **피격** | MMF_CameraShake + MMF_PositionShake (패널 흔들림) | 높음 |
-| **스크린 플래시** | MMF_Flash (적중 시 빨강, 힐 시 초록) | 높음 |
-| **공격** | MMF_AudioSource (효과음) + MMF_Particles (이펙트) | 높음 |
-| **패널 펀치** | MMF_Scale / MMF_ScaleSpring (히트 시 크기 변화) | 중간 |
-| **HP 바 변화** | MMF_ImageFill (HP 바 트윈) | 중간 |
-| **텍스트 애니메이션** | MMF_TMPColor (HP 텍스트 색상), MMF_TMPTextReveal (로그) | 중간 |
-| **버프/디버프** | MMF_Bloom (URP 글로우), MMF_Vignette (위험 표시) | 낮음 |
-| **연출 체인** | MMF_PlayerChain (freeze → shake → flash → sound 순차 실행) | 높음 |
-
-#### 관련 데모 씬
-
-| 데모 | 경로 | 활용 |
-|------|------|------|
-| CardsUI | `FeelDemos/CardsUI/` | 카드 게임 UI — 드로우/배치 피드백 |
-| Tactical | `FeelDemos/Tactical/` | 턴제 전략 — 턴 전환 피드백 |
-| Toaster | `FeelDemos/Toaster/` | 토스트 알림 — ToastUI 개선 |
 
 ---
 
@@ -599,7 +557,6 @@ MMF_Player (중심 컴포넌트)
 | **1** | 전투 이펙트 (히트/힐/쉴드/사망) | Epic Toon FX | 낮음 | 미구현 |
 | **2** | 스킬/아이템/상태이상 아이콘 | Layer Lab PictoIcons/ItemIcons/RuneIcons | 낮음 | 미구현 |
 | **2** | UIAnimationHelper → DOTween 전환 | DOTween | 중간 | 미구현 |
-| **3** | 전투 피드백 통합 (히트스톱+셰이크+이펙트) | Feel (MMFeedbacks) | 중간 | 미구현 |
 | **3** | 카메라 연출 (셰이크/룸/바운더리) | ProCamera2D | 중간 | 미구현 |
 | **4** | 스킬 아이콘 다각화 | CaptainCatSparrow + Tazo 2D | 낮음 | 미구현 |
 | **4** | 캐릭터 상세/장비 패널 | Classic RPG GUI | 중간 | 미구현 |

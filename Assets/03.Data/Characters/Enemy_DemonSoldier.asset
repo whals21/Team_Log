@@ -14,14 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _characterName: "\uC545\uB9C8 \uBCD1\uC0AC"
   _characterClass: 0
-  _description: "\uC9C0\uC625\uC758 \uAD70\uB300\uB97C \uC774\uB8E8\uB294 \uC545\uB9C8
-    \uC804\uC0AC."
-  _baseHP: 38
-  _baseATK: 8
-  _baseDEF: 3
-  _enemyTrait: 4
-  _skills:
-  - {fileID: 11400000, guid: ea4337d29fc8df14eb6d1e8a6ce71e6b, type: 2}
-  - {fileID: 11400000, guid: ccbed86833ede6d46be33ab282794164, type: 2}
-  - {fileID: 11400000, guid: 8cae50e2a74c22545959240d891dad2e, type: 2}
-  - {fileID: 11400000, guid: 5a29db3d07254a141b1b16f87ee345e6, type: 2}
+  _description: 42
+  _baseHP: 8
+  _baseATK: 3
+  _baseDEF: 0
+  _enemyTrait: 0
+  _skills: []

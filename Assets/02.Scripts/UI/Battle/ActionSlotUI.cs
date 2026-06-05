@@ -76,6 +76,7 @@ namespace TeamLog.UI.Battle
 
             if (_skillIcon != null)
             {
+                _skillIcon.sprite = skill?.Icon;
                 _skillIcon.color = GetSkillColor(skill);
                 _originalSkillColor = _skillIcon.color;
                 _colorsStored = true;
@@ -109,7 +110,10 @@ namespace TeamLog.UI.Battle
                 _casterNameText.text = "";
 
             if (_skillIcon != null)
+            {
+                _skillIcon.sprite = null;
                 _skillIcon.color = Color.gray;
+            }
 
             SetSelected(false);
         }

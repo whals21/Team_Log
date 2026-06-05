@@ -11,6 +11,8 @@ namespace TeamLog.Characters
         private readonly Dictionary<StatusEffectType, ActiveEffect> _activeEffects = new();
 
         public event Action OnEffectsChanged;
+        public event Action<StatusEffectType> OnEffectApplied;
+        public event Action<StatusEffectType> OnEffectExpired;
 
         public bool HasEffect(StatusEffectType type) => _activeEffects.ContainsKey(type);
 
@@ -26,13 +28,16 @@ namespace TeamLog.Characters
                 _activeEffects[type] = new ActiveEffect(type, duration, value);
             }
 
+            OnEffectApplied?.Invoke(type);
             OnEffectsChanged?.Invoke();
         }
 
         public void RemoveEffect(StatusEffectType type)
         {
             if (_activeEffects.Remove(type))
+            {
                 OnEffectsChanged?.Invoke();
+            }
         }
 
         /// <summary>
@@ -50,7 +55,10 @@ namespace TeamLog.Characters
             }
 
             foreach (var type in expiredEffects)
+            {
+                OnEffectExpired?.Invoke(type);
                 RemoveEffect(type);
+            }
 
             return expiredEffects;
         }

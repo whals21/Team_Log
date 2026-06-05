@@ -144,11 +144,11 @@ namespace TeamLog.Editor
 
             var root = NewRoot("MapConnectionLine", 100f, 3f);
 
-            var lineImage = root.gameObject.AddComponent<Image>();
-            lineImage.color = new Color(0.5f, 0.5f, 0.6f, 0.5f);
+            // CubicBezierLine은 Graphic 서브클래스 — Image와 공존 불가
+            var bezier = root.gameObject.AddComponent<CubicBezierLine>();
 
             var lineComp = root.gameObject.AddComponent<MapConnectionLine>();
-            Wire(lineComp, "_lineImage", lineImage);
+            Wire(lineComp, "_bezierLine", bezier);
 
             SavePrefab(root.gameObject, path);
         }

@@ -7,6 +7,7 @@ using TeamLog.Combat.Turn;
 using TeamLog.Combat.AI;
 using TeamLog.UI;
 using TeamLog.UI.Battle;
+using Michsky.UI.MTP;
 
 namespace TeamLog.Combat
 {
@@ -19,6 +20,8 @@ namespace TeamLog.Combat
         [SerializeField] private BattleUIManager _battleUIManager;
         [SerializeField] private ActionBarUI _actionBar;
         [SerializeField] private BattleEndOverlay _battleEndOverlay;
+        [SerializeField] private RectTransform _mainCanvasRect;
+        [SerializeField] private BattleTitleManager _titleManager;
 
         [Header("Test Mode")]
         [SerializeField] private bool _useTestData = true;
@@ -40,6 +43,7 @@ namespace TeamLog.Combat
         private List<EnemyAIController> _enemyControllers;
         private List<Character> _playerParty = new();
         private List<Character> _enemies = new();
+        private VFXManager _vfxManager;
 
         // 외부 데이터 주입용 (맵 시스템에서 전투 시작 시 사용)
         private static List<Character> _pendingParty;
@@ -156,6 +160,15 @@ namespace TeamLog.Combat
                 _turnManager, _actionBar, _battleUIManager, _playerParty, _enemies);
             _actionController.Initialize();
 
+            // VFXManager 초기화 — BattleUICanvas 아래에 VFX Canvas 생성
+            if (_mainCanvasRect != null)
+            {
+                var vfxGO = new GameObject("VFXManager");
+                vfxGO.transform.SetParent(transform);
+                _vfxManager = vfxGO.AddComponent<VFXManager>();
+                _vfxManager.Initialize(_mainCanvasRect);
+            }
+
             // HP/쉴드 변경 이벤트 구독
             foreach (var c in _playerParty)
             {
@@ -165,9 +178,18 @@ namespace TeamLog.Combat
                 c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
                 c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
                 c.Health.OnDamageTaken += _ => _battleUIManager?.FlashPanelForCharacter(c);
-                c.Health.OnDamageTaken += _ => AudioManager.Instance.PlayAttackHit();
-                c.Health.OnHealApplied += _ => AudioManager.Instance.PlayHeal();
+                c.Health.OnDamageTaken += _ => _vfxManager.PlayHitEffect(
+                    _battleUIManager?.GetPanelTransform(c));
+                c.Health.OnDamageTaken += _ => CameraShake.Instance.Shake(_mainCanvasRect, 0.15f, 5f);
+                c.Health.OnHealApplied += _ => _vfxManager.PlayHealEffect(
+                    _battleUIManager?.GetPanelTransform(c));
+                c.Health.OnShieldAdded += _ => _vfxManager.PlayShieldEffect(
+                    _battleUIManager?.GetPanelTransform(c));
+                c.Health.OnDeath += () => AudioManager.Instance.PlayCharacterDeath();
+                c.Health.OnDeath += () => _vfxManager.PlayDeathEffect(
+                    _battleUIManager?.GetPanelTransform(c));
                 c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
+                c.StatusEffects.OnEffectApplied += effect => OnStatusEffectApplied(effect);
             }
             foreach (var c in _enemies)
             {
@@ -177,19 +199,112 @@ namespace TeamLog.Combat
                 c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
                 c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
                 c.Health.OnDamageTaken += _ => _battleUIManager?.FlashPanelForCharacter(c);
-                c.Health.OnDamageTaken += _ => AudioManager.Instance.PlayAttackHit();
-                c.Health.OnHealApplied += _ => AudioManager.Instance.PlayHeal();
+                c.Health.OnDamageTaken += _ => _vfxManager.PlayHitEffect(
+                    _battleUIManager?.GetPanelTransform(c));
+                c.Health.OnDamageTaken += _ => CameraShake.Instance.Shake(_mainCanvasRect, 0.15f, 5f);
+                c.Health.OnHealApplied += _ => _vfxManager.PlayHealEffect(
+                    _battleUIManager?.GetPanelTransform(c));
+                c.Health.OnShieldAdded += _ => _vfxManager.PlayShieldEffect(
+                    _battleUIManager?.GetPanelTransform(c));
+                c.Health.OnDeath += () => AudioManager.Instance.PlayCharacterDeath();
+                c.Health.OnDeath += () => _vfxManager.PlayDeathEffect(
+                    _battleUIManager?.GetPanelTransform(c));
                 c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
+                c.StatusEffects.OnEffectApplied += effect => OnStatusEffectApplied(effect);
             }
 
-            // 특성: 회피 시 MISS 플로팅 텍스트
+            // 스킬 타입별 사운드 분기
+            TurnManager.OnSkillApplied += OnSkillApplied;
+
+            // 드로우/리롤 사운드
+            _turnManager.DrawSystem.OnDrawComplete += _ => AudioManager.Instance.PlaySkillDraw();
+            _turnManager.DrawSystem.OnSlotRerolled += () => AudioManager.Instance.PlaySkillReroll();
+
+            // 턴 시작 사운드
+            _turnManager.OnTurnStarted += _ => AudioManager.Instance.PlayTurnStart();
+
+            // 특성: 회피 시 MISS 플로팅 텍스트 + 사운드
             TurnManager.OnAttackMissed += (target) => SpawnFloatingText(target, "MISS", FloatingTextUI.DamageColor);
+            TurnManager.OnAttackMissed += _ => AudioManager.Instance.PlayMiss();
 
             // 전투 시작
             _turnManager.StartBattle();
+
+            // 전투 시작 타이틀
+            if (_titleManager != null)
+                _titleManager.ShowBattleStart();
         }
 
         #region Events
+
+        private static readonly HashSet<StatusEffectType> BuffEffects = new()
+        {
+            StatusEffectType.AttackUp, StatusEffectType.DefenseUp,
+            StatusEffectType.Regeneration, StatusEffectType.Shield
+        };
+
+        private static readonly HashSet<StatusEffectType> DebuffEffects = new()
+        {
+            StatusEffectType.AttackDown, StatusEffectType.DefenseDown,
+            StatusEffectType.Poison, StatusEffectType.Burn,
+            StatusEffectType.Bleed, StatusEffectType.Stun,
+            StatusEffectType.Freeze, StatusEffectType.Sleep
+        };
+
+        private void OnSkillApplied(SkillData skill, Character target)
+        {
+            switch (skill.Type)
+            {
+                case SkillType.Attack:
+                    PlayAttackSound(skill);
+                    break;
+                case SkillType.Heal:
+                    AudioManager.Instance.PlayHealImpact();
+                    break;
+                case SkillType.Buff:
+                    AudioManager.Instance.PlayBuffCast();
+                    break;
+                case SkillType.Debuff:
+                    AudioManager.Instance.PlayDebuffCast();
+                    break;
+                case SkillType.Shield:
+                    AudioManager.Instance.PlayShieldCast();
+                    break;
+                case SkillType.Purify:
+                    AudioManager.Instance.PlayPurifyCast();
+                    break;
+            }
+        }
+
+        private void PlayAttackSound(SkillData skill)
+        {
+            // 상태이상 기반 사운드 우선
+            if (skill.StatusEffect == StatusEffectType.Burn)
+                AudioManager.Instance.PlayBurnImpact();
+            else if (skill.StatusEffect == StatusEffectType.Poison)
+                AudioManager.Instance.PlayPoisonImpact();
+            else if (skill.StatusEffect == StatusEffectType.Freeze)
+                AudioManager.Instance.PlayFreezeImpact();
+            else
+                AudioManager.Instance.PlayAttackHit();
+        }
+
+        private void OnStatusEffectApplied(StatusEffectType effect)
+        {
+            if (BuffEffects.Contains(effect))
+            {
+                AudioManager.Instance.PlayBuffApply();
+                // BuffEffect는 현재 캐릭터를 알 수 없으므로 패널 위치 없이 재생
+            }
+            else if (DebuffEffects.Contains(effect))
+            {
+                AudioManager.Instance.PlayDebuffApply();
+            }
+            else
+            {
+                AudioManager.Instance.PlayStatusEffectApply();
+            }
+        }
 
         private void OnPhaseChanged(TurnPhase oldPhase, TurnPhase newPhase)
         {
@@ -226,6 +341,18 @@ namespace TeamLog.Combat
             {
                 _battleEndOverlay.Show(victory);
                 _battleEndOverlay.OnContinueClicked += OnBattleEndContinue;
+
+                // 승리/패배 타이틀 애니메이션
+                if (_titleManager != null)
+                {
+                    if (victory) _titleManager.ShowVictory();
+                    else _titleManager.ShowDefeat();
+                }
+
+                if (victory)
+                    _vfxManager.PlayVictoryEffect();
+                else
+                    _vfxManager.PlayDefeatEffect();
             }
             else
             {

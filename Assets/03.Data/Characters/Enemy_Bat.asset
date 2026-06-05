@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: Enemy_Bat
   m_EditorClassIdentifier: 
   _characterName: "\uBC15\uC950"
-  _characterClass: 3
-  _description: "\uCD08\uC74C\uD30C\uB85C \uC0AC\uB0E5\uD558\uB294 \uBC15\uC950 \uB5BC\uC758
-    \uC6B0\uB450\uBA38\uB9AC."
-  _baseHP: 22
+  _characterClass: 0
+  _description: Rogue
+  _baseHP: 24
   _baseATK: 5
   _baseDEF: 1
   _enemyTrait: 6

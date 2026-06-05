@@ -14,11 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _characterName: "\uD574\uACE8 \uC804\uC0AC"
   _characterClass: 0
-  _description: "\uC0DD\uACFC \uC0AC\uB97C \uC624\uAC00\uB294 \uC5B8\uB370\uB4DC
-    \uAE30\uC0AC."
-  _baseHP: 32
-  _baseATK: 6
-  _baseDEF: 2
+  _description: Warrior
+  _baseHP: 35
+  _baseATK: 5
+  _baseDEF: 3
   _enemyTrait: 3
   _skills:
   - {fileID: 11400000, guid: 3b563b2a8dff820419bdfd807b049231, type: 2}

@@ -45,6 +45,9 @@ namespace TeamLog.Reward
         [SerializeField] private int _price;
         [SerializeField] private RewardRarity _rarity;
 
+        [Header("아이콘")]
+        [SerializeField] private Sprite _icon;
+
         public string ItemName => _itemName;
         public string Description => _description;
         public ItemType Type => _itemType;
@@ -52,5 +55,6 @@ namespace TeamLog.Reward
         public int EffectValue => _effectValue;
         public int Price => _price;
         public RewardRarity Rarity => _rarity;
+        public Sprite Icon => _icon;
     }
 }

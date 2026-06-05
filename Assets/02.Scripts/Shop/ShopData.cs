@@ -29,6 +29,10 @@ namespace TeamLog.Shop
         public int EffectValue => ContentType == SlotContentType.Skill ?
             (Skill != null ? Skill.Power : 0) :
             (Item != null ? Item.EffectValue : 0);
+
+        public Sprite Icon => ContentType == SlotContentType.Skill ?
+            (Skill != null ? Skill.Icon : null) :
+            (Item != null ? Item.Icon : null);
     }
 
     /// <summary>

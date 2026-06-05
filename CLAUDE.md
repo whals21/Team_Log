@@ -21,6 +21,7 @@ Assets/
 │   │   ├── Reward/     # RewardUI, RewardCard
 │   │   ├── Shop/       # ShopUI, ShopItemSlot
 │   │   └── Event/      # EventUI
+│   ├── Debug/          # GameDebugOptions (SRDebugger 인게임 디버그)
 │   ├── Editor/         # DataGenerator, SceneBuilder, MapSceneBuilder
 │   └── Tests/          # Editor-mode 단위 테스트 (61개)
 ├── 03.Data/            # ScriptableObject 에셋
@@ -64,11 +65,17 @@ BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신, bonusAP �
 UI 시스템 (Phase 4):
 SceneTransition (씬 트랜지션 페이드, DontDestroyOnLoad 싱글톤)
 ToastUI (토스트 알림, 큐 기반, ShopUI 골드 부족/구매 성공에 활용)
-UIAnimationHelper (FadeIn/FadeOut/ScaleFromZero/TweenAnchorMaxX/FlashColor/FadeToAlpha)
+UIAnimationHelper (DOTween 기반, FadeIn/FadeOut/ScaleFromZero/TweenAnchorMaxX/FlashColor/FadeToAlpha, 모두 Tween 반환)
 ConfirmationDialog (ShopUI 구매 확인, MapSceneSetup 보스/엘리트 전투 확인)
 UIPalette (색상 설계 토큰 SO, Default 정적 프로퍼티)
-AudioManager (DontDestroyOnLoad 사운드 싱글톤)
-AudioPalette (오디오 클립 매핑 SO)
+AudioManager (DontDestroyOnLoad 사운드 싱글톤, 마스터 볼륨, 40개 편의 메서드, 스킬 타입별 사운드 분기)
+AudioPalette (오디오 클립 매핑 SO, Resources/ 저장, DataGenerator에서 42개 클립 자동 할당 — CombatMagicSpellsVIISFX 활용)
+VFXManager (전투 이펙트 매니저, URP Camera Stacking 방식, 파티클 → VFX Overlay Camera → Main Camera에 Stacking)
+VFXPalette (VFX 프리팹 매핑 SO, Resources/ 저장, 13개 Epic Toon FX 프리팹 자동 할당 완료)
+CameraShake (DontDestroyOnLoad 캔버스 흔들림 싱글톤, DOTween.To() 기반, 피격 시 화면 흔들림)
+BattleTitleManager (전투 타이틀 애니메이션, Motion Titles Pack 활용, ShowBattleStart/ShowVictory/ShowDefeat)
+SaveManager (저장/불러오기, JsonUtility + 파일 I/O 기반, RunSaveData/CharacterSaveData DTO)
+GameDebugOptions (SRDebugger 인게임 디버그 옵션, Run State 조회 + 치트 메서드, TeamLog.EditorDebug 네임스페이스)
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
     ├── HealthComponent (HP/쉴드 관리, OnHPChanged/OnShieldChanged/OnDeath + delta: OnDamageTaken/OnHealApplied/OnShieldAdded, OnPreDeath 사망 방지)
@@ -92,7 +99,8 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 
 ### 데이터 계층
 - **CharacterData** (ScriptableObject): 이름, 클래스, 기본 스탯, 스킬 목록, 적 특성(EnemyTrait)
-- **SkillData** (ScriptableObject): 이름, 타입(Attack/Heal/Buff/Debuff/Shield/Purify), 타겟타입, 위력, 비용, 가중치, 상태이상
+- **ItemData** (ScriptableObject): 이름, 효과타입, 값, 아이콘(Sprite, DataGenerator에서 ItemEffectType 기반 자동 할당)
+- **SkillData** (ScriptableObject): 이름, 타입(Attack/Heal/Buff/Debuff/Shield/Purify), 타겟타입, 위력, 비용, 가중치, 상태이상, 아이콘(Sprite, DataGenerator에서 SkillType+StatusEffect 기반 자동 할당)
 - 모든 데이터는 `Assets/03.Data/`에 `TeamLog/` 메뉴로 생성
 - **DataGenerator 규칙**:
   - `GetOrCreateAsset<T>`로 기존 에셋 로드 우선 (GUID 보존, 참조 끊김 방지)
@@ -124,6 +132,7 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
   - `TeamLog.UI.Shop` — 상점 UI 클래스
   - `TeamLog.UI.Event` — 이벤트 UI 클래스
   - `TeamLog.Editor` — 에디터 도구
+  - `TeamLog.EditorDebug` — SRDebugger 인게임 디버그 옵션 (TeamLog.Debug 사용 금지: UnityEngine.Debug와 충돌)
 - **이벤트 기반 통신**: 클래스 간 직접 참조 최소화, C# event/Action 사용
 - **UI-로직 분리**: UI 클래스는 표시만, 게임 로직은 Combat/Characters 계층에
 - **순수 C# 우선**: MonoBehaviour는 Unity 라이프사이클이 필요한 경우만 사용
@@ -227,6 +236,21 @@ private IEnumerator HideAndNotify()
 
 **규칙**: `UIAnimationHelper.FadeOut()`은 마지막에 `gameObject.SetActive(false)` 함. 코루틴 안에서 FadeOut **이후**에 실행해야 할 로직이 있으면 콜백을 FadeOut **이전**에 실행하거나, 별도의 비동기 패턴 사용.
 
+### 4. DOTween 확장 메서드 + asmdef 경계
+
+**문제**: DOTween의 UI 확장 메서드(`CanvasGroup.DOFade()`, `Image.DOColor()`, `Transform.DOScale()` 등)는 `DOTweenModuleUI.cs` 소스 파일에 정의되어 있고, 이 파일은 asmdef가 없어 글로벌 어셈블리에 컴파일됨. `TeamLog.Runtime`(asmdef)에서는 글로벌 어셈블리의 소스 코드 타입을 볼 수 없어 컴파일 에러 발생.
+
+**해결**: `DOTween.To()` (코어 DLL, 확장 메서드 아님)만 사용. getter/setter 람다로 수동 트윈 구현.
+
+```csharp
+// BAD — asmdef 경계에서 보이지 않음
+cg.DOFade(0f, 0.3f);
+img.DOColor(Color.red, 0.15f);
+
+// GOOD — DOTween.To() 직접 사용
+DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
+```
+
 ## 새 기능 추가 워크플로우
 
 1. **기존 코드 읽기** — 관련 클래스 먼저 읽고 패턴 파악
@@ -254,13 +278,20 @@ private IEnumerator HideAndNotify()
   - 4H: 층별 적 풀 + 신규 적 9종 + 휴식 선택지 완료 (FloorEnemyPool 3층 분리, RestUI 3선택지, BonusAP 파이프라인)
   - 4I: 버그 수정 2건 + 자동화 테스트 인프라 완료 (BattleEndOverlay/RewardUI 버그, 61개 단위 테스트, 어셈블리 분리)
   - 4K: UI 종합 개선 완료 (UIPalette 토큰, HP 트윈/플래시/페이드 애니메이션, 색맹 이니셜, 툴팁 시스템, 로그 색상 코딩+스크롤, GUI 에셋 스프라이트, 베지에 곡선 연결선, 파티 상태 위젯, 사운드 시스템)
-  - **잔여**: 이펙트, 밸런싱
+  - 4L: 사운드 시스템 완료 (42개 SFX 자동 할당 — CombatMagicSpellsVIISFX, 스킬 타입별 사운드 분기, TurnManager.OnSkillApplied 이벤트)
+  - 4M: 에셋 활용 5단계 완료 (스킬 아이콘 ✅, DOTween 전환 ✅, SRDebugger ✅, CameraShake ✅, VFXManager URP Camera Stacking ✅)
+  - 4N: 아이템 아이콘 시스템 완료 (ItemData._icon, DataGenerator.GetItemIconPath(), ShopItemSlot/RewardCard 아이콘 표시)
+  - 4O: 밸런싱 패스 완료 (플레이어 HP 증가, 보스 쉴드 너프, 적 스탯 층별 스케일링 개선)
+  - 4P: Motion Titles Pack 통합 완료 (BattleTitleManager, 전투 시작/승리/패배 타이틀, MotionTitlesPack.Runtime.asmdef)
+  - 4Q: 저장 시스템 기반 완료 (SaveManager — JsonUtility + 파일 I/O, RunSaveData/CharacterSaveData DTO, 파티/아이템/스킬 복원)
+  - **잔여**: 런타임 플레이테스트 전체 검증, 밸런싱 추가 튜닝
 
 ### 미구현 항목
 - 스킬 레벨/업그레이드
 - EnemyDetailPanel 가디언/아크카 버튼 실제 로직 (TODO 스텁 상태)
-- 이펙트 시스템 (파티클 등)
-- AudioPalette 실제 오디오 클립 파일 (현재 빈 슬롯)
+- VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, 실제 파티클 표시 확인 필요)
+- SaveManager 저장 타이밍 연동 (코드 완료, MapSceneSetup에서 자동 저장/불러오기 호출 연결 필요)
+- 밸런싱 추가 튜닝 (플레이테스트 피드백 기반)
 
 ### 세션 종료 체크리스트
 
@@ -327,4 +358,4 @@ private IEnumerator HideAndNotify()
 - **렌더파이프라인**: URP
 - **UI**: TextMesh Pro (NanumGothic SDF 한국어 폰트)
 - **입력**: New Input System
-- **에셋**: GUI Pro-CasualGame (Layer Lab)
+- **에셋**: GUI Pro-CasualGame (Layer Lab), Epic Toon FX, SRDebugger, DOTween, CombatMagicSpellsVIISFX, Motion Titles Pack

@@ -179,15 +179,15 @@ namespace TeamLog.Combat
                 c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
                 c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
                 c.Health.OnDamageTaken += _ => _battleUIManager?.FlashPanelForCharacter(c);
-                c.Health.OnDamageTaken += _ => _vfxManager.PlayHitEffect(
+                c.Health.OnDamageTaken += _ => _vfxManager?.PlayHitEffect(
                     _battleUIManager?.GetPanelTransform(c));
                 c.Health.OnDamageTaken += _ => CameraShake.Instance.Shake(_mainCanvasRect, 0.15f, 5f);
-                c.Health.OnHealApplied += _ => _vfxManager.PlayHealEffect(
+                c.Health.OnHealApplied += _ => _vfxManager?.PlayHealEffect(
                     _battleUIManager?.GetPanelTransform(c));
-                c.Health.OnShieldAdded += _ => _vfxManager.PlayShieldEffect(
+                c.Health.OnShieldAdded += _ => _vfxManager?.PlayShieldEffect(
                     _battleUIManager?.GetPanelTransform(c));
                 c.Health.OnDeath += () => AudioManager.Instance.PlayCharacterDeath();
-                c.Health.OnDeath += () => _vfxManager.PlayDeathEffect(
+                c.Health.OnDeath += () => _vfxManager?.PlayDeathEffect(
                     _battleUIManager?.GetPanelTransform(c));
                 c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
                 c.StatusEffects.OnEffectApplied += effect => OnStatusEffectApplied(effect);
@@ -200,15 +200,15 @@ namespace TeamLog.Combat
                 c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
                 c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
                 c.Health.OnDamageTaken += _ => _battleUIManager?.FlashPanelForCharacter(c);
-                c.Health.OnDamageTaken += _ => _vfxManager.PlayHitEffect(
+                c.Health.OnDamageTaken += _ => _vfxManager?.PlayHitEffect(
                     _battleUIManager?.GetPanelTransform(c));
                 c.Health.OnDamageTaken += _ => CameraShake.Instance.Shake(_mainCanvasRect, 0.15f, 5f);
-                c.Health.OnHealApplied += _ => _vfxManager.PlayHealEffect(
+                c.Health.OnHealApplied += _ => _vfxManager?.PlayHealEffect(
                     _battleUIManager?.GetPanelTransform(c));
-                c.Health.OnShieldAdded += _ => _vfxManager.PlayShieldEffect(
+                c.Health.OnShieldAdded += _ => _vfxManager?.PlayShieldEffect(
                     _battleUIManager?.GetPanelTransform(c));
                 c.Health.OnDeath += () => AudioManager.Instance.PlayCharacterDeath();
-                c.Health.OnDeath += () => _vfxManager.PlayDeathEffect(
+                c.Health.OnDeath += () => _vfxManager?.PlayDeathEffect(
                     _battleUIManager?.GetPanelTransform(c));
                 c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
                 c.StatusEffects.OnEffectApplied += effect => OnStatusEffectApplied(effect);
@@ -355,9 +355,9 @@ namespace TeamLog.Combat
                 }
 
                 if (victory)
-                    _vfxManager.PlayVictoryEffect();
+                    _vfxManager?.PlayVictoryEffect();
                 else
-                    _vfxManager.PlayDefeatEffect();
+                    _vfxManager?.PlayDefeatEffect();
             }
             else
             {

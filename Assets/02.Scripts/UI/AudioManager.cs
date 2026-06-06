@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace TeamLog.UI
 {
@@ -49,11 +50,49 @@ namespace TeamLog.UI
             _sfxSource.playOnAwake = false;
             _sfxSource.spatialBlend = 0f; // 2D
 
-            // AudioListener 보장 (씬에 없으면 자동 추가)
-            if (FindFirstObjectByType<AudioListener>() == null)
+            // AudioListener 보장 — 기존 씬 카메라의 리스너 제거 후 1개만 유지
+            var existingListeners = FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
+            if (existingListeners.Length > 0)
+            {
+                // 기존 리스너가 있으면 AudioManager에 없으면 그것을 사용, 중복 제거
+                bool hasOwn = false;
+                foreach (var listener in existingListeners)
+                {
+                    if (listener.gameObject == gameObject)
+                        hasOwn = true;
+                    else
+                        Destroy(listener);
+                }
+                if (!hasOwn)
+                    gameObject.AddComponent<AudioListener>();
+            }
+            else
+            {
                 gameObject.AddComponent<AudioListener>();
+            }
 
             _palette = Resources.Load<AudioPalette>("AudioPalette");
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            RemoveDuplicateListeners();
+        }
+
+        private void RemoveDuplicateListeners()
+        {
+            var listeners = FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
+            bool ownFound = false;
+            foreach (var listener in listeners)
+            {
+                if (listener.gameObject == gameObject)
+                    ownFound = true;
+                else
+                    Destroy(listener);
+            }
+            if (!ownFound && listeners.Length == 0)
+                gameObject.AddComponent<AudioListener>();
         }
 
         public void PlaySFX(string clipName, float volumeScale = 1f)

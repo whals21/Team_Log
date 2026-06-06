@@ -262,5 +262,87 @@ namespace TeamLog.Editor
         }
 
         #endregion
+
+        #region Run End Overlay
+
+        private static GameObject BuildRunEndOverlay(Transform parent, TMP_FontAsset font)
+        {
+            var overlay = CreateFullImage("RunEndOverlay", parent, OverlayBg);
+            overlay.SetActive(false);
+
+            var canvasGroup = overlay.AddComponent<CanvasGroup>();
+            canvasGroup.alpha = 0f;
+
+            var content = CreatePanel("Content", overlay.transform,
+                new Vector2(0.2f, 0.2f), new Vector2(0.8f, 0.8f), ContentPanel);
+
+            // 결과 텍스트
+            var resultText = CreateText("ResultText", content.transform, font,
+                "", 48, AccentGold, TextAlignmentOptions.Center);
+            SetAnchors(resultText.GetComponent<RectTransform>(),
+                new Vector2(0.05f, 0.7f), new Vector2(0.95f, 0.9f));
+
+            // 통계 텍스트
+            var statsText = CreateText("StatsText", content.transform, font,
+                "", 24, TextWhite, TextAlignmentOptions.Center);
+            statsText.enableWordWrapping = true;
+            SetAnchors(statsText.GetComponent<RectTransform>(),
+                new Vector2(0.1f, 0.35f), new Vector2(0.9f, 0.65f));
+
+            // 타이틀로 버튼
+            var toTitleBtn = CreateButton("ToTitleButton", content.transform, font,
+                "타이틀로", 24, TextWhite);
+            SetAnchors(toTitleBtn.GetComponent<RectTransform>(),
+                new Vector2(0.3f, 0.1f), new Vector2(0.7f, 0.28f));
+
+            var runEndOverlay = overlay.AddComponent<RunEndOverlay>();
+            var ser = new SerializedObject(runEndOverlay);
+            WireProperty(ser, "_canvasGroup", canvasGroup);
+            WireProperty(ser, "_resultText", resultText);
+            WireProperty(ser, "_statsText", statsText);
+            WireProperty(ser, "_toTitleButton", toTitleBtn.GetComponent<Button>());
+            ser.ApplyModifiedProperties();
+
+            return overlay;
+        }
+
+        #endregion
+
+        #region Relic Bar
+
+        private static GameObject BuildRelicBar(Transform parent, TMP_FontAsset font)
+        {
+            // 하단 유물 바 배경
+            var bar = CreatePanel("RelicBar", parent,
+                new Vector2(0f, 0f), new Vector2(1f, 0.06f), PanelDark);
+
+            // 유물 카운트 라벨
+            var countLabel = CreateText("CountLabel", bar.transform, font,
+                "", 18, AccentGold, TextAlignmentOptions.Left);
+            SetAnchors(countLabel.GetComponent<RectTransform>(),
+                new Vector2(0.02f, 0f), new Vector2(0.15f, 1f));
+
+            // 아이콘 컨테이너 (수평)
+            var iconContainer = CreateUIObject("IconContainer", bar.transform);
+            SetAnchors(iconContainer.GetComponent<RectTransform>(),
+                new Vector2(0.16f, 0.05f), new Vector2(0.98f, 0.95f));
+            var layout = iconContainer.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 8;
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = false;
+            layout.childForceExpandHeight = true;
+
+            var relicBarUI = bar.AddComponent<RelicBarUI>();
+            var ser = new SerializedObject(relicBarUI);
+            WireProperty(ser, "_iconContainer", iconContainer.transform);
+            WireProperty(ser, "_countLabel", countLabel);
+            ser.ApplyModifiedProperties();
+
+            return bar;
+        }
+
+        #endregion
     }
 }

@@ -43,6 +43,7 @@ namespace TeamLog.Editor
             GenerateEnemyPatternData();
             GenerateItemData();
             GenerateEventData();
+            GenerateRelicData();
             GenerateUIPalette();
             GenerateAudioPalette();
             GenerateVFXPalette();

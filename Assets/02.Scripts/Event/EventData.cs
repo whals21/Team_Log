@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TeamLog.Characters;
 
 namespace TeamLog.Event
 {
@@ -28,6 +29,11 @@ namespace TeamLog.Event
         public int HPPercentChange;     // 파티 전체 HP 비율 변화 (-50% ~ +50%)
         public bool GiveRandomSkill;
         public bool GiveRandomItem;
+
+        [Header("저주 / 부정적 효과")]
+        public StatusEffectType ApplyStatusEffect;
+        public int StatusEffectDuration;
+        public int StatusEffectValue;
     }
 
     /// <summary>

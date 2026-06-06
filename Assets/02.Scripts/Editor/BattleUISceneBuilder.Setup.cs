@@ -156,6 +156,11 @@ namespace TeamLog.Editor
             if (actionBar != null)
                 SetPrivateField(sceneSetup, "_actionBar", actionBar);
 
+            // BattleRelicBarUI 연결
+            var relicBar = bottomBar?.Find("RelicBar");
+            if (relicBar != null)
+                SetPrivateField(sceneSetup, "_relicBarUI", relicBar.GetComponent<BattleRelicBarUI>());
+
             var slimeData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Enemy_Slime.asset");
             var goblinData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Enemy_Goblin.asset");
             SetPrivateField(sceneSetup, "_testEnemyData", new CharacterData[] { goblinData, goblinData });

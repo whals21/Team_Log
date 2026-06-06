@@ -37,6 +37,8 @@ namespace TeamLog.UI.Map
         [SerializeField] private RewardUI _rewardUI;
         [SerializeField] private ConfirmationDialog _confirmationDialog;
         [SerializeField] private RestUI _restUI;
+        [SerializeField] private RunEndOverlay _runEndOverlay;
+        [SerializeField] private RelicBarUI _relicBarUI;
 
         [Header("Test Mode")]
         [SerializeField] private bool _useTestData = true;
@@ -54,6 +56,7 @@ namespace TeamLog.UI.Map
         [Header("Data Pools")]
         [SerializeField] private SkillData[] _skillPool;
         [SerializeField] private ItemData[] _itemPool;
+        [SerializeField] private RelicData[] _relicPool;
 
         private GameRunState _runState;
         private List<Character> _playerParty;
@@ -63,9 +66,19 @@ namespace TeamLog.UI.Map
 
         private void Start()
         {
+            // RunEndOverlay 이벤트 연결
+            if (_runEndOverlay != null)
+                _runEndOverlay.OnReturnToTitle += OnReturnToTitle;
+
             if (GameRunState.Instance != null)
             {
+                // 전투 씬에서 복귀
                 RestoreExistingRun();
+            }
+            else if (SaveManager.HasSave)
+            {
+                // 타이틀에서 이어하기 — 세이브 파일에서 복원
+                ContinueFromSave();
             }
             else
             {
@@ -90,13 +103,20 @@ namespace TeamLog.UI.Map
 
             _runState = GameRunState.Create(_playerParty, startingGold: 50);
             _runState.OnMapChanged += OnMapChanged;
+            _runState.OnRunEnded += OnRunEnded;
             _runState.SetDataPools(
                 _skillPool != null ? new List<SkillData>(_skillPool) : new List<SkillData>(),
-                _itemPool != null ? new List<ItemData>(_itemPool) : new List<ItemData>());
+                _itemPool != null ? new List<ItemData>(_itemPool) : new List<ItemData>(),
+                _relicPool != null ? new List<RelicData>(_relicPool) : new List<RelicData>());
 
             InitializeSubUIs();
 
             _runState.StartRun();
+
+            // 메타 데이터에 런 시작 기록
+            var meta = SaveManager.Meta;
+            meta.HasPendingRun = true;
+            SaveManager.SaveMeta();
         }
 
         /// <summary>
@@ -109,6 +129,7 @@ namespace TeamLog.UI.Map
 
             // 이벤트 재구독
             _runState.OnMapChanged += OnMapChanged;
+            _runState.OnRunEnded += OnRunEnded;
 
             // 서브 UI 재초기화
             InitializeSubUIs();
@@ -124,6 +145,40 @@ namespace TeamLog.UI.Map
             }
         }
 
+        /// <summary>
+        /// 타이틀에서 이어하기 — 세이브 파일에서 런 복원
+        /// </summary>
+        private void ContinueFromSave()
+        {
+            _runState = SaveManager.Load();
+            if (_runState == null)
+            {
+                InitializeTestRun();
+                return;
+            }
+
+            _playerParty = new List<Character>(_runState.PlayerParty);
+            _runState.OnMapChanged += OnMapChanged;
+            _runState.OnRunEnded += OnRunEnded;
+            _runState.SetDataPools(
+                _skillPool != null ? new List<SkillData>(_skillPool) : new List<SkillData>(),
+                _itemPool != null ? new List<ItemData>(_itemPool) : new List<ItemData>(),
+                _relicPool != null ? new List<RelicData>(_relicPool) : new List<RelicData>());
+
+            InitializeSubUIs();
+
+            // 현재 층 맵 재생성
+            _runState.GenerateCurrentFloorMap();
+
+            if (_mapView != null && _runState.CurrentMap != null)
+                _mapView.Initialize(_runState.CurrentMap, _runState.Gold, OnNodeClicked);
+
+            // 메타 데이터에 대기 중 런 표시
+            var meta = SaveManager.Meta;
+            meta.HasPendingRun = true;
+            SaveManager.SaveMeta();
+        }
+
         private void InitializeSubUIs()
         {
             if (_eventUI != null)
@@ -134,6 +189,8 @@ namespace TeamLog.UI.Map
                 _rewardUI.Initialize(_runState, OnRewardComplete);
             if (_restUI != null)
                 _restUI.Initialize(OnRestChoiceSelected);
+            if (_relicBarUI != null)
+                _relicBarUI.Initialize(_runState);
         }
 
         /// <summary>
@@ -316,6 +373,8 @@ namespace TeamLog.UI.Map
 
             if (_mapView != null)
                 _mapView.Refresh(_runState.Gold);
+
+            SaveManager.Save();
         }
 
         private void OpenEvent()
@@ -340,12 +399,16 @@ namespace TeamLog.UI.Map
         {
             if (_mapView != null)
                 _mapView.Refresh(_runState.Gold);
+            RefreshRelicBar();
+            SaveManager.Save();
         }
 
         private void OnShopExit()
         {
             if (_mapView != null)
                 _mapView.Refresh(_runState.Gold);
+            RefreshRelicBar();
+            SaveManager.Save();
         }
 
         private void OnRewardComplete()
@@ -355,16 +418,64 @@ namespace TeamLog.UI.Map
             {
                 _runState.AdvanceToNextFloor();
             }
+            else
+            {
+                SaveManager.Save();
+            }
 
             if (_mapView != null)
                 _mapView.Refresh(_runState.Gold);
+            RefreshRelicBar();
         }
 
         private void OnDestroy()
         {
             if (_runState != null)
+            {
                 _runState.OnMapChanged -= OnMapChanged;
+                _runState.OnRunEnded -= OnRunEnded;
+            }
+            if (_runEndOverlay != null)
+                _runEndOverlay.OnReturnToTitle -= OnReturnToTitle;
             // GameRunState.Instance는 파괴하지 않음 — 씬 전환 간 유지
+        }
+
+        /// <summary>
+        /// 런 종료 시 RunEndOverlay 표시 + 메타 통계 갱신
+        /// </summary>
+        private void OnRunEnded()
+        {
+            bool victory = _runState.IsRunComplete;
+            int floor = _runState.CurrentFloor;
+            int gold = _runState.TotalGoldEarned;
+            int battlesWon = _runState.BattlesWon;
+
+            SaveManager.RecordRunEnd(victory, floor, gold);
+            GameRunState.Destroy();
+
+            if (_runEndOverlay != null)
+            {
+                _runEndOverlay.Show(victory, floor, gold, battlesWon);
+            }
+            else
+            {
+                // RunEndOverlay가 없으면 바로 타이틀로
+                OnReturnToTitle();
+            }
+        }
+
+        /// <summary>
+        /// 타이틀 씬으로 복귀
+        /// </summary>
+        private void OnReturnToTitle()
+        {
+            SceneTransition.Instance.FadeToScene("TitleScene");
+        }
+
+        private void RefreshRelicBar()
+        {
+            if (_relicBarUI != null && _runState != null)
+                _relicBarUI.Refresh();
         }
     }
 }

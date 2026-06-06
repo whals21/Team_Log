@@ -6,7 +6,7 @@
 
 ```
 Assets/
-├── 01.Scenes/          # BattleScene, TestCombatScene, MapScene
+├── 01.Scenes/          # TitleScene, BattleScene, MapScene
 ├── 02.Scripts/
 │   ├── Characters/     # Character, CharacterData, Components/
 │   ├── Combat/         # AI/, Draw/, Turn/
@@ -34,14 +34,14 @@ Assets/
 ### 핵심 클래스 관계
 ```
 맵 시스템 (Phase 3):
-MapSceneSetup (진입점)
-    ├── GameRunState (런 전체 상태: 층, 골드, 파티 HP 유지, BonusAP 명상 보너스, Train/Rest/Meditate 캠프파이어 선택)
+MapSceneSetup (진입점, SaveManager.HasSave 분기, OnRunEnded → RunEndOverlay, 자동 저장)
+    ├── GameRunState (런 전체 상태: 층, 골드, 파티 HP 유지, BonusAP 명상 보너스, BattlesWon/TotalGoldEarned 통계)
     ├── FloorEnemyPool (층별 적 풀: normalEnemies/eliteEnemies/boss, MapSceneBuilder에서 와이어링)
     ├── MapFloor (단일 층 맵)
     │   └── MapNode (노드: 타입, 위치, 연결, 방문 상태)
     ├── MapView (맵 시각화 UI)
-    ├── EventUI / ShopUI / RewardUI / RestUI (노드별 서브 UI)
-    └── MapGenerator (프록시럴 맵 생성)
+    ├── EventUI / ShopUI / RewardUI / RestUI / RunEndOverlay (노드별 서브 UI + 런 종료 오버레이)
+    └── MapGenerator (프로시저럴 맵 생성)
 
 전투 시스템 (Phase 1-2):
 BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신, bonusAP 명상 보너스 전달)
@@ -63,6 +63,7 @@ BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신, bonusAP �
         └── PartyStatusWidget (총 HP, 골드 표시)
 
 UI 시스템 (Phase 4):
+TitleSceneSetup (타이틀 화면: 새 게임/이어하기, SaveManager.Meta 통계 표시)
 SceneTransition (씬 트랜지션 페이드, DontDestroyOnLoad 싱글톤)
 ToastUI (토스트 알림, 큐 기반, ShopUI 골드 부족/구매 성공에 활용)
 UIAnimationHelper (DOTween 기반, FadeIn/FadeOut/ScaleFromZero/TweenAnchorMaxX/FlashColor/FadeToAlpha, 모두 Tween 반환)
@@ -74,15 +75,20 @@ VFXManager (전투 이펙트 매니저, URP Camera Stacking 방식, 파티클 �
 VFXPalette (VFX 프리팹 매핑 SO, Resources/ 저장, 13개 Epic Toon FX 프리팹 자동 할당 완료)
 CameraShake (DontDestroyOnLoad 캔버스 흔들림 싱글톤, DOTween.To() 기반, 피격 시 화면 흔들림)
 BattleTitleManager (전투 타이틀 애니메이션, Motion Titles Pack 활용, ShowBattleStart/ShowVictory/ShowDefeat)
-SaveManager (저장/불러오기, JsonUtility + 파일 I/O 기반, RunSaveData/CharacterSaveData DTO)
+SaveManager (저장/불러오기, JsonUtility + 파일 I/O, RunSaveData/CharacterSaveData DTO, MetaSaveData 런 간 영구 통계, RecordRunEnd 자동 정리)
 GameDebugOptions (SRDebugger 인게임 디버그 옵션, Run State 조회 + 치트 메서드, TeamLog.EditorDebug 네임스페이스)
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
     ├── HealthComponent (HP/쉴드 관리, OnHPChanged/OnShieldChanged/OnDeath + delta: OnDamageTaken/OnHealApplied/OnShieldAdded, OnPreDeath 사망 방지)
     ├── StatComponent (ATK/DEF, base + modifier + permanent base 증가)
     ├── StatusEffectComponent (14종 상태이상 관리: Taunt 추가)
-    ├── SkillInventoryComponent (스킬 목록, DrawSkill 가중치 뽑기)
+    ├── SkillInventoryComponent (SkillInstance 목록, DrawSkillInstance 가중치 뽑기, 업그레이드 상태 관리)
     └── EnemyTraitHandler (적 패시브 특성 처리기: ShieldPrep/Agile/Sturdy/ArcaneFury/Corrosive/Enrage/ScaleArmor/Immortal)
+
+SkillInstance (순수 C# 클래스, SkillData + UpgradeLevel, EffectivePower/Cost/Weight 계산 프로퍼티)
+
+CombatEventBus (static 전투 중앙 이벤트 버스 — TurnManager에서 발행, RelicHandler에서 구독)
+RelicHandler (순수 C# 클래스, GameRunState 소속, 유물 트리거 매칭 → 효과 적용)
 
 ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 ```
@@ -120,7 +126,8 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 - **네임스페이스**: `TeamLog` 최상위, 하위는 폴더 구조 따름
   - `TeamLog.Characters` — Character, CharacterData, Components, SkillData
   - `TeamLog.Combat.Turn` — TurnManager, TurnPhase, TurnContext
-  - `TeamLog.Combat.Draw` — SkillDrawSystem
+  - `TeamLog.Combat.Draw` — SkillDrawSystem (SkillInstance 기반)
+  - `TeamLog.Combat` — CombatEventBus (static 전투 이벤트 버스)
   - `TeamLog.Combat.AI` — EnemyAIController, EnemyActionPattern
   - `TeamLog.Map` — MapNode, MapFloor, MapGenerator, GameRunState
   - `TeamLog.Reward` — RewardData, ItemData, RewardManager
@@ -128,6 +135,7 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
   - `TeamLog.Event` — EventData, EventManager
   - `TeamLog.UI.Battle` — 전투 UI 클래스
   - `TeamLog.UI.Map` — 맵 UI 클래스
+  - `TeamLog.UI.Title` — 타이틀 UI 클래스
   - `TeamLog.UI.Reward` — 보상 UI 클래스
   - `TeamLog.UI.Shop` — 상점 UI 클래스
   - `TeamLog.UI.Event` — 이벤트 UI 클래스
@@ -284,13 +292,16 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - 4O: 밸런싱 패스 완료 (플레이어 HP 증가, 보스 쉴드 너프, 적 스탯 층별 스케일링 개선)
   - 4P: Motion Titles Pack 통합 완료 (BattleTitleManager, 전투 시작/승리/패배 타이틀, MotionTitlesPack.Runtime.asmdef)
   - 4Q: 저장 시스템 기반 완료 (SaveManager — JsonUtility + 파일 I/O, RunSaveData/CharacterSaveData DTO, 파티/아이템/스킬 복원)
+- **Phase 5 (메타프로그레션 + 심화)**: 완료
+  - 5A: 타이틀 + 런 라이프사이클 완료 (TitleScene/TitleSceneSetup, MetaSaveData 영구 통계, RunEndOverlay 승리/패배 화면, SaveManager.HasSave 이어하기, 자동 저장)
+  - 5B: 스킬 성장 시스템 완료 (SkillInstance 래퍼 + 업그레이드 레벨, SkillDrawSystem/EfficientCost/Power, SkillUpgradeUI 휴식지 강화 선택지, 저장/로드 업그레이드 레벨 유지)
+  - 5C: 유물 시스템 완료 (CombatEventBus 전투 중앙 이벤트 버스, RelicData SO 트리거+효과, RelicHandler 구독/적용, 12종 유물 DataGenerator 생성, TurnManager DealDamage/OnKill 이벤트 발행)
+  - 5D: 폴리싱 완료 (ItemEffectApplier HealPerTurn/BonusGold/DrawWeight 처리, EventData 저주/상태이상 필드, EventManager 상태이상 적용)
   - **잔여**: 런타임 플레이테스트 전체 검증, 밸런싱 추가 튜닝
 
 ### 미구현 항목
-- 스킬 레벨/업그레이드
 - EnemyDetailPanel 가디언/아크카 버튼 실제 로직 (TODO 스텁 상태)
 - VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, 실제 파티클 표시 확인 필요)
-- SaveManager 저장 타이밍 연동 (코드 완료, MapSceneSetup에서 자동 저장/불러오기 호출 연결 필요)
 - 밸런싱 추가 튜닝 (플레이테스트 피드백 기반)
 
 ### 세션 종료 체크리스트

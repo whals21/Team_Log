@@ -198,6 +198,55 @@ namespace TeamLog.Editor
             tt.alignment = TextAlignmentOptions.Left;
             tt.margin = new Vector4(8, 0, 4, 0);
             tt.color = AccentYellow;
+
+            // 유물 바 — BottomBar 우측 영역
+            CreateRelicBar(bar);
+        }
+
+        // ══════════════════════════════════════════════════════════
+        //  Relic Bar (BottomBar 우측)
+        // ══════════════════════════════════════════════════════════
+
+        private static void CreateRelicBar(RectTransform parent)
+        {
+            var bar = NewRect("RelicBar", parent);
+            bar.anchorMin = new Vector2(0.15f, 0);
+            bar.anchorMax = new Vector2(0.5f, 1);
+            bar.offsetMin = Vector2.zero;
+            bar.offsetMax = Vector2.zero;
+
+            var hlg = bar.gameObject.AddComponent<HorizontalLayoutGroup>();
+            hlg.spacing = 6;
+            hlg.padding = new RectOffset(4, 4, 10, 10);
+            hlg.childAlignment = TextAnchor.MiddleRight;
+            hlg.childControlWidth = false;
+            hlg.childControlHeight = false;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
+
+            var countLabel = NewRect("RelicCount", bar);
+            countLabel.anchorMin = new Vector2(0, 0.5f);
+            countLabel.anchorMax = new Vector2(0, 0.5f);
+            countLabel.pivot = new Vector2(0, 0.5f);
+            countLabel.anchoredPosition = Vector2.zero;
+            countLabel.sizeDelta = new Vector2(80, 30);
+            var ct = countLabel.gameObject.AddComponent<TextMeshProUGUI>();
+            ct.font = GetOrCreateKoreanFont();
+            ct.text = "";
+            ct.fontSize = 14;
+            ct.fontStyle = FontStyles.Bold;
+            ct.alignment = TextAlignmentOptions.Left;
+            ct.color = new Color(0.7f, 0.3f, 0.9f);
+
+            bar.gameObject.AddComponent<BattleRelicBarUI>();
+
+            // SerializedObject로 필드 와이어링
+            var ser = new UnityEditor.SerializedObject(bar.GetComponent<BattleRelicBarUI>());
+            var containerProp = ser.FindProperty("_iconContainer");
+            if (containerProp != null) containerProp.objectReferenceValue = bar;
+            var countProp = ser.FindProperty("_countLabel");
+            if (countProp != null) countProp.objectReferenceValue = ct;
+            ser.ApplyModifiedProperties();
         }
 
         // ══════════════════════════════════════════════════════════

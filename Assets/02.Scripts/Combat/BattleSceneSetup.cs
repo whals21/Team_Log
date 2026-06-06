@@ -21,6 +21,7 @@ namespace TeamLog.Combat
         [SerializeField] private ActionBarUI _actionBar;
         [SerializeField] private BattleEndOverlay _battleEndOverlay;
         [SerializeField] private RectTransform _mainCanvasRect;
+        [SerializeField] private BattleRelicBarUI _relicBarUI;
         [SerializeField] private BattleTitleManager _titleManager;
 
         [Header("Test Mode")]
@@ -229,6 +230,10 @@ namespace TeamLog.Combat
 
             // 전투 시작
             _turnManager.StartBattle();
+
+            // 유물 바 새로고침
+            if (_relicBarUI != null)
+                _relicBarUI.Refresh();
 
             // 전투 시작 타이틀
             if (_titleManager != null)

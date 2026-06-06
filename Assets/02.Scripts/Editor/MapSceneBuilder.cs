@@ -12,6 +12,7 @@ using TeamLog.UI.Map;
 using TeamLog.UI.Reward;
 using TeamLog.UI.Shop;
 using TeamLog.UI;
+using TeamLog.UI.Title;
 
 namespace TeamLog.Editor
 {
@@ -38,6 +39,118 @@ namespace TeamLog.Editor
         private static readonly Color TextWhite = Color.white;
         private static readonly Color TextDim = new Color(0.7f, 0.7f, 0.75f);
         private static readonly Color AccentGold = new Color(0.96f, 0.82f, 0.25f);
+
+        [MenuItem("TeamLog/Scene/Build Title Scene")]
+        public static void BuildTitleScene()
+        {
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(KOREAN_FONT_SDF);
+
+            // 카메라
+            var camObj = new GameObject("Main Camera");
+            var cam = camObj.AddComponent<Camera>();
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = BgDark;
+            camObj.tag = "MainCamera";
+
+            // 캔버스
+            var canvasObj = new GameObject("Canvas");
+            var canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var scaler = canvasObj.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.matchWidthOrHeight = 0.5f;
+            canvasObj.AddComponent<GraphicRaycaster>();
+
+            // 배경
+            CreateFullImage("Background", canvasObj.transform, BgDark);
+
+            // 타이틀 텍스트
+            var titleText = CreateText("TitleText", canvasObj.transform, font,
+                "TEAM LOG", 64, AccentGold, TextAlignmentOptions.Center);
+            SetAnchors(titleText.GetComponent<RectTransform>(),
+                new Vector2(0.2f, 0.65f), new Vector2(0.8f, 0.8f));
+
+            // 통계 라벨
+            var statsLabel = CreateText("StatsLabel", canvasObj.transform, font,
+                "", 22, TextDim, TextAlignmentOptions.Center);
+            SetAnchors(statsLabel.GetComponent<RectTransform>(),
+                new Vector2(0.3f, 0.55f), new Vector2(0.7f, 0.65f));
+
+            // 버튼 컨테이너
+            var btnContainer = CreateUIObject("ButtonContainer", canvasObj.transform);
+            SetAnchors(btnContainer.GetComponent<RectTransform>(),
+                new Vector2(0.3f, 0.25f), new Vector2(0.7f, 0.5f));
+
+            var layout = btnContainer.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 20;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+
+            var newGameBtn = CreateButton("NewGameButton", btnContainer.transform, font,
+                "새 게임", 32, TextWhite);
+            var newGameLayout = newGameBtn.AddComponent<LayoutElement>();
+            newGameLayout.minHeight = 60;
+
+            var continueBtn = CreateButton("ContinueButton", btnContainer.transform, font,
+                "이어하기", 32, TextWhite);
+            var continueLayout = continueBtn.AddComponent<LayoutElement>();
+            continueLayout.minHeight = 60;
+
+            // 이어하기 차단 오버레이
+            var continueBlock = CreateFullImage("ContinueBlock", continueBtn.transform,
+                new Color(0f, 0f, 0f, 0.6f));
+            var blockText = CreateText("BlockText", continueBlock.transform, font,
+                "저장 데이터 없음", 20, TextDim, TextAlignmentOptions.Center);
+            SetAnchors(blockText.GetComponent<RectTransform>(),
+                Vector2.zero, Vector2.one);
+
+            // TitleSceneSetup 컴포넌트
+            var setupObj = new GameObject("TitleSceneSetup");
+            var setup = setupObj.AddComponent<TeamLog.UI.Title.TitleSceneSetup>();
+            var setupSer = new SerializedObject(setup);
+            WireProperty(setupSer, "_newGameButton", newGameBtn.GetComponent<Button>());
+            WireProperty(setupSer, "_continueButton", continueBtn.GetComponent<Button>());
+            WireProperty(setupSer, "_statsLabel", statsLabel);
+            WireProperty(setupSer, "_continueBlock", continueBlock);
+            setupSer.ApplyModifiedProperties();
+
+            // EventSystem
+            var eventSystemObj = new GameObject("EventSystem");
+            eventSystemObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            eventSystemObj.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+
+            // 씬 저장
+            const string TITLE_SCENE_PATH = "Assets/01.Scenes/TitleScene.unity";
+            EditorSceneManager.SaveScene(scene, TITLE_SCENE_PATH);
+
+            // Build Settings에 TitleScene 추가 (Index 0)
+            AddSceneToBuildSettings(TITLE_SCENE_PATH, 0);
+
+            Debug.Log($"[MapSceneBuilder] 타이틀 씬 생성 완료: {TITLE_SCENE_PATH}");
+        }
+
+        /// <summary>
+        /// Build Settings에 씬 추가 — 지정 인덱스에 삽입
+        /// </summary>
+        private static void AddSceneToBuildSettings(string scenePath, int insertIndex)
+        {
+            var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+
+            // 이미 존재하면 스킵
+            foreach (var s in scenes)
+                if (s.path == scenePath) return;
+
+            // 인덱스 위치에 삽입
+            if (insertIndex < 0) insertIndex = 0;
+            if (insertIndex > scenes.Count) insertIndex = scenes.Count;
+            scenes.Insert(insertIndex, new EditorBuildSettingsScene(scenePath, true));
+            EditorBuildSettings.scenes = scenes.ToArray();
+        }
 
         [MenuItem("TeamLog/Scene/Build Map Scene")]
         public static void BuildMapScene()
@@ -94,6 +207,8 @@ namespace TeamLog.Editor
             var rewardPanel = BuildRewardPanel(canvasObj.transform, font);
             var confirmationDialog = BuildConfirmationDialog(canvasObj.transform, font);
             var restPanel = BuildRestPanel(canvasObj.transform, font);
+            var runEndOverlay = BuildRunEndOverlay(canvasObj.transform, font);
+            var relicBar = BuildRelicBar(canvasObj.transform, font);
 
             // ShopUI에 ConfirmationDialog 참조 연결
             var shopUISer = new SerializedObject(shopPanel.GetComponent<ShopUI>());
@@ -128,6 +243,8 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_rewardUI", rewardPanel.GetComponent<RewardUI>());
             WireProperty(setupSer, "_confirmationDialog", confirmationDialog.GetComponent<ConfirmationDialog>());
             WireProperty(setupSer, "_restUI", restPanel.GetComponent<RestUI>());
+            WireProperty(setupSer, "_runEndOverlay", runEndOverlay.GetComponent<RunEndOverlay>());
+            WireProperty(setupSer, "_relicBarUI", relicBar.GetComponent<RelicBarUI>());
 
             // CharacterData
             WireProperty(setupSer, "_testWarriorData",
@@ -214,6 +331,16 @@ namespace TeamLog.Editor
                     itemPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = itemAssets[i];
             }
 
+            // RelicData pool
+            var relicAssets = LoadAllAssets<RelicData>("Assets/03.Data/Relics");
+            var relicPoolProp = setupSer.FindProperty("_relicPool");
+            if (relicPoolProp != null && relicAssets.Count > 0)
+            {
+                relicPoolProp.arraySize = relicAssets.Count;
+                for (int i = 0; i < relicAssets.Count; i++)
+                    relicPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = relicAssets[i];
+            }
+
             setupSer.ApplyModifiedProperties();
 
             // EventSystem
@@ -226,7 +353,7 @@ namespace TeamLog.Editor
             Debug.Log($"[MapSceneBuilder] 맵 씬 생성 완료: {SCENE_PATH}");
             Debug.Log($"[MapSceneBuilder] 프리팹: Node={nodeButtonPrefab != null}, Line={connectionLinePrefab != null}, Marker={playerMarkerPrefab != null}");
             Debug.Log($"[MapSceneBuilder] 캐릭터: {LoadAllAssets<CharacterData>(CHAR_DIR).Count}개");
-            Debug.Log($"[MapSceneBuilder] 스킬 풀: {skillAssets.Count}개, 아이템 풀: {itemAssets.Count}개, 이벤트: {eventAssets.Count}개");
+            Debug.Log($"[MapSceneBuilder] 스킬 풀: {skillAssets.Count}개, 아이템 풀: {itemAssets.Count}개, 유물 풀: {relicAssets.Count}개, 이벤트: {eventAssets.Count}개");
         }
     }
 }

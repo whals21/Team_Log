@@ -64,6 +64,22 @@ namespace TeamLog.Event
                     outcome.ResultText += $" ({item.ItemName} 획득!)";
             }
 
+            // 저주 / 상태이상 적용
+            if (outcome.ApplyStatusEffect != StatusEffectType.None)
+            {
+                foreach (var member in runState.PlayerParty)
+                {
+                    if (member.IsAlive)
+                    {
+                        member.StatusEffects.ApplyEffect(
+                            outcome.ApplyStatusEffect,
+                            outcome.StatusEffectDuration,
+                            outcome.StatusEffectValue);
+                        member.ApplyStatModifiers();
+                    }
+                }
+            }
+
             return outcome;
         }
     }

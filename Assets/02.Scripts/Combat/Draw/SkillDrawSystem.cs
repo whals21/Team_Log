@@ -3,6 +3,7 @@ using System.Collections.Generic;
 // 네임스페이스 충돌 해결
 using Character = TeamLog.Characters.Character;
 using SkillData = TeamLog.Characters.SkillData;
+using SkillInstance = TeamLog.Characters.SkillInstance;
 
 namespace TeamLog.Combat.Draw
 {
@@ -44,10 +45,10 @@ namespace TeamLog.Combat.Draw
             {
                 if (character.IsAlive)
                 {
-                    var skill = character.SkillInventory.DrawSkill();
-                    if (skill != null)
+                    var instance = character.SkillInventory.DrawSkillInstance();
+                    if (instance != null)
                     {
-                        var slot = new DrawnSkillSlot(character, skill, _drawnSlots.Count);
+                        var slot = new DrawnSkillSlot(character, instance, _drawnSlots.Count);
                         _drawnSlots.Add(slot);
                     }
                 }
@@ -65,11 +66,11 @@ namespace TeamLog.Combat.Draw
                 return false;
 
             var slot = _drawnSlots[slotIndex];
-            var newSkill = slot.Caster.SkillInventory.DrawSkill();
+            var newInstance = slot.Caster.SkillInventory.DrawSkillInstance();
 
-            if (newSkill != null)
+            if (newInstance != null)
             {
-                slot.SetSkill(newSkill);
+                slot.SetInstance(newInstance);
                 _rerollCount++;
                 OnSlotRerolled?.Invoke();
                 return true;
@@ -87,28 +88,39 @@ namespace TeamLog.Combat.Draw
     }
 
     /// <summary>
-    /// 드로우된 스킬 슬롯
+    /// 드로우된 스킬 슬롯 — SkillInstance 기반
     /// </summary>
     public class DrawnSkillSlot
     {
         public Character Caster { get; }
-        public SkillData Skill { get; private set; }
+        public SkillInstance Instance { get; private set; }
         public int SlotIndex { get; }
         public bool IsSelected { get; set; }
         public int ExecutionOrder { get; set; } = -1;
         public Character AssignedTarget { get; set; }
         public bool IsAssigned => AssignedTarget != null;
 
-        public DrawnSkillSlot(Character caster, SkillData skill, int slotIndex)
+        /// <summary>하위 호환: SkillData</summary>
+        public SkillData Skill => Instance?.Data;
+
+        public DrawnSkillSlot(Character caster, SkillInstance instance, int slotIndex)
         {
             Caster = caster;
-            Skill = skill;
+            Instance = instance;
             SlotIndex = slotIndex;
         }
 
+        /// <summary>하위 호환: SkillData 설정 (새 SkillInstance로 래핑)</summary>
         public void SetSkill(SkillData newSkill)
         {
-            Skill = newSkill;
+            if (newSkill != null)
+                Instance = new SkillInstance(newSkill);
+        }
+
+        /// <summary>SkillInstance 직접 설정</summary>
+        public void SetInstance(SkillInstance newInstance)
+        {
+            Instance = newInstance;
         }
 
         public void Reset()

@@ -41,6 +41,37 @@ namespace TeamLog.Reward
                 rewards.Add(GenerateRandomReward(battleType, runState));
             }
 
+            // 보스: 항상 유물 보상 추가
+            if (battleType == MapNodeType.Boss)
+            {
+                var relic = runState.PeekRandomRelic();
+                if (relic != null)
+                {
+                    rewards.Add(new RewardOffer
+                    {
+                        Type = RewardType.Relic,
+                        Rarity = RewardRarity.Unique,
+                        Description = $"유물: {relic.RelicName}",
+                        Relic = relic
+                    });
+                }
+            }
+            // 엘리트: 30% 확률로 유물 보상 추가
+            else if (battleType == MapNodeType.Elite && _rng.NextDouble() < 0.30)
+            {
+                var relic = runState.PeekRandomRelic();
+                if (relic != null)
+                {
+                    rewards.Add(new RewardOffer
+                    {
+                        Type = RewardType.Relic,
+                        Rarity = RewardRarity.Rare,
+                        Description = $"유물: {relic.RelicName}",
+                        Relic = relic
+                    });
+                }
+            }
+
             return rewards;
         }
 
@@ -107,6 +138,9 @@ namespace TeamLog.Reward
                 case RewardType.Item:
                     runState.AcquireItem(reward.Item);
                     break;
+                case RewardType.Relic:
+                    runState.AcquireRelic(reward.Relic);
+                    break;
             }
         }
     }
@@ -122,6 +156,7 @@ namespace TeamLog.Reward
         public string Description;
         public SkillData Skill;
         public ItemData Item;
+        public RelicData Relic;
 
         // 희귀도별 색상
         public Color GetRarityColor()

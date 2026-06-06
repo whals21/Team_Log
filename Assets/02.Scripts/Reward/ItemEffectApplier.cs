@@ -1,4 +1,5 @@
 using TeamLog.Characters;
+using TeamLog.Map;
 
 namespace TeamLog.Reward
 {
@@ -22,7 +23,25 @@ namespace TeamLog.Reward
                 case ItemEffectType.DEFUp:
                     character.Stats.AddPermanentBase(StatType.DEF, item.EffectValue);
                     break;
+                // HealPerTurn, ExtraGold, DrawWeightBonus는 GameRunState 플래그로 처리
             }
+        }
+
+        /// <summary>
+        /// 턴 시작 시 HealtPerTurn 아이템 효과 적용
+        /// </summary>
+        public static void ApplyHealPerTurn(Character character, int healAmount)
+        {
+            if (character != null && character.IsAlive && healAmount > 0)
+                character.Health.Heal(healAmount);
+        }
+
+        /// <summary>
+        /// ExtraGold 아이템 보너스 골드 계산
+        /// </summary>
+        public static int CalculateBonusGold(int baseGold, int bonusPercent)
+        {
+            return baseGold * bonusPercent / 100;
         }
     }
 }

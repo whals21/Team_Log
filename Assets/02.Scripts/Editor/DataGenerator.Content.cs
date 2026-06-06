@@ -537,6 +537,86 @@ namespace TeamLog.Editor
         }
 
         #endregion
+
+        #region Relic Data
+
+        private const string RELIC_PATH = "Assets/03.Data/Relics";
+
+        private static void GenerateRelicData()
+        {
+            EnsureFolder(RELIC_PATH);
+
+            CreateRelic("Relic_BurningSword", "불타는 검", "공격 시 추가 데미지 +3",
+                RelicTrigger.OnSkillUsed, RelicEffectType.BonusDamage, 3, RewardRarity.Common);
+
+            CreateRelic("Relic_IronHide", "철가죽", "받는 피해 -2",
+                RelicTrigger.OnDamageReceived, RelicEffectType.DamageReduction, 2, RewardRarity.Common);
+
+            CreateRelic("Relic_RegenRing", "재생의 반지", "매 턴 3 HP 회복",
+                RelicTrigger.TurnEnd, RelicEffectType.HealPerTurn, 3, RewardRarity.Common);
+
+            CreateRelic("Relic_GoldCharm", "황금 부적", "골드 획득 시 +15 골드",
+                RelicTrigger.OnGoldEarned, RelicEffectType.BonusGold, 15, RewardRarity.Rare);
+
+            CreateRelic("Relic_ShieldAmulet", "방패 부적", "방패 스킬 사용 시 +3 쉴드",
+                RelicTrigger.OnShieldGained, RelicEffectType.BonusShield, 3, RewardRarity.Common);
+
+            CreateRelic("Relic_VampireFang", "흡혈 송곳니", "적 처치 시 +5 HP 회복",
+                RelicTrigger.OnKill, RelicEffectType.HealOnKill, 5, RewardRarity.Rare);
+
+            CreateRelic("Relic_BerserkerMark", "광전사 인장", "적 처치당 공격력 +2 누적",
+                RelicTrigger.OnKill, RelicEffectType.StackingPowerOnKill, 2, RewardRarity.Unique);
+
+            CreateRelic("Relic_LuckyClover", "네잎클로버", "드로우 가중치 +5",
+                RelicTrigger.BattleStart, RelicEffectType.BonusDrawWeight, 5, RewardRarity.Rare);
+
+            CreateRelic("Relic_ThornArmor", "가시 갑옷", "피격 시 반사 데미지 2",
+                RelicTrigger.OnDamageReceived, RelicEffectType.CounterDamage, 2, RewardRarity.Rare);
+
+            CreateRelic("Relic_SwiftBoots", "질풍 부츠", "매 턴 쉴드 +2",
+                RelicTrigger.TurnStart, RelicEffectType.BonusShield, 2, RewardRarity.Rare);
+
+            CreateRelic("Relic_WarBanner", "전투 깃발", "전투 시작 시 쉴드 +5 (전체)",
+                RelicTrigger.BattleStart, RelicEffectType.BonusShield, 5, RewardRarity.Unique);
+
+            CreateRelic("Relic_HealingHerb", "치유 허브", "전투 시작 시 파티 HP 10% 회복",
+                RelicTrigger.BattleStart, RelicEffectType.HealPerTurn, 10, RewardRarity.Common);
+
+            Debug.Log($"[DataGenerator] 유물 데이터 생성 완료");
+        }
+
+        private static void CreateRelic(string fileName, string relicName, string desc,
+            RelicTrigger trigger, RelicEffectType effectType, int effectValue, RewardRarity rarity)
+        {
+            var path = $"{RELIC_PATH}/{fileName}.asset";
+            var relic = GetOrCreateAsset<RelicData>(path);
+
+            // 필드 설정 via SerializedObject
+            var so = new SerializedObject(relic);
+            SetField(so, "_relicName", relicName);
+            SetField(so, "_description", desc);
+            SetField(so, "_trigger", (int)trigger);
+            SetField(so, "_effectType", (int)effectType);
+            SetField(so, "_effectValue", effectValue);
+            SetField(so, "_rarity", (int)rarity);
+            so.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(relic);
+        }
+
+        private static void SetField(SerializedObject so, string fieldName, int value)
+        {
+            var prop = so.FindProperty(fieldName);
+            if (prop != null) prop.intValue = value;
+        }
+
+        private static void SetField(SerializedObject so, string fieldName, string value)
+        {
+            var prop = so.FindProperty(fieldName);
+            if (prop != null) prop.stringValue = value;
+        }
+
+        #endregion
     }
 }
 #endif

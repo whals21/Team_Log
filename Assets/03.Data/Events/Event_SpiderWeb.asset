@@ -27,6 +27,9 @@ MonoBehaviour:
       HPPercentChange: 0
       GiveRandomSkill: 0
       GiveRandomItem: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
   - ChoiceText: "\uB3CC\uC544\uAC04\uB2E4"
     ChoiceDescription: "\uC548\uC804\uD558\uAC8C \uC6B0\uD68C\uD569\uB2C8\uB2E4."
     Outcome:
@@ -36,3 +39,6 @@ MonoBehaviour:
       HPPercentChange: 0
       GiveRandomSkill: 0
       GiveRandomItem: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0

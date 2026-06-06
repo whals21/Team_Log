@@ -187,10 +187,11 @@ namespace TeamLog.Combat
 
         private void CastImmediately(DrawnSkillSlot slot, Character target)
         {
-            // AP 부족 체크 — 시전 전에 미리 확인
-            if (!_turnManager.Context.CanAfford(slot.Skill.Cost))
+            // AP 부족 체크 — 업그레이드된 비용 반영
+            int effectiveCost = slot.Instance?.EffectiveCost ?? slot.Skill.Cost;
+            if (!_turnManager.Context.CanAfford(effectiveCost))
             {
-                _uiManager.AddLog($"AP 부족! (필요: {slot.Skill.Cost}, 잔여: {_turnManager.Context.CurrentAP})");
+                _uiManager.AddLog($"AP 부족! (필요: {effectiveCost}, 잔여: {_turnManager.Context.CurrentAP})");
                 return;
             }
 
@@ -198,8 +199,9 @@ namespace TeamLog.Combat
             slot.IsSelected = true;
             slot.AssignedTarget = target;
 
-            // 즉시 시전
-            bool battleEnded = _turnManager.ExecuteSkillImmediately(slot.Caster, slot.Skill, target);
+            // 즉시 시전 — 업그레이드 보너스 적용
+            int bonusPower = slot.Instance != null ? slot.Instance.EffectivePower - slot.Skill.Power : 0;
+            bool battleEnded = _turnManager.ExecuteSkillImmediately(slot.Caster, slot.Skill, target, bonusPower);
 
             // UI 갱신
             _actionBar.MarkSlotAssigned(slot.SlotIndex, _actionBar.GetNextExecutionOrder());

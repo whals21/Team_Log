@@ -11,6 +11,7 @@ namespace TeamLog.Reward
     {
         Gold,
         Skill,
-        Item
+        Item,
+        Relic
     }
 }

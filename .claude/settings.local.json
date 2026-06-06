@@ -38,7 +38,12 @@
       "Bash(echo === $asset ===:*)",
       "Bash(do echo:*)",
       "Bash(sed:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(xargs cat:*)",
+      "Bash(do:*)",
+      "Bash(du:*)",
+      "Bash(\"/c/Program Files/Unity/Hub/Editor/6000.0.42f1/Editor/Unity.exe\":*)",
+      "Bash(\"C:/Program Files/Unity/Hub/Editor/6000.0.66f2/Editor/Unity.exe\":*)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TeamLog.Characters;
 using TeamLog.Reward;
+using TeamLog.Combat;
 
 namespace TeamLog.Map
 {
@@ -48,6 +49,7 @@ namespace TeamLog.Map
         // 데이터 풀 (MapSceneSetup에서 주입)
         private List<SkillData> _skillPool;
         private List<ItemData> _itemPool;
+        private List<RelicData> _relicPool;
 
         // 맵 진행
         public int CurrentFloor { get; private set; } = 1;
@@ -57,11 +59,18 @@ namespace TeamLog.Map
         // 리소스
         public int Gold { get; private set; }
 
+        // 통계
+        public int BattlesWon { get; private set; }
+        public int TotalGoldEarned { get; private set; }
+
         // 파티
         public IReadOnlyList<Character> PlayerParty => _playerParty;
 
         // 인벤토리
         public IReadOnlyList<ItemData> AcquiredItems => _acquiredItems;
+
+        // 유물
+        public RelicHandler RelicHandler { get; } = new();
 
         // 이력
         public IReadOnlyList<string> RunHistory => _runHistory;
@@ -114,6 +123,7 @@ namespace TeamLog.Map
         public void AddGold(int amount)
         {
             Gold += amount;
+            TotalGoldEarned += amount;
             OnGoldChanged?.Invoke(Gold);
         }
 
@@ -147,6 +157,7 @@ namespace TeamLog.Map
         /// </summary>
         public void OnBattleVictory()
         {
+            BattlesWon++;
             AddLog($"층 {CurrentFloor} — 전투 승리");
         }
 
@@ -167,6 +178,9 @@ namespace TeamLog.Map
             CurrentFloor++;
             AddLog($"층 {CurrentFloor}(으)로 진입");
             GenerateCurrentFloorMap();
+
+            // 층 이동 시 자동 저장
+            SaveManager.Save();
         }
 
         /// <summary>
@@ -251,10 +265,11 @@ namespace TeamLog.Map
         /// <summary>
         /// 스킬/아이템 데이터 풀 주입 (MapSceneSetup에서 호출)
         /// </summary>
-        public void SetDataPools(List<SkillData> skillPool, List<ItemData> itemPool)
+        public void SetDataPools(List<SkillData> skillPool, List<ItemData> itemPool, List<RelicData> relicPool = null)
         {
             _skillPool = skillPool;
             _itemPool = itemPool;
+            _relicPool = relicPool ?? new List<RelicData>();
         }
 
         /// <summary>
@@ -273,6 +288,15 @@ namespace TeamLog.Map
         {
             if (_itemPool == null || _itemPool.Count == 0) return null;
             return _itemPool[_rng.Next(_itemPool.Count)];
+        }
+
+        /// <summary>
+        /// 풀에서 랜덤 유물 조회 (실제 획득하지 않음 — 보상 미리보기용)
+        /// </summary>
+        public RelicData PeekRandomRelic()
+        {
+            if (_relicPool == null || _relicPool.Count == 0) return null;
+            return _relicPool[_rng.Next(_relicPool.Count)];
         }
 
         /// <summary>
@@ -338,6 +362,16 @@ namespace TeamLog.Map
             }
 
             AddLog($"아이템 획득: {item.ItemName}");
+        }
+
+        /// <summary>
+        /// 유물 획득 — RelicHandler에 추가
+        /// </summary>
+        public void AcquireRelic(RelicData relic)
+        {
+            if (relic == null) return;
+            RelicHandler.AddRelic(relic);
+            AddLog($"유물 획득: {relic.RelicName}");
         }
     }
 }

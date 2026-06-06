@@ -35,6 +35,7 @@ namespace TeamLog.UI.Reward
                 RewardType.Gold => "골드",
                 RewardType.Skill => "스킬",
                 RewardType.Item => "아이템",
+                RewardType.Relic => "유물",
                 _ => "보상"
             };
 
@@ -45,6 +46,7 @@ namespace TeamLog.UI.Reward
                 {
                     RewardType.Skill => offer.Skill?.Icon,
                     RewardType.Item => offer.Item?.Icon,
+                    RewardType.Relic => offer.Relic?.Icon,
                     _ => null
                 };
                 _iconImage.sprite = icon;
@@ -67,6 +69,7 @@ namespace TeamLog.UI.Reward
                     RewardType.Gold => new Color(0.2f, 0.18f, 0.08f),
                     RewardType.Skill => new Color(0.12f, 0.15f, 0.22f),
                     RewardType.Item => new Color(0.15f, 0.12f, 0.2f),
+                    RewardType.Relic => new Color(0.22f, 0.12f, 0.22f),
                     _ => new Color(0.15f, 0.15f, 0.2f)
                 };
                 _backgroundImage.color = baseColor;

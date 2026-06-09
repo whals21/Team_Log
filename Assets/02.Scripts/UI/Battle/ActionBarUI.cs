@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using TeamLog.Combat.Turn;
 using TeamLog.Combat.Draw;
 using TeamLog.Characters;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Battle
 {
     /// <summary>
-    /// 하단 액션 바 (스킬 선택, 상세정보, End Turn 버튼)
+    /// 하단 액션 바 (스킬 선택, End Turn 버튼)
     /// </summary>
     public class ActionBarUI : MonoBehaviour
     {
@@ -18,12 +19,7 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Transform _actionMenuContainer;
         [SerializeField] private ActionSlotUI _actionSlotPrefab;
         [SerializeField] private int _maxActionSlots = 6;
-
-        [Header("Action Detail")]
-        [SerializeField] private GameObject _actionDetailPanel;
-        [SerializeField] private TextMeshProUGUI _actionTitleText;
-        [SerializeField] private TextMeshProUGUI _actionDescText;
-        [SerializeField] private Button _cancelButton;
+        [SerializeField] private TextMeshProUGUI _rerollText;
 
         [Header("End Turn")]
         [SerializeField] private Button _endTurnButton;
@@ -66,9 +62,6 @@ namespace TeamLog.UI.Battle
         {
             if (_endTurnButton != null)
                 _endTurnButton.onClick.AddListener(OnEndTurnClicked);
-
-            if (_cancelButton != null)
-                _cancelButton.onClick.AddListener(OnCancelSelection);
         }
 
         public void UpdateActionSlots(IReadOnlyList<DrawnSkillSlot> slots)
@@ -80,6 +73,7 @@ namespace TeamLog.UI.Battle
                 if (i < slots.Count)
                 {
                     var slot = slots[i];
+                    _actionSlots[i].gameObject.SetActive(true);
                     _actionSlots[i].SetSkill(slot.Skill, slot.Caster);
                     _actionSlots[i].SetAssigned(slot.IsAssigned);
                     _actionSlots[i].SetExecutionOrder(slot.ExecutionOrder);
@@ -88,6 +82,7 @@ namespace TeamLog.UI.Battle
                 else
                 {
                     _actionSlots[i].Clear();
+                    _actionSlots[i].gameObject.SetActive(false);
                 }
             }
         }
@@ -97,60 +92,9 @@ namespace TeamLog.UI.Battle
             _selectedSlotIndex = slotIndex;
 
             for (int i = 0; i < _actionSlots.Count; i++)
-            {
                 _actionSlots[i].SetSelected(i == slotIndex);
-            }
-
-            if (slotIndex >= 0 && slotIndex < _actionSlots.Count)
-            {
-                ShowActionDetail(_actionSlots[slotIndex]);
-            }
 
             OnSlotSelected?.Invoke(slotIndex);
-        }
-
-        private void ShowActionDetail(ActionSlotUI slot)
-        {
-            if (_actionDetailPanel == null) return;
-
-            _actionDetailPanel.SetActive(true);
-
-            if (_actionTitleText != null && slot.Skill != null)
-                _actionTitleText.text = slot.Skill.SkillName;
-
-            if (_actionDescText != null && slot.Skill != null)
-                _actionDescText.text = BuildActionDescription(slot.Skill, slot.Caster);
-        }
-
-        private string BuildActionDescription(SkillData skill, Character caster)
-        {
-            var parts = new List<string>();
-
-            if (!string.IsNullOrEmpty(skill.Description))
-                parts.Add(skill.Description);
-
-            string summary = BattleDisplayUtil.BuildSkillDescription(skill, caster, "  |  ");
-            if (!string.IsNullOrEmpty(summary))
-                parts.Add(summary);
-
-            return string.Join("  |  ", parts);
-        }
-
-        private void HideActionDetail()
-        {
-            if (_actionDetailPanel != null)
-                _actionDetailPanel.SetActive(false);
-
-            _selectedSlotIndex = -1;
-
-            foreach (var slot in _actionSlots)
-                slot.SetSelected(false);
-        }
-
-        private void OnCancelSelection()
-        {
-            HideActionDetail();
-            OnSlotSelectionCancelled?.Invoke();
         }
 
         private void OnEndTurnClicked()
@@ -167,8 +111,18 @@ namespace TeamLog.UI.Battle
         public void SetRerollState(int remaining, int max)
         {
             bool canReroll = remaining > 0;
+            if (_rerollText != null)
+            {
+                _rerollText.text = $"리롤 {remaining}/{max}";
+                _rerollText.color = canReroll
+                    ? UIPalette.Default.RerollNormal
+                    : UIPalette.Default.RerollEmpty;
+            }
             foreach (var slot in _actionSlots)
+            {
+                if (!slot.gameObject.activeSelf) continue;
                 slot.SetRerollAvailable(canReroll);
+            }
         }
 
         public void MarkSlotAssigned(int slotIndex, int executionOrder)
@@ -209,37 +163,32 @@ namespace TeamLog.UI.Battle
 
             for (int i = 0; i < _actionSlots.Count && i < slots.Count; i++)
             {
+                if (!_actionSlots[i].gameObject.activeSelf) continue;
                 var skill = slots[i].Skill;
                 _actionSlots[i].SetAffordable(skill == null || slots[i].IsSelected || _currentAP >= skill.Cost);
             }
         }
 
-        public void Show()
-        {
-            gameObject.SetActive(true);
-        }
-
-        public void Hide()
-        {
-            gameObject.SetActive(false);
-        }
-
         private void OnBadgeClicked(string title, string description)
         {
-            if (_actionDetailPanel == null) return;
-
-            _actionDetailPanel.SetActive(true);
-
-            if (_actionTitleText != null)
-                _actionTitleText.text = title;
-
-            if (_actionDescText != null)
-                _actionDescText.text = description;
+            if (TooltipUI.Instance != null)
+                TooltipUI.Instance.Show(title, description);
         }
 
         private void OnDestroy()
         {
             StatusEffectBadge.OnBadgeClicked -= OnBadgeClicked;
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape) && _selectedSlotIndex >= 0)
+            {
+                _selectedSlotIndex = -1;
+                foreach (var slot in _actionSlots)
+                    slot.SetSelected(false);
+                OnSlotSelectionCancelled?.Invoke();
+            }
         }
     }
 }

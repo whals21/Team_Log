@@ -21,7 +21,7 @@ namespace TeamLog.UI
 
         [Header("Text")]
         public Color TextWhite = Color.white;
-        public Color TextDim = new Color(0.7f, 0.7f, 0.75f);
+        public Color TextDim = new Color(0.82f, 0.82f, 0.87f);
 
         [Header("HP")]
         public Color HPNormal = new Color(0.15f, 0.68f, 0.38f);
@@ -53,11 +53,22 @@ namespace TeamLog.UI
         public Color BorderRed = new Color(0.6f, 0.1f, 0.18f, 0.8f);
 
         [Header("Log Colors")]
-        public Color LogDamage = new Color(0.85f, 0.3f, 0.3f);
-        public Color LogHeal = new Color(0.3f, 0.8f, 0.5f);
+        public Color LogDamage = new Color(0.95f, 0.4f, 0.4f);
+        public Color LogHeal = new Color(0.4f, 0.9f, 0.6f);
         public Color LogBuff = new Color(0.9f, 0.8f, 0.3f);
-        public Color LogDebuff = new Color(0.7f, 0.4f, 0.9f);
-        public Color LogSystem = new Color(0.7f, 0.7f, 0.75f);
+        public Color LogDebuff = new Color(0.8f, 0.5f, 1.0f);
+        public Color LogSystem = new Color(0.82f, 0.82f, 0.87f);
+
+        [Header("Intent")]
+        public Color IntentAttack = new Color(0.85f, 0.2f, 0.2f);
+        public Color IntentShield = new Color(0.72f, 0.45f, 0.2f);
+        public Color IntentHeal = new Color(0.15f, 0.68f, 0.38f);
+        public Color IntentBuff = new Color(0.96f, 0.82f, 0.25f);
+        public Color IntentDebuff = new Color(0.6f, 0.3f, 0.8f);
+
+        [Header("Slot States")]
+        public Color SlotAffordable = new Color(0.1f, 0.1f, 0.18f, 0.9f);
+        public Color SlotExpensive = new Color(0.15f, 0.05f, 0.05f, 0.9f);
 
         // ── Static Access ──
 
@@ -78,11 +89,6 @@ namespace TeamLog.UI
                 _default = CreateInstance<UIPalette>();
                 return _default;
             }
-        }
-
-        public static void Initialize(UIPalette palette)
-        {
-            _default = palette;
         }
     }
 }

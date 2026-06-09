@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 127bd08492722a240a2fe9af60102ca8, type: 3}
+  m_Name: Aug_GlassCannon
+  m_EditorClassIdentifier: 
+  _augmentName: "\uC720\uB9AC \uB300\uD3EC"
+  _description: "\uC704\uB825\uC774 +8 \uC99D\uAC00\uD569\uB2C8\uB2E4"
+  _type: 14
+  _compatibleSkillType: 0
+  _tier: 3
+  _icon: {fileID: 0}
+  _isCursed: 1
+  _curseDescription: "\uBC1B\uB294 \uD53C\uD574 +50%"
+  _keywords:
+  - Type: 2
+    Value: 8
+    Trigger: 0
+    ConditionParam: 0
+  - Type: 12
+    Value: 1.5
+    Trigger: 0
+    ConditionParam: 0

@@ -1,26 +1,23 @@
 using System.Collections.Generic;
 using TeamLog.Characters;
 using TeamLog.Reward;
-using TeamLog.Combat;
+using TeamLog.Skill;
+
+using StatType = TeamLog.Characters.StatType;
 
 namespace TeamLog.Map
 {
     /// <summary>
     /// 로그라이크 런 상태 — 정적 싱글톤 순수 C# 클래스
     /// 전체 플레이 세션의 진행 상태를 관리, 씬 전환 시에도 유지
+    /// 보상 생성: AugmentOfferGenerator, 데미지: DamageCalculator
     /// </summary>
     public class GameRunState
     {
         private static GameRunState _instance;
 
-        /// <summary>
-        /// 현재 런 인스턴스 (씬 전환 시에도 유지)
-        /// </summary>
         public static GameRunState Instance => _instance;
 
-        /// <summary>
-        /// 새 런 생성 — 기존 인스턴스가 있으면 파괴 후 생성
-        /// </summary>
         public static GameRunState Create(List<Character> playerParty, int startingGold = 0)
         {
             if (_instance != null)
@@ -29,9 +26,6 @@ namespace TeamLog.Map
             return _instance;
         }
 
-        /// <summary>
-        /// 런 종료 시 인스턴스 파괴
-        /// </summary>
         public static void Destroy()
         {
             if (_instance != null)
@@ -42,14 +36,12 @@ namespace TeamLog.Map
         }
 
         private readonly List<Character> _playerParty;
-        private readonly List<ItemData> _acquiredItems = new();
         private readonly List<string> _runHistory = new();
         private readonly System.Random _rng = new();
 
         // 데이터 풀 (MapSceneSetup에서 주입)
-        private List<SkillData> _skillPool;
-        private List<ItemData> _itemPool;
         private List<RelicData> _relicPool;
+        private List<AugmentData> _augmentPool;
 
         // 맵 진행
         public int CurrentFloor { get; private set; } = 1;
@@ -58,6 +50,7 @@ namespace TeamLog.Map
 
         // 리소스
         public int Gold { get; private set; }
+        public int RerollTokens { get; private set; } = 1;
 
         // 통계
         public int BattlesWon { get; private set; }
@@ -66,11 +59,11 @@ namespace TeamLog.Map
         // 파티
         public IReadOnlyList<Character> PlayerParty => _playerParty;
 
-        // 인벤토리
-        public IReadOnlyList<ItemData> AcquiredItems => _acquiredItems;
-
         // 유물
         public RelicHandler RelicHandler { get; } = new();
+
+        // 증강 보상 생성기
+        public AugmentOfferGenerator AugmentGenerator { get; private set; }
 
         // 이력
         public IReadOnlyList<string> RunHistory => _runHistory;
@@ -95,9 +88,8 @@ namespace TeamLog.Map
             OnRunEnded = null;
         }
 
-        /// <summary>
-        /// 런 시작 — 첫 층 맵 생성
-        /// </summary>
+        // ── 런 라이프사이클 ──
+
         public void StartRun()
         {
             IsRunActive = true;
@@ -106,9 +98,6 @@ namespace TeamLog.Map
             GenerateCurrentFloorMap();
         }
 
-        /// <summary>
-        /// 현재 층의 맵 생성
-        /// </summary>
         public void GenerateCurrentFloorMap()
         {
             var generator = new MapGenerator();
@@ -117,53 +106,6 @@ namespace TeamLog.Map
             OnMapChanged?.Invoke(CurrentMap);
         }
 
-        /// <summary>
-        /// 골드 추가
-        /// </summary>
-        public void AddGold(int amount)
-        {
-            Gold += amount;
-            TotalGoldEarned += amount;
-            OnGoldChanged?.Invoke(Gold);
-        }
-
-        /// <summary>
-        /// 층별 스케일링 배율
-        /// </summary>
-        public float GetFloorScaling()
-        {
-            return CurrentFloor switch
-            {
-                1 => 1.0f,
-                2 => 1.3f,
-                3 => 1.6f,
-                _ => 1.0f + (CurrentFloor - 1) * 0.3f
-            };
-        }
-
-        /// <summary>
-        /// 골드 사용 — 성공 시 true, 부족 시 false
-        /// </summary>
-        public bool SpendGold(int amount)
-        {
-            if (Gold < amount) return false;
-            Gold -= amount;
-            OnGoldChanged?.Invoke(Gold);
-            return true;
-        }
-
-        /// <summary>
-        /// 전투 승리 처리
-        /// </summary>
-        public void OnBattleVictory()
-        {
-            BattlesWon++;
-            AddLog($"층 {CurrentFloor} — 전투 승리");
-        }
-
-        /// <summary>
-        /// 보스 격파 시 다음 층으로 이동
-        /// </summary>
         public void AdvanceToNextFloor()
         {
             if (CurrentFloor >= TotalFloors)
@@ -178,22 +120,9 @@ namespace TeamLog.Map
             CurrentFloor++;
             AddLog($"층 {CurrentFloor}(으)로 진입");
             GenerateCurrentFloorMap();
-
-            // 층 이동 시 자동 저장
             SaveManager.Save();
         }
 
-        /// <summary>
-        /// 파티 전원 사망 여부
-        /// </summary>
-        public bool IsPartyWiped()
-        {
-            return _playerParty.TrueForAll(p => p.IsDead);
-        }
-
-        /// <summary>
-        /// 런 종료 (패배)
-        /// </summary>
         public void EndRunDefeat()
         {
             IsRunActive = false;
@@ -201,12 +130,59 @@ namespace TeamLog.Map
             OnRunEnded?.Invoke();
         }
 
-        // 휴식 노드 보너스 AP (명상 선택 시)
+        public bool IsPartyWiped() => _playerParty.TrueForAll(p => p.IsDead);
+
+        public void OnBattleVictory()
+        {
+            BattlesWon++;
+            AddLog($"층 {CurrentFloor} — 전투 승리");
+        }
+
+        // ── 경제 ──
+
+        public void AddGold(int amount)
+        {
+            Gold += amount;
+            TotalGoldEarned += amount;
+            OnGoldChanged?.Invoke(Gold);
+        }
+
+        public bool SpendGold(int amount)
+        {
+            if (Gold < amount) return false;
+            Gold -= amount;
+            OnGoldChanged?.Invoke(Gold);
+            return true;
+        }
+
+        public float GetFloorScaling()
+        {
+            return CurrentFloor switch
+            {
+                1 => 1.0f,
+                2 => 1.3f,
+                3 => 1.6f,
+                _ => 1.0f + (CurrentFloor - 1) * 0.3f
+            };
+        }
+
+        // ── 리롤 토큰 ──
+
+        public void AddRerollTokens(int count) => RerollTokens += count;
+
+        public bool SpendRerollToken()
+        {
+            if (RerollTokens <= 0) return false;
+            RerollTokens--;
+            return true;
+        }
+
+        public void RestoreRerollTokens(int tokens) => RerollTokens = tokens;
+
+        // ── 휴식지 ──
+
         public int BonusAP { get; private set; }
 
-        /// <summary>
-        /// 휴식 노드 — 파티 전체 HP 회복
-        /// </summary>
         public void RestAtCampfire(float healPercent = 0.3f)
         {
             foreach (var member in _playerParty)
@@ -220,9 +196,6 @@ namespace TeamLog.Map
             AddLog("캠프파이어에서 휴식 — 파티 HP 회복");
         }
 
-        /// <summary>
-        /// 수련 — 모든 생존 파티원 ATK+1 영구 증가
-        /// </summary>
         public void TrainAtCampfire()
         {
             foreach (var member in _playerParty)
@@ -233,18 +206,12 @@ namespace TeamLog.Map
             AddLog("캠프파이어에서 수련 — 파티 ATK 영구 증가");
         }
 
-        /// <summary>
-        /// 명상 — 다음 전투 시작 시 AP+1
-        /// </summary>
         public void MeditateAtCampfire()
         {
             BonusAP = 1;
             AddLog("캠프파이어에서 명상 — 다음 전투 AP 보너스");
         }
 
-        /// <summary>
-        /// 보너스 AP 소모 후 초기화
-        /// </summary>
         public int ConsumeBonusAP()
         {
             int bonus = BonusAP;
@@ -252,126 +219,57 @@ namespace TeamLog.Map
             return bonus;
         }
 
-        /// <summary>
-        /// 저장 복원용 — BonusAP 설정
-        /// </summary>
         public void RestoreBonusAP(int bonus) => BonusAP = bonus;
 
-        private void AddLog(string entry)
-        {
-            _runHistory.Add($"[층 {CurrentFloor}] {entry}");
-        }
+        // ── 데이터 풀 & 획득 ──
 
-        /// <summary>
-        /// 스킬/아이템 데이터 풀 주입 (MapSceneSetup에서 호출)
-        /// </summary>
-        public void SetDataPools(List<SkillData> skillPool, List<ItemData> itemPool, List<RelicData> relicPool = null)
+        public void SetDataPools(List<RelicData> relicPool = null, List<AugmentData> augmentPool = null)
         {
-            _skillPool = skillPool;
-            _itemPool = itemPool;
             _relicPool = relicPool ?? new List<RelicData>();
+            _augmentPool = augmentPool ?? new List<AugmentData>();
+            AugmentGenerator = new AugmentOfferGenerator(_augmentPool, _playerParty, _rng);
         }
 
-        /// <summary>
-        /// 풀에서 랜덤 스킬 조회 (실제 획득하지 않음 — 보상 미리보기용)
-        /// </summary>
-        public SkillData PeekRandomSkill()
-        {
-            if (_skillPool == null || _skillPool.Count == 0) return null;
-            return _skillPool[_rng.Next(_skillPool.Count)];
-        }
-
-        /// <summary>
-        /// 풀에서 랜덤 아이템 조회 (실제 획득하지 않음 — 보상 미리보기용)
-        /// </summary>
-        public ItemData PeekRandomItem()
-        {
-            if (_itemPool == null || _itemPool.Count == 0) return null;
-            return _itemPool[_rng.Next(_itemPool.Count)];
-        }
-
-        /// <summary>
-        /// 풀에서 랜덤 유물 조회 (실제 획득하지 않음 — 보상 미리보기용)
-        /// </summary>
         public RelicData PeekRandomRelic()
         {
             if (_relicPool == null || _relicPool.Count == 0) return null;
             return _relicPool[_rng.Next(_relicPool.Count)];
         }
 
-        /// <summary>
-        /// 풀에서 랜덤 스킬 획득 — 첫 번째 생존 파티원에게 추가
-        /// </summary>
-        public SkillData AcquireRandomSkill()
+        public AugmentData PeekRandomAugment()
         {
-            if (_skillPool == null || _skillPool.Count == 0) return null;
-            var skill = _skillPool[_rng.Next(_skillPool.Count)];
-            foreach (var member in _playerParty)
-            {
-                if (member.IsAlive) { member.SkillInventory.AddSkill(skill); break; }
-            }
-            AddLog($"스킬 획득: {skill.SkillName}");
-            return skill;
+            if (_augmentPool == null || _augmentPool.Count == 0) return null;
+            return _augmentPool[_rng.Next(_augmentPool.Count)];
         }
 
-        /// <summary>
-        /// 풀에서 랜덤 아이템 획득
-        /// </summary>
-        public ItemData AcquireRandomItem()
+        public bool AcquireAugment(AugmentData augment, Character member, SkillInstance targetSkill)
         {
-            if (_itemPool == null || _itemPool.Count == 0) return null;
-            var item = _itemPool[_rng.Next(_itemPool.Count)];
-            _acquiredItems.Add(item);
-
-            foreach (var member in _playerParty)
-            {
-                if (member.IsAlive)
-                    ItemEffectApplier.Apply(member, item);
-            }
-
-            AddLog($"아이템 획득: {item.ItemName}");
-            return item;
+            if (augment == null || member == null || targetSkill == null) return false;
+            bool applied = member.SkillInventory.ApplyAugmentToSkill(targetSkill, augment);
+            if (applied)
+                AddLog($"증강 획득: {augment.AugmentName} → {targetSkill.Data.SkillName}");
+            return applied;
         }
 
-        /// <summary>
-        /// 특정 스킬 획득
-        /// </summary>
-        public void AcquireSkill(SkillData skill)
-        {
-            if (skill == null) return;
-            foreach (var member in _playerParty)
-            {
-                if (member.IsAlive) { member.SkillInventory.AddSkill(skill); break; }
-            }
-            AddLog($"스킬 획득: {skill.SkillName}");
-        }
-
-        /// <summary>
-        /// 특정 아이템 획득 — 즉시 효과 적용
-        /// </summary>
-        public void AcquireItem(ItemData item)
-        {
-            if (item == null) return;
-            _acquiredItems.Add(item);
-
-            // 아이템 효과를 모든 생존 파티원에 적용
-            foreach (var member in _playerParty)
-            {
-                if (member.IsAlive)
-                    ItemEffectApplier.Apply(member, item);
-            }
-
-            AddLog($"아이템 획득: {item.ItemName}");
-        }
-
-        /// <summary>
-        /// 유물 획득 — RelicHandler에 추가
-        /// </summary>
         public void AcquireRelic(RelicData relic)
         {
             if (relic == null) return;
             RelicHandler.AddRelic(relic);
             AddLog($"유물 획득: {relic.RelicName}");
+        }
+
+        public bool RemoveRelic(RelicData relic)
+        {
+            if (relic == null) return false;
+            bool removed = RelicHandler.RemoveRelic(relic);
+            if (removed)
+                AddLog($"유물 제거: {relic.RelicName}");
+            return removed;
+        }
+
+        private void AddLog(string entry)
+        {
+            _runHistory.Add($"[층 {CurrentFloor}] {entry}");
         }
     }
 }

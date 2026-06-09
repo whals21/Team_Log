@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 using TeamLog.Characters;
 using TeamLog.UI;
 
@@ -9,7 +10,7 @@ namespace TeamLog.UI.Battle
     /// <summary>
     /// 액션 슬롯 UI (스킬 아이콘 + 이름 + 코스트)
     /// </summary>
-    public class ActionSlotUI : MonoBehaviour
+    public class ActionSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("Visuals")]
         [SerializeField] private Image _skillIcon;
@@ -21,13 +22,8 @@ namespace TeamLog.UI.Battle
         [SerializeField] private TextMeshProUGUI _executionOrderText;
         [SerializeField] private GameObject _assignedOverlay;
 
-        [Header("Colors")]
-        [SerializeField] private Color _attackColor = new Color(0.77f, 0.12f, 0.23f);
-        [SerializeField] private Color _healColor = new Color(0.15f, 0.68f, 0.38f);
-        [SerializeField] private Color _buffColor = new Color(0.96f, 0.82f, 0.25f);
-        [SerializeField] private Color _debuffColor = new Color(0.6f, 0.3f, 0.8f);
-        [SerializeField] private Color _shieldColor = new Color(0.72f, 0.45f, 0.2f);
-        [SerializeField] private Color _purifyColor = new Color(0.4f, 0.8f, 0.95f);
+        [Header("AP Shortage")]
+        [SerializeField] private GameObject _apShortageBorder;
 
         [Header("Button")]
         [SerializeField] private Button _button;
@@ -41,7 +37,9 @@ namespace TeamLog.UI.Battle
         private ActionBarUI _parent;
         private Color _originalSkillColor;
         private Color _originalCostColor;
+        private Color _originalBgColor;
         private bool _colorsStored;
+        private Image _bgImage;
 
         public SkillData Skill => _skill;
         public Character Caster => _caster;
@@ -52,6 +50,10 @@ namespace TeamLog.UI.Battle
         {
             _slotIndex = slotIndex;
             _parent = parent;
+
+            _bgImage = GetComponent<Image>();
+            if (_bgImage != null)
+                _originalBgColor = _bgImage.color;
 
             if (_button != null)
                 _button.onClick.AddListener(OnClick);
@@ -85,13 +87,26 @@ namespace TeamLog.UI.Battle
             if (_costText != null)
                 _originalCostColor = _costText.color;
 
+            // 스킬 타입별 배경 틴트 (P1-1)
+            if (_bgImage != null)
+            {
+                var skillColor = GetSkillColor(skill);
+                _bgImage.color = new Color(skillColor.r * 0.25f, skillColor.g * 0.25f, skillColor.b * 0.25f, 0.9f);
+            }
+
             // 툴팁 설정
             if (skill != null)
             {
                 var tooltip = GetComponent<TooltipTarget>();
                 if (tooltip == null) tooltip = gameObject.AddComponent<TooltipTarget>();
+
+                string subtitle = BuildSkillSubtitle(skill);
                 string desc = BattleDisplayUtil.BuildSkillDescription(skill, caster);
-                tooltip.SetContent(skill.SkillName, desc);
+                string fullDesc = string.IsNullOrEmpty(skill.Description) ? desc : skill.Description;
+                if (!string.IsNullOrEmpty(desc) && !string.IsNullOrEmpty(skill.Description) && skill.Description != desc)
+                    fullDesc = skill.Description + "\n" + desc;
+
+                tooltip.SetContent(skill.SkillName, subtitle, fullDesc);
             }
         }
 
@@ -114,6 +129,9 @@ namespace TeamLog.UI.Battle
                 _skillIcon.sprite = null;
                 _skillIcon.color = Color.gray;
             }
+
+            if (_bgImage != null)
+                _bgImage.color = _originalBgColor;
 
             SetSelected(false);
         }
@@ -143,6 +161,9 @@ namespace TeamLog.UI.Battle
 
             if (_button != null)
                 _button.interactable = affordable;
+
+            if (_apShortageBorder != null)
+                _apShortageBorder.SetActive(!affordable);
         }
 
         public void SetRerollAvailable(bool available)
@@ -179,6 +200,38 @@ namespace TeamLog.UI.Battle
             };
         }
 
+        private static string BuildSkillSubtitle(SkillData skill)
+        {
+            var parts = new System.Collections.Generic.List<string>();
+
+            string typeLabel = skill.Type switch
+            {
+                SkillType.Attack => "공격",
+                SkillType.Heal => "치유",
+                SkillType.Buff => "강화",
+                SkillType.Debuff => "약화",
+                SkillType.Shield => "보호막",
+                SkillType.Purify => "정화",
+                _ => ""
+            };
+            if (!string.IsNullOrEmpty(typeLabel)) parts.Add(typeLabel);
+
+            parts.Add($"비용 {skill.Cost}");
+
+            string targetLabel = skill.Target switch
+            {
+                TargetType.SingleEnemy => "단일 적",
+                TargetType.AllEnemies => "전체 적",
+                TargetType.SingleAlly => "단일 아군",
+                TargetType.AllAllies => "전체 아군",
+                TargetType.Self => "자신",
+                _ => ""
+            };
+            if (!string.IsNullOrEmpty(targetLabel)) parts.Add(targetLabel);
+
+            return string.Join(" | ", parts);
+        }
+
         private void OnClick()
         {
             if (_skill != null && _parent != null)
@@ -191,6 +244,16 @@ namespace TeamLog.UI.Battle
         private void OnRerollClick()
         {
             OnSlotRerollRequested?.Invoke(_slotIndex);
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            // TooltipTarget이 툴팁을 자동 처리
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            // TooltipTarget이 툴팁을 자동 처리
         }
     }
 }

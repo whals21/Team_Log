@@ -13,9 +13,15 @@ MonoBehaviour:
   m_Name: Relic_HealingHerb
   m_EditorClassIdentifier: 
   _relicName: "\uCE58\uC720 \uD5C8\uBE0C"
-  _description: "\uC804\uD22C \uC2DC\uC791 \uC2DC \uD30C\uD2F0 HP 10% \uD68C\uBCF5"
+  _description: "\uC804\uD22C \uC2DC\uC791 \uC2DC \uD30C\uD2F0 HP 10 \uD68C\uBCF5"
   _icon: {fileID: 0}
   _trigger: 1
   _effectType: 3
   _effectValue: 10
   _rarity: 0
+  _price: 60
+  _keywords:
+  - Type: 10
+    Value: 10
+    Trigger: 3
+    ConditionParam: 0

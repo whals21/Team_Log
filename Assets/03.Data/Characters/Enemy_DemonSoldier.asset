@@ -18,5 +18,7 @@ MonoBehaviour:
   _baseHP: 8
   _baseATK: 3
   _baseDEF: 0
-  _enemyTrait: 0
+  _enemyTrait: 1
   _skills: []
+  _isDefault: 0
+  _unlockCondition: 

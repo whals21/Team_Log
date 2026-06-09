@@ -37,54 +37,61 @@ namespace TeamLog.Editor
                 if (topBarUI == null)
                     topBarUI = topBar.gameObject.AddComponent<TopBarUI>();
 
-                var turnCounter = topBar.Find("TurnCounter");
-                if (turnCounter != null)
-                {
-                    var tmp = turnCounter.GetComponent<TMPro.TextMeshProUGUI>();
-                    if (tmp != null)
-                        tmp.text = "1/4";
-                }
-
-                // 턴 카운터 텍스트 자동 연결
-                if (turnCounter != null)
-                    SetPrivateField(topBarUI, "_turnCounterText", turnCounter.GetComponent<TMPro.TextMeshProUGUI>());
-
-                // AP 텍스트 자동 연결
-                var apText = topBar.Find("APText");
-                if (apText != null)
-                    SetPrivateField(topBarUI, "_apText", apText.GetComponent<TMPro.TextMeshProUGUI>());
-
-                // 리롤 카운트 텍스트 자동 연결
-                var rerollText = topBar.Find("RerollText");
-                if (rerollText != null)
-                    SetPrivateField(topBarUI, "_rerollText", rerollText.GetComponent<TMPro.TextMeshProUGUI>());
-
                 // PartyStatusWidget 자동 연결
                 var partyWidget = topBar.GetComponent<PartyStatusWidget>();
-                if (partyWidget != null)
-                {
-                    var partyHP = topBar.Find("PartyHP");
-                    var partyGold = topBar.Find("PartyGold");
-                    if (partyHP != null)
-                        SetPrivateField(partyWidget, "_hpText", partyHP.GetComponent<TMPro.TextMeshProUGUI>());
-                    if (partyGold != null)
-                        SetPrivateField(partyWidget, "_goldText", partyGold.GetComponent<TMPro.TextMeshProUGUI>());
-                }
             }
 
-            // 3) BottomBar에 ActionBarUI 추가
+            // 3) BottomBar에 ActionBarUI 추가 + TopBarUI 요소 와이어링
             var bottomBar = root.transform.Find("BottomBar");
             if (bottomBar != null)
             {
                 SetupActionBar(bottomBar);
+
+                // TopBarUI가 BottomBar의 AP/속도/턴종료 요소를 참조하도록 와이어링
+                var topBarUI = topBar?.GetComponent<TopBarUI>();
+                if (topBarUI != null)
+                {
+                    var topBarSer = new SerializedObject(topBarUI);
+
+                    var apText = bottomBar.Find("APText");
+                    if (apText != null)
+                    {
+                        var apTextProp = topBarSer.FindProperty("_apText");
+                        if (apTextProp != null) apTextProp.objectReferenceValue = apText.GetComponent<TMPro.TextMeshProUGUI>();
+                    }
+
+                    var apFill = bottomBar.Find("APBar/APFill");
+                    if (apFill != null)
+                    {
+                        var apFillProp = topBarSer.FindProperty("_apFillImage");
+                        if (apFillProp != null) apFillProp.objectReferenceValue = apFill.GetComponent<Image>();
+                    }
+
+                    var speedBtn = bottomBar.Find("SpeedButton");
+                    if (speedBtn != null)
+                    {
+                        var speedBtnProp = topBarSer.FindProperty("_speedToggleButton");
+                        if (speedBtnProp != null) speedBtnProp.objectReferenceValue = speedBtn.GetComponent<Button>();
+                    }
+
+                    var speedLabel = bottomBar.Find("SpeedButton/SpeedLabel");
+                    if (speedLabel != null)
+                    {
+                        var speedLabelProp = topBarSer.FindProperty("_speedLabel");
+                        if (speedLabelProp != null) speedLabelProp.objectReferenceValue = speedLabel.GetComponent<TMPro.TextMeshProUGUI>();
+                    }
+
+                    topBarSer.ApplyModifiedProperties();
+                }
             }
 
-            // 4) LeftSidebar 패널에 PlayerSidebarPanel 추가
-            var leftSidebar = root.transform.Find("ContentArea/LeftSidebar");
-            if (leftSidebar != null)
+            // 4) PlayerStrip 카드에 PlayerSidebarPanel 추가 (Divider 제외)
+            var playerStrip = root.transform.Find("PlayerStrip");
+            if (playerStrip != null)
             {
-                foreach (Transform child in leftSidebar)
+                foreach (Transform child in playerStrip)
                 {
+                    if (child.name == "Divider") continue;
                     if (child.GetComponent<PlayerSidebarPanel>() == null)
                         child.gameObject.AddComponent<PlayerSidebarPanel>();
                 }
@@ -156,8 +163,8 @@ namespace TeamLog.Editor
             if (actionBar != null)
                 SetPrivateField(sceneSetup, "_actionBar", actionBar);
 
-            // BattleRelicBarUI 연결
-            var relicBar = bottomBar?.Find("RelicBar");
+            // BattleRelicBarUI 연결 — TopBar 좌측에 위치
+            var relicBar = topBar?.Find("RelicBar");
             if (relicBar != null)
                 SetPrivateField(sceneSetup, "_relicBarUI", relicBar.GetComponent<BattleRelicBarUI>());
 
@@ -173,7 +180,7 @@ namespace TeamLog.Editor
                 AutoWireActionBar(actionBar);
 
             // 9) 정적 패널 제거
-            RemoveStaticPanels(leftSidebar, centerArea);
+            RemoveStaticPanels(playerStrip, centerArea);
 
             EditorSceneManager.MarkSceneDirty(root.scene);
             Debug.Log("[Setup] 스크립트 세팅 완료! 씬을 저장하세요.");
@@ -194,47 +201,19 @@ namespace TeamLog.Editor
             if (slotContainer == null)
             {
                 var container = NewRect("ActionSlotContainer", bottomBar as RectTransform);
-                container.anchorMin = new Vector2(0.15f, 0);
-                container.anchorMax = new Vector2(0.85f, 1);
+                container.anchorMin = new Vector2(0, 0);
+                container.anchorMax = new Vector2(1, 1);
                 container.offsetMin = Vector2.zero;
                 container.offsetMax = Vector2.zero;
 
                 var hlg = container.gameObject.AddComponent<HorizontalLayoutGroup>();
                 hlg.spacing = 8;
-                hlg.padding = new RectOffset(12, 12, 10, 10);
+                hlg.padding = new RectOffset(8, 8, 10, 10);
                 hlg.childAlignment = TextAnchor.MiddleCenter;
-                hlg.childControlWidth = true;
-                hlg.childControlHeight = true;
+                hlg.childControlWidth = false;
+                hlg.childControlHeight = false;
                 hlg.childForceExpandWidth = false;
-                hlg.childForceExpandHeight = true;
-            }
-
-            // 액션 디테일 패널
-            var detailPanel = bottomBar.Find("ActionDetailPanel");
-            if (detailPanel == null)
-            {
-                var detail = NewRect("ActionDetailPanel", bottomBar as RectTransform);
-                detail.anchorMin = new Vector2(0, 1);
-                detail.anchorMax = new Vector2(1, 1);
-                detail.pivot = new Vector2(0.5f, 0);
-                detail.anchoredPosition = new Vector2(0, 0);
-                detail.sizeDelta = new Vector2(0, 80);
-                detail.gameObject.SetActive(false);
-                detail.gameObject.AddComponent<Image>().color = new Color(0.04f, 0.04f, 0.1f, 0.95f);
-
-                var titleT = NewRect("TitleText", detail);
-                titleT.anchorMin = new Vector2(0, 0.5f);
-                titleT.anchorMax = new Vector2(0.5f, 1);
-                titleT.offsetMin = new Vector2(12, 4);
-                titleT.offsetMax = new Vector2(-4, -4);
-                AddText(titleT, "스킬명", 16, FontStyles.Bold, TextAlignmentOptions.Left, TextWhite);
-
-                var descT = NewRect("DescText", detail);
-                descT.anchorMin = new Vector2(0.5f, 0.5f);
-                descT.anchorMax = new Vector2(1, 1);
-                descT.offsetMin = new Vector2(4, 4);
-                descT.offsetMax = new Vector2(-12, -4);
-                AddText(descT, "설명", 13, FontStyles.Normal, TextAlignmentOptions.Left, TextDim);
+                hlg.childForceExpandHeight = false;
             }
 
             CreateActionSlotPrefab();
@@ -251,12 +230,12 @@ namespace TeamLog.Editor
 
             var go = new GameObject("ActionSlotUI");
             var rect = go.AddComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(150, 80);
+            rect.sizeDelta = new Vector2(240, 80);
 
             var layoutEl = go.AddComponent<LayoutElement>();
-            layoutEl.preferredWidth = 150;
+            layoutEl.preferredWidth = 240;
             layoutEl.preferredHeight = 80;
-            layoutEl.minWidth = 150;
+            layoutEl.minWidth = 240;
             layoutEl.minHeight = 80;
 
             go.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.18f, 0.9f);
@@ -315,17 +294,17 @@ namespace TeamLog.Editor
             selOutline.effectDistance = new Vector2(3, -3);
             selBorder.gameObject.SetActive(false);
 
-            // 실행 순서 뱃지
+            // 실행 순서 뱃지 (확대)
             var orderBadge = NewRect("ExecutionOrderBadge", rect);
             orderBadge.anchorMin = new Vector2(1, 1);
             orderBadge.anchorMax = new Vector2(1, 1);
             orderBadge.pivot = new Vector2(1, 1);
-            orderBadge.anchoredPosition = new Vector2(-2, -36);
-            orderBadge.sizeDelta = new Vector2(24, 24);
+            orderBadge.anchoredPosition = new Vector2(-2, -32);
+            orderBadge.sizeDelta = new Vector2(30, 30);
             orderBadge.gameObject.AddComponent<Image>().color = AccentYellow;
             var orderText = NewRect("OrderText", orderBadge);
             SetFillParent(orderText);
-            AddText(orderText, "1", 12, FontStyles.Bold, TextAlignmentOptions.Center, Color.black);
+            AddText(orderText, "1", 16, FontStyles.Bold, TextAlignmentOptions.Center, Color.black);
             orderBadge.gameObject.SetActive(false);
 
             // 할당 오버레이
@@ -333,6 +312,16 @@ namespace TeamLog.Editor
             SetFillParent(assigned);
             assigned.gameObject.AddComponent<Image>().color = new Color(0.2f, 0.8f, 0.4f, 0.15f);
             assigned.gameObject.SetActive(false);
+
+            // AP 부족 테두리 오버레이
+            var apShortageBorder = NewRect("APShortageBorder", rect);
+            SetFillParent(apShortageBorder);
+            var apBorderImg = apShortageBorder.gameObject.AddComponent<Image>();
+            apBorderImg.color = Color.clear;
+            var apOutline = apShortageBorder.gameObject.AddComponent<Outline>();
+            apOutline.effectColor = new Color(0.85f, 0.15f, 0.15f, 0.9f);
+            apOutline.effectDistance = new Vector2(2, -2);
+            apShortageBorder.gameObject.SetActive(false);
 
             // 리롤 버튼 (우측 하단 작은 버튼)
             var rerollBtn = NewRect("RerollBtn", rect);
@@ -362,6 +351,7 @@ namespace TeamLog.Editor
             SetPrivateField(slotUI, "_assignedOverlay", assigned.gameObject);
             SetPrivateField(slotUI, "_button", go.GetComponent<Button>());
             SetPrivateField(slotUI, "_rerollButton", rerollBtn.gameObject.GetComponent<Button>());
+            SetPrivateField(slotUI, "_apShortageBorder", apShortageBorder.gameObject);
 
             var prefab = PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
             Object.DestroyImmediate(go);
@@ -382,13 +372,24 @@ namespace TeamLog.Editor
             if (topBar != null)
                 SetPrivateField(uiManager, "_topBar", topBar.GetComponent<TopBarUI>() ?? topBar.gameObject.AddComponent<TopBarUI>());
 
-            // Player panel container
-            var leftSidebar = root.Find("ContentArea/LeftSidebar");
-            if (leftSidebar != null)
-                SetPrivateField(uiManager, "_playerPanelContainer", leftSidebar);
+            // Player panel container — PlayerStrip
+            var playerStrip = root.Find("PlayerStrip");
+            if (playerStrip != null)
+                SetPrivateField(uiManager, "_playerPanelContainer", playerStrip);
 
-            // Player panel prefab
-            Transform firstPanel = leftSidebar != null && leftSidebar.childCount > 0 ? leftSidebar.GetChild(0) : null;
+            // Player panel prefab — skip Divider
+            Transform firstPanel = null;
+            if (playerStrip != null)
+            {
+                for (int i = 0; i < playerStrip.childCount; i++)
+                {
+                    if (playerStrip.GetChild(i).name != "Divider")
+                    {
+                        firstPanel = playerStrip.GetChild(i);
+                        break;
+                    }
+                }
+            }
             if (firstPanel != null)
             {
                 const string prefabPath = "Assets/03.Data/Prefabs/PlayerSidebarPanel.prefab";
@@ -421,11 +422,6 @@ namespace TeamLog.Editor
             if (rightSidebar != null)
                 SetPrivateField(uiManager, "_battleLog", rightSidebar.GetComponent<BattleLogUI>());
 
-            // CurrentTurnText
-            var currentTurnText = root.Find("BottomBar/CurrentTurnText");
-            if (currentTurnText != null)
-                SetPrivateField(uiManager, "_currentTurnText", currentTurnText.GetComponent<TMPro.TextMeshProUGUI>());
-
             // ActionBarUI
             var bottomBar = root.Find("BottomBar");
             if (bottomBar != null)
@@ -454,17 +450,12 @@ namespace TeamLog.Editor
             if (slotPrefab != null)
                 SetPrivateField(actionBar, "_actionSlotPrefab", slotPrefab.GetComponent<ActionSlotUI>());
 
-            var detailPanel = bottomBar.Find("ActionDetailPanel");
-            SetPrivateField(actionBar, "_actionDetailPanel", detailPanel?.gameObject);
-
-            var titleText = detailPanel?.Find("TitleText");
-            SetPrivateField(actionBar, "_actionTitleText", titleText?.GetComponent<TMPro.TextMeshProUGUI>());
-
-            var descText = detailPanel?.Find("DescText");
-            SetPrivateField(actionBar, "_actionDescText", descText?.GetComponent<TMPro.TextMeshProUGUI>());
-
-            var endTurnBtn = actionBar.transform.root.Find("BattleUIRoot/TopBar/EndTurnButton");
+            var endTurnBtn = actionBar.transform.root.Find("BattleUIRoot/BottomBar/EndTurnButton");
             SetPrivateField(actionBar, "_endTurnButton", endTurnBtn?.GetComponent<Button>());
+
+            // 리롤 텍스트 (BottomBar 내)
+            var rerollText = bottomBar.Find("RerollText");
+            SetPrivateField(actionBar, "_rerollText", rerollText?.GetComponent<TMPro.TextMeshProUGUI>());
 
             EditorUtility.SetDirty(actionBar);
         }
@@ -473,13 +464,13 @@ namespace TeamLog.Editor
         //  유틸리티
         // ══════════════════════════════════════════════════════════
 
-        private static void RemoveStaticPanels(Transform leftSidebar, Transform centerArea)
+        private static void RemoveStaticPanels(Transform playerStrip, Transform centerArea)
         {
-            if (leftSidebar != null)
+            if (playerStrip != null)
             {
-                for (int i = leftSidebar.childCount - 1; i >= 0; i--)
-                    Object.DestroyImmediate(leftSidebar.GetChild(i).gameObject);
-                Debug.Log("[Setup] LeftSidebar static panels removed");
+                for (int i = playerStrip.childCount - 1; i >= 0; i--)
+                    Object.DestroyImmediate(playerStrip.GetChild(i).gameObject);
+                Debug.Log("[Setup] PlayerStrip static panels removed");
             }
 
             if (centerArea != null)

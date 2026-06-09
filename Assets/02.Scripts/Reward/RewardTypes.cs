@@ -10,8 +10,8 @@ namespace TeamLog.Reward
     public enum RewardType
     {
         Gold,
-        Skill,
-        Item,
-        Relic
+        Relic,
+        Augment,
+        AugmentOffer
     }
 }

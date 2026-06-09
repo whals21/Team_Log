@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
+using TeamLog.Skill;
 
 namespace TeamLog.Characters
 {
     /// <summary>
     /// 스킬 인벤토리 및 드로우 관리 컴포넌트
-    /// SkillInstance 기반으로 업그레이드 상태를 관리
+    /// 고정 스킬셋 + 증강(Augment) 부착 관리
     /// </summary>
     public class SkillInventoryComponent
     {
@@ -17,6 +18,10 @@ namespace TeamLog.Characters
         /// <summary>SkillInstance 목록</summary>
         public IReadOnlyList<SkillInstance> SkillInstances => _instances;
 
+        /// <summary>스킬 수</summary>
+        public int Count => _instances.Count;
+
+        /// <summary>고정 스킬셋 초기화 (캐릭터 생성 시 1회만 호출)</summary>
         public void Initialize(IEnumerable<SkillData> skills)
         {
             _instances.Clear();
@@ -25,54 +30,34 @@ namespace TeamLog.Characters
                     _instances.Add(new SkillInstance(skill));
         }
 
-        /// <summary>기존 스킬 추가 (SkillData)</summary>
-        public void AddSkill(SkillData skill)
+        /// <summary>특정 스킬에 증강 부착 — 성공 시 true</summary>
+        public bool ApplyAugmentToSkill(SkillInstance instance, AugmentData augment)
         {
-            if (skill != null && !_instances.Any(i => i.Data == skill))
-                _instances.Add(new SkillInstance(skill));
-        }
-
-        /// <summary>SkillInstance 직접 추가</summary>
-        public void AddInstance(SkillInstance instance)
-        {
-            if (instance != null && !_instances.Any(i => i.Data == instance.Data))
-                _instances.Add(instance);
-        }
-
-        /// <summary>스킬 제거</summary>
-        public void RemoveSkill(SkillData skill)
-        {
-            _instances.RemoveAll(i => i.Data == skill);
-        }
-
-        /// <summary>SkillInstance 제거</summary>
-        public void RemoveInstance(SkillInstance instance)
-        {
-            _instances.Remove(instance);
-        }
-
-        /// <summary>가중치 기반 랜덤 스킬 드로우 (SkillData 반환 — 하위 호환)</summary>
-        public SkillData DrawSkill()
-        {
-            var instance = DrawSkillInstance();
-            return instance?.Data;
+            if (instance == null || augment == null) return false;
+            if (!_instances.Contains(instance)) return false;
+            return instance.AddAugment(augment);
         }
 
         /// <summary>가중치 기반 랜덤 스킬 드로우 (SkillInstance 반환)</summary>
-        public SkillInstance DrawSkillInstance()
+        /// <param name="bonusWeight">유물 등 외부 가중치 보너스</param>
+        public SkillInstance DrawSkillInstance(int bonusWeight = 0)
         {
             if (_instances.Count == 0) return null;
 
+            // QuickDraw 증강이 있는 스킬은 항상 우선 뽑힘
+            var quickDraw = _instances.FirstOrDefault(i => i.HasAugment(AugmentType.QuickDraw));
+            if (quickDraw != null) return quickDraw;
+
             int totalWeight = 0;
             foreach (var inst in _instances)
-                totalWeight += inst.EffectiveWeight;
+                totalWeight += inst.EffectiveWeight + bonusWeight;
 
             int randomValue = UnityEngine.Random.Range(1, totalWeight + 1);
             int cumulative = 0;
 
             foreach (var inst in _instances)
             {
-                cumulative += inst.EffectiveWeight;
+                cumulative += inst.EffectiveWeight + bonusWeight;
                 if (randomValue <= cumulative)
                     return inst;
             }

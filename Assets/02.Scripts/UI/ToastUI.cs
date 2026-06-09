@@ -67,10 +67,8 @@ namespace TeamLog.UI
             _toastText.fontSize = 20;
             _toastText.color = new Color(0.96f, 0.82f, 0.25f);
 
-            // 폰트 로드 시도
-            var font = TMPro.TMP_Settings.fallbackFontAssets?.Count > 0
-                ? TMPro.TMP_Settings.fallbackFontAssets[0] : null;
-            if (font != null) _toastText.font = font;
+            // 폰트: UIKoreanFont로 명시적 할당
+            UIKoreanFont.EnsureFont(_toastText);
         }
 
         public static void Show(string message)

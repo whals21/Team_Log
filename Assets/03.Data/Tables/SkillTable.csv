@@ -99,3 +99,19 @@ DemonMage_Hellfire,지옥불,지옥의 불꽃으로 공격합니다.,Attack,Sing
 DemonMage_DarkPulse,암흑 파동,어둠의 파동으로 전체 공격합니다.,Attack,AllEnemies,6,0,25,None,0,0
 DemonMage_CurseBarrier,저주받은 결계,저주의 방어막을 칩니다.,Shield,Self,8,0,20,None,0,0
 DemonMage_SoulBurn,영혼 불태우기,대상의 방어력을 태웁니다.,Debuff,SingleEnemy,0,0,25,DefenseDown,2,2
+Archer_PiercingArrow,관통 화살,관통력이 높은 화살을 쏩니다.,Attack,SingleEnemy,14,2,30,None,0,0
+Archer_RapidShot,연사,빠르게 2발의 화살을 쏩니다.,Attack,SingleEnemy,6,1,35,None,0,0
+Archer_Mark,표식,적에게 표식을 남겨 방어력을 낮춥니다.,Debuff,SingleEnemy,0,1,25,DefenseDown,2,3
+Archer_CriticalShot,치명적 일격,급소를 노린 강력한 일격입니다.,Attack,SingleEnemy,22,3,15,None,0,0
+Necro_LifeDrain,생명력 흡수,적의 생명력을 빼앗아 자신의 것으로 만듭니다.,Attack,SingleEnemy,10,2,30,None,0,0
+Necro_Curse,저주,적의 공격력을 약화시킵니다.,Debuff,SingleEnemy,0,1,25,AttackDown,2,3
+Necro_Decay,부패,적을 부패시켜 독 데미지를 줍니다.,Attack,SingleEnemy,4,1,30,Poison,3,3
+Necro_RaiseDead,사령술,죽은 자를 일으켜 광역 공격합니다.,Attack,AllEnemies,7,3,15,None,0,0
+Alch_HealPotion,치유 물약,아군에게 치유 물약을 투여합니다.,Heal,SingleAlly,12,1,35,None,0,0
+Alch_PoisonBomb,독 폭탄,독이 든 폭탄을 투척합니다.,Attack,AllEnemies,6,2,25,Poison,2,3
+Alch_BoostPotion,강화 물약,아군의 공격력을 강화합니다.,Buff,SingleAlly,0,1,25,AttackUp,2,4
+Alch_ShieldPotion,보호막 물약,아군에게 보호막을 부여합니다.,Shield,SingleAlly,10,2,25,None,0,0
+Bard_BattleSong,전장의 노래,파티 전체의 공격력을 높입니다.,Buff,AllAllies,0,2,25,AttackUp,2,2
+Bard_WeakenMelody,약화의 멜로디,모든 적의 공격력을 낮춥니다.,Debuff,AllEnemies,0,2,25,AttackDown,2,2
+Bard_CourageChord,용기의 화음,아군을 치유하고 AP를 회복합니다.,Heal,SingleAlly,8,2,30,None,0,0
+Bard_Blessing,파티마의 축복,파티 전체의 방어력을 높입니다.,Buff,AllAllies,0,3,15,DefenseUp,1,3

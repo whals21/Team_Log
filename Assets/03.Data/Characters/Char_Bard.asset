@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Char_Bard
+  m_EditorClassIdentifier: 
+  _characterName: "\uC74C\uC720\uC2DC\uC778"
+  _characterClass: 0
+  _description: Bard
+  _baseHP: 75
+  _baseATK: 6
+  _baseDEF: 3
+  _enemyTrait: 3
+  _skills:
+  - {fileID: 11400000, guid: 4c6dad51bd171af479bccb852553e93b, type: 2}
+  - {fileID: 11400000, guid: 5c01a4a1a08c4134593f461b3bdc509a, type: 2}
+  - {fileID: 11400000, guid: 26f5db91b876de64ab5f2dcc62854024, type: 2}
+  - {fileID: 11400000, guid: 550920d5442d6b3469ad8c9183818184, type: 2}
+  _isDefault: 0
+  _unlockCondition: "\uCD1D \uC2B9\uB9AC 3\uD68C \uB2EC\uC131"

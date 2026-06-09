@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 780e2b59c52b4f042b0f0415063ec471, type: 3}
+  m_Name: SpawnPatterns_F2
+  m_EditorClassIdentifier: 
+  _normalPatterns:
+  - patternName: "\uC720\uC801 \uC218\uD638\uB300"
+    enemies:
+    - enemyData: {fileID: 11400000, guid: 09948b2a653edb84188ce00ce61d966d, type: 2}
+      count: 3
+    - enemyData: {fileID: 11400000, guid: 282d022d7d6307e468dfc1cc3a80810e, type: 2}
+      count: 2
+  - patternName: "\uBC15\uC950 \uB5BC"
+    enemies:
+    - enemyData: {fileID: 11400000, guid: 52e3ca2b34facb245879578d7e2ff6b4, type: 2}
+      count: 5
+    - enemyData: {fileID: 11400000, guid: 09948b2a653edb84188ce00ce61d966d, type: 2}
+      count: 1
+  - patternName: "\uBBF8\uB77C \uAD70\uB2E8"
+    enemies:
+    - enemyData: {fileID: 11400000, guid: ed6c97ce3df014748ae3ce172b7fcc06, type: 2}
+      count: 2
+    - enemyData: {fileID: 11400000, guid: 09948b2a653edb84188ce00ce61d966d, type: 2}
+      count: 2
+  - patternName: "\uAD81\uC218 \uBD80\uB300"
+    enemies:
+    - enemyData: {fileID: 11400000, guid: 282d022d7d6307e468dfc1cc3a80810e, type: 2}
+      count: 3
+    - enemyData: {fileID: 11400000, guid: 52e3ca2b34facb245879578d7e2ff6b4, type: 2}
+      count: 2
+  - patternName: "\uD63C\uC131 \uC720\uC801\uB300"
+    enemies:
+    - enemyData: {fileID: 11400000, guid: ed6c97ce3df014748ae3ce172b7fcc06, type: 2}
+      count: 1
+    - enemyData: {fileID: 11400000, guid: 282d022d7d6307e468dfc1cc3a80810e, type: 2}
+      count: 1
+    - enemyData: {fileID: 11400000, guid: 52e3ca2b34facb245879578d7e2ff6b4, type: 2}
+      count: 2
+    - enemyData: {fileID: 11400000, guid: 09948b2a653edb84188ce00ce61d966d, type: 2}
+      count: 1
+  - patternName: "\uBF08\uC758 \uD589\uC9C4"
+    enemies:
+    - enemyData: {fileID: 11400000, guid: 09948b2a653edb84188ce00ce61d966d, type: 2}
+      count: 4
+    - enemyData: {fileID: 11400000, guid: ed6c97ce3df014748ae3ce172b7fcc06, type: 2}
+      count: 1
+  _elitePatterns:
+  - patternName: "\uC8FC\uC220\uC0AC \uC758\uC2DD"
+    enemies:
+    - enemyData: {fileID: 11400000, guid: 15d1c2f8630aef84f8f93d063307093c, type: 2}
+      count: 1
+    - enemyData: {fileID: 11400000, guid: 09948b2a653edb84188ce00ce61d966d, type: 2}
+      count: 3
+  - patternName: "\uD574\uACE8 \uB300\uC7A5"
+    enemies:
+    - enemyData: {fileID: 11400000, guid: 10619358882f4de40b3d456f5b25c86b, type: 2}
+      count: 1
+    - enemyData: {fileID: 11400000, guid: 282d022d7d6307e468dfc1cc3a80810e, type: 2}
+      count: 2
+  - patternName: "\uC554\uD751 \uC2AC\uB77C\uC784 \uAC15\uD654"
+    enemies:
+    - enemyData: {fileID: 11400000, guid: 030262a7eea30df41a59429168f81dc6, type: 2}
+      count: 1
+    - enemyData: {fileID: 11400000, guid: ed6c97ce3df014748ae3ce172b7fcc06, type: 2}
+      count: 2

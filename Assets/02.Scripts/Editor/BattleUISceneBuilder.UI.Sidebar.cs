@@ -7,123 +7,95 @@ using TeamLog.UI.Battle;
 namespace TeamLog.Editor
 {
     /// <summary>
-    /// Battle UI 씬 빌더 — 사이드바 및 패널 UI 생성
-    /// 진입점+TopBar+BottomBar+유틸리티: BattleUISceneBuilder.UI.cs
+    /// Battle UI 씬 빌더 — 사이드바, 패널 UI, PlayerCard 생성
+    /// 진입점+TopBar+BottomBar+PlayerStrip+유틸리티: BattleUISceneBuilder.UI.cs
     /// 오버레이: BattleUISceneBuilder.UI.Overlay.cs
     /// </summary>
     public partial class BattleUISceneBuilder
     {
         // ══════════════════════════════════════════════════════════
-        //  Left Sidebar
+        //  Player Card (가로 카드 — PlayerStrip 내부)
         // ══════════════════════════════════════════════════════════
 
-        private static void CreateLeftSidebar(RectTransform parent)
+        private static void CreatePlayerCard(RectTransform parent, string name, string hp)
         {
-            var sidebar = NewRect("LeftSidebar", parent);
-            sidebar.anchorMin = Vector2.zero;
-            sidebar.anchorMax = new Vector2(0.24f, 1);
-            sidebar.offsetMin = new Vector2(5, 5);
-            sidebar.offsetMax = new Vector2(-2, -5);
-            var leftImg = sidebar.gameObject.AddComponent<Image>();
-            var leftSprite = LoadSprite(SPRITE_LOG_SIDEBAR);
-            if (leftSprite != null)
-            {
-                leftImg.sprite = leftSprite;
-                Set9Slice(leftImg);
-            }
-            else
-                leftImg.color = new Color(0.04f, 0.04f, 0.1f, 0.8f);
+            var card = NewRect($"CharCard_{name}", parent);
+            card.sizeDelta = new Vector2(240, 64);
 
-            var vlg = sidebar.gameObject.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 8;
-            vlg.padding = new RectOffset(8, 8, 8, 8);
-            vlg.childAlignment = TextAnchor.UpperCenter;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
+            var layoutEl = card.gameObject.AddComponent<LayoutElement>();
+            layoutEl.preferredWidth = 240;
+            layoutEl.preferredHeight = 64;
+            layoutEl.minWidth = 200;
+            layoutEl.minHeight = 64;
 
-            string[] names = { "카인", "쉘레이아", "아트카나", "샤이비어" };
-            string[] hps = { "88/88", "55/55", "45/45", "50/50" };
-            string[] skills = { "방어막", "연속 베기", "원죽 방패", "치명 오라" };
-
-            for (int i = 0; i < 4; i++)
-                CreatePlayerPanel(sidebar, i + 1, names[i], hps[i], skills[i]);
-        }
-
-        private static void CreatePlayerPanel(RectTransform parent, int num, string name, string hp, string skill)
-        {
-            var panel = NewRect($"CharPanel_{name}", parent);
-            panel.sizeDelta = new Vector2(0, 160);
-            var panelImg = panel.gameObject.AddComponent<Image>();
+            var cardImg = card.gameObject.AddComponent<Image>();
             var playerSprite = LoadSprite(SPRITE_PLAYER_PANEL);
             if (playerSprite != null)
             {
-                panelImg.sprite = playerSprite;
-                Set9Slice(panelImg);
+                cardImg.sprite = playerSprite;
+                Set9Slice(cardImg);
+                cardImg.color = new Color(0.08f, 0.08f, 0.08f, 0.95f);
             }
             else
-                panelImg.color = new Color(0.06f, 0.06f, 0.14f, 0.95f);
-            var ol = panel.gameObject.AddComponent<Outline>();
+                cardImg.color = new Color(0.06f, 0.06f, 0.06f, 0.95f);
+
+            var ol = card.gameObject.AddComponent<Outline>();
             ol.effectColor = BorderRed;
             ol.effectDistance = new Vector2(1, -1);
 
-            var panelBtn = panel.gameObject.AddComponent<Button>();
-            panelBtn.targetGraphic = panelImg;
+            var cardBtn = card.gameObject.AddComponent<Button>();
+            cardBtn.targetGraphic = cardImg;
 
-            // 그림자
-            var shadow = panel.gameObject.AddComponent<Shadow>();
+            var shadow = card.gameObject.AddComponent<Shadow>();
             shadow.effectColor = new Color(0, 0, 0, 0.3f);
-            shadow.effectDistance = new Vector2(3, -3);
+            shadow.effectDistance = new Vector2(2, -2);
 
-            // 번호 뱃지
-            var badge = NewRect("NumberBadge", panel);
-            badge.anchorMin = new Vector2(0, 1);
-            badge.anchorMax = new Vector2(0, 1);
-            badge.pivot = new Vector2(0, 1);
-            badge.anchoredPosition = new Vector2(5, -5);
-            badge.sizeDelta = new Vector2(24, 24);
-            badge.gameObject.AddComponent<Image>().color = AccentRed;
-            var bt = AddText(NewRect("T", badge), num.ToString(), 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
-            SetFillParent(bt.rectTransform);
+            // ── 아바타 (48x48, 좌측) ──
+            var avatar = NewRect("Avatar", card);
+            avatar.anchorMin = new Vector2(0, 0.5f);
+            avatar.anchorMax = new Vector2(0, 0.5f);
+            avatar.pivot = new Vector2(0, 0.5f);
+            avatar.anchoredPosition = new Vector2(4, 0);
+            avatar.sizeDelta = new Vector2(48, 48);
+            avatar.gameObject.AddComponent<Image>().color = new Color(0.4f, 0.4f, 0.4f);
 
-            // X 버튼
-            var xBtn = NewRect("CloseBtn", panel);
-            xBtn.anchorMin = new Vector2(1, 1);
-            xBtn.anchorMax = new Vector2(1, 1);
-            xBtn.pivot = new Vector2(1, 1);
-            xBtn.anchoredPosition = new Vector2(-5, -5);
-            xBtn.sizeDelta = new Vector2(20, 20);
-            xBtn.gameObject.AddComponent<Button>();
-            xBtn.gameObject.AddComponent<Image>().color = new Color(0.5f, 0.1f, 0.1f, 0.8f);
-            var xt = AddText(NewRect("T", xBtn), "X", 12, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
-            SetFillParent(xt.rectTransform);
+            var aLabel = NewRect("Label", avatar);
+            SetFillParent(aLabel);
+            AddText(aLabel, "?", 18, FontStyles.Bold, TextAlignmentOptions.Center, new Color(1, 1, 1, 0.7f));
 
-            // 이름
-            var nRect = NewRect("Name", panel);
-            nRect.anchorMin = new Vector2(0, 1);
-            nRect.anchorMax = new Vector2(1, 1);
-            nRect.pivot = new Vector2(0.5f, 1);
-            nRect.anchoredPosition = new Vector2(0, -32);
-            nRect.sizeDelta = new Vector2(-16, 22);
-            AddTextNoWrap(nRect, name, 15, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            // ── RightSection (아바타 우측) ──
+            var right = NewRect("RightSection", card);
+            right.anchorMin = new Vector2(0, 0);
+            right.anchorMax = new Vector2(1, 1);
+            right.offsetMin = new Vector2(56, 4);
+            right.offsetMax = new Vector2(-6, -4);
 
-            // ATK / DEF 스탯
-            var statsRect = NewRect("Stats", panel);
-            statsRect.anchorMin = new Vector2(0, 1);
-            statsRect.anchorMax = new Vector2(1, 1);
-            statsRect.pivot = new Vector2(0.5f, 1);
-            statsRect.anchoredPosition = new Vector2(0, -54);
-            statsRect.sizeDelta = new Vector2(-16, 18);
-            AddTextNoWrap(statsRect, "ATK 10  DEF 5", 12, FontStyles.Bold, TextAlignmentOptions.Center, TextDim);
+            // NameRow: 이름(좌) + Stats(우)
+            var nameRow = NewRect("NameRow", right);
+            nameRow.anchorMin = new Vector2(0, 1);
+            nameRow.anchorMax = new Vector2(1, 1);
+            nameRow.pivot = new Vector2(0, 1);
+            nameRow.sizeDelta = new Vector2(0, 20);
 
-            // HP 바
-            var hpBar = NewRect("HPBar", panel);
-            hpBar.anchorMin = new Vector2(0, 0);
-            hpBar.anchorMax = new Vector2(1, 0);
-            hpBar.pivot = new Vector2(0.5f, 0);
-            hpBar.anchoredPosition = new Vector2(0, 60);
-            hpBar.sizeDelta = new Vector2(-16, 20);
+            var nameT = NewRect("Name", nameRow);
+            nameT.anchorMin = Vector2.zero;
+            nameT.anchorMax = new Vector2(0.5f, 1);
+            nameT.offsetMax = new Vector2(-2, 0);
+            AddTextNoWrap(nameT, name, 14, FontStyles.Bold, TextAlignmentOptions.Left, TextWhite);
+
+            var statsT = NewRect("Stats", nameRow);
+            statsT.anchorMin = new Vector2(0.5f, 0);
+            statsT.anchorMax = Vector2.one;
+            statsT.offsetMin = new Vector2(2, 0);
+            AddTextNoWrap(statsT, "ATK 12 DEF 5", 12, FontStyles.Bold, TextAlignmentOptions.Right, TextDim);
+
+            // HP 바 (20px)
+            var hpBar = NewRect("HPBar", right);
+            hpBar.anchorMin = new Vector2(0, 1);
+            hpBar.anchorMax = new Vector2(1, 1);
+            hpBar.pivot = new Vector2(0, 1);
+            hpBar.anchoredPosition = new Vector2(0, -22);
+            hpBar.sizeDelta = new Vector2(0, 20);
             hpBar.gameObject.AddComponent<Image>().color = new Color(0.15f, 0.15f, 0.15f);
 
             var hpFill = NewRect("Fill", hpBar);
@@ -133,7 +105,7 @@ namespace TeamLog.Editor
             hpFill.offsetMax = new Vector2(-2, -2);
             hpFill.gameObject.AddComponent<Image>().color = AccentGreen;
 
-            // 쉴드 바 (HP 바 위에 겹침)
+            // 쉴드 바
             var shieldFill = NewRect("ShieldFill", hpBar);
             shieldFill.anchorMin = Vector2.zero;
             shieldFill.anchorMax = Vector2.zero;
@@ -141,9 +113,10 @@ namespace TeamLog.Editor
             shieldFill.offsetMax = new Vector2(-2, -2);
             shieldFill.gameObject.AddComponent<Image>().color = ShieldBrown;
 
-            var hpTxt = NewRect("Text", hpBar);
+            // HP 텍스트
+            var hpTxt = NewRect("HPText", hpBar);
             SetFillParent(hpTxt);
-            AddTextNoWrap(hpTxt, hp, 12, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            AddTextNoWrap(hpTxt, hp, 11, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
 
             // HP 라벨 (색맹 지원)
             var hpLabel = NewRect("HPLabel", hpBar);
@@ -155,45 +128,38 @@ namespace TeamLog.Editor
             var hpl = hpLabel.gameObject.AddComponent<TextMeshProUGUI>();
             hpl.font = GetOrCreateKoreanFont();
             hpl.text = "HP";
-            hpl.fontSize = 9;
+            hpl.fontSize = 8;
             hpl.fontStyle = FontStyles.Bold;
             hpl.alignment = TextAlignmentOptions.Left;
             hpl.color = new Color(1, 1, 1, 0.6f);
             hpl.raycastTarget = false;
             hpl.enableWordWrapping = false;
 
-            // 퍼센트
-            var pct = NewRect("Pct", panel);
-            pct.anchorMin = new Vector2(0, 0);
-            pct.anchorMax = new Vector2(1, 0);
-            pct.pivot = new Vector2(0.5f, 0);
-            pct.anchoredPosition = new Vector2(0, 44);
-            pct.sizeDelta = new Vector2(-16, 16);
-            AddTextNoWrap(pct, "100%", 11, FontStyles.Normal, TextAlignmentOptions.Center, AccentGreen);
-
-            // 상태이상 뱃지 컨테이너
-            var statusCont = NewRect("StatusContainer", panel);
+            // 상태이상 컨테이너 (HP 바 아래, 16px)
+            var statusCont = NewRect("StatusContainer", right);
             statusCont.anchorMin = new Vector2(0, 0);
             statusCont.anchorMax = new Vector2(1, 0);
-            statusCont.pivot = new Vector2(0.5f, 0);
-            statusCont.anchoredPosition = new Vector2(0, 26);
-            statusCont.sizeDelta = new Vector2(-16, 18);
-            var hlg = statusCont.gameObject.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 3;
-            hlg.childAlignment = TextAnchor.MiddleLeft;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = false;
-            hlg.childForceExpandWidth = false;
-            hlg.childForceExpandHeight = false;
+            statusCont.pivot = new Vector2(0, 0);
+            statusCont.anchoredPosition = new Vector2(0, 0);
+            statusCont.sizeDelta = new Vector2(0, 16);
+            var sHlg = statusCont.gameObject.AddComponent<HorizontalLayoutGroup>();
+            sHlg.spacing = 3;
+            sHlg.childAlignment = TextAnchor.LowerLeft;
+            sHlg.childControlWidth = false;
+            sHlg.childControlHeight = false;
+            sHlg.childForceExpandWidth = false;
+            sHlg.childForceExpandHeight = false;
 
-            // 스킬명
-            var sk = NewRect("Skill", panel);
-            sk.anchorMin = new Vector2(0, 0);
-            sk.anchorMax = new Vector2(1, 0);
-            sk.pivot = new Vector2(0.5f, 0);
-            sk.anchoredPosition = new Vector2(0, 8);
-            sk.sizeDelta = new Vector2(-16, 18);
-            AddTextNoWrap(sk, skill, 11, FontStyles.Normal, TextAlignmentOptions.Center, TextDim);
+            // 선택 하이라이트
+            var selHL = NewRect("SelectionHighlight", card);
+            SetFillParent(selHL);
+            var selImg = selHL.gameObject.AddComponent<Image>();
+            selImg.color = new Color(0.96f, 0.82f, 0.25f, 0.10f);
+            selImg.raycastTarget = false;
+            var selOl = selHL.gameObject.AddComponent<Outline>();
+            selOl.effectColor = AccentYellow;
+            selOl.effectDistance = new Vector2(2, -2);
+            selHL.gameObject.SetActive(false);
         }
 
         // ══════════════════════════════════════════════════════════
@@ -203,10 +169,10 @@ namespace TeamLog.Editor
         private static void CreateCenterArea(RectTransform parent)
         {
             var center = NewRect("CenterArea", parent);
-            center.anchorMin = new Vector2(0.24f, 0);
-            center.anchorMax = new Vector2(0.78f, 1);
-            center.offsetMin = new Vector2(3, 5);
-            center.offsetMax = new Vector2(-3, -5);
+            center.anchorMin = new Vector2(0, 0);
+            center.anchorMax = new Vector2(1, 1);
+            center.offsetMin = new Vector2(5, 5);
+            center.offsetMax = new Vector2(-5, -5);
 
             var hlg = center.gameObject.AddComponent<HorizontalLayoutGroup>();
             hlg.spacing = 12;
@@ -230,9 +196,10 @@ namespace TeamLog.Editor
             {
                 panelImg.sprite = enemySprite;
                 Set9Slice(panelImg);
+                panelImg.color = new Color(0.08f, 0.08f, 0.08f, 0.95f);
             }
             else
-                panelImg.color = new Color(0.06f, 0.04f, 0.08f, 0.95f);
+                panelImg.color = new Color(0.06f, 0.06f, 0.06f, 0.95f);
             var ol = panel.gameObject.AddComponent<Outline>();
             ol.effectColor = BorderRed;
             ol.effectDistance = new Vector2(2, -2);
@@ -246,8 +213,8 @@ namespace TeamLog.Editor
             shadow.effectDistance = new Vector2(3, -3);
 
             var vlg = panel.gameObject.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 6;
-            vlg.padding = new RectOffset(10, 10, 12, 12);
+            vlg.spacing = 4;
+            vlg.padding = new RectOffset(8, 8, 8, 8);
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
@@ -256,26 +223,80 @@ namespace TeamLog.Editor
 
             var le = panel.gameObject.AddComponent<LayoutElement>();
             le.preferredWidth = 180;
-            le.minWidth = 120;
+            le.minWidth = 150;
             le.preferredHeight = 280;
-            le.minHeight = 200;
+            le.minHeight = 220;
+            le.flexibleWidth = 0;
 
-            // 아바타
+            // ── IntentSlot (패널 최상단, 아이콘 + 큰 숫자) ──
+            var intentSlot = NewRect("IntentSlot", panel);
+            intentSlot.sizeDelta = new Vector2(0, 36);
+            var intentBg = intentSlot.gameObject.AddComponent<Image>();
+            intentBg.color = new Color(0.15f, 0.05f, 0.05f, 0.9f);
+            var intentHlg = intentSlot.gameObject.AddComponent<HorizontalLayoutGroup>();
+            intentHlg.spacing = 6;
+            intentHlg.padding = new RectOffset(8, 8, 4, 4);
+            intentHlg.childAlignment = TextAnchor.MiddleCenter;
+            intentHlg.childControlWidth = true;
+            intentHlg.childControlHeight = false;
+            intentHlg.childForceExpandWidth = false;
+            intentHlg.childForceExpandHeight = false;
+
+            var intentIcon = NewRect("IntentIcon", intentSlot);
+            var iconLe = intentIcon.gameObject.AddComponent<LayoutElement>();
+            iconLe.preferredWidth = 28;
+            iconLe.preferredHeight = 28;
+            iconLe.flexibleWidth = 0;
+            var intentIconImg = intentIcon.gameObject.AddComponent<Image>();
+            intentIconImg.color = AccentRed;
+            intentIconImg.raycastTarget = false;
+
+            var intentValue = NewRect("IntentValue", intentSlot);
+            var ivLe = intentValue.gameObject.AddComponent<LayoutElement>();
+            ivLe.preferredWidth = 30;
+            ivLe.minWidth = 20;
+            ivLe.flexibleWidth = 0;
+            var ivTmp = intentValue.gameObject.AddComponent<TextMeshProUGUI>();
+            ivTmp.font = GetOrCreateKoreanFont();
+            ivTmp.text = "";
+            ivTmp.fontSize = 22;
+            ivTmp.fontStyle = FontStyles.Bold;
+            ivTmp.alignment = TextAlignmentOptions.Left;
+            ivTmp.color = TextWhite;
+            ivTmp.raycastTarget = false;
+            ivTmp.enableWordWrapping = false;
+
+            var intentText = NewRect("IntentText", intentSlot);
+            var itLe = intentText.gameObject.AddComponent<LayoutElement>();
+            itLe.minWidth = 20;
+            itLe.preferredWidth = 60;
+            itLe.flexibleWidth = 1;
+            var intentTmp = intentText.gameObject.AddComponent<TextMeshProUGUI>();
+            intentTmp.font = GetOrCreateKoreanFont();
+            intentTmp.text = "";
+            intentTmp.fontSize = 11;
+            intentTmp.fontStyle = FontStyles.Normal;
+            intentTmp.alignment = TextAlignmentOptions.Left;
+            intentTmp.color = new Color(1, 1, 1, 0.8f);
+            intentTmp.raycastTarget = false;
+            intentTmp.enableWordWrapping = false;
+
+            // ── 아바타 (큰 영역) ──
             var avatar = NewRect("Avatar", panel);
-            avatar.sizeDelta = new Vector2(0, 100);
+            avatar.sizeDelta = new Vector2(0, 120);
             avatar.gameObject.AddComponent<Image>().color = AccentRed;
             var aLabel = NewRect("Label", avatar);
             SetFillParent(aLabel);
-            AddText(aLabel, "적 초상화", 13, FontStyles.Normal, TextAlignmentOptions.Center, new Color(1, 1, 1, 0.5f));
+            AddText(aLabel, "적", 24, FontStyles.Bold, TextAlignmentOptions.Center, new Color(1, 1, 1, 0.7f));
 
-            // 이름
+            // ── 이름 ──
             var nRect = NewRect("Name", panel);
-            nRect.sizeDelta = new Vector2(0, 24);
-            AddText(nRect, name, 17, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            nRect.sizeDelta = new Vector2(0, 22);
+            AddText(nRect, name, 16, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
 
-            // HP 바
+            // ── HP 바 ──
             var hpCont = NewRect("HPBarContainer", panel);
-            hpCont.sizeDelta = new Vector2(0, 24);
+            hpCont.sizeDelta = new Vector2(0, 22);
             hpCont.gameObject.AddComponent<Image>().color = new Color(0.2f, 0.1f, 0.1f);
 
             var fill = NewRect("Fill", hpCont);
@@ -295,7 +316,7 @@ namespace TeamLog.Editor
 
             var hpText = NewRect("HPText", hpCont);
             SetFillParent(hpText);
-            AddText(hpText, hp, 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            AddText(hpText, hp, 13, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
 
             // HP 라벨 (색맹 지원)
             var ehpLabel = NewRect("HPLabel", hpCont);
@@ -307,38 +328,36 @@ namespace TeamLog.Editor
             var ehpl = ehpLabel.gameObject.AddComponent<TextMeshProUGUI>();
             ehpl.font = GetOrCreateKoreanFont();
             ehpl.text = "HP";
-            ehpl.fontSize = 10;
+            ehpl.fontSize = 9;
             ehpl.fontStyle = FontStyles.Bold;
             ehpl.alignment = TextAlignmentOptions.Left;
             ehpl.color = new Color(1, 1, 1, 0.6f);
             ehpl.raycastTarget = false;
             ehpl.enableWordWrapping = false;
 
-            // ATK / DEF 스탯
-            var statsRect = NewRect("Stats", panel);
-            statsRect.sizeDelta = new Vector2(0, 18);
-            AddTextNoWrap(statsRect, "ATK 10  DEF 5", 12, FontStyles.Bold, TextAlignmentOptions.Center, TextDim);
+            // ── Info (특성/스탯 — 한 줄, 런타임에 교체됨) ──
+            var infoRect = NewRect("Info", panel);
+            infoRect.sizeDelta = new Vector2(0, 18);
+            AddTextNoWrap(infoRect, "", 11, FontStyles.Normal, TextAlignmentOptions.Center, TextDim);
 
-            // 버튼 영역
+            // ── Stats (숨김 — 툴팁/팝업에서만 참조) ──
+            var statsRect = NewRect("Stats", panel);
+            statsRect.sizeDelta = new Vector2(0, 0);
+            AddTextNoWrap(statsRect, "ATK 10  DEF 5", 12, FontStyles.Bold, TextAlignmentOptions.Center, TextDim);
+            statsRect.gameObject.SetActive(false);
+
+            // ── 버튼 영역 (런타임에 특성 뱃지로 대체, 축소) ──
             var btnArea = NewRect("ButtonArea", panel);
-            btnArea.sizeDelta = new Vector2(0, 40);
+            btnArea.sizeDelta = new Vector2(0, 24);
             var bhlg = btnArea.gameObject.AddComponent<HorizontalLayoutGroup>();
-            bhlg.spacing = 8;
+            bhlg.spacing = 4;
             bhlg.childAlignment = TextAnchor.MiddleCenter;
             bhlg.childControlWidth = false;
             bhlg.childControlHeight = false;
 
-            CreateActionBtn(btnArea, "", AccentRed);
-            CreateActionBtn(btnArea, "", new Color(0.4f, 0.15f, 0.55f));
-
-            // 수량 정보
-            var info = NewRect("Info", panel);
-            info.sizeDelta = new Vector2(0, 22);
-            AddText(info, "수량: 상시발동", 12, FontStyles.Normal, TextAlignmentOptions.Center, TextDim);
-
-            // 상태이상 뱃지 컨테이너
+            // ── 상태이상 뱃지 컨테이너 ──
             var statusCont = NewRect("StatusContainer", panel);
-            statusCont.sizeDelta = new Vector2(0, 20);
+            statusCont.sizeDelta = new Vector2(0, 18);
             var shlg = statusCont.gameObject.AddComponent<HorizontalLayoutGroup>();
             shlg.spacing = 3;
             shlg.childAlignment = TextAnchor.MiddleCenter;
@@ -346,20 +365,17 @@ namespace TeamLog.Editor
             shlg.childControlHeight = false;
             shlg.childForceExpandWidth = false;
             shlg.childForceExpandHeight = false;
-        }
 
-        private static void CreateActionBtn(RectTransform parent, string label, Color bg)
-        {
-            var btn = NewRect($"Btn_{label}", parent);
-            btn.sizeDelta = new Vector2(110, 36);
-            var b = btn.gameObject.AddComponent<Button>();
-            var img = btn.gameObject.AddComponent<Image>();
-            img.color = bg;
-            b.targetGraphic = img;
-
-            var t = NewRect("T", btn);
-            SetFillParent(t);
-            AddText(t, label, 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            // ── 타겟 인디케이터 ──
+            var targetInd = NewRect("TargetIndicator", panel);
+            SetFillParent(targetInd);
+            var tiImg = targetInd.gameObject.AddComponent<Image>();
+            tiImg.color = new Color(0.85f, 0.2f, 0.2f, 0.10f);
+            tiImg.raycastTarget = false;
+            var tiOl = targetInd.gameObject.AddComponent<Outline>();
+            tiOl.effectColor = AccentRed;
+            tiOl.effectDistance = new Vector2(3, -3);
+            targetInd.gameObject.SetActive(false);
         }
 
         // ══════════════════════════════════════════════════════════
@@ -369,19 +385,18 @@ namespace TeamLog.Editor
         private static void CreateRightSidebar(RectTransform parent)
         {
             var sidebar = NewRect("RightSidebar", parent);
-            sidebar.anchorMin = new Vector2(0.78f, 0);
+            sidebar.anchorMin = new Vector2(0.80f, 0);
             sidebar.anchorMax = new Vector2(1, 1);
             sidebar.offsetMin = new Vector2(2, 5);
             sidebar.offsetMax = new Vector2(-5, -5);
             var sidebarImg = sidebar.gameObject.AddComponent<Image>();
-            var logSprite = LoadSprite(SPRITE_LOG_SIDEBAR);
-            if (logSprite != null)
+            var rightSprite = LoadSprite(SPRITE_SOLID_FRAME);
+            if (rightSprite != null)
             {
-                sidebarImg.sprite = logSprite;
+                sidebarImg.sprite = rightSprite;
                 Set9Slice(sidebarImg);
             }
-            else
-                sidebarImg.color = new Color(0.04f, 0.04f, 0.1f, 0.8f);
+            sidebarImg.color = new Color(0.06f, 0.06f, 0.09f, 0.95f);
             var ol = sidebar.gameObject.AddComponent<Outline>();
             ol.effectColor = BorderRed;
             ol.effectDistance = new Vector2(1, -1);
@@ -429,6 +444,7 @@ namespace TeamLog.Editor
             lt.color = TextDim;
             lt.enableWordWrapping = true;
             lt.overflowMode = TextOverflowModes.Overflow;
+            lt.lineSpacing = 50f;
             if (_koreanFont != null)
                 lt.font = _koreanFont;
 

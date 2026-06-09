@@ -14,7 +14,7 @@ namespace TeamLog.UI.Battle
     /// <summary>
     /// 중앙 적 유닛 상세 패널 (아바타, 이름, HP, 스탯, 상태이상, 버튼)
     /// </summary>
-    public class EnemyDetailPanel : MonoBehaviour, IPointerClickHandler
+    public class EnemyDetailPanel : BattlePanelBase, IPointerClickHandler
     {
         [Header("UI References")]
         [SerializeField] private Image _avatarImage;
@@ -23,15 +23,15 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Image _hpFillImage;
         [SerializeField] private Image _shieldFillImage;
         [SerializeField] private TextMeshProUGUI _infoText;
-        [SerializeField] private TextMeshProUGUI _statText;
-        [SerializeField] private Transform _statusEffectContainer;
-
-        [Header("Action Buttons")]
-        [SerializeField] private Button _guardianButton;
-        [SerializeField] private Button _arcanaButton;
 
         [Header("Trait Area")]
         [SerializeField] private Transform _buttonArea;
+
+        [Header("Intent")]
+        [SerializeField] private GameObject _intentSlot;
+        [SerializeField] private Image _intentIcon;
+        [SerializeField] private TextMeshProUGUI _intentValueText;
+        [SerializeField] private TextMeshProUGUI _intentText;
 
         [Header("Selection")]
         [SerializeField] private GameObject _targetIndicator;
@@ -46,8 +46,6 @@ namespace TeamLog.UI.Battle
         private Characters.Character _character;
         private EnemyIntent _intent;
         private BattleUIManager _uiManager;
-        private CanvasGroup _canvasGroup;
-        private Image _panelBgImage;
         private Tween _hpTween;
 
         public int EnemyIndex => _enemyIndex;
@@ -65,22 +63,25 @@ namespace TeamLog.UI.Battle
             if (_statText == null) _statText = FindComponent<TextMeshProUGUI>("Stats");
             if (_statusEffectContainer == null) _statusEffectContainer = transform.Find("StatusContainer");
             if (_buttonArea == null) _buttonArea = transform.Find("ButtonArea");
-            if (_guardianButton == null) _guardianButton = FindComponent<Button>("ButtonArea/Btn_가디언");
-            if (_arcanaButton == null) _arcanaButton = FindComponent<Button>("ButtonArea/Btn_아크카");
+            if (_intentSlot == null) _intentSlot = transform.Find("IntentSlot")?.gameObject;
+            if (_intentIcon == null) _intentIcon = FindComponent<Image>("IntentSlot/IntentIcon");
+            if (_intentValueText == null) _intentValueText = FindComponent<TextMeshProUGUI>("IntentSlot/IntentValue");
+            if (_intentText == null) _intentText = FindComponent<TextMeshProUGUI>("IntentSlot/IntentText");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
+            if (_targetIndicator == null) _targetIndicator = transform.Find("TargetIndicator")?.gameObject;
 
             // 자식 Graphic들의 raycastTarget을 꺼서 부모 Button이 클릭을 받도록 함
-            // (Button이 있는 자식은 제외 - 가디언/아크카 버튼 등)
+            // 단, IntentSlot 하위는 툴팁 hover 이벤트를 받아야 하므로 예외
             foreach (var graphic in GetComponentsInChildren<Graphic>())
             {
-                if (graphic.gameObject != gameObject && graphic.GetComponent<Button>() == null)
+                if (graphic.gameObject != gameObject
+                    && graphic.GetComponent<Button>() == null
+                    && graphic.transform.parent?.name != "IntentSlot"
+                    && graphic.gameObject.name != "IntentSlot")
                     graphic.raycastTarget = false;
             }
 
-            _canvasGroup = GetComponent<CanvasGroup>();
-            if (_canvasGroup == null)
-                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
-            _panelBgImage = GetComponent<Image>();
+            InitPanelBase();
         }
 
         private void Start()
@@ -89,12 +90,6 @@ namespace TeamLog.UI.Battle
             {
                 _panelButton.onClick.AddListener(() => OnPanelClicked?.Invoke(_enemyIndex));
             }
-        }
-
-        private T FindComponent<T>(string path) where T : Component
-        {
-            var t = transform.Find(path);
-            return t != null ? t.GetComponent<T>() : null;
         }
 
         private void ShowPopup()
@@ -151,9 +146,6 @@ namespace TeamLog.UI.Battle
             bg.color = BattleDisplayUtil.GetTraitColor(trait);
             bg.raycastTarget = true;
 
-            var btn = labelRect.gameObject.AddComponent<Button>();
-            btn.targetGraphic = bg;
-
             var labelObj = new GameObject("T").AddComponent<RectTransform>();
             labelObj.SetParent(labelRect, false);
             labelObj.anchorMin = Vector2.zero;
@@ -170,24 +162,19 @@ namespace TeamLog.UI.Battle
             tmp.overflowMode = TextOverflowModes.Ellipsis;
             tmp.raycastTarget = false;
             tmp.text = BattleDisplayUtil.GetTraitLabel(trait);
+            UIKoreanFont.EnsureFont(tmp);
 
+            // 호버 시 하단 액션 상세 패널에 특성 설명 표시
             var capturedTrait = trait;
-            bool showing = false;
-            btn.onClick.AddListener(() =>
-            {
-                if (showing)
-                {
-                    SetInfoText(_intent?.GetDisplayText() ?? "");
-                    showing = false;
-                }
-                else
-                {
-                    string label = BattleDisplayUtil.GetTraitLabel(capturedTrait);
-                    string desc = BattleDisplayUtil.GetTraitDescription(capturedTrait);
-                    SetInfoText($"[{label}] {desc}");
-                    showing = true;
-                }
-            });
+            string capturedLabel = BattleDisplayUtil.GetTraitLabel(capturedTrait);
+            string capturedDesc = BattleDisplayUtil.GetTraitDescription(capturedTrait);
+            var trigger = labelRect.gameObject.AddComponent<EventTrigger>();
+            var enter = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
+            enter.callback.AddListener(_ => _uiManager?.ShowTraitInfo($"[{capturedLabel}]", capturedDesc));
+            trigger.triggers.Add(enter);
+            var exit = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
+            exit.callback.AddListener(_ => _uiManager?.HideTraitInfo());
+            trigger.triggers.Add(exit);
         }
 
         public void UpdateHP(int current, int max, int shield = 0)
@@ -220,7 +207,123 @@ namespace TeamLog.UI.Battle
         public void SetIntent(EnemyIntent intent)
         {
             _intent = intent;
-            SetInfoText(intent?.GetDisplayText() ?? "");
+
+            // 전용 Intent 슬롯 업데이트
+            bool hasIntent = intent != null && intent.Type != EnemyIntentType.None;
+            if (_intentSlot != null)
+                _intentSlot.SetActive(hasIntent);
+
+            if (_intentIcon != null)
+            {
+                var palette = UIPalette.Default;
+                _intentIcon.color = intent?.Type switch
+                {
+                    EnemyIntentType.Attack => palette.AccentRed,
+                    EnemyIntentType.Shield => palette.ShieldBrown,
+                    EnemyIntentType.Heal => palette.AccentGreen,
+                    EnemyIntentType.Buff => palette.AccentYellow,
+                    EnemyIntentType.Debuff => palette.SkillDebuff,
+                    _ => palette.TextDim
+                };
+            }
+
+            // 큰 숫자 (위력/수치)
+            if (_intentValueText != null)
+            {
+                _intentValueText.text = hasIntent && intent.Value > 0 ? intent.Value.ToString() : "";
+                _intentValueText.color = intent?.Type switch
+                {
+                    EnemyIntentType.Attack => UIPalette.Default.AccentRed,
+                    EnemyIntentType.Heal => UIPalette.Default.AccentGreen,
+                    EnemyIntentType.Shield => UIPalette.Default.ShieldBrown,
+                    _ => Color.white
+                };
+            }
+
+            // 스킬명 텍스트
+            if (_intentText != null)
+            {
+                _intentText.text = hasIntent && intent.Skill != null ? intent.Skill.SkillName : "";
+            }
+
+            // IntentSlot에 툴팁 설정
+            if (hasIntent && intent.Skill != null && _intentSlot != null)
+            {
+                var tooltip = _intentSlot.GetComponent<TooltipTarget>();
+                if (tooltip == null) tooltip = _intentSlot.AddComponent<TooltipTarget>();
+                tooltip.SetContent(
+                    intent.Skill.SkillName,
+                    BuildIntentSubtitle(intent.Skill),
+                    BuildIntentTooltipDesc(intent));
+            }
+            else if (_intentSlot != null)
+            {
+                var tooltip = _intentSlot.GetComponent<TooltipTarget>();
+                if (tooltip != null) tooltip.SetContent("", "", "");
+            }
+
+            // Info 텍스트에도 표시 (특성 클릭 시 교체됨)
+            if (hasIntent)
+                SetInfoText(BuildIntentDisplay(intent));
+        }
+
+        /// <summary>
+        /// "스킬명(수치) → 대상" 형식으로 Intent 표시 문자열 생성
+        /// </summary>
+        private static string BuildIntentDisplay(EnemyIntent intent)
+        {
+            if (intent.Skill == null) return "";
+
+            string name = intent.Skill.SkillName;
+            string valuePart = intent.Value > 0 ? $"({intent.Value})" : "";
+            string target = !string.IsNullOrEmpty(intent.TargetDisplay) ? $" {intent.TargetDisplay}" : "";
+            return $"{name}{valuePart}{target}";
+        }
+
+        private static string BuildIntentSubtitle(SkillData skill)
+        {
+            var parts = new List<string>();
+
+            string typeLabel = skill.Type switch
+            {
+                SkillType.Attack => "공격",
+                SkillType.Heal => "치유",
+                SkillType.Buff => "강화",
+                SkillType.Debuff => "약화",
+                SkillType.Shield => "보호막",
+                SkillType.Purify => "정화",
+                _ => ""
+            };
+            if (!string.IsNullOrEmpty(typeLabel)) parts.Add(typeLabel);
+
+            string targetLabel = skill.Target switch
+            {
+                TargetType.SingleEnemy => "단일 적",
+                TargetType.AllEnemies => "전체 적",
+                TargetType.SingleAlly => "단일 아군",
+                TargetType.AllAllies => "전체 아군",
+                TargetType.Self => "자신",
+                _ => ""
+            };
+            if (!string.IsNullOrEmpty(targetLabel)) parts.Add(targetLabel);
+
+            return string.Join(" | ", parts);
+        }
+
+        private static string BuildIntentTooltipDesc(EnemyIntent intent)
+        {
+            if (intent.Skill == null) return "";
+
+            var desc = BattleDisplayUtil.BuildSkillDescription(intent.Skill, intent.Skill.Type == SkillType.Attack ? null : null);
+            string skillDesc = string.IsNullOrEmpty(intent.Skill.Description) ? desc : intent.Skill.Description;
+            if (!string.IsNullOrEmpty(desc) && !string.IsNullOrEmpty(intent.Skill.Description) && intent.Skill.Description != desc)
+                skillDesc = intent.Skill.Description + "\n" + desc;
+
+            // 위력 정보 추가
+            if (intent.Value > 0)
+                skillDesc = $"위력 {intent.Value}\n" + skillDesc;
+
+            return skillDesc;
         }
 
         public void SetTargetMode(bool isTargetable)
@@ -229,49 +332,5 @@ namespace TeamLog.UI.Battle
                 _targetIndicator.SetActive(isTargetable);
         }
 
-        public void SetDead(bool isDead)
-        {
-            if (_canvasGroup != null)
-            {
-                if (isDead)
-                {
-                    UIAnimationHelper.FadeToAlpha(_canvasGroup, 0.4f, 0.5f).OnComplete(() =>
-                    {
-                        _canvasGroup.interactable = false;
-                        _canvasGroup.blocksRaycasts = false;
-                    });
-                }
-                else
-                {
-                    _canvasGroup.alpha = 1f;
-                    _canvasGroup.interactable = true;
-                    _canvasGroup.blocksRaycasts = true;
-                }
-            }
-        }
-
-        public void FlashHit()
-        {
-            if (_panelBgImage != null)
-                UIAnimationHelper.FlashColor(_panelBgImage, Color.white, 0.15f);
-        }
-
-        public void UpdateStats(int atk, int def)
-        {
-            if (_statText != null)
-                _statText.text = $"ATK {atk}  DEF {def}";
-        }
-
-        public void UpdateStatusEffects(IEnumerable<ActiveEffect> effects)
-        {
-            if (_statusEffectContainer == null) return;
-
-            for (int i = _statusEffectContainer.childCount - 1; i >= 0; i--)
-                Destroy(_statusEffectContainer.GetChild(i).gameObject);
-
-            if (effects == null) return;
-            foreach (var effect in effects)
-                StatusEffectBadge.Create(_statusEffectContainer, effect);
-        }
     }
 }

@@ -6,14 +6,16 @@ using TeamLog.Characters;
 using TeamLog.Map;
 using TeamLog.Reward;
 using TeamLog.Shop;
+using TeamLog.Skill;
 using TeamLog.UI;
 
 namespace TeamLog.UI.Shop
 {
     /// <summary>
     /// 상점 UI — 구매 슬롯 목록 + 골드 표시 + 나가기 버튼
+    /// 판매 탭: ShopUI.Sell.cs
     /// </summary>
-    public class ShopUI : MonoBehaviour
+    public partial class ShopUI : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField] private Transform _slotContainer;
@@ -23,28 +25,49 @@ namespace TeamLog.UI.Shop
         [SerializeField] private Button _exitButton;
         [SerializeField] private ConfirmationDialog _confirmationDialog;
 
+        [Header("Tab References")]
+        [SerializeField] private Button _buyTabButton;
+        [SerializeField] private Button _sellTabButton;
+        [SerializeField] private GameObject _buyContainer;
+        [SerializeField] private Transform _sellContainer;
+
+        [Header("Augment Assign")]
+        [SerializeField] private AugmentSelectPanel _augmentSelectPanel;
+
         private ShopManager _shopManager;
         private GameRunState _runState;
         private System.Action _onShopExit;
         private readonly List<ShopSlot> _currentSlots = new();
-        private IReadOnlyList<SkillData> _skillPool;
-        private IReadOnlyList<ItemData> _itemPool;
+        private IReadOnlyList<AugmentData> _augmentPool;
+        private IReadOnlyList<RelicData> _relicPool;
         private ShopSlot _pendingPurchase;
+        private bool _isSellMode;
 
         private void Awake()
         {
             if (_exitButton != null)
                 _exitButton.onClick.AddListener(OnExit);
+            if (_buyTabButton != null)
+                _buyTabButton.onClick.AddListener(() => SetTab(false));
+            if (_sellTabButton != null)
+                _sellTabButton.onClick.AddListener(() => SetTab(true));
         }
 
         public void Initialize(GameRunState runState, System.Action onShopExit,
-            IReadOnlyList<SkillData> skillPool = null, IReadOnlyList<ItemData> itemPool = null)
+            IReadOnlyList<RelicData> relicPool = null)
         {
             _runState = runState;
             _onShopExit = onShopExit;
-            _skillPool = skillPool;
-            _itemPool = itemPool;
+            _relicPool = relicPool;
             _shopManager = new ShopManager();
+        }
+
+        /// <summary>
+        /// 증강 풀 주입 (MapSceneSetup에서 호출)
+        /// </summary>
+        public void SetAugmentPool(IReadOnlyList<AugmentData> augmentPool)
+        {
+            _augmentPool = augmentPool;
         }
 
         /// <summary>
@@ -58,10 +81,13 @@ namespace TeamLog.UI.Shop
             UIAnimationHelper.FadeIn(cg);
             AudioManager.Instance.PlayUIShopOpen();
 
+            _currentFloorNumber = floorNumber;
+            SetTab(false); // 기본: 구매 탭
+
             ClearSlots();
 
             _currentSlots.Clear();
-            var slots = _shopManager.GenerateShopSlots(floorNumber, _skillPool, _itemPool);
+            var slots = _shopManager.GenerateShopSlots(floorNumber, _augmentPool, _relicPool);
             _currentSlots.AddRange(slots);
 
             if (_titleLabel != null)
@@ -117,9 +143,26 @@ namespace TeamLog.UI.Shop
             {
                 UpdateGoldDisplay();
                 RefreshAllSlots();
-                AudioManager.Instance.PlayUIShopPurchase();
-                AudioManager.Instance.PlayUIGoldSpend();
-                ToastUI.Show($"{slot.Name}을(를) 구매했습니다.");
+
+                if (slot.ContentType == ShopSlot.SlotContentType.Augment && _augmentSelectPanel != null)
+                {
+                    _augmentSelectPanel.Show(slot.Augment, _runState.PlayerParty, _runState,
+                        (applied) =>
+                        {
+                            AudioManager.Instance.PlayUIShopPurchase();
+                            AudioManager.Instance.PlayUIGoldSpend();
+                            if (applied)
+                                ToastUI.Show($"{slot.Name}을(를) 구매했습니다.");
+                            else
+                                ToastUI.Show("증강을 적용하지 않았습니다.");
+                        });
+                }
+                else
+                {
+                    AudioManager.Instance.PlayUIShopPurchase();
+                    AudioManager.Instance.PlayUIGoldSpend();
+                    ToastUI.Show($"{slot.Name}을(를) 구매했습니다.");
+                }
             }
         }
 
@@ -161,6 +204,18 @@ namespace TeamLog.UI.Shop
         {
             if (_exitButton != null)
                 _exitButton.onClick.RemoveListener(OnExit);
+            if (_buyTabButton != null)
+                _buyTabButton.onClick.RemoveAllListeners();
+            if (_sellTabButton != null)
+                _sellTabButton.onClick.RemoveAllListeners();
+        }
+
+        private void SetTab(bool sellMode)
+        {
+            _isSellMode = sellMode;
+            if (_buyContainer != null) _buyContainer.SetActive(!sellMode);
+            if (_sellContainer != null) _sellContainer.gameObject.SetActive(sellMode);
+            if (sellMode) RefreshSellList();
         }
     }
 }

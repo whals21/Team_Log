@@ -1,20 +1,23 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using TeamLog.Characters;
 using TeamLog.Combat.Turn;
+using SkillExecutor = TeamLog.Combat.Turn.SkillExecutor;
 using TeamLog.Combat.AI;
 using TeamLog.UI;
 using TeamLog.UI.Battle;
-using Michsky.UI.MTP;
+using TeamLog.Map;
+using TeamLog.Reward;
 
 namespace TeamLog.Combat
 {
     /// <summary>
     /// 전투 씬 초기화 - UI 초기화, 테스트 데이터 생성, 시스템 연결
+    /// 이벤트 핸들러/사운드/VFX: BattleSceneSetup.Events.cs
     /// </summary>
-    public class BattleSceneSetup : MonoBehaviour
+    public partial class BattleSceneSetup : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField] private BattleUIManager _battleUIManager;
@@ -45,6 +48,13 @@ namespace TeamLog.Combat
         private List<Character> _playerParty = new();
         private List<Character> _enemies = new();
         private VFXManager _vfxManager;
+
+        // 전투 속도
+        public enum BattleSpeed { Normal = 1, Fast = 2 }
+        private BattleSpeed _currentSpeed = BattleSpeed.Normal;
+        public BattleSpeed CurrentBattleSpeed => _currentSpeed;
+
+        public event System.Action<BattleSpeed> OnBattleSpeedChanged;
 
         // 외부 데이터 주입용 (맵 시스템에서 전투 시작 시 사용)
         private static List<Character> _pendingParty;
@@ -154,7 +164,7 @@ namespace TeamLog.Combat
 
             // BattleUIManager 초기화
             if (_battleUIManager != null)
-                _battleUIManager.Initialize(_turnManager, _playerParty, _enemies);
+                _battleUIManager.Initialize(_turnManager, _playerParty, _enemies, this);
 
             // PlayerActionController 생성 및 연결
             _actionController = new PlayerActionController(
@@ -170,63 +180,32 @@ namespace TeamLog.Combat
                 _vfxManager.Initialize(_mainCanvasRect);
             }
 
-            // HP/쉴드 변경 이벤트 구독
+            // HP/쉴드 변경 이벤트 구독 — 플레이어/적 공통 헬퍼 사용
             foreach (var c in _playerParty)
-            {
-                c.Health.OnHPChanged += (hp, max) => OnCharacterStateChanged(c);
-                c.Health.OnShieldChanged += (shield) => OnCharacterStateChanged(c);
-                c.Health.OnDamageTaken += amount => SpawnFloatingText(c, $"-{amount}", FloatingTextUI.DamageColor);
-                c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
-                c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
-                c.Health.OnDamageTaken += _ => _battleUIManager?.FlashPanelForCharacter(c);
-                c.Health.OnDamageTaken += _ => _vfxManager?.PlayHitEffect(
-                    _battleUIManager?.GetPanelTransform(c));
-                c.Health.OnDamageTaken += _ => CameraShake.Instance.Shake(_mainCanvasRect, 0.15f, 5f);
-                c.Health.OnHealApplied += _ => _vfxManager?.PlayHealEffect(
-                    _battleUIManager?.GetPanelTransform(c));
-                c.Health.OnShieldAdded += _ => _vfxManager?.PlayShieldEffect(
-                    _battleUIManager?.GetPanelTransform(c));
-                c.Health.OnDeath += () => AudioManager.Instance.PlayCharacterDeath();
-                c.Health.OnDeath += () => _vfxManager?.PlayDeathEffect(
-                    _battleUIManager?.GetPanelTransform(c));
-                c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
-                c.StatusEffects.OnEffectApplied += effect => OnStatusEffectApplied(effect);
-            }
+                SubscribeCharacterEvents(c);
             foreach (var c in _enemies)
-            {
-                c.Health.OnHPChanged += (hp, max) => OnCharacterStateChanged(c);
-                c.Health.OnShieldChanged += (shield) => OnCharacterStateChanged(c);
-                c.Health.OnDamageTaken += amount => SpawnFloatingText(c, $"-{amount}", FloatingTextUI.DamageColor);
-                c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
-                c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
-                c.Health.OnDamageTaken += _ => _battleUIManager?.FlashPanelForCharacter(c);
-                c.Health.OnDamageTaken += _ => _vfxManager?.PlayHitEffect(
-                    _battleUIManager?.GetPanelTransform(c));
-                c.Health.OnDamageTaken += _ => CameraShake.Instance.Shake(_mainCanvasRect, 0.15f, 5f);
-                c.Health.OnHealApplied += _ => _vfxManager?.PlayHealEffect(
-                    _battleUIManager?.GetPanelTransform(c));
-                c.Health.OnShieldAdded += _ => _vfxManager?.PlayShieldEffect(
-                    _battleUIManager?.GetPanelTransform(c));
-                c.Health.OnDeath += () => AudioManager.Instance.PlayCharacterDeath();
-                c.Health.OnDeath += () => _vfxManager?.PlayDeathEffect(
-                    _battleUIManager?.GetPanelTransform(c));
-                c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
-                c.StatusEffects.OnEffectApplied += effect => OnStatusEffectApplied(effect);
-            }
+                SubscribeCharacterEvents(c);
 
             // 스킬 타입별 사운드 분기
-            TurnManager.OnSkillApplied += OnSkillApplied;
+            SkillExecutor.OnSkillApplied += OnSkillApplied;
 
             // 드로우/리롤 사운드
             _turnManager.DrawSystem.OnDrawComplete += _ => AudioManager.Instance.PlaySkillDraw();
             _turnManager.DrawSystem.OnSlotRerolled += () => AudioManager.Instance.PlaySkillReroll();
 
-            // 턴 시작 사운드
+            // 턴 시작 사운드 (별도 람다 — OnTurnStarted는 이미 명명 메서드로 구독 중)
             _turnManager.OnTurnStarted += _ => AudioManager.Instance.PlayTurnStart();
 
             // 특성: 회피 시 MISS 플로팅 텍스트 + 사운드
-            TurnManager.OnAttackMissed += (target) => SpawnFloatingText(target, "MISS", FloatingTextUI.DamageColor);
-            TurnManager.OnAttackMissed += _ => AudioManager.Instance.PlayMiss();
+            DamageCalculator.OnAttackMissed += OnAttackMissed;
+
+            // 유물 이벤트 구독 — 전투 시작 전에 연결
+            var relicHandler = GameRunState.Instance?.RelicHandler;
+            if (relicHandler != null)
+            {
+                relicHandler.SetPlayerParty(_playerParty);
+                relicHandler.SubscribeEvents();
+            }
 
             // 전투 시작
             _turnManager.StartBattle();
@@ -240,212 +219,14 @@ namespace TeamLog.Combat
                 _titleManager.ShowBattleStart();
         }
 
-        #region Events
-
-        private static readonly HashSet<StatusEffectType> BuffEffects = new()
+        /// <summary>
+        /// 전투 속도 토글 — Normal(1x) ↔ Fast(2x)
+        /// </summary>
+        public void ToggleBattleSpeed()
         {
-            StatusEffectType.AttackUp, StatusEffectType.DefenseUp,
-            StatusEffectType.Regeneration, StatusEffectType.Shield
-        };
-
-        private static readonly HashSet<StatusEffectType> DebuffEffects = new()
-        {
-            StatusEffectType.AttackDown, StatusEffectType.DefenseDown,
-            StatusEffectType.Poison, StatusEffectType.Burn,
-            StatusEffectType.Bleed, StatusEffectType.Stun,
-            StatusEffectType.Freeze, StatusEffectType.Sleep
-        };
-
-        private void OnSkillApplied(SkillData skill, Character target)
-        {
-            switch (skill.Type)
-            {
-                case SkillType.Attack:
-                    PlayAttackSound(skill);
-                    break;
-                case SkillType.Heal:
-                    AudioManager.Instance.PlayHealImpact();
-                    break;
-                case SkillType.Buff:
-                    AudioManager.Instance.PlayBuffCast();
-                    break;
-                case SkillType.Debuff:
-                    AudioManager.Instance.PlayDebuffCast();
-                    break;
-                case SkillType.Shield:
-                    AudioManager.Instance.PlayShieldCast();
-                    break;
-                case SkillType.Purify:
-                    AudioManager.Instance.PlayPurifyCast();
-                    break;
-            }
-        }
-
-        private void PlayAttackSound(SkillData skill)
-        {
-            // 상태이상 기반 사운드 우선
-            if (skill.StatusEffect == StatusEffectType.Burn)
-                AudioManager.Instance.PlayBurnImpact();
-            else if (skill.StatusEffect == StatusEffectType.Poison)
-                AudioManager.Instance.PlayPoisonImpact();
-            else if (skill.StatusEffect == StatusEffectType.Freeze)
-                AudioManager.Instance.PlayFreezeImpact();
-            else
-                AudioManager.Instance.PlayAttackHit();
-        }
-
-        private void OnStatusEffectApplied(StatusEffectType effect)
-        {
-            if (BuffEffects.Contains(effect))
-            {
-                AudioManager.Instance.PlayBuffApply();
-                // BuffEffect는 현재 캐릭터를 알 수 없으므로 패널 위치 없이 재생
-            }
-            else if (DebuffEffects.Contains(effect))
-            {
-                AudioManager.Instance.PlayDebuffApply();
-            }
-            else
-            {
-                AudioManager.Instance.PlayStatusEffectApply();
-            }
-        }
-
-        private void OnPhaseChanged(TurnPhase oldPhase, TurnPhase newPhase)
-        {
-            _battleUIManager?.UpdateAllPanels();
-        }
-
-        private void OnTurnStarted(int turnNumber)
-        {
-            _battleUIManager?.UpdateAllPanels();
-
-            foreach (var controller in _enemyControllers)
-            {
-                if (controller.Owner.IsAlive)
-                    controller.PrepareNextAction();
-                else
-                {
-                    int idx = _enemyControllers.IndexOf(controller);
-                    _battleUIManager?.SetEnemyIntent(idx, null);
-                }
-            }
-        }
-
-        private void OnBattleEnded()
-        {
-            _actionController?.Shutdown();
-            _battleUIManager?.UpdateAllPanels();
-
-            bool victory = _enemies.TrueForAll(e => e.IsDead);
-            _battleUIManager?.AddLog(victory ? "전투 승리!" : "전투 패배...");
-
-            BattleResult.SetResult(victory);
-
-            if (_battleEndOverlay != null)
-            {
-                _battleEndOverlay.Show(victory);
-                _battleEndOverlay.OnContinueClicked += OnBattleEndContinue;
-
-                // 승리/패배 타이틀 애니메이션
-                if (_titleManager != null)
-                {
-                    if (victory) _titleManager.ShowVictory();
-                    else _titleManager.ShowDefeat();
-                }
-
-                if (victory)
-                    _vfxManager?.PlayVictoryEffect();
-                else
-                    _vfxManager?.PlayDefeatEffect();
-            }
-            else
-            {
-                StartCoroutine(BattleEndTransition());
-            }
-        }
-
-        private void OnBattleEndContinue()
-        {
-            if (_battleEndOverlay != null)
-                _battleEndOverlay.OnContinueClicked -= OnBattleEndContinue;
-
-            StartCoroutine(BattleEndTransition());
-        }
-
-        private IEnumerator BattleEndTransition()
-        {
-            yield return null; // 한 프레임 대기 후 트랜지션 시작
-            SceneTransition.Instance.FadeToScene("MapScene");
-        }
-
-        private void OnCharacterStateChanged(Character character)
-        {
-            _battleUIManager?.UpdateAllPanels();
-
-            if (character.Health.IsDead)
-            {
-                _battleUIManager?.AddLog($"{character.Name}이(가) 쓰러졌습니다.");
-
-                // 적 사망 시 의도 텍스트 제거
-                int enemyIdx = _enemies.IndexOf(character);
-                if (enemyIdx >= 0)
-                    _battleUIManager?.SetEnemyIntent(enemyIdx, null);
-            }
-        }
-
-        private EnemyActionPattern LoadEnemyPattern(int enemyIndex, Character enemy)
-        {
-            // 1. 인스펙터에 할당된 패턴 배열에서 매칭 시도
-            if (_enemyPatternData != null && enemyIndex < _enemyPatternData.Length && _enemyPatternData[enemyIndex] != null)
-                return _enemyPatternData[enemyIndex].CreateRuntimePattern();
-
-            // 2. 캐릭터 Data의 에셋 이름으로 패턴 에셋 자동 탐색 (에디터 전용)
-#if UNITY_EDITOR
-            string assetName = enemy.Data != null ? enemy.Data.name : "";
-            if (!string.IsNullOrEmpty(assetName))
-            {
-                var patternAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<EnemyPatternData>(
-                    $"Assets/03.Data/Patterns/Pattern_{assetName}.asset");
-                if (patternAsset != null)
-                    return patternAsset.CreateRuntimePattern();
-            }
-#endif
-
-            // 3. 폴백: 캐릭터 Data의 스킬 목록에서 패턴 생성
-            if (enemy.Data != null && enemy.Data.Skills.Count > 0)
-                return new EnemyActionPattern(enemy.Data.Skills);
-
-            // 4. 최종 폴백: 빈 패턴 (아무 행동도 안 함)
-            return new EnemyActionPattern(new Characters.SkillData[0]);
-        }
-
-        private void OnEnemyIntentChanged(int enemyIndex, EnemyIntent intent)
-        {
-            _battleUIManager?.SetEnemyIntent(enemyIndex, intent);
-        }
-
-        private void SpawnFloatingText(Character character, string message, Color color)
-        {
-            var panelTransform = _battleUIManager?.GetPanelTransform(character);
-            if (panelTransform == null) return;
-            FloatingTextUI.Spawn(panelTransform, message, color, new Vector2(0, 30));
-        }
-
-        #endregion
-
-        private void OnDestroy()
-        {
-            if (_turnManager != null)
-            {
-                _turnManager.OnPhaseChanged -= OnPhaseChanged;
-                _turnManager.OnTurnStarted -= OnTurnStarted;
-                _turnManager.OnBattleEnded -= OnBattleEnded;
-            }
-
-            _actionController?.Shutdown();
-            _playerParty.Clear();
-            _enemies.Clear();
+            _currentSpeed = _currentSpeed == BattleSpeed.Normal ? BattleSpeed.Fast : BattleSpeed.Normal;
+            Time.timeScale = (int)_currentSpeed;
+            OnBattleSpeedChanged?.Invoke(_currentSpeed);
         }
     }
 }

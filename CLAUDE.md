@@ -12,7 +12,7 @@ Assets/
 │   ├── Combat/         # AI/, Draw/, Turn/
 │   ├── Skill/          # SkillData
 │   ├── Map/            # MapNode, MapFloor, MapGenerator, GameRunState
-│   ├── Reward/         # RewardData, ItemData, RewardManager
+│   ├── Reward/         # RewardData, RewardManager, AugmentOfferGenerator
 │   ├── Shop/           # ShopData, ShopManager
 │   ├── Event/          # EventData, EventManager
 │   ├── UI/
@@ -35,7 +35,7 @@ Assets/
 ```
 맵 시스템 (Phase 3):
 MapSceneSetup (진입점, SaveManager.HasSave 분기, OnRunEnded → RunEndOverlay, 자동 저장)
-    ├── GameRunState (런 전체 상태: 층, 골드, 파티 HP 유지, BonusAP 명상 보너스, BattlesWon/TotalGoldEarned 통계)
+    ├── GameRunState (런 전체 상태: 층, 골드, 파티 HP 유지, BonusAP 명상 보너스, RerollTokens, BattlesWon/TotalGoldEarned 통계, AugmentGenerator 위임)
     ├── FloorEnemyPool (층별 적 풀: normalEnemies/eliteEnemies/boss, MapSceneBuilder에서 와이어링)
     ├── MapFloor (단일 층 맵)
     │   └── MapNode (노드: 타입, 위치, 연결, 방문 상태)
@@ -45,12 +45,14 @@ MapSceneSetup (진입점, SaveManager.HasSave 분기, OnRunEnded → RunEndOverl
 
 전투 시스템 (Phase 1-2):
 BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신, bonusAP 명상 보너스 전달)
-    ├── TurnManager (턴 사이클 오케스트레이터, DealDamage 중앙화, 특성 훅 연동, bonusFirstTurnAP 첫 턴 AP 보너스)
+    ├── TurnManager (턴 사이클 오케스트레이터, AP 관리, 대상 결정, bonusFirstTurnAP 첫 턴 AP 보너스)
+    │   ├── SkillExecutor (인스턴스, 타겟별 스킬 실행 + 증강 해석 + 키워드 해석, OnSkillApplied 이벤트)
+    │   ├── DamageCalculator (static, 데미지 공식 + 특성 훅 + 유물 훅 + 카운터 데미지, TurnManager/EnemyAIController에서 호출)
     │   ├── SkillDrawSystem (가중치 랜덤 드로우)
     │   └── TurnContext (턴 상태: phase, AP)
     │       └── AP: 파티 공유, 매 턴 1+생존수 전량 회복, 첫 턴 bonusAP 추가, OnAPChanged 이벤트
     ├── PlayerActionController (UI ↔ 전투 로직 중재자, AP 부족 차단, 리롤 중계)
-    ├── EnemyAIController (패턴 기반 AI, 의도 표시, Taunt 타겟 우선)
+    ├── EnemyAIController (패턴 기반 AI, 의도 표시, Taunt 타겟 우선, DamageCalculator.DealDamage 호출)
     └── BattleUIManager (UI 패널 생성/관리, AP/리롤 이벤트 구독, GetPanelTransform)
         ├── TopBarUI (턴 카운터, AP 표시, 리롤 카운트)
         ├── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리, 리롤 버튼, 툴팁)
@@ -78,6 +80,11 @@ BattleTitleManager (전투 타이틀 애니메이션, Motion Titles Pack 활용,
 SaveManager (저장/불러오기, JsonUtility + 파일 I/O, RunSaveData/CharacterSaveData DTO, MetaSaveData 런 간 영구 통계, RecordRunEnd 자동 정리)
 GameDebugOptions (SRDebugger 인게임 디버그 옵션, Run State 조회 + 치트 메서드, TeamLog.EditorDebug 네임스페이스)
 
+DeckViewerUI (파티 전체 스킬/아이템/유물 뷰어 오버레이, 캐릭터별 그룹화, MapSceneSetup._deckViewerUI, 탑 패널 "덱" 버튼)
+TutorialUI (인터랙티브 튜토리얼 오버레이, TutorialStep 진행 상태, MetaSaveData.HasCompletedTutorial 플래그, 4단계: MapNavigation/BattleBasics/ShopBasics/RestBasics)
+BattleSpeed (전투 속도 enum: Normal=1, Fast=2, BattleSceneSetup.ToggleBattleSpeed → Time.timeScale, TopBarUI 속도 버튼 "1x"/"2x")
+ShopUI.Sell (상점 판매 탭 partial, ShopManager.SellSkill/SellItem, 구매가 50% 환불, ConfirmationDialog 재사용)
+
 Character (순수 C# 클래스, MonoBehaviour 아님)
     ├── HealthComponent (HP/쉴드 관리, OnHPChanged/OnShieldChanged/OnDeath + delta: OnDamageTaken/OnHealApplied/OnShieldAdded, OnPreDeath 사망 방지)
     ├── StatComponent (ATK/DEF, base + modifier + permanent base 증가)
@@ -87,8 +94,10 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 
 SkillInstance (순수 C# 클래스, SkillData + UpgradeLevel, EffectivePower/Cost/Weight 계산 프로퍼티)
 
-CombatEventBus (static 전투 중앙 이벤트 버스 — TurnManager에서 발행, RelicHandler에서 구독)
+CombatEventBus (static 전투 중앙 이벤트 버스 — DamageCalculator/SkillExecutor에서 발행, RelicHandler에서 구독)
 RelicHandler (순수 C# 클래스, GameRunState 소속, 유물 트리거 매칭 → 효과 적용)
+
+AugmentOfferGenerator (순수 C# 클래스, 등급 가중치 증강 선택 + 호환성 체크 + 제안 조합, GameRunState.AugmentGenerator로 접근)
 
 ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 ```
@@ -113,6 +122,7 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
   - `Object.name = fileName` (에셋 파일명과 일치, Unity 경고 방지)
   - 한국어 표시명은 `_skillName`/`_characterName` 등 private 필드에 저장
   - 스킬 Cost 포함하여 모든 필드를 명시적으로 설정
+  - 파일 구조: DataGenerator.cs (진입점+스킬/캐릭터/유틸), DataGenerator.Augments.cs (증강+스폰패턴), DataGenerator.Content.cs (이벤트+유물+팔레트)
 - **MapSceneBuilder 규칙**:
   - 에셋 필터링은 `Object.name`이 아닌 파일 경로 기반 (`namePrefix` 파라미터)
   - 층별 적 풀 분리: `FloorEnemyPool` 구조체로 층별(normal/elite/boss) 독립 관리
@@ -125,12 +135,12 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 ### 필수
 - **네임스페이스**: `TeamLog` 최상위, 하위는 폴더 구조 따름
   - `TeamLog.Characters` — Character, CharacterData, Components, SkillData
-  - `TeamLog.Combat.Turn` — TurnManager, TurnPhase, TurnContext
+  - `TeamLog.Combat.Turn` — TurnManager, TurnPhase, TurnContext, SkillExecutor
   - `TeamLog.Combat.Draw` — SkillDrawSystem (SkillInstance 기반)
-  - `TeamLog.Combat` — CombatEventBus (static 전투 이벤트 버스)
+  - `TeamLog.Combat` — CombatEventBus (static 전투 이벤트 버스), DamageCalculator (static 데미지 계산)
   - `TeamLog.Combat.AI` — EnemyAIController, EnemyActionPattern
   - `TeamLog.Map` — MapNode, MapFloor, MapGenerator, GameRunState
-  - `TeamLog.Reward` — RewardData, ItemData, RewardManager
+  - `TeamLog.Reward` — RewardData, RewardManager, AugmentOfferGenerator
   - `TeamLog.Shop` — ShopData, ShopManager
   - `TeamLog.Event` — EventData, EventManager
   - `TeamLog.UI.Battle` — 전투 UI 클래스
@@ -197,6 +207,11 @@ Editor/
   XxxSceneBuilder.cs         — 진입점 + 상수 + 오케스트레이션
   XxxSceneBuilder.UI.cs      — UI 계층 생성 (Create* 메서드)
   XxxSceneBuilder.Setup.cs   — 컴포넌트 부착 + 참조 연결 (AutoWire*, Setup*)
+
+DataGenerator/
+  DataGenerator.cs           — 진입점 + 상수 + 스킬/캐릭터/패턴 CSV 생성 + 유틸리티
+  DataGenerator.Augments.cs  — 증강 데이터 + 스폰 패턴 테이블
+  DataGenerator.Content.cs   — 이벤트 + 유물 + 오디오/VFX 팔레트
 ```
 
 - 각 partial 파일의 `namespace`와 `class` 선언은 동일하게 유지
@@ -286,7 +301,7 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - 4H: 층별 적 풀 + 신규 적 9종 + 휴식 선택지 완료 (FloorEnemyPool 3층 분리, RestUI 3선택지, BonusAP 파이프라인)
   - 4I: 버그 수정 2건 + 자동화 테스트 인프라 완료 (BattleEndOverlay/RewardUI 버그, 61개 단위 테스트, 어셈블리 분리)
   - 4K: UI 종합 개선 완료 (UIPalette 토큰, HP 트윈/플래시/페이드 애니메이션, 색맹 이니셜, 툴팁 시스템, 로그 색상 코딩+스크롤, GUI 에셋 스프라이트, 베지에 곡선 연결선, 파티 상태 위젯, 사운드 시스템)
-  - 4L: 사운드 시스템 완료 (42개 SFX 자동 할당 — CombatMagicSpellsVIISFX, 스킬 타입별 사운드 분기, TurnManager.OnSkillApplied 이벤트)
+  - 4L: 사운드 시스템 완료 (42개 SFX 자동 할당 — CombatMagicSpellsVIISFX, 스킬 타입별 사운드 분기, SkillExecutor.OnSkillApplied 이벤트)
   - 4M: 에셋 활용 5단계 완료 (스킬 아이콘 ✅, DOTween 전환 ✅, SRDebugger ✅, CameraShake ✅, VFXManager URP Camera Stacking ✅)
   - 4N: 아이템 아이콘 시스템 완료 (ItemData._icon, DataGenerator.GetItemIconPath(), ShopItemSlot/RewardCard 아이콘 표시)
   - 4O: 밸런싱 패스 완료 (플레이어 HP 증가, 보스 쉴드 너프, 적 스탯 층별 스케일링 개선)
@@ -295,14 +310,14 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
 - **Phase 5 (메타프로그레션 + 심화)**: 완료
   - 5A: 타이틀 + 런 라이프사이클 완료 (TitleScene/TitleSceneSetup, MetaSaveData 영구 통계, RunEndOverlay 승리/패배 화면, SaveManager.HasSave 이어하기, 자동 저장)
   - 5B: 스킬 성장 시스템 완료 (SkillInstance 래퍼 + 업그레이드 레벨, SkillDrawSystem/EfficientCost/Power, SkillUpgradeUI 휴식지 강화 선택지, 저장/로드 업그레이드 레벨 유지)
-  - 5C: 유물 시스템 완료 (CombatEventBus 전투 중앙 이벤트 버스, RelicData SO 트리거+효과, RelicHandler 구독/적용, 12종 유물 DataGenerator 생성, TurnManager DealDamage/OnKill 이벤트 발행)
+  - 5C: 유물 시스템 완료 (CombatEventBus 전투 중앙 이벤트 버스, RelicData SO 트리거+효과, RelicHandler 구독/적용, 12종 유물 DataGenerator 생성, DamageCalculator DealDamage/OnKill 이벤트 발행)
   - 5D: 폴리싱 완료 (ItemEffectApplier HealPerTurn/BonusGold/DrawWeight 처리, EventData 저주/상태이상 필드, EventManager 상태이상 적용)
-  - **잔여**: 런타임 플레이테스트 전체 검증, 밸런싱 추가 튜닝
+  - **잔여**: 런타임 플레이테스트 전체 검증, 밸런싱 추가 튜닝, GC 감사 후보 정리
 
 ### 미구현 항목
-- EnemyDetailPanel 가디언/아크카 버튼 실제 로직 (TODO 스텁 상태)
-- VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, 실제 파티클 표시 확인 필요)
+- VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, VFXPalette.asset에 13개 프리팹 참조 확인, 실제 파티클 표시 확인 필요)
 - 밸런싱 추가 튜닝 (플레이테스트 피드백 기반)
+- GC 감사 후보 정리 (GC_Report_2026-06-07.md 참조: 고아 CombatEventBus 이벤트, 미구현 유물 효과, 중복 패널 로직 등)
 
 ### 세션 종료 체크리스트
 

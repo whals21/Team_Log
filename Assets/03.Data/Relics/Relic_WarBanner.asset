@@ -19,3 +19,9 @@ MonoBehaviour:
   _effectType: 5
   _effectValue: 5
   _rarity: 2
+  _price: 160
+  _keywords:
+  - Type: 11
+    Value: 5
+    Trigger: 3
+    ConditionParam: 0

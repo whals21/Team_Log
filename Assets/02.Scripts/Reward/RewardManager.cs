@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-using TeamLog.Characters;
 using TeamLog.Map;
+using TeamLog.Skill;
 
 namespace TeamLog.Reward
 {
@@ -12,33 +12,59 @@ namespace TeamLog.Reward
     {
         private readonly System.Random _rng = new();
 
+        private MapNodeType _lastBattleType;
+        private GameRunState _lastRunState;
+
         /// <summary>
         /// 전투 결과에 따라 보상 3개 생성
+        /// 새 흐름: 증강 제안 3개 + 유물 (보스/엘리트)
         /// </summary>
         public List<RewardOffer> GenerateRewards(MapNodeType battleType, GameRunState runState)
         {
-            var rewards = new List<RewardOffer>();
-            int goldMin, goldMax;
+            _lastBattleType = battleType;
+            _lastRunState = runState;
 
+            var rewards = new List<RewardOffer>();
+
+            // 증강 제안 3개 생성
+            for (int i = 0; i < 3; i++)
+            {
+                var offer = runState.AugmentGenerator.GenerateAugmentOffer(battleType);
+                if (offer != null)
+                {
+                    rewards.Add(new RewardOffer
+                    {
+                        Type = RewardType.AugmentOffer,
+                        Rarity = offer.Tier switch
+                        {
+                            3 => RewardRarity.Unique,
+                            2 => RewardRarity.Rare,
+                            _ => RewardRarity.Common
+                        },
+                        Description = offer.GetDisplayText(),
+                        AugmentOfferData = offer
+                    });
+                }
+            }
+
+            // 증강 제안이 3개 미만이면 골드로 채움
+            int goldMin, goldMax;
             switch (battleType)
             {
                 case MapNodeType.Elite:
-                    goldMin = 50; goldMax = 100;
+                    goldMin = 30; goldMax = 60;
                     break;
                 case MapNodeType.Boss:
-                    goldMin = 100; goldMax = 200;
+                    goldMin = 50; goldMax = 100;
                     break;
-                default: // Battle
-                    goldMin = 20; goldMax = 50;
+                default:
+                    goldMin = 10; goldMax = 25;
                     break;
             }
 
-            // 보상 3개 생성: 항상 골드 1개 + 나머지는 가중치 랜덤
-            rewards.Add(CreateGoldReward(goldMin, goldMax, RewardRarity.Common));
-
-            for (int i = 0; i < 2; i++)
+            while (rewards.Count < 3)
             {
-                rewards.Add(GenerateRandomReward(battleType, runState));
+                rewards.Add(CreateGoldReward(goldMin, goldMax, RewardRarity.Common));
             }
 
             // 보스: 항상 유물 보상 추가
@@ -56,8 +82,8 @@ namespace TeamLog.Reward
                     });
                 }
             }
-            // 엘리트: 30% 확률로 유물 보상 추가
-            else if (battleType == MapNodeType.Elite && _rng.NextDouble() < 0.30)
+            // 엘리트: 50% 확률로 유물 보상 추가
+            else if (battleType == MapNodeType.Elite && _rng.NextDouble() < 0.50)
             {
                 var relic = runState.PeekRandomRelic();
                 if (relic != null)
@@ -75,39 +101,12 @@ namespace TeamLog.Reward
             return rewards;
         }
 
-        private RewardOffer GenerateRandomReward(MapNodeType battleType, GameRunState runState)
+        /// <summary>
+        /// 리롤 — 토큰 소모 후 보상 재생성
+        /// </summary>
+        public List<RewardOffer> RerollRewards(MapNodeType battleType, GameRunState runState)
         {
-            // 가중치: 골드 40%, 스킬 35%, 아이템 25%
-            double roll = _rng.NextDouble();
-
-            if (roll < 0.40)
-            {
-                int goldMin = battleType == MapNodeType.Elite ? 50 : 20;
-                int goldMax = battleType == MapNodeType.Boss ? 80 : 50;
-                return CreateGoldReward(goldMin, goldMax, RewardRarity.Common);
-            }
-            else if (roll < 0.75)
-            {
-                var skill = runState.PeekRandomSkill();
-                return new RewardOffer
-                {
-                    Type = RewardType.Skill,
-                    Rarity = battleType == MapNodeType.Boss ? RewardRarity.Unique : RewardRarity.Common,
-                    Description = skill != null ? $"스킬: {skill.SkillName}" : "스킬 보상 (풀 없음)",
-                    Skill = skill
-                };
-            }
-            else
-            {
-                var item = runState.PeekRandomItem();
-                return new RewardOffer
-                {
-                    Type = RewardType.Item,
-                    Rarity = battleType == MapNodeType.Elite ? RewardRarity.Rare : RewardRarity.Common,
-                    Description = item != null ? $"아이템: {item.ItemName}" : "아이템 보상 (풀 없음)",
-                    Item = item
-                };
-            }
+            return GenerateRewards(battleType, runState);
         }
 
         private RewardOffer CreateGoldReward(int min, int max, RewardRarity rarity)
@@ -124,6 +123,7 @@ namespace TeamLog.Reward
 
         /// <summary>
         /// 선택된 보상을 GameRunState에 적용
+        /// AugmentOffer: 즉시 증강 부착
         /// </summary>
         public void ApplyReward(RewardOffer reward, GameRunState runState)
         {
@@ -132,16 +132,33 @@ namespace TeamLog.Reward
                 case RewardType.Gold:
                     runState.AddGold(reward.GoldAmount);
                     break;
-                case RewardType.Skill:
-                    runState.AcquireSkill(reward.Skill);
+                case RewardType.Augment:
+                    // 상점용 — AugmentSelectPanel에서 처리
                     break;
-                case RewardType.Item:
-                    runState.AcquireItem(reward.Item);
+                case RewardType.AugmentOffer:
+                    if (reward.AugmentOfferData != null)
+                    {
+                        var offer = reward.AugmentOfferData;
+                        runState.AcquireAugment(offer.Augment, offer.TargetCharacter, offer.TargetSkill);
+                    }
                     break;
                 case RewardType.Relic:
                     runState.AcquireRelic(reward.Relic);
                     break;
             }
+        }
+
+        /// <summary>
+        /// 스킵 시 골드 보상 계산
+        /// </summary>
+        public static int GetSkipGold(MapNodeType battleType)
+        {
+            return battleType switch
+            {
+                MapNodeType.Elite => 30,
+                MapNodeType.Boss => 50,
+                _ => 15
+            };
         }
     }
 
@@ -154,13 +171,17 @@ namespace TeamLog.Reward
         public RewardRarity Rarity;
         public int GoldAmount;
         public string Description;
-        public SkillData Skill;
-        public ItemData Item;
         public RelicData Relic;
+        public AugmentData Augment;
+        public AugmentOffer AugmentOfferData;
 
         // 희귀도별 색상
         public Color GetRarityColor()
         {
+            // 저주 증강은 암적색
+            if (Type == RewardType.AugmentOffer && AugmentOfferData != null && AugmentOfferData.IsCursed)
+                return new Color(0.8f, 0.15f, 0.15f);
+
             return Rarity switch
             {
                 RewardRarity.Common => Color.white,

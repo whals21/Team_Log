@@ -127,5 +127,58 @@ namespace TeamLog.Editor
             rect.anchorMax = max;
             rect.sizeDelta = Vector2.zero;
         }
+
+        /// <summary>
+        /// 오버레이 패널 생성 — 전체 화면 이미지 + 비활성화 + 선택적 CanvasGroup
+        /// </summary>
+        private static GameObject CreateOverlay(string name, Transform parent, Color color, bool withCanvasGroup = false)
+        {
+            var overlay = CreateFullImage(name, parent, color);
+            overlay.SetActive(false);
+            if (withCanvasGroup)
+            {
+                var cg = overlay.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+            }
+            return overlay;
+        }
+
+        /// <summary>
+        /// 수직 스크롤 뷰 생성 — ScrollRect + Viewport + Content(RectMask2D, VerticalLayoutGroup, ContentSizeFitter)
+        /// </summary>
+        private static RectTransform CreateVerticalScrollView(string name, Transform parent,
+            int spacing = 8, TextAnchor childAlignment = TextAnchor.UpperLeft)
+        {
+            var scrollObj = CreateUIObject(name, parent);
+            var scrollRect = scrollObj.AddComponent<ScrollRect>();
+
+            var viewport = CreateUIObject("Viewport", scrollObj.transform);
+            SetAnchors(viewport.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+            viewport.AddComponent<RectMask2D>();
+
+            var contentObj = CreateUIObject("Content", viewport.transform);
+            var contentRect = contentObj.GetComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0, 1);
+            contentRect.anchorMax = new Vector2(1, 1);
+            contentRect.pivot = new Vector2(0.5f, 1);
+            contentRect.sizeDelta = new Vector2(0, 0);
+            var vlg = contentObj.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = spacing;
+            vlg.childAlignment = childAlignment;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+            var csf = contentObj.AddComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            scrollRect.content = contentRect;
+            scrollRect.viewport = viewport.GetComponent<RectTransform>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+
+            return contentRect;
+        }
     }
 }

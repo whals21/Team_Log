@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -14,5 +15,9 @@ namespace TeamLog.Map
         public int BestFloor;
         public int TotalGoldEarned;
         public bool HasPendingRun;
+        public bool HasCompletedTutorial;
+
+        // 캐릭터 잠금해제 상태
+        public List<string> UnlockedCharacterIds = new();
     }
 }

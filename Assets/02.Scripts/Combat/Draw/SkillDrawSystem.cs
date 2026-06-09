@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TeamLog.Map;
 
 // 네임스페이스 충돌 해결
 using Character = TeamLog.Characters.Character;
@@ -41,11 +42,13 @@ namespace TeamLog.Combat.Draw
             _drawnSlots.Clear();
             _rerollCount = 0;
 
+            int bonusWeight = GameRunState.Instance?.RelicHandler.GetDrawWeightBonus() ?? 0;
+
             foreach (var character in _party)
             {
                 if (character.IsAlive)
                 {
-                    var instance = character.SkillInventory.DrawSkillInstance();
+                    var instance = character.SkillInventory.DrawSkillInstance(bonusWeight);
                     if (instance != null)
                     {
                         var slot = new DrawnSkillSlot(character, instance, _drawnSlots.Count);
@@ -108,13 +111,6 @@ namespace TeamLog.Combat.Draw
             Caster = caster;
             Instance = instance;
             SlotIndex = slotIndex;
-        }
-
-        /// <summary>하위 호환: SkillData 설정 (새 SkillInstance로 래핑)</summary>
-        public void SetSkill(SkillData newSkill)
-        {
-            if (newSkill != null)
-                Instance = new SkillInstance(newSkill);
         }
 
         /// <summary>SkillInstance 직접 설정</summary>

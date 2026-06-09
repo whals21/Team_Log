@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using TeamLog.Characters;
 using TeamLog.Combat.AI;
 using TeamLog.Combat.Turn;
+using TeamLog.Combat;
 
 namespace TeamLog.UI.Battle
 {
@@ -19,7 +20,7 @@ namespace TeamLog.UI.Battle
         [Header("Top Bar")]
         [SerializeField] private TopBarUI _topBar;
 
-        [Header("Left Sidebar - Player Panels")]
+        [Header("Player Strip")]
         [SerializeField] private Transform _playerPanelContainer;
         [SerializeField] private PlayerSidebarPanel _playerPanelPrefab;
         [SerializeField] private int _maxPlayerPanels = 4;
@@ -32,7 +33,6 @@ namespace TeamLog.UI.Battle
         [SerializeField] private BattleLogUI _battleLog;
 
         [Header("Bottom Bar")]
-        [SerializeField] private TextMeshProUGUI _currentTurnText;
         [SerializeField] private ActionBarUI _actionBar;
 
         [Header("Character Popup")]
@@ -44,7 +44,8 @@ namespace TeamLog.UI.Battle
         private List<Character> _playerParty;
         private List<Character> _enemies;
 
-        public void Initialize(TurnManager turnManager, List<Character> playerParty, List<Character> enemies)
+        public void Initialize(TurnManager turnManager, List<Character> playerParty, List<Character> enemies,
+            BattleSceneSetup battleSetup = null)
         {
             _turnManager = turnManager;
             _playerParty = playerParty;
@@ -56,6 +57,10 @@ namespace TeamLog.UI.Battle
 
             CreatePlayerPanels();
             CreateEnemyPanels();
+
+            // TopBar 속도 토글 초기화
+            if (_topBar != null && battleSetup != null)
+                _topBar.Initialize(battleSetup);
 
             AddLog("전투가 시작되었습니다.");
         }
@@ -82,26 +87,89 @@ namespace TeamLog.UI.Battle
             }
         }
 
+        private const int ENEMIES_PER_ROW = 5;
+
         private void CreateEnemyPanels()
         {
             ClearPanels(_enemyPanels);
+
+            if (_enemyPanelContainer == null)
+            {
+                Debug.LogError("[BattleUIManager] _enemyPanelContainer is null! Cannot create enemy panels.");
+                return;
+            }
             ClearContainerChildren(_enemyPanelContainer);
+
+            int count = _enemies.Count;
+            bool multiRow = count > ENEMIES_PER_ROW;
+
+            if (multiRow)
+                SetupMultiRowContainer(count);
+            else
+                SetupSingleRowContainer();
+
+            float panelWidth = multiRow ? 120f : 180f;
+            float panelHeight = multiRow ? 240f : 320f;
 
             foreach (var enemy in _enemies)
             {
                 var panel = Instantiate(_enemyPanelPrefab, _enemyPanelContainer);
-                // 적 패널 고정 크기 보장 (프리팹에 없을 경우 대비)
                 var le = panel.GetComponent<LayoutElement>();
                 if (le == null) le = panel.gameObject.AddComponent<LayoutElement>();
-                le.preferredWidth = 180;
-                le.minWidth = 120;
-                le.preferredHeight = 280;
-                le.minHeight = 200;
+                le.preferredWidth = panelWidth;
+                le.minWidth = panelWidth;
+                le.preferredHeight = panelHeight;
+                le.minHeight = panelHeight;
+                le.flexibleWidth = 0;
                 panel.Setup(_enemyPanels.Count, enemy.Name, character: enemy, uiManager: this);
                 panel.UpdateHP(enemy.Health.CurrentHP, enemy.Health.MaxHP);
                 panel.OnPanelClicked += OnEnemyPanelClicked;
                 _enemyPanels.Add(panel);
             }
+        }
+
+        private void SetupSingleRowContainer()
+        {
+            // 기존 레이아웃 유지 (HorizontalLayoutGroup)
+            var existing = _enemyPanelContainer.GetComponent<HorizontalLayoutGroup>();
+            if (existing == null)
+            {
+                var hlg = _enemyPanelContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
+                hlg.spacing = 12;
+                hlg.padding = new RectOffset(12, 12, 12, 12);
+                hlg.childAlignment = TextAnchor.MiddleCenter;
+                hlg.childControlWidth = false;
+                hlg.childControlHeight = false;
+                hlg.childForceExpandWidth = false;
+                hlg.childForceExpandHeight = false;
+            }
+
+            // GridLayoutGroup이 있으면 즉시 제거
+            var grid = _enemyPanelContainer.GetComponent<GridLayoutGroup>();
+            if (grid != null) DestroyImmediate(grid);
+        }
+
+        private void SetupMultiRowContainer(int count)
+        {
+            // HorizontalLayoutGroup 즉시 제거
+            var hlg = _enemyPanelContainer.GetComponent<HorizontalLayoutGroup>();
+            if (hlg != null) DestroyImmediate(hlg);
+
+            // GridLayoutGroup으로 2줄 배치
+            var grid = _enemyPanelContainer.GetComponent<GridLayoutGroup>();
+            if (grid == null) grid = _enemyPanelContainer.gameObject.AddComponent<GridLayoutGroup>();
+
+            int columns = Mathf.CeilToInt(count / 2f);
+            if (columns > ENEMIES_PER_ROW) columns = ENEMIES_PER_ROW;
+
+            grid.cellSize = new Vector2(120f, 240f);
+            grid.spacing = new Vector2(8, 8);
+            grid.padding = new RectOffset(8, 8, 8, 8);
+            grid.childAlignment = TextAnchor.MiddleCenter;
+            grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+            grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = columns;
         }
 
         private void ClearPanels<T>(List<T> panels) where T : Component
@@ -158,14 +226,7 @@ namespace TeamLog.UI.Battle
 
         private void OnTurnStarted(int turnNumber)
         {
-            _topBar.SetTurnCounter(turnNumber, _playerParty?.Count ?? 1);
             AddLog($"--- 턴 {turnNumber} 시작 ---");
-
-            if (_currentTurnText != null && _playerParty != null && _playerParty.Count > 0)
-            {
-                var currentChar = _playerParty[turnNumber % _playerParty.Count];
-                _currentTurnText.text = $"{currentChar.Name}, 턴";
-            }
         }
 
         private void OnAPChanged(int current, int max)
@@ -251,7 +312,19 @@ namespace TeamLog.UI.Battle
 
         public void UpdateRerollCount(int remaining, int max)
         {
-            _topBar?.SetRerollCount(remaining, max);
+            _actionBar?.SetRerollState(remaining, max);
+        }
+
+        public void ShowTraitInfo(string title, string description)
+        {
+            if (TooltipUI.Instance != null)
+                TooltipUI.Instance.Show(title, description);
+        }
+
+        public void HideTraitInfo()
+        {
+            if (TooltipUI.Instance != null)
+                TooltipUI.Instance.Hide();
         }
 
         public void FlashPanelForCharacter(Character character)

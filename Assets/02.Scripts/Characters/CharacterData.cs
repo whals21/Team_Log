@@ -26,6 +26,10 @@ namespace TeamLog.Characters
         [Header("스킬")]
         [SerializeField] private List<SkillData> _skills = new List<SkillData>(4);
 
+        [Header("잠금해제")]
+        [SerializeField] private bool _isDefault = true;  // 기본 해금 여부
+        [SerializeField] private string _unlockCondition; // 잠금해제 조건 텍스트
+
         #region Properties
         public string CharacterName => _characterName;
         public CharacterClass Class => _characterClass;
@@ -35,6 +39,8 @@ namespace TeamLog.Characters
         public int BaseDEF => _baseDEF;
         public IReadOnlyList<SkillData> Skills => _skills;
         public EnemyTrait Trait => _enemyTrait;
+        public bool IsDefault => _isDefault;
+        public string UnlockCondition => _unlockCondition;
         #endregion
     }
 
@@ -43,9 +49,13 @@ namespace TeamLog.Characters
     /// </summary>
     public enum CharacterClass
     {
-        Warrior,    // 전사
-        Mage,       // 마법사
-        Healer,     // 힐러
-        Rogue       // 도적
+        Warrior,        // 전사
+        Mage,           // 마법사
+        Healer,         // 힐러
+        Rogue,          // 도적
+        Archer,         // 궁수
+        Necromancer,    // 네크로맨서
+        Alchemist,      // 연금술사
+        Bard            // 음유시인
     }
 }

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using DG.Tweening;
 using TeamLog.Map;
 using TeamLog.Reward;
 using TeamLog.UI.Battle;
@@ -70,6 +69,7 @@ namespace TeamLog.UI.Map
                 tmp.fontSize = 14;
                 tmp.color = GetRarityColor(relic.Rarity);
                 tmp.alignment = TextAlignmentOptions.Center;
+                UIKoreanFont.EnsureFont(tmp);
                 var textRect = textObj.GetComponent<RectTransform>();
                 textRect.anchorMin = Vector2.zero;
                 textRect.anchorMax = Vector2.one;

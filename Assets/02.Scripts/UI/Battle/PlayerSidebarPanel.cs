@@ -11,22 +11,20 @@ using DG.Tweening;
 namespace TeamLog.UI.Battle
 {
     /// <summary>
-    /// 좌측 사이드바 캐릭터 패널 (번호, 이름, HP, 스탯, 상태이상, 스킬명)
+    /// 하단 PlayerStrip 가로 카드 패널 (이름, HP, 스탯, 상태이상)
     /// </summary>
-    public class PlayerSidebarPanel : MonoBehaviour, IPointerClickHandler
+    public class PlayerSidebarPanel : BattlePanelBase, IPointerClickHandler
     {
         [Header("UI References")]
-        [SerializeField] private TextMeshProUGUI _numberText;
         [SerializeField] private TextMeshProUGUI _nameText;
+        [SerializeField] private Image _avatarBgImage;
+        [SerializeField] private TextMeshProUGUI _avatarLabel;
         [SerializeField] private TextMeshProUGUI _hpText;
         [SerializeField] private TextMeshProUGUI _hpPercentText;
-        [SerializeField] private TextMeshProUGUI _skillNameText;
         [SerializeField] private Image _hpFillImage;
         [SerializeField] private Image _shieldFillImage;
         [SerializeField] private GameObject _selectionHighlight;
         [SerializeField] private Button _panelButton;
-        [SerializeField] private TextMeshProUGUI _statText;
-        [SerializeField] private Transform _statusEffectContainer;
 
         [Header("HP Colors")]
         [SerializeField] private Color _hpNormalColor = new Color(0.15f, 0.68f, 0.38f);
@@ -36,9 +34,11 @@ namespace TeamLog.UI.Battle
         private int _panelIndex;
         private Characters.Character _character;
         private BattleUIManager _uiManager;
-        private CanvasGroup _canvasGroup;
-        private Image _panelBgImage;
         private Tween _hpTween;
+        private Tween _hpPulseTween;
+        private Tween _scaleTween;
+        private bool _isDead;
+        private LayoutElement _layoutElement;
 
         public int PanelIndex => _panelIndex;
         public event Action<int> OnPanelClicked;
@@ -46,43 +46,33 @@ namespace TeamLog.UI.Battle
         private void Awake()
         {
             // Auto-wire: Inspector에 할당되지 않은 필드를 자동으로 찾아 연결
-            if (_numberText == null) _numberText = FindComponent<TextMeshProUGUI>("NumberBadge/T");
-            if (_nameText == null) _nameText = FindComponent<TextMeshProUGUI>("Name");
-            if (_hpText == null) _hpText = FindComponent<TextMeshProUGUI>("HPBar/Text");
-            if (_hpPercentText == null) _hpPercentText = FindComponent<TextMeshProUGUI>("Pct");
-            if (_skillNameText == null) _skillNameText = FindComponent<TextMeshProUGUI>("Skill");
-            if (_hpFillImage == null) _hpFillImage = FindComponent<Image>("HPBar/Fill");
-            if (_shieldFillImage == null) _shieldFillImage = FindComponent<Image>("HPBar/ShieldFill");
-            if (_statText == null) _statText = FindComponent<TextMeshProUGUI>("Stats");
-            if (_statusEffectContainer == null) _statusEffectContainer = transform.Find("StatusContainer");
+            if (_nameText == null) _nameText = FindComponent<TextMeshProUGUI>("RightSection/NameRow/Name");
+            if (_avatarBgImage == null) _avatarBgImage = FindComponent<Image>("Avatar");
+            if (_avatarLabel == null) _avatarLabel = FindComponent<TextMeshProUGUI>("Avatar/Label");
+            if (_hpText == null) _hpText = FindComponent<TextMeshProUGUI>("RightSection/HPBar/HPText");
+            if (_hpFillImage == null) _hpFillImage = FindComponent<Image>("RightSection/HPBar/Fill");
+            if (_shieldFillImage == null) _shieldFillImage = FindComponent<Image>("RightSection/HPBar/ShieldFill");
+            if (_statText == null) _statText = FindComponent<TextMeshProUGUI>("RightSection/NameRow/Stats");
+            if (_statusEffectContainer == null) _statusEffectContainer = transform.Find("RightSection/StatusContainer");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
+            if (_selectionHighlight == null) _selectionHighlight = transform.Find("SelectionHighlight")?.gameObject;
+
+            _layoutElement = GetComponent<LayoutElement>();
 
             // 자식 Graphic들의 raycastTarget을 꺼서 부모 Button이 클릭을 받도록 함
-            // (Button이 있는 자식은 제외 - CloseBtn 등)
             foreach (var graphic in GetComponentsInChildren<Graphic>())
             {
                 if (graphic.gameObject != gameObject && graphic.GetComponent<Button>() == null)
                     graphic.raycastTarget = false;
             }
 
-            _canvasGroup = GetComponent<CanvasGroup>();
-            if (_canvasGroup == null)
-                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
-            _panelBgImage = GetComponent<Image>();
+            InitPanelBase();
         }
 
         private void Start()
         {
             if (_panelButton != null)
-            {
                 _panelButton.onClick.AddListener(() => OnPanelClicked?.Invoke(_panelIndex));
-            }
-        }
-
-        private T FindComponent<T>(string path) where T : Component
-        {
-            var t = transform.Find(path);
-            return t != null ? t.GetComponent<T>() : null;
         }
 
         private void ShowPopup()
@@ -109,14 +99,31 @@ namespace TeamLog.UI.Battle
             _character = character;
             _uiManager = uiManager;
 
-            if (_numberText != null)
-                _numberText.text = (index + 1).ToString();
-
             if (_nameText != null)
                 _nameText.text = name;
 
-            if (_skillNameText != null)
-                _skillNameText.text = skillName;
+            // 초상화 이니셜 + 클래스 색상 배경
+            if (character != null)
+            {
+                if (_avatarLabel != null)
+                {
+                    _avatarLabel.text = character.Data.Class switch
+                    {
+                        CharacterClass.Warrior => "전",
+                        CharacterClass.Mage => "마",
+                        CharacterClass.Healer => "힐",
+                        CharacterClass.Rogue => "도",
+                        CharacterClass.Archer => "궁",
+                        CharacterClass.Necromancer => "강",
+                        CharacterClass.Alchemist => "연",
+                        CharacterClass.Bard => "음",
+                        _ => "?"
+                    };
+                }
+
+                if (_avatarBgImage != null)
+                    _avatarBgImage.color = GetClassColor(character.Data.Class);
+            }
         }
 
         public void UpdateHP(int current, int max, int shield = 0)
@@ -130,19 +137,40 @@ namespace TeamLog.UI.Battle
             }
 
             if (_hpPercentText != null)
-                _hpPercentText.text = $"{Mathf.RoundToInt(ratio * 100)}%";
+                _hpPercentText.gameObject.SetActive(false);
 
             if (_hpFillImage != null)
             {
                 if (_hpTween != null) _hpTween.Kill();
                 _hpTween = UIAnimationHelper.TweenAnchorMaxX(_hpFillImage.rectTransform, ratio, 0.3f);
-                _hpFillImage.color = ratio <= _lowThreshold ? _hpLowColor : _hpNormalColor;
             }
 
-            if (_hpPercentText != null)
-                _hpPercentText.color = ratio <= _lowThreshold ? _hpLowColor : _hpNormalColor;
+            // HP 위기 펄스 애니메이션
+            bool isLow = ratio <= _lowThreshold && ratio > 0f;
+            if (isLow)
+            {
+                if (_hpFillImage != null)
+                    _hpFillImage.color = _hpLowColor;
 
-            // 쉴드 바: HP 바 끝점부터 겹쳐서 표시
+                if (_hpPulseTween == null && _canvasGroup != null)
+                    _hpPulseTween = UIAnimationHelper.PulseAlpha(_canvasGroup, 0.5f, 1f, 0.8f);
+            }
+            else
+            {
+                // 펄스 정지 + 정상 복구
+                if (_hpPulseTween != null)
+                {
+                    _hpPulseTween.Kill();
+                    _hpPulseTween = null;
+                }
+                if (_canvasGroup != null && !_isDead)
+                    _canvasGroup.alpha = 1f;
+
+                if (_hpFillImage != null)
+                    _hpFillImage.color = _hpNormalColor;
+            }
+
+            // 쉴드 바
             BattleDisplayUtil.UpdateShieldBar(_shieldFillImage, ratio, shield, max);
         }
 
@@ -150,13 +178,34 @@ namespace TeamLog.UI.Battle
         {
             if (_selectionHighlight != null)
                 _selectionHighlight.SetActive(selected);
+
+            // 선택 시 카드 확대
+            if (_scaleTween != null) _scaleTween.Kill();
+            _scaleTween = UIAnimationHelper.ScaleTo(transform, selected ? 1.05f : 1f, 0.2f);
+
+            // 선택 시 그림자 강화
+            var shadow = GetComponent<Shadow>();
+            if (shadow != null)
+                shadow.effectDistance = selected ? new Vector2(4, -4) : new Vector2(2, -2);
         }
 
-        public void SetDead(bool isDead)
+        public override void SetDead(bool isDead)
         {
-            if (_canvasGroup != null)
+            _isDead = isDead;
+
+            if (_layoutElement != null)
+                _layoutElement.preferredHeight = isDead ? 40f : 64f;
+
+            if (isDead)
             {
-                if (isDead)
+                // 펄스 정지
+                if (_hpPulseTween != null)
+                {
+                    _hpPulseTween.Kill();
+                    _hpPulseTween = null;
+                }
+
+                if (_canvasGroup != null)
                 {
                     UIAnimationHelper.FadeToAlpha(_canvasGroup, 0.4f, 0.5f).OnComplete(() =>
                     {
@@ -164,37 +213,37 @@ namespace TeamLog.UI.Battle
                         _canvasGroup.blocksRaycasts = false;
                     });
                 }
-                else
+
+                // 흑백 변환 — 아바타 색상 회색화
+                if (_avatarBgImage != null)
+                    _avatarBgImage.color = new Color(0.3f, 0.3f, 0.3f);
+            }
+            else
+            {
+                // 부활 시 복구
+                if (_canvasGroup != null)
                 {
                     _canvasGroup.alpha = 1f;
                     _canvasGroup.interactable = true;
                     _canvasGroup.blocksRaycasts = true;
                 }
+
+                if (_character != null && _avatarBgImage != null)
+                    _avatarBgImage.color = GetClassColor(_character.Data.Class);
             }
         }
 
-        public void FlashHit()
+        private static Color GetClassColor(CharacterClass cls) => cls switch
         {
-            if (_panelBgImage != null)
-                UIAnimationHelper.FlashColor(_panelBgImage, Color.white, 0.15f);
-        }
-
-        public void UpdateStats(int atk, int def)
-        {
-            if (_statText != null)
-                _statText.text = $"ATK {atk}  DEF {def}";
-        }
-
-        public void UpdateStatusEffects(IEnumerable<ActiveEffect> effects)
-        {
-            if (_statusEffectContainer == null) return;
-
-            for (int i = _statusEffectContainer.childCount - 1; i >= 0; i--)
-                Destroy(_statusEffectContainer.GetChild(i).gameObject);
-
-            if (effects == null) return;
-            foreach (var effect in effects)
-                StatusEffectBadge.Create(_statusEffectContainer, effect);
-        }
+            CharacterClass.Warrior => new Color(0.75f, 0.20f, 0.20f),
+            CharacterClass.Mage => new Color(0.25f, 0.40f, 0.85f),
+            CharacterClass.Healer => new Color(0.20f, 0.75f, 0.40f),
+            CharacterClass.Rogue => new Color(0.75f, 0.65f, 0.20f),
+            CharacterClass.Archer => new Color(0.50f, 0.75f, 0.25f),
+            CharacterClass.Necromancer => new Color(0.50f, 0.20f, 0.70f),
+            CharacterClass.Alchemist => new Color(0.85f, 0.55f, 0.15f),
+            CharacterClass.Bard => new Color(0.75f, 0.35f, 0.65f),
+            _ => new Color(0.4f, 0.4f, 0.4f),
+        };
     }
 }

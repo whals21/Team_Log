@@ -402,6 +402,26 @@ namespace TeamLog.Editor
             tt.color = AccentYellow;
             tt.raycastTarget = false;
 
+            // Subtitle: 비용/타입/타겟 (필요시에만 표시)
+            var subtitle = NewRect("Subtitle", tooltip);
+            var st = subtitle.gameObject.AddComponent<TextMeshProUGUI>();
+            st.font = GetOrCreateKoreanFont();
+            st.text = "";
+            st.fontSize = 11;
+            st.fontStyle = FontStyles.Normal;
+            st.alignment = TextAlignmentOptions.Left;
+            st.color = new Color(0.7f, 0.7f, 0.8f, 0.9f);
+            st.raycastTarget = false;
+            st.enableWordWrapping = false;
+            subtitle.gameObject.SetActive(false);
+
+            // 구분선
+            var div = NewRect("Divider", tooltip);
+            var divLe = div.gameObject.AddComponent<LayoutElement>();
+            divLe.preferredHeight = 1;
+            divLe.flexibleHeight = 0;
+            div.gameObject.AddComponent<Image>().color = new Color(0.4f, 0.4f, 0.5f, 0.5f);
+
             var desc = NewRect("Desc", tooltip);
             var dt = desc.gameObject.AddComponent<TextMeshProUGUI>();
             dt.font = GetOrCreateKoreanFont();

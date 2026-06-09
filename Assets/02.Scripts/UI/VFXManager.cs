@@ -25,7 +25,9 @@ namespace TeamLog.UI
         public void Initialize(RectTransform parentCanvas)
         {
             _palette = Resources.Load<VFXPalette>("VFXPalette");
+#if UNITY_EDITOR
             Debug.Log($"[VFXManager] Init — palette: {_palette != null}, entries: {_palette?.entries.Count ?? 0}");
+#endif
 
             // 1) Main Camera 찾기 또는 생성
             var mainCam = Camera.main;
@@ -78,7 +80,9 @@ namespace TeamLog.UI
             rootGO.transform.SetParent(transform);
             _vfxRoot = rootGO.transform;
 
+#if UNITY_EDITOR
             Debug.Log("[VFXManager] Setup complete — URP Camera Stacking");
+#endif
         }
 
         /// <summary>

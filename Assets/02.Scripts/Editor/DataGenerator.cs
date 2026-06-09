@@ -6,14 +6,18 @@ using System.Linq;
 using TeamLog.Characters;
 using TeamLog.Combat.AI;
 using TeamLog.Event;
+using TeamLog.Map;
 using TeamLog.Reward;
+using TeamLog.Skill;
 using TeamLog.UI;
 
 namespace TeamLog.Editor
 {
     /// <summary>
     /// CSV 테이블 → ScriptableObject 에셋 자동 생성 에디터
-    /// 콘텐츠 데이터 (아이템/이벤트/UIPalette/AudioPalette): DataGenerator.Content.cs
+    /// 진입점/스킬/캐릭터/패턴/유틸리티: DataGenerator.cs
+    /// 증강 데이터/스폰 패턴: DataGenerator.Augments.cs
+    /// 콘텐츠 데이터 (이벤트/유물/팔레트): DataGenerator.Content.cs
     /// </summary>
     public static partial class DataGenerator
     {
@@ -21,8 +25,9 @@ namespace TeamLog.Editor
         private const string SKILL_PATH = "Assets/03.Data/Skills";
         private const string CHAR_PATH = "Assets/03.Data/Characters";
         private const string PATTERN_PATH = "Assets/03.Data/Patterns";
-        private const string ITEM_PATH = "Assets/03.Data/Items";
         private const string EVENT_PATH = "Assets/03.Data/Events";
+        private const string AUGMENT_PATH = "Assets/03.Data/Augments";
+        private const string SPAWN_PATTERN_PATH = "Assets/03.Data/SpawnPatterns";
 
         // Icon base paths
         private const string PICTO_BASE = "Assets/Layer Lab/GUI Pro-CasualGame/ResourcesData/Sprites/Components/Icon_PictoIcons/128";
@@ -35,15 +40,17 @@ namespace TeamLog.Editor
             EnsureFolder(SKILL_PATH);
             EnsureFolder(CHAR_PATH);
             EnsureFolder(PATTERN_PATH);
-            EnsureFolder(ITEM_PATH);
             EnsureFolder(EVENT_PATH);
+            EnsureFolder(AUGMENT_PATH);
+            EnsureFolder(SPAWN_PATTERN_PATH);
 
             GenerateSkillData();
             GenerateCharacterData();
             GenerateEnemyPatternData();
-            GenerateItemData();
             GenerateEventData();
             GenerateRelicData();
+            GenerateAugmentData();
+            GenerateSpawnPatternTables();
             GenerateUIPalette();
             GenerateAudioPalette();
             GenerateVFXPalette();
@@ -137,13 +144,16 @@ namespace TeamLog.Editor
                 string skillsRaw = csv.Get(i, "skills");
                 string[] skills = string.IsNullOrEmpty(skillsRaw) ? new string[0] : skillsRaw.Split(';');
                 var trait = ParseEnum<EnemyTrait>(csv.Get(i, "trait"));
+                bool isDefault = csv.GetInt(i, "isDefault") == 1;
+                string unlockCondition = csv.Get(i, "unlockCondition");
 
-                CreateCharacter(id, displayName, charClass, desc, hp, atk, def, skills, trait);
+                CreateCharacter(id, displayName, charClass, desc, hp, atk, def, skills, trait, isDefault, unlockCondition);
             }
         }
 
         private static void CreateCharacter(string fileName, string name, CharacterClass charClass,
-            string desc, int hp, int atk, int def, string[] skills, EnemyTrait trait = EnemyTrait.None)
+            string desc, int hp, int atk, int def, string[] skills, EnemyTrait trait = EnemyTrait.None,
+            bool isDefault = true, string unlockCondition = "")
         {
             var path = $"{CHAR_PATH}/{fileName}.asset";
             var character = GetOrCreateAsset<CharacterData>(path);
@@ -156,6 +166,8 @@ namespace TeamLog.Editor
             SetPrivateField(character, "_baseATK", atk);
             SetPrivateField(character, "_baseDEF", def);
             SetPrivateField(character, "_enemyTrait", trait);
+            SetPrivateField(character, "_isDefault", isDefault);
+            SetPrivateField(character, "_unlockCondition", unlockCondition);
 
             var skillList = new List<SkillData>();
             foreach (var skillName in skills)

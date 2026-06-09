@@ -1,20 +1,21 @@
 using System.Collections.Generic;
 using TeamLog.Combat.AI;
 using TeamLog.Combat.Draw;
+using TeamLog.Map;
+using TeamLog.Skill;
 
 // 네임스페이스 충돌 해결
 using Character = TeamLog.Characters.Character;
-using CharacterData = TeamLog.Characters.CharacterData;
 using SkillData = TeamLog.Characters.SkillData;
-using SkillType = TeamLog.Characters.SkillType;
-using StatType = TeamLog.Characters.StatType;
+using SkillInstance = TeamLog.Characters.SkillInstance;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
 using TargetType = TeamLog.Characters.TargetType;
 
 namespace TeamLog.Combat.Turn
 {
     /// <summary>
-    /// 턴 진행 관리자
+    /// 턴 진행 오케스트레이터 — 턴 라이프사이클, AP 관리, 대상 분해만 담당
+    /// 데미지 계산: DamageCalculator, 스킬 실행: SkillExecutor
     /// </summary>
     public class TurnManager
     {
@@ -23,10 +24,12 @@ namespace TeamLog.Combat.Turn
         private readonly List<Character> _enemies;
         private readonly List<EnemyAIController> _enemyControllers;
         private readonly SkillDrawSystem _drawSystem;
+        private readonly SkillExecutor _skillExecutor;
         private readonly int _bonusFirstTurnAP;
 
         public TurnContext Context => _context;
         public SkillDrawSystem DrawSystem => _drawSystem;
+        public SkillExecutor SkillExecutor => _skillExecutor;
         public TurnPhase CurrentPhase => _context.CurrentPhase;
         public int TurnNumber => _context.TurnNumber;
 
@@ -46,66 +49,13 @@ namespace TeamLog.Combat.Turn
             _enemyControllers = enemyControllers ?? new List<EnemyAIController>();
             _context = new TurnContext();
             _drawSystem = new SkillDrawSystem(playerParty, maxRerolls);
+            _skillExecutor = new SkillExecutor(playerParty, enemies);
             _bonusFirstTurnAP = bonusFirstTurnAP;
 
             _context.OnPhaseChanged += (old, newPhase) => OnPhaseChanged?.Invoke(old, newPhase);
             _context.OnTurnStarted += turn => OnTurnStarted?.Invoke(turn);
             _context.OnAPChanged += (current, max) => OnAPChanged?.Invoke(current, max);
         }
-
-        /// <summary>
-        /// 중앙화된 데미지 계산 공식
-        /// </summary>
-        public static int CalculateDamage(int attackPower, int defense)
-        {
-            return System.Math.Max(1, attackPower - defense);
-        }
-
-        /// <summary>
-        /// 중앙화된 데미지 적용: 공격자 ATK + bonusPower - 대상 DEF + 특성 훅
-        /// </summary>
-        public static void DealDamage(Character attacker, Character target, int bonusPower = 0)
-        {
-            int damage = attacker.Stats.GetStat(StatType.ATK) + bonusPower;
-            int defense = target.Stats.GetStat(StatType.DEF);
-            int calculatedDamage = CalculateDamage(damage, defense);
-
-            // 대상 특성: 들어오는 데미지 수정 (Sturdy 절반)
-            calculatedDamage = target.TraitHandler.ModifyIncomingDamage(calculatedDamage);
-
-            // 회피 시 MISS 처리
-            if (calculatedDamage == 0)
-            {
-                OnAttackMissed?.Invoke(target);
-                return;
-            }
-
-            target.Health.TakeDamage(calculatedDamage);
-
-            // 공격자 특성: 피해를 입혔을 때 (Corrosive 방어감소)
-            attacker.TraitHandler.OnDamageDealtTo(target);
-
-            // 대상 특성: 피해를 받은 후 (Counter/Thorns/Rampage/ArcaneFury/Rally)
-            target.TraitHandler.OnDamageReceived(attacker, calculatedDamage);
-
-            // CombatEventBus: 유물 트리거
-            CombatEventBus.FireDamageDealt(attacker, target, calculatedDamage);
-            CombatEventBus.FireDamageReceived(target, calculatedDamage);
-
-            // 사망 시 Kill 이벤트
-            if (target.IsDead)
-                CombatEventBus.FireKill(target);
-        }
-
-        /// <summary>
-        /// 회피 발생 시 이벤트 (FloatingText "MISS" 표시용)
-        /// </summary>
-        public static event System.Action<Character> OnAttackMissed;
-
-        /// <summary>
-        /// 스킬 효과 적용 후 이벤트 — 스킬 타입별 사운드/VFX 분기용
-        /// </summary>
-        public static event System.Action<SkillData, Character> OnSkillApplied;
 
         public void StartBattle()
         {
@@ -128,10 +78,20 @@ namespace TeamLog.Combat.Turn
             // 적 특성: 턴 시작 훅 (Regenerate, Sturdy, PhaseShift, Rampage, Shell)
             foreach (var c in _enemies) if (c.IsAlive) c.TraitHandler.OnTurnStart(_context.TurnNumber);
 
-            // AP 리셋: 기본 1 + 생존 파티원 수 (+ 첫 턴 보너스)
+            // 키워드: HPPerTurn — 매턴 HP 변화 (저주: 감소, 재생: 회복)
+            foreach (var c in _playerParty)
+            {
+                if (!c.IsAlive) continue;
+                int hpChange = SkillExecutor.GetKeywordSumForCharacter(c, KeywordType.HPPerTurn);
+                if (hpChange > 0) c.Health.Heal(hpChange);
+                else if (hpChange < 0) c.Health.TakeDamage(-hpChange);
+            }
+
+            // AP 리셋: 기본 1 + 생존 파티원 수 (+ 첫 턴 보너스 + 유물 ExtraAP)
             int aliveCount = _playerParty.FindAll(p => p.IsAlive).Count;
             int bonus = (_context.TurnNumber == 1) ? _bonusFirstTurnAP : 0;
-            _context.ResetAP(1 + aliveCount + bonus);
+            int relicAP = GameRunState.Instance?.RelicHandler.GetExtraAP() ?? 0;
+            _context.ResetAP(1 + aliveCount + bonus + relicAP);
 
             ExecuteDrawPhase();
 
@@ -152,44 +112,59 @@ namespace TeamLog.Combat.Turn
         }
 
         /// <summary>
-        /// 스킬 즉시 시전 — 대상 클릭 시 곧바로 실행
+        /// 스킬 즉시 시전 — 대상 분해 + AP 관리 후 SkillExecutor에 위임
         /// </summary>
         public bool ExecuteSkillImmediately(Character caster, SkillData skill, Character target)
         {
-            return ExecuteSkillImmediately(caster, skill, target, 0);
+            return ExecuteSkillImmediately(caster, skill, target, null);
         }
 
-        /// <summary>
-        /// 스킬 즉시 시전 — 업그레이드 보너스 포함
-        /// </summary>
-        public bool ExecuteSkillImmediately(Character caster, SkillData skill, Character target, int bonusPower)
+        public bool ExecuteSkillImmediately(Character caster, SkillData skill, Character target, SkillInstance instance)
         {
             if (caster.IsDead) return false;
 
-            // AP 체크
-            if (!_context.CanAfford(skill.Cost))
+            // AP 체크 — 증강 반영 코스트 사용
+            int effectiveCost = instance != null ? instance.EffectiveCost : skill.Cost;
+            if (!_context.CanAfford(effectiveCost))
                 return false;
 
-            _context.SpendAP(skill.Cost);
+            _context.SpendAP(effectiveCost);
 
             switch (skill.Target)
             {
                 case TargetType.Self:
                 case TargetType.SingleAlly:
                     if (target != null)
-                        ExecuteSkillInternal(caster, skill, target, bonusPower);
+                        _skillExecutor.ExecuteSkillInternal(caster, skill, target, instance);
                     break;
                 case TargetType.SingleEnemy:
                     if (target != null && target.IsAlive)
-                        ExecuteSkillInternal(caster, skill, target, bonusPower);
+                    {
+                        // Spread 증강: 단일→광역, 위력 70%
+                        if (instance != null && instance.HasAugment(AugmentType.Spread))
+                        {
+                            foreach (var enemy in _enemies)
+                                if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance, 0.7f);
+                        }
+                        // 저주 증강: AOEAuto — 자동 광역, 위력 50%
+                        else if (instance != null && instance.HasAugment(AugmentType.AOEAuto))
+                        {
+                            foreach (var enemy in _enemies)
+                                if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance, 0.5f);
+                        }
+                        else
+                        {
+                            _skillExecutor.ExecuteSkillInternal(caster, skill, target, instance);
+                        }
+                    }
                     break;
                 case TargetType.AllEnemies:
                     foreach (var enemy in _enemies)
-                        if (enemy.IsAlive) ExecuteSkillInternal(caster, skill, enemy, bonusPower);
+                        if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance);
                     break;
                 case TargetType.AllAllies:
                     foreach (var ally in _playerParty)
-                        if (ally.IsAlive) ExecuteSkillInternal(caster, skill, ally, bonusPower);
+                        if (ally.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, ally, instance);
                     break;
             }
 
@@ -204,68 +179,6 @@ namespace TeamLog.Combat.Turn
 
             if (CurrentPhase != TurnPhase.BattleEnd)
                 StartEnemyTurn();
-        }
-
-        private void ExecuteSkillInternal(Character caster, SkillData skill, Character target, int bonusPower = 0)
-        {
-            switch (skill.Type)
-            {
-                case SkillType.Attack:
-                    ExecuteAttack(caster, target, skill, bonusPower);
-                    break;
-                case SkillType.Heal:
-                    ExecuteHeal(target, skill, bonusPower);
-                    break;
-                case SkillType.Buff:
-                    ApplyEffect(skill, target);
-                    break;
-                case SkillType.Debuff:
-                    ApplyEffect(skill, target);
-                    break;
-                case SkillType.Shield:
-                    ExecuteShield(target, skill, bonusPower);
-                    break;
-                case SkillType.Purify:
-                    ExecutePurify(target);
-                    break;
-            }
-
-            OnSkillApplied?.Invoke(skill, target);
-            CombatEventBus.FireSkillUsed(skill, caster);
-        }
-
-        private void ExecuteAttack(Character caster, Character target, SkillData skill, int bonusPower = 0)
-        {
-            DealDamage(caster, target, skill.Power + bonusPower);
-        }
-
-        private void ExecuteHeal(Character target, SkillData skill, int bonusPower = 0)
-        {
-            target.Health.Heal(skill.Power + bonusPower);
-        }
-
-        private void ApplyEffect(SkillData skill, Character target)
-        {
-            if (skill.StatusEffect != StatusEffectType.None)
-            {
-                // Shell 특성: 매 턴 첫 상태이상 무효화
-                if (target.TraitHandler.ShouldBlockEffect())
-                    return;
-
-                target.StatusEffects.ApplyEffect(skill.StatusEffect, skill.EffectDuration, skill.EffectValue);
-                target.ApplyStatModifiers();
-            }
-        }
-
-        private void ExecuteShield(Character target, SkillData skill, int bonusPower = 0)
-        {
-            target.Health.AddShield(skill.Power + bonusPower);
-        }
-
-        private void ExecutePurify(Character target)
-        {
-            target.StatusEffects.ClearAllEffects();
-            target.ApplyStatModifiers();
         }
 
         public void StartEnemyTurn()
@@ -310,7 +223,7 @@ namespace TeamLog.Combat.Turn
             // Taunt 상태인 캐릭터가 있으면 우선 타겟
             var tauntTarget = alivePlayers.Find(p => p.StatusEffects.HasEffect(StatusEffectType.Taunt));
             var target = tauntTarget ?? alivePlayers[UnityEngine.Random.Range(0, alivePlayers.Count)];
-            DealDamage(enemy, target);
+            DamageCalculator.DealDamage(enemy, target);
         }
 
         /// <summary>
@@ -338,6 +251,8 @@ namespace TeamLog.Combat.Turn
                 _context.SetPhase(TurnPhase.BattleEnd);
                 CombatEventBus.FireBattleEnd(allEnemiesDead);
                 CombatEventBus.Clear();
+                DamageCalculator.ClearEvents();
+                SkillExecutor.ClearEvents();
                 OnBattleEnded?.Invoke();
             }
         }

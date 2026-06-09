@@ -3,6 +3,7 @@ using UnityEngine;
 using TeamLog.Characters;
 using TeamLog.Map;
 using TeamLog.Reward;
+using TeamLog.Skill;
 
 namespace TeamLog.Shop
 {
@@ -17,38 +18,38 @@ namespace TeamLog.Shop
         /// 랜덤 상점 슬롯 생성 (상점 노드 방문 시)
         /// </summary>
         public List<ShopSlot> GenerateShopSlots(int floorNumber,
-            IReadOnlyList<SkillData> skillPool, IReadOnlyList<ItemData> itemPool)
+            IReadOnlyList<AugmentData> augmentPool, IReadOnlyList<RelicData> relicPool)
         {
             var slots = new List<ShopSlot>();
 
-            // 스킬 3개
+            // 증강 3개
             for (int i = 0; i < 3; i++)
             {
                 var slot = new ShopSlot
                 {
-                    ContentType = ShopSlot.SlotContentType.Skill,
-                    Price = GetSkillPrice(floorNumber),
+                    ContentType = ShopSlot.SlotContentType.Augment,
+                    Price = GetAugmentPrice(floorNumber),
                     IsSold = false
                 };
 
-                if (skillPool != null && skillPool.Count > 0)
-                    slot.Skill = skillPool[_rng.Next(skillPool.Count)];
+                if (augmentPool != null && augmentPool.Count > 0)
+                    slot.Augment = augmentPool[_rng.Next(augmentPool.Count)];
 
                 slots.Add(slot);
             }
 
-            // 아이템 2개
+            // 유물 2개
             for (int i = 0; i < 2; i++)
             {
                 var slot = new ShopSlot
                 {
-                    ContentType = ShopSlot.SlotContentType.Item,
-                    Price = GetItemPrice(floorNumber),
+                    ContentType = ShopSlot.SlotContentType.Relic,
+                    Price = GetRelicPrice(floorNumber),
                     IsSold = false
                 };
 
-                if (itemPool != null && itemPool.Count > 0)
-                    slot.Item = itemPool[_rng.Next(itemPool.Count)];
+                if (relicPool != null && relicPool.Count > 0)
+                    slot.Relic = relicPool[_rng.Next(relicPool.Count)];
 
                 slots.Add(slot);
             }
@@ -57,7 +58,7 @@ namespace TeamLog.Shop
         }
 
         /// <summary>
-        /// 아이템 구매 — 성공 시 true
+        /// 구매 — 성공 시 true
         /// </summary>
         public bool PurchaseItem(ShopSlot slot, GameRunState runState)
         {
@@ -66,33 +67,36 @@ namespace TeamLog.Shop
 
             slot.IsSold = true;
 
-            if (slot.ContentType == ShopSlot.SlotContentType.Skill)
+            if (slot.ContentType == ShopSlot.SlotContentType.Relic)
             {
-                runState.AcquireSkill(slot.Skill);
+                runState.AcquireRelic(slot.Relic);
             }
-            else
-            {
-                runState.AcquireItem(slot.Item);
-            }
+            // 증강 배정은 호출자에서 AugmentSelectPanel로 처리
 
             return true;
         }
 
         /// <summary>
-        /// 스킬 판매 (판매가 = 50%)
+        /// 유물 판매 — 유물 목록에서 제거 + 골드 획득
         /// </summary>
-        public void SellSkill(int sellPrice, GameRunState runState)
+        public bool SellRelic(RelicData relic, GameRunState runState, int floorNumber)
         {
+            if (relic == null) return false;
+            if (!runState.RemoveRelic(relic)) return false;
+            int sellPrice = GetRelicSellPrice(floorNumber);
             runState.AddGold(sellPrice);
+            return true;
         }
 
-        private int GetSkillPrice(int floorNumber)
+        public int GetRelicSellPrice(int floorNumber) => GetRelicPrice(floorNumber) / 2;
+
+        private int GetAugmentPrice(int floorNumber)
         {
             int basePrice = 30 + (floorNumber - 1) * 15;
             return _rng.Next(basePrice, basePrice + 30);
         }
 
-        private int GetItemPrice(int floorNumber)
+        private int GetRelicPrice(int floorNumber)
         {
             int basePrice = 40 + (floorNumber - 1) * 20;
             return _rng.Next(basePrice, basePrice + 40);

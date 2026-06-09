@@ -34,7 +34,8 @@ namespace TeamLog.UI.Title
             var meta = SaveManager.Meta;
             if (_statsLabel != null && meta != null)
             {
-                _statsLabel.text = $"총 런: {meta.TotalRuns}  승리: {meta.Victories}\n최고 층: {meta.BestFloor}";
+                int unlockedCount = 4 + (meta.UnlockedCharacterIds?.Count ?? 0); // 기본 4 + 잠금해제
+                _statsLabel.text = $"총 런: {meta.TotalRuns}  승리: {meta.Victories}\n최고 층: {meta.BestFloor}\n캐릭터: {unlockedCount}/8";
             }
         }
 

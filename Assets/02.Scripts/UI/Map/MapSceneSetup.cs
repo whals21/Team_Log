@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TeamLog.Characters;
 using TeamLog.Combat;
 using TeamLog.Event;
 using TeamLog.Map;
 using TeamLog.Reward;
+using TeamLog.Skill;
 using TeamLog.UI;
 using TeamLog.UI.Event;
 using TeamLog.UI.Reward;
@@ -27,8 +29,9 @@ namespace TeamLog.UI.Map
 
     /// <summary>
     /// 맵 씬의 진입점 — 맵 UI, GameRunState, 노드 이벤트 처리를 연결
+    /// 노드 디스패치: MapSceneSetup.Nodes.cs
     /// </summary>
-    public class MapSceneSetup : MonoBehaviour
+    public partial class MapSceneSetup : MonoBehaviour
     {
         [Header("UI")]
         [SerializeField] private MapView _mapView;
@@ -39,6 +42,13 @@ namespace TeamLog.UI.Map
         [SerializeField] private RestUI _restUI;
         [SerializeField] private RunEndOverlay _runEndOverlay;
         [SerializeField] private RelicBarUI _relicBarUI;
+        [SerializeField] private DeckViewerUI _deckViewerUI;
+        [SerializeField] private Button _deckButton;
+        [SerializeField] private TutorialUI _tutorialUI;
+        [SerializeField] private CharacterSelectUI _characterSelectUI;
+
+        [Header("All Characters")]
+        [SerializeField] private CharacterData[] _allCharacters;
 
         [Header("Test Mode")]
         [SerializeField] private bool _useTestData = true;
@@ -53,10 +63,12 @@ namespace TeamLog.UI.Map
         [Header("Floor-based Enemy Pools")]
         [SerializeField] private FloorEnemyPool[] _floorPools;
 
+        [Header("Spawn Pattern Tables (per floor)")]
+        [SerializeField] private SpawnPatternTable[] _spawnPatternTables;
+
         [Header("Data Pools")]
-        [SerializeField] private SkillData[] _skillPool;
-        [SerializeField] private ItemData[] _itemPool;
         [SerializeField] private RelicData[] _relicPool;
+        [SerializeField] private AugmentData[] _augmentPool;
 
         private GameRunState _runState;
         private List<Character> _playerParty;
@@ -82,8 +94,29 @@ namespace TeamLog.UI.Map
             }
             else
             {
-                InitializeTestRun();
+                // 새 런 시작 — 캐릭터 선택
+                if (_characterSelectUI != null && _allCharacters != null && _allCharacters.Length > 0)
+                {
+                    _characterSelectUI.Initialize(_allCharacters, SaveManager.Meta, OnCharacterSelectConfirmed);
+                    _characterSelectUI.Show();
+                }
+                else
+                {
+                    InitializeTestRun();
+                }
             }
+        }
+
+        /// <summary>
+        /// 캐릭터 선택 완료 → 런 시작
+        /// </summary>
+        private void OnCharacterSelectConfirmed(List<CharacterData> selectedCharacters)
+        {
+            _playerParty = new List<Character>();
+            foreach (var data in selectedCharacters)
+                _playerParty.Add(new Character(data));
+
+            StartRunWithParty();
         }
 
         private void InitializeTestRun()
@@ -101,13 +134,20 @@ namespace TeamLog.UI.Map
                     _playerParty.Add(new Character(data));
             }
 
+            StartRunWithParty();
+        }
+
+        /// <summary>
+        /// 파티가 확정된 후 런 초기화
+        /// </summary>
+        private void StartRunWithParty()
+        {
             _runState = GameRunState.Create(_playerParty, startingGold: 50);
             _runState.OnMapChanged += OnMapChanged;
             _runState.OnRunEnded += OnRunEnded;
             _runState.SetDataPools(
-                _skillPool != null ? new List<SkillData>(_skillPool) : new List<SkillData>(),
-                _itemPool != null ? new List<ItemData>(_itemPool) : new List<ItemData>(),
-                _relicPool != null ? new List<RelicData>(_relicPool) : new List<RelicData>());
+                _relicPool != null ? new List<RelicData>(_relicPool) : new List<RelicData>(),
+                _augmentPool != null ? new List<AugmentData>(_augmentPool) : new List<AugmentData>());
 
             InitializeSubUIs();
 
@@ -153,7 +193,15 @@ namespace TeamLog.UI.Map
             _runState = SaveManager.Load();
             if (_runState == null)
             {
-                InitializeTestRun();
+                if (_characterSelectUI != null && _allCharacters != null && _allCharacters.Length > 0)
+                {
+                    _characterSelectUI.Initialize(_allCharacters, SaveManager.Meta, OnCharacterSelectConfirmed);
+                    _characterSelectUI.Show();
+                }
+                else
+                {
+                    InitializeTestRun();
+                }
                 return;
             }
 
@@ -161,9 +209,8 @@ namespace TeamLog.UI.Map
             _runState.OnMapChanged += OnMapChanged;
             _runState.OnRunEnded += OnRunEnded;
             _runState.SetDataPools(
-                _skillPool != null ? new List<SkillData>(_skillPool) : new List<SkillData>(),
-                _itemPool != null ? new List<ItemData>(_itemPool) : new List<ItemData>(),
-                _relicPool != null ? new List<RelicData>(_relicPool) : new List<RelicData>());
+                _relicPool != null ? new List<RelicData>(_relicPool) : new List<RelicData>(),
+                _augmentPool != null ? new List<AugmentData>(_augmentPool) : new List<AugmentData>());
 
             InitializeSubUIs();
 
@@ -184,13 +231,28 @@ namespace TeamLog.UI.Map
             if (_eventUI != null)
                 _eventUI.Initialize(_runState, OnEventComplete);
             if (_shopUI != null)
-                _shopUI.Initialize(_runState, OnShopExit, _skillPool, _itemPool);
+            {
+                _shopUI.Initialize(_runState, OnShopExit, _relicPool);
+                _shopUI.SetAugmentPool(_augmentPool);
+            }
             if (_rewardUI != null)
                 _rewardUI.Initialize(_runState, OnRewardComplete);
             if (_restUI != null)
                 _restUI.Initialize(OnRestChoiceSelected);
             if (_relicBarUI != null)
                 _relicBarUI.Initialize(_runState);
+            if (_deckViewerUI != null)
+                _deckViewerUI.Initialize(_runState);
+            if (_deckButton != null)
+                _deckButton.onClick.AddListener(OnDeckButtonClicked);
+            if (_tutorialUI != null)
+                _tutorialUI.Initialize(_runState);
+        }
+
+        private void OnMapChanged(MapFloor mapFloor)
+        {
+            if (_mapView != null)
+                _mapView.Initialize(mapFloor, _runState.Gold, OnNodeClicked);
         }
 
         /// <summary>
@@ -221,213 +283,6 @@ namespace TeamLog.UI.Map
             }
         }
 
-        private void OnMapChanged(MapFloor mapFloor)
-        {
-            if (_mapView != null)
-                _mapView.Initialize(mapFloor, _runState.Gold, OnNodeClicked);
-        }
-
-        private void OnNodeClicked(MapNode node)
-        {
-            if (!_runState.IsRunActive) return;
-
-            // 보스/엘리트: 이동 전 확인 다이얼로그
-            if (node.NodeType == MapNodeType.Boss || node.NodeType == MapNodeType.Elite)
-            {
-                string label = node.NodeType == MapNodeType.Boss ? "보스" : "엘리트";
-                _pendingBattleNode = node;
-                if (_confirmationDialog != null)
-                {
-                    _confirmationDialog.Show(
-                        $"강력한 {label} 적이 기다리고 있습니다.\n전투를 시작하시겠습니까?",
-                        OnBattleConfirmed,
-                        () => { _pendingBattleNode = null; });
-                }
-                else
-                {
-                    OnBattleConfirmed();
-                }
-                return;
-            }
-
-            MoveToNode(node);
-        }
-
-        private void OnBattleConfirmed()
-        {
-            if (_pendingBattleNode == null) return;
-            MoveToNode(_pendingBattleNode);
-            _pendingBattleNode = null;
-        }
-
-        private void MoveToNode(MapNode node)
-        {
-            bool moved = _runState.CurrentMap.MoveToNode(node);
-            if (!moved) return;
-
-            AudioManager.Instance.PlayUINodeClick();
-
-            // UI 갱신
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
-
-            // 노드 타입별 처리
-            switch (node.NodeType)
-            {
-                case MapNodeType.Battle:
-                case MapNodeType.Elite:
-                case MapNodeType.Boss:
-                    StartBattle(node);
-                    break;
-                case MapNodeType.Rest:
-                    if (_restUI != null)
-                        _restUI.Show();
-                    else
-                    {
-                        _runState.RestAtCampfire();
-                        ToastUI.Show("파티가 휴식했습니다.");
-                    }
-                    break;
-                case MapNodeType.Event:
-                    OpenEvent();
-                    break;
-                case MapNodeType.Shop:
-                    OpenShop();
-                    break;
-            }
-        }
-
-        private void StartBattle(MapNode node)
-        {
-            var pool = GetFloorPool();
-            if (pool == null)
-            {
-                Debug.LogWarning("[MapSceneSetup] 층별 적 풀이 비어 있습니다.");
-                return;
-            }
-
-            var enemies = new List<Character>();
-
-            switch (node.NodeType)
-            {
-                case MapNodeType.Boss:
-                    if (pool.boss != null)
-                        enemies.Add(new Character(pool.boss));
-                    break;
-                case MapNodeType.Elite:
-                    if (pool.eliteEnemies != null && pool.eliteEnemies.Length > 0)
-                        enemies.Add(new Character(pool.eliteEnemies[UnityEngine.Random.Range(0, pool.eliteEnemies.Length)]));
-                    break;
-                default: // 일반 전투
-                    if (pool.normalEnemies != null && pool.normalEnemies.Length > 0)
-                    {
-                        int count = UnityEngine.Random.Range(1, 4); // 1~3마리
-                        for (int i = 0; i < count; i++)
-                            enemies.Add(new Character(pool.normalEnemies[UnityEngine.Random.Range(0, pool.normalEnemies.Length)]));
-                    }
-                    break;
-            }
-
-            if (enemies.Count == 0)
-            {
-                Debug.LogWarning("[MapSceneSetup] 적 데이터가 없어 전투를 시작할 수 없습니다.");
-                return;
-            }
-
-            // 층별 적 스케일링 적용
-            float scaling = _runState.GetFloorScaling();
-            foreach (var enemy in enemies)
-                enemy.ApplyFloorScaling(scaling);
-
-            int bonusAP = _runState.ConsumeBonusAP();
-            BattleSceneSetup.SetBattleData(_playerParty, enemies, bonusAP);
-            BattleResult.SetBattleType(node.NodeType);
-            SceneTransition.Instance.FadeToScene(BattleSceneName);
-        }
-
-        private FloorEnemyPool GetFloorPool()
-        {
-            if (_floorPools == null || _floorPools.Length == 0) return null;
-            int index = System.Math.Clamp(_runState.CurrentFloor - 1, 0, _floorPools.Length - 1);
-            return _floorPools[index];
-        }
-
-        private void OnRestChoiceSelected(int choice)
-        {
-            AudioManager.Instance.PlayUIConfirm();
-            switch (choice)
-            {
-                case 0: // 휴식
-                    _runState.RestAtCampfire();
-                    ToastUI.Show("파티가 휴식하여 HP를 회복했습니다.");
-                    break;
-                case 1: // 수련
-                    _runState.TrainAtCampfire();
-                    ToastUI.Show("파티가 수련하여 공격력이 영구 증가했습니다.");
-                    break;
-                case 2: // 명상
-                    _runState.MeditateAtCampfire();
-                    ToastUI.Show("파티가 명상하여 다음 전투 AP 보너스를 얻었습니다.");
-                    break;
-            }
-
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
-
-            SaveManager.Save();
-        }
-
-        private void OpenEvent()
-        {
-            if (_eventUI == null) return;
-
-            // 테스트 이벤트 데이터 있으면 사용, 없으면 스킵
-            if (_testEvents != null && _testEvents.Length > 0)
-            {
-                int index = UnityEngine.Random.Range(0, _testEvents.Length);
-                _eventUI.ShowEvent(_testEvents[index]);
-            }
-        }
-
-        private void OpenShop()
-        {
-            if (_shopUI != null)
-                _shopUI.OpenShop(_runState.CurrentFloor);
-        }
-
-        private void OnEventComplete()
-        {
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
-            RefreshRelicBar();
-            SaveManager.Save();
-        }
-
-        private void OnShopExit()
-        {
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
-            RefreshRelicBar();
-            SaveManager.Save();
-        }
-
-        private void OnRewardComplete()
-        {
-            // 보스 클리어 시 다음 층으로 이동 (보상 선택 이후)
-            if (_runState.CurrentMap.IsCleared)
-            {
-                _runState.AdvanceToNextFloor();
-            }
-            else
-            {
-                SaveManager.Save();
-            }
-
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
-            RefreshRelicBar();
-        }
-
         private void OnDestroy()
         {
             if (_runState != null)
@@ -437,7 +292,8 @@ namespace TeamLog.UI.Map
             }
             if (_runEndOverlay != null)
                 _runEndOverlay.OnReturnToTitle -= OnReturnToTitle;
-            // GameRunState.Instance는 파괴하지 않음 — 씬 전환 간 유지
+            if (_deckButton != null)
+                _deckButton.onClick.RemoveListener(OnDeckButtonClicked);
         }
 
         /// <summary>
@@ -470,12 +326,6 @@ namespace TeamLog.UI.Map
         private void OnReturnToTitle()
         {
             SceneTransition.Instance.FadeToScene("TitleScene");
-        }
-
-        private void RefreshRelicBar()
-        {
-            if (_relicBarUI != null && _runState != null)
-                _relicBarUI.Refresh();
         }
     }
 }

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 359ccd898c414ec499c7b83b44f63fdd, type: 3}
+  m_Name: Bard_BattleSong
+  m_EditorClassIdentifier: 
+  _skillName: "\uC804\uC7A5\uC758 \uB178\uB798"
+  _description: "\uD30C\uD2F0 \uC804\uCCB4\uC758 \uACF5\uACA9\uB825\uC744 \uB192\uC785\uB2C8\uB2E4."
+  _skillType: 2
+  _targetType: 3
+  _power: 0
+  _cost: 2
+  _weight: 25
+  _icon: {fileID: 21300000, guid: 3ed6de5139c654e459ff59751d7ab9b2, type: 3}
+  _statusEffect: 9
+  _effectDuration: 2
+  _effectValue: 2

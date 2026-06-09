@@ -71,6 +71,16 @@ namespace TeamLog.Characters
             OnEffectsChanged?.Invoke();
         }
 
+        /// <summary>
+        /// 모든 이벤트 구독 해제 — 씬 전환 시 BattleSceneSetup에서 호출
+        /// </summary>
+        public void ClearEvents()
+        {
+            OnEffectsChanged = null;
+            OnEffectApplied = null;
+            OnEffectExpired = null;
+        }
+
         public IEnumerable<ActiveEffect> GetAllEffects() => _activeEffects.Values;
     }
 

@@ -24,7 +24,7 @@ namespace TeamLog.Editor
         private static readonly Color AccentYellow = new Color(0.96f, 0.82f, 0.25f);
         private static readonly Color BorderRed = new Color(0.6f, 0.1f, 0.18f, 0.8f);
         private static readonly Color TextWhite = Color.white;
-        private static readonly Color TextDim = new Color(0.7f, 0.7f, 0.75f);
+        private static readonly Color TextDim = new Color(0.82f, 0.82f, 0.87f);
         private static readonly Color ShieldBrown = new Color(0.72f, 0.45f, 0.2f);
 
         // ── GUI 에셋 스프라이트 경로 ──
@@ -32,6 +32,7 @@ namespace TeamLog.Editor
         private const string SPRITE_TOPBAR = SPRITE_BASE + "/Frame/PanelFrame03_Topbar.png";
         private const string SPRITE_BOTTOM = SPRITE_BASE + "/Frame/PanelFrame06_Bottom.png";
         private const string SPRITE_PLAYER_PANEL = SPRITE_BASE + "/Frame/BasicFrame_Round12_Gradient.png";
+        private const string SPRITE_SOLID_FRAME = SPRITE_BASE + "/Frame/BasicFrame_Round12.png";
         private const string SPRITE_ENEMY_PANEL = SPRITE_BASE + "/Frame/CardFrame03_Single_Blue.png";
         private const string SPRITE_HP_BG = SPRITE_BASE + "/Slider/Slider_Basic04_Bg.png";
         private const string SPRITE_HP_FILL_GREEN = SPRITE_BASE + "/Slider/Slider_Basic04_Fill_Green.png";
@@ -163,12 +164,11 @@ namespace TeamLog.Editor
             var content = NewRect("ContentArea", root);
             content.anchorMin = Vector2.zero;
             content.anchorMax = Vector2.one;
-            content.offsetMin = new Vector2(0, 100);
-            content.offsetMax = new Vector2(0, -60);
+            content.offsetMin = new Vector2(0, 166);
+            content.offsetMax = new Vector2(0, -44);
 
-            CreateLeftSidebar(content);
-            CreateRightSidebar(content);
             CreateCenterArea(content);
+            CreatePlayerStrip(root);
 
             CreateCharacterPopup(root);
             CreateBattleEndOverlay(root);

@@ -21,7 +21,6 @@ namespace TeamLog.UI.Battle
         [Header("HP")]
         [SerializeField] private Image _hpFillImage;
         [SerializeField] private TextMeshProUGUI _hpText;
-        [SerializeField] private Image _hpBarBg;
 
         [Header("Stats")]
         [SerializeField] private TextMeshProUGUI _atkText;
@@ -63,7 +62,6 @@ namespace TeamLog.UI.Battle
             if (_closeButton == null) _closeButton = FindComponent<Button>("Panel/Header/CloseBtn");
             if (_hpFillImage == null) _hpFillImage = FindComponent<Image>("Panel/HPArea/HPBarBg/Fill");
             if (_hpText == null) _hpText = FindComponent<TextMeshProUGUI>("Panel/HPArea/HPText");
-            if (_hpBarBg == null) _hpBarBg = FindComponent<Image>("Panel/HPArea/HPBarBg");
             if (_atkText == null) _atkText = FindComponent<TextMeshProUGUI>("Panel/StatsArea/ATK/T");
             if (_defText == null) _defText = FindComponent<TextMeshProUGUI>("Panel/StatsArea/DEF/T");
             if (_tabSkillButton == null) _tabSkillButton = FindComponent<Button>("Panel/TabArea/TabSkill");
@@ -306,6 +304,7 @@ namespace TeamLog.UI.Battle
                 var tmp = go.AddComponent<TextMeshProUGUI>();
                 tmp.fontSize = 14;
                 tmp.alignment = TextAlignmentOptions.Left;
+                UIKoreanFont.EnsureFont(tmp);
                 _spawnedEntries.Add(go);
                 return go;
             }

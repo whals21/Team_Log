@@ -121,5 +121,19 @@ namespace TeamLog.Characters
             _currentShield = 0;
             OnShieldChanged?.Invoke(_currentShield);
         }
+
+        /// <summary>
+        /// 모든 이벤트 구독 해제 — 씬 전환 시 BattleSceneSetup에서 호출
+        /// </summary>
+        public void ClearEvents()
+        {
+            OnHPChanged = null;
+            OnShieldChanged = null;
+            OnDeath = null;
+            OnDamageTaken = null;
+            OnHealApplied = null;
+            OnShieldAdded = null;
+            OnPreDeath = null;
+        }
     }
 }

@@ -9,18 +9,25 @@ namespace TeamLog.UI.Battle
     public class TooltipTarget : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         private string _title;
+        private string _subtitle;
         private string _description;
 
         public void SetContent(string title, string description)
         {
+            SetContent(title, null, description);
+        }
+
+        public void SetContent(string title, string subtitle, string description)
+        {
             _title = title;
+            _subtitle = subtitle;
             _description = description;
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (TooltipUI.Instance != null && !string.IsNullOrEmpty(_title))
-                TooltipUI.Instance.Show(_title, _description);
+                TooltipUI.Instance.Show(_title, _subtitle, _description);
         }
 
         public void OnPointerExit(PointerEventData eventData)

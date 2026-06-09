@@ -13,6 +13,8 @@ using TeamLog.UI.Reward;
 using TeamLog.UI.Shop;
 using TeamLog.UI;
 using TeamLog.UI.Title;
+using TeamLog.Skill;
+using TeamLog.Map;
 
 namespace TeamLog.Editor
 {
@@ -28,8 +30,9 @@ namespace TeamLog.Editor
         private const string PREFAB_DIR = "Assets/03.Data/Prefabs";
         private const string CHAR_DIR = "Assets/03.Data/Characters";
         private const string SKILL_DIR = "Assets/03.Data/Skills";
-        private const string ITEM_DIR = "Assets/03.Data/Items";
         private const string EVENT_DIR = "Assets/03.Data/Events";
+        private const string AUGMENT_DIR = "Assets/03.Data/Augments";
+        private const string SPAWN_PATTERN_DIR = "Assets/03.Data/SpawnPatterns";
 
         // 색상 팔레트 (기존 BattleUI와 통일)
         private static readonly Color BgDark = new Color(0.08f, 0.08f, 0.16f);
@@ -190,7 +193,13 @@ namespace TeamLog.Editor
             var goldLabel = CreateText("GoldLabel", topPanel.transform, font,
                 "0 G", 24, AccentGold, TextAlignmentOptions.Center);
             SetAnchors(goldLabel.GetComponent<RectTransform>(),
-                new Vector2(0.65f, 0f), new Vector2(0.9f, 1f));
+                new Vector2(0.65f, 0f), new Vector2(0.85f, 1f));
+
+            // 덱 버튼
+            var deckBtn = CreateButton("DeckButton", topPanel.transform, font,
+                "덱", 20, TextWhite);
+            SetAnchors(deckBtn.GetComponent<RectTransform>(),
+                new Vector2(0.05f, 0.05f), new Vector2(0.15f, 0.95f));
 
             // 맵 컨테이너
             var nodeContainer = CreateUIObject("NodeContainer", canvasObj.transform);
@@ -209,6 +218,9 @@ namespace TeamLog.Editor
             var restPanel = BuildRestPanel(canvasObj.transform, font);
             var runEndOverlay = BuildRunEndOverlay(canvasObj.transform, font);
             var relicBar = BuildRelicBar(canvasObj.transform, font);
+            var deckViewerPanel = BuildDeckViewerPanel(canvasObj.transform, font);
+            var tutorialOverlay = BuildTutorialOverlay(canvasObj.transform, font);
+            var characterSelectPanel = BuildCharacterSelectPanel(canvasObj.transform, font);
 
             // ShopUI에 ConfirmationDialog 참조 연결
             var shopUISer = new SerializedObject(shopPanel.GetComponent<ShopUI>());
@@ -245,6 +257,9 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_restUI", restPanel.GetComponent<RestUI>());
             WireProperty(setupSer, "_runEndOverlay", runEndOverlay.GetComponent<RunEndOverlay>());
             WireProperty(setupSer, "_relicBarUI", relicBar.GetComponent<RelicBarUI>());
+            WireProperty(setupSer, "_deckViewerUI", deckViewerPanel.GetComponent<DeckViewerUI>());
+            WireProperty(setupSer, "_deckButton", deckBtn.GetComponent<Button>());
+            WireProperty(setupSer, "_tutorialUI", tutorialOverlay.GetComponent<TutorialUI>());
 
             // CharacterData
             WireProperty(setupSer, "_testWarriorData",
@@ -311,25 +326,53 @@ namespace TeamLog.Editor
                     testEventsProp.GetArrayElementAtIndex(i).objectReferenceValue = eventAssets[i];
             }
 
-            // SkillData pool
-            var skillAssets = LoadAllAssets<SkillData>(SKILL_DIR);
-            var skillPoolProp = setupSer.FindProperty("_skillPool");
-            if (skillPoolProp != null && skillAssets.Count > 0)
+            // SpawnPatternTable — 층별 스폰 패턴 테이블 (F1/F2/F3)
+            var spawnPatternProp = setupSer.FindProperty("_spawnPatternTables");
+            if (spawnPatternProp != null)
             {
-                skillPoolProp.arraySize = skillAssets.Count;
-                for (int i = 0; i < skillAssets.Count; i++)
-                    skillPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = skillAssets[i];
+                string[] patternNames = { "SpawnPatterns_F1", "SpawnPatterns_F2", "SpawnPatterns_F3" };
+                spawnPatternProp.arraySize = patternNames.Length;
+                for (int i = 0; i < patternNames.Length; i++)
+                {
+                    var path = $"{SPAWN_PATTERN_DIR}/{patternNames[i]}.asset";
+                    // LoadAssetAtPath<SpawnPatternTable>이 스크립트 참조 누락으로 null을 반환할 수 있으므로
+                    // AssetDatabase.LoadMainAssetAtPath로 우회
+                    var obj = AssetDatabase.LoadMainAssetAtPath(path);
+                    var table = obj as SpawnPatternTable;
+                    if (table == null && obj != null)
+                        Debug.LogWarning($"[MapSceneBuilder] {patternNames[i]}: 로드됨({obj.GetType().Name})이지만 SpawnPatternTable로 캐스팅 실패");
+                    else if (table == null)
+                        Debug.LogWarning($"[MapSceneBuilder] {patternNames[i]}: 에셋 로드 실패 (path={path})");
+                    spawnPatternProp.GetArrayElementAtIndex(i).objectReferenceValue = table;
+                }
             }
 
-            // ItemData pool
-            var itemAssets = LoadAllAssets<ItemData>(ITEM_DIR);
-            var itemPoolProp = setupSer.FindProperty("_itemPool");
-            if (itemPoolProp != null && itemAssets.Count > 0)
+            // AugmentData pool
+            var augmentAssets = LoadAllAssets<AugmentData>(AUGMENT_DIR);
+            var augmentPoolProp = setupSer.FindProperty("_augmentPool");
+            if (augmentPoolProp != null && augmentAssets.Count > 0)
             {
-                itemPoolProp.arraySize = itemAssets.Count;
-                for (int i = 0; i < itemAssets.Count; i++)
-                    itemPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = itemAssets[i];
+                augmentPoolProp.arraySize = augmentAssets.Count;
+                for (int i = 0; i < augmentAssets.Count; i++)
+                    augmentPoolProp.GetArrayElementAtIndex(i).objectReferenceValue = augmentAssets[i];
             }
+
+            // All Characters — Char_ 접두사 에셋만 (적 제외)
+            var allCharProp = setupSer.FindProperty("_allCharacters");
+            if (allCharProp != null)
+            {
+                string[] charNames = {
+                    "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Rogue",
+                    "Char_Archer", "Char_Necromancer", "Char_Alchemist", "Char_Bard"
+                };
+                var charAssets = LoadAssetsByNames<CharacterData>(CHAR_DIR, charNames);
+                allCharProp.arraySize = charAssets.Count;
+                for (int i = 0; i < charAssets.Count; i++)
+                    allCharProp.GetArrayElementAtIndex(i).objectReferenceValue = charAssets[i];
+            }
+
+            // CharacterSelectUI — 씬에 생성된 패널 와이어링
+            WireProperty(setupSer, "_characterSelectUI", characterSelectPanel.GetComponent<CharacterSelectUI>());
 
             // RelicData pool
             var relicAssets = LoadAllAssets<RelicData>("Assets/03.Data/Relics");
@@ -352,8 +395,7 @@ namespace TeamLog.Editor
             EditorSceneManager.SaveScene(scene, SCENE_PATH);
             Debug.Log($"[MapSceneBuilder] 맵 씬 생성 완료: {SCENE_PATH}");
             Debug.Log($"[MapSceneBuilder] 프리팹: Node={nodeButtonPrefab != null}, Line={connectionLinePrefab != null}, Marker={playerMarkerPrefab != null}");
-            Debug.Log($"[MapSceneBuilder] 캐릭터: {LoadAllAssets<CharacterData>(CHAR_DIR).Count}개");
-            Debug.Log($"[MapSceneBuilder] 스킬 풀: {skillAssets.Count}개, 아이템 풀: {itemAssets.Count}개, 유물 풀: {relicAssets.Count}개, 이벤트: {eventAssets.Count}개");
+            Debug.Log($"[MapSceneBuilder] 증강 풀: {augmentAssets.Count}개, 유물 풀: {relicAssets.Count}개, 이벤트: {eventAssets.Count}개");
         }
     }
 }

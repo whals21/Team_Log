@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Char_Alchemist
+  m_EditorClassIdentifier: 
+  _characterName: "\uC5F0\uAE08\uC220\uC0AC"
+  _characterClass: 0
+  _description: Alchemist
+  _baseHP: 85
+  _baseATK: 7
+  _baseDEF: 4
+  _enemyTrait: 6
+  _skills:
+  - {fileID: 11400000, guid: 284829a39fad1d84081c766d6c6ecafd, type: 2}
+  - {fileID: 11400000, guid: 771da9ab69d82a948b641e51c3162028, type: 2}
+  - {fileID: 11400000, guid: e4e4d82402997fb4b9289af114fab6b0, type: 2}
+  - {fileID: 11400000, guid: 4110e1a34e151df469719cf3609c60b7, type: 2}
+  _isDefault: 0
+  _unlockCondition: "3\uCE35 \uBCF4\uC2A4 \uD074\uB9AC\uC5B4"

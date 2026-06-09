@@ -1,4 +1,5 @@
 using TeamLog.Characters;
+using TeamLog.Reward;
 
 namespace TeamLog.Combat
 {
@@ -19,6 +20,7 @@ namespace TeamLog.Combat
         public static event System.Action<Character, int> OnShieldGained;                // target, amount
         public static event System.Action<int> OnGoldEarned;                             // amount
         public static event System.Action<SkillData, Character> OnSkillUsed;             // skill, caster
+        public static event System.Action<RelicData> OnRelicTriggered;                   // relic
 
         public static void FireBattleStart() => OnBattleStart?.Invoke();
         public static void FireBattleEnd(bool victory) => OnBattleEnd?.Invoke(victory);
@@ -31,6 +33,7 @@ namespace TeamLog.Combat
         public static void FireShieldGained(Character target, int amount) => OnShieldGained?.Invoke(target, amount);
         public static void FireGoldEarned(int amount) => OnGoldEarned?.Invoke(amount);
         public static void FireSkillUsed(SkillData skill, Character caster) => OnSkillUsed?.Invoke(skill, caster);
+        public static void FireRelicTriggered(RelicData relic) => OnRelicTriggered?.Invoke(relic);
 
         /// <summary>
         /// 전투 종료 시 모든 이벤트 구독 해제 — 이벤트 누수 방지
@@ -48,6 +51,7 @@ namespace TeamLog.Combat
             OnShieldGained = null;
             OnGoldEarned = null;
             OnSkillUsed = null;
+            OnRelicTriggered = null;
         }
     }
 }

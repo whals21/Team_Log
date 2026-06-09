@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using TeamLog.Characters;
+using TeamLog.Combat;
 using TeamLog.Combat.Turn;
 
 namespace TeamLog.Tests
@@ -14,19 +15,19 @@ namespace TeamLog.Tests
         [Test]
         public void CalculateDamage_MinimumOne()
         {
-            Assert.AreEqual(1, TurnManager.CalculateDamage(1, 100));
+            Assert.AreEqual(1, DamageCalculator.CalculateDamage(1, 100));
         }
 
         [Test]
         public void CalculateDamage_AtkMinusDef()
         {
-            Assert.AreEqual(5, TurnManager.CalculateDamage(10, 5));
+            Assert.AreEqual(5, DamageCalculator.CalculateDamage(10, 5));
         }
 
         [Test]
         public void CalculateDamage_ZeroDefense()
         {
-            Assert.AreEqual(10, TurnManager.CalculateDamage(10, 0));
+            Assert.AreEqual(10, DamageCalculator.CalculateDamage(10, 0));
         }
 
         // ── 전투 종료 감지 ──

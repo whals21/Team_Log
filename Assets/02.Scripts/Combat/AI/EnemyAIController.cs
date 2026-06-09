@@ -102,7 +102,7 @@ namespace TeamLog.Combat.AI
             switch (skill.Type)
             {
                 case SkillType.Attack:
-                    TurnManager.DealDamage(caster, target, skill.Power);
+                    DamageCalculator.DealDamage(caster, target, skill.Power);
                     break;
                 case SkillType.Shield:
                     target.Health.AddShield(skill.Power);

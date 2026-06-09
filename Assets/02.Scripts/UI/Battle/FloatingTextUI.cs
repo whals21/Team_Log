@@ -76,10 +76,8 @@ namespace TeamLog.UI.Battle
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.raycastTarget = false;
 
-            // 폰트 로드
-            var font = TMPro.TMP_Settings.fallbackFontAssets?.Count > 0
-                ? TMPro.TMP_Settings.fallbackFontAssets[0] : null;
-            if (font != null) tmp.font = font;
+            // 폰트: UIKoreanFont로 명시적 할당
+            UIKoreanFont.EnsureFont(tmp);
 
             var floating = go.AddComponent<FloatingTextUI>();
             floating.Show(message, color, position);

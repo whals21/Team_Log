@@ -85,5 +85,34 @@ namespace TeamLog.UI
             return DOTween.To(() => cg.alpha, x => cg.alpha = x, targetAlpha, duration)
                 .SetUpdate(true);
         }
+
+        /// <summary>
+        /// alpha를 지속적으로 펄스 (HP 위기 표시용)
+        /// </summary>
+        public static Tween PulseAlpha(CanvasGroup cg, float min, float max, float duration)
+        {
+            if (cg == null) return null;
+            float progress = 0f;
+            return DOTween.To(() => progress, p =>
+            {
+                progress = p;
+                cg.alpha = UnityEngine.Mathf.Lerp(min, max, (UnityEngine.Mathf.Sin(p * UnityEngine.Mathf.PI * 2) + 1f) / 2f);
+            }, 1f, duration)
+            .SetLoops(-1)
+            .SetUpdate(true);
+        }
+
+        /// <summary>
+        /// Transform의 스케일을 트윈 (선택/해제 강조용)
+        /// </summary>
+        public static Tween ScaleTo(Transform target, float targetScale, float duration = 0.2f)
+        {
+            if (target == null) return null;
+            return DOTween.To(() => target.localScale.x,
+                x => target.localScale = new UnityEngine.Vector3(x, x, x),
+                targetScale, duration)
+                .SetEase(Ease.OutQuad)
+                .SetUpdate(true);
+        }
     }
 }

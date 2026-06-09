@@ -187,7 +187,7 @@ namespace TeamLog.Combat
 
         private void CastImmediately(DrawnSkillSlot slot, Character target)
         {
-            // AP 부족 체크 — 업그레이드된 비용 반영
+            // AP 부족 체크 — 증강 반영 비용
             int effectiveCost = slot.Instance?.EffectiveCost ?? slot.Skill.Cost;
             if (!_turnManager.Context.CanAfford(effectiveCost))
             {
@@ -199,9 +199,8 @@ namespace TeamLog.Combat
             slot.IsSelected = true;
             slot.AssignedTarget = target;
 
-            // 즉시 시전 — 업그레이드 보너스 적용
-            int bonusPower = slot.Instance != null ? slot.Instance.EffectivePower - slot.Skill.Power : 0;
-            bool battleEnded = _turnManager.ExecuteSkillImmediately(slot.Caster, slot.Skill, target, bonusPower);
+            // 즉시 시전 — SkillInstance 전달 (증강 효과 반영)
+            bool battleEnded = _turnManager.ExecuteSkillImmediately(slot.Caster, slot.Skill, target, slot.Instance);
 
             // UI 갱신
             _actionBar.MarkSlotAssigned(slot.SlotIndex, _actionBar.GetNextExecutionOrder());

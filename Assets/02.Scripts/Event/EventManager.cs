@@ -3,6 +3,7 @@ using UnityEngine;
 using TeamLog.Characters;
 using TeamLog.Map;
 using TeamLog.Reward;
+using TeamLog.Skill;
 
 namespace TeamLog.Event
 {
@@ -48,20 +49,41 @@ namespace TeamLog.Event
                 }
             }
 
-            // 스킬 획득
+            // 증강 획득 (스킬 대신)
             if (outcome.GiveRandomSkill)
             {
-                var skill = runState.AcquireRandomSkill();
-                if (skill != null && outcome.ResultText != null)
-                    outcome.ResultText += $" ({skill.SkillName} 획득!)";
+                var augment = runState.PeekRandomAugment();
+                if (augment != null)
+                {
+                    // 첫 번째 생존 파티원의 첫 번째 스킬에 부착
+                    foreach (var member in runState.PlayerParty)
+                    {
+                        if (!member.IsAlive) continue;
+                        foreach (var inst in member.SkillInventory.SkillInstances)
+                        {
+                            if (inst.Augments.Count < SkillInstance.MaxAugments)
+                            {
+                                runState.AcquireAugment(augment, member, inst);
+                                if (outcome.ResultText != null)
+                                    outcome.ResultText += $" ({augment.AugmentName} 획득!)";
+                                goto DoneAugment;
+                            }
+                        }
+                    }
+                DoneAugment:;
+                }
             }
 
-            // 아이템 획득
+            // 유물 획득
             if (outcome.GiveRandomItem)
             {
-                var item = runState.AcquireRandomItem();
-                if (item != null && outcome.ResultText != null)
-                    outcome.ResultText += $" ({item.ItemName} 획득!)";
+                var relic = runState.PeekRandomRelic();
+                if (relic != null)
+                {
+                    runState.AcquireRelic(relic);
+                    if (outcome.ResultText != null)
+                        outcome.ResultText += $" ({relic.RelicName} 획득!)";
+                }
             }
 
             // 저주 / 상태이상 적용

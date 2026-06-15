@@ -150,6 +150,13 @@ namespace TeamLog.UI.Battle
             return _nextExecutionOrder++;
         }
 
+        public ActionSlotUI GetSlot(int index)
+        {
+            if (index >= 0 && index < _actionSlots.Count)
+                return _actionSlots[index];
+            return null;
+        }
+
         public void SetAPState(int currentAP)
         {
             _currentAP = currentAP;

@@ -68,6 +68,9 @@ namespace TeamLog.UI.Battle
             if (_intentValueText == null) _intentValueText = FindComponent<TextMeshProUGUI>("IntentSlot/IntentValue");
             if (_intentText == null) _intentText = FindComponent<TextMeshProUGUI>("IntentSlot/IntentText");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
+
+            // 색상 토큰을 UIPalette에서 초기화
+            _hpColor = UIPalette.Default.HPEnemy;
             if (_targetIndicator == null) _targetIndicator = transform.Find("TargetIndicator")?.gameObject;
 
             // 자식 Graphic들의 raycastTarget을 꺼서 부모 Button이 클릭을 받도록 함
@@ -164,17 +167,11 @@ namespace TeamLog.UI.Battle
             tmp.text = BattleDisplayUtil.GetTraitLabel(trait);
             UIKoreanFont.EnsureFont(tmp);
 
-            // 호버 시 하단 액션 상세 패널에 특성 설명 표시
-            var capturedTrait = trait;
-            string capturedLabel = BattleDisplayUtil.GetTraitLabel(capturedTrait);
-            string capturedDesc = BattleDisplayUtil.GetTraitDescription(capturedTrait);
-            var trigger = labelRect.gameObject.AddComponent<EventTrigger>();
-            var enter = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
-            enter.callback.AddListener(_ => _uiManager?.ShowTraitInfo($"[{capturedLabel}]", capturedDesc));
-            trigger.triggers.Add(enter);
-            var exit = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
-            exit.callback.AddListener(_ => _uiManager?.HideTraitInfo());
-            trigger.triggers.Add(exit);
+            // 툴팁: 특성 이름 / 설명 (TooltipUI 통합 — 일관성)
+            string traitLabel = BattleDisplayUtil.GetTraitLabel(trait);
+            string traitDesc = BattleDisplayUtil.GetTraitDescription(trait);
+            var tooltip = labelRect.gameObject.AddComponent<TooltipTarget>();
+            tooltip.SetContent($"[{traitLabel}]", traitDesc);
         }
 
         public void UpdateHP(int current, int max, int shield = 0)

@@ -16,7 +16,6 @@ MonoBehaviour:
   _description: "\uC801 \uCC98\uCE58 \uC2DC +5 HP \uD68C\uBCF5"
   _icon: {fileID: 0}
   _trigger: 6
-  _effectType: 9
   _effectValue: 5
   _rarity: 1
   _price: 100

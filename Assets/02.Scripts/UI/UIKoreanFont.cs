@@ -20,7 +20,7 @@ namespace TeamLog.UI
             {
                 if (s_cachedFont != null) return s_cachedFont;
 
-                // 1. TMP_Settings fallback에서 찾기
+                // TMP_Settings fallback에서 찾기
                 if (TMP_Settings.fallbackFontAssets != null)
                 {
                     foreach (var fb in TMP_Settings.fallbackFontAssets)
@@ -28,11 +28,6 @@ namespace TeamLog.UI
                         if (fb != null) { s_cachedFont = fb; return s_cachedFont; }
                     }
                 }
-
-                // 2. 기존 씬의 TMP 컴포넌트에서 빌려오기
-                var existing = Object.FindObjectOfType<TextMeshProUGUI>();
-                if (existing != null && existing.font != null)
-                    s_cachedFont = existing.font;
 
                 return s_cachedFont;
             }

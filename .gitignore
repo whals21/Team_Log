@@ -119,3 +119,10 @@ Desktop.ini
 
 # VS Code
 .vscode/
+
+# Balance simulator per-run output (CSV artifacts, keep folder .meta)
+/[Aa]ssets/09.Docs/BalanceReports/*.csv
+
+# Local playtest screenshots
+/[Ss]creenshot/
+

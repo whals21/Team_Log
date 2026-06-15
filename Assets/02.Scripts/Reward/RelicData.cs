@@ -19,24 +19,6 @@ namespace TeamLog.Reward
         OnSkillUsed
     }
 
-    public enum RelicEffectType
-    {
-        None,
-        BonusDamage,
-        DamageReduction,
-        HealPerTurn,
-        BonusGold,
-        BonusShield,
-        BonusDrawWeight,
-        CounterDamage,
-        ExtraAP,
-        HealOnKill,
-        StackingPowerOnKill,
-        MaxHPUp,
-        ATKUp,
-        DEFUp
-    }
-
     /// <summary>
     /// 유물 데이터 — 트리거 + 효과 조합
     /// </summary>
@@ -53,7 +35,6 @@ namespace TeamLog.Reward
         [SerializeField] private RelicTrigger _trigger;
 
         [Header("효과")]
-        [SerializeField] private RelicEffectType _effectType;
         [SerializeField] private int _effectValue;
         [SerializeField] private RewardRarity _rarity;
 
@@ -67,7 +48,6 @@ namespace TeamLog.Reward
         public string Description => _description;
         public Sprite Icon => _icon;
         public RelicTrigger Trigger => _trigger;
-        public RelicEffectType EffectType => _effectType;
         public int EffectValue => _effectValue;
         public RewardRarity Rarity => _rarity;
         public int Price => _price;

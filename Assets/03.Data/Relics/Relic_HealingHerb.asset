@@ -16,7 +16,6 @@ MonoBehaviour:
   _description: "\uC804\uD22C \uC2DC\uC791 \uC2DC \uD30C\uD2F0 HP 10 \uD68C\uBCF5"
   _icon: {fileID: 0}
   _trigger: 1
-  _effectType: 3
   _effectValue: 10
   _rarity: 0
   _price: 60

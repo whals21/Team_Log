@@ -16,8 +16,8 @@ MonoBehaviour:
   _characterClass: 0
   _description: Alchemist
   _baseHP: 85
-  _baseATK: 7
-  _baseDEF: 4
+  _baseATK: 0
+  _baseDEF: 0
   _enemyTrait: 6
   _skills:
   - {fileID: 11400000, guid: 284829a39fad1d84081c766d6c6ecafd, type: 2}

@@ -16,8 +16,8 @@ MonoBehaviour:
   _characterClass: 0
   _description: Warrior
   _baseHP: 120
-  _baseATK: 8
-  _baseDEF: 5
+  _baseATK: 0
+  _baseDEF: 0
   _enemyTrait: 7
   _skills:
   - {fileID: 11400000, guid: a25928fc74aaa844ca3d74aaa8046395, type: 2}

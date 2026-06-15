@@ -17,7 +17,9 @@ namespace TeamLog.Editor
     /// CSV 테이블 → ScriptableObject 에셋 자동 생성 에디터
     /// 진입점/스킬/캐릭터/패턴/유틸리티: DataGenerator.cs
     /// 증강 데이터/스폰 패턴: DataGenerator.Augments.cs
-    /// 콘텐츠 데이터 (이벤트/유물/팔레트): DataGenerator.Content.cs
+    /// 이벤트 데이터: DataGenerator.Events.cs
+    /// 유물 데이터: DataGenerator.Relics.cs
+    /// 팔레트 (UI/오디오/VFX): DataGenerator.Palettes.cs
     /// </summary>
     public static partial class DataGenerator
     {
@@ -194,19 +196,20 @@ namespace TeamLog.Editor
                 return;
             }
 
-            // enemyId별로 스킬 ID 순서 그룹핑
-            var grouped = new Dictionary<string, List<(int order, string skillId)>>();
+            // enemyId별로 스킬 ID/가중치 순서 그룹핑
+            var grouped = new Dictionary<string, List<(int order, string skillId, int weight)>>();
 
             for (int i = 0; i < csv.RowCount; i++)
             {
                 string enemyId = csv.Get(i, "enemyId");
                 int order = csv.GetInt(i, "order");
                 string skillId = csv.Get(i, "skillId");
+                int weight = csv.GetInt(i, "weight", 25);
 
                 if (!grouped.ContainsKey(enemyId))
-                    grouped[enemyId] = new List<(int, string)>();
+                    grouped[enemyId] = new List<(int, string, int)>();
 
-                grouped[enemyId].Add((order, skillId));
+                grouped[enemyId].Add((order, skillId, weight));
             }
 
             foreach (var kv in grouped)
@@ -221,15 +224,20 @@ namespace TeamLog.Editor
                 SetPrivateField(patternData, "_enemyId", enemyId);
 
                 var skillList = new List<SkillData>();
+                var weightList = new List<int>();
                 foreach (var entry in entries)
                 {
                     var skill = AssetDatabase.LoadAssetAtPath<SkillData>($"{SKILL_PATH}/{entry.skillId}.asset");
                     if (skill != null)
+                    {
                         skillList.Add(skill);
+                        weightList.Add(entry.weight);
+                    }
                     else
                         Debug.LogWarning($"[DataGenerator] 패턴 스킬을 찾을 수 없음: {entry.skillId}");
                 }
                 SetPrivateField(patternData, "_skills", skillList);
+                SetPrivateField(patternData, "_weights", weightList);
 
                 EditorUtility.SetDirty(patternData);
             }

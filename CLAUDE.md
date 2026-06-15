@@ -52,7 +52,7 @@ BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신, bonusAP �
     │   └── TurnContext (턴 상태: phase, AP)
     │       └── AP: 파티 공유, 매 턴 1+생존수 전량 회복, 첫 턴 bonusAP 추가, OnAPChanged 이벤트
     ├── PlayerActionController (UI ↔ 전투 로직 중재자, AP 부족 차단, 리롤 중계)
-    ├── EnemyAIController (패턴 기반 AI, 의도 표시, Taunt 타겟 우선, DamageCalculator.DealDamage 호출)
+    ├── EnemyAIController (상황인식 가중치 AI, 의도 표시, Taunt 타겟 우선, DamageCalculator.DealDamage 호출)
     └── BattleUIManager (UI 패널 생성/관리, AP/리롤 이벤트 구독, GetPanelTransform)
         ├── TopBarUI (턴 카운터, AP 표시, 리롤 카운트)
         ├── ActionBarUI → ActionSlotUI (AP 부족 시 회색 처리, 리롤 버튼, 툴팁)
@@ -62,7 +62,8 @@ BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신, bonusAP �
         ├── FloatingTextUI (데미지/힐/쉴드/MISS 플로팅 텍스트, UIPalette 색상 참조)
         ├── StatusEffectBadge (한국어 이니셜 + 툴팁)
         ├── TooltipUI / TooltipTarget (호버 툴팁 시스템)
-        └── PartyStatusWidget (총 HP, 골드 표시)
+        ├── PartyStatusWidget (총 HP, 골드 표시)
+        └── BattleScreenFlash (크리티컬 히트 시 전체 화면 점멸, DOTween.To 기반)
 
 UI 시스템 (Phase 4):
 TitleSceneSetup (타이틀 화면: 새 게임/이어하기, SaveManager.Meta 통계 표시)
@@ -70,12 +71,12 @@ SceneTransition (씬 트랜지션 페이드, DontDestroyOnLoad 싱글톤)
 ToastUI (토스트 알림, 큐 기반, ShopUI 골드 부족/구매 성공에 활용)
 UIAnimationHelper (DOTween 기반, FadeIn/FadeOut/ScaleFromZero/TweenAnchorMaxX/FlashColor/FadeToAlpha, 모두 Tween 반환)
 ConfirmationDialog (ShopUI 구매 확인, MapSceneSetup 보스/엘리트 전투 확인)
-UIPalette (색상 설계 토큰 SO, Default 정적 프로퍼티)
+UIPalette (색상 설계 토큰 SO, Default 정적 프로퍼티, 배경/강조/HP/쉴드/AP/스킬타입/로그/의도/슬롯/상태이상색/특성색/등급색 토큰)
 AudioManager (DontDestroyOnLoad 사운드 싱글톤, 마스터 볼륨, 40개 편의 메서드, 스킬 타입별 사운드 분기)
 AudioPalette (오디오 클립 매핑 SO, Resources/ 저장, DataGenerator에서 42개 클립 자동 할당 — CombatMagicSpellsVIISFX 활용)
-VFXManager (전투 이펙트 매니저, URP Camera Stacking 방식, 파티클 → VFX Overlay Camera → Main Camera에 Stacking)
-VFXPalette (VFX 프리팹 매핑 SO, Resources/ 저장, 13개 Epic Toon FX 프리팹 자동 할당 완료)
-CameraShake (DontDestroyOnLoad 캔버스 흔들림 싱글톤, DOTween.To() 기반, 피격 시 화면 흔들림)
+VFXManager (전투 이펙트 매니저, URP Camera Stacking 방식, 15종 VFX: Hit/Critical/Heal/Shield/Death/Buff/Debuff/Burn/Poison/Freeze/Purify/Slash/Stun/Victory/Defeat)
+VFXPalette (VFX 프리팹 매핑 SO, Resources/ 저장, 15개 Epic Toon FX 프리팹 자동 할당)
+CameraShake (DontDestroyOnLoad 캔버스 흔들림 싱글톤, DOTween.To() 기반, 데미지 비례 강도, 크리티컬 시 강한 흔들림)
 BattleTitleManager (전투 타이틀 애니메이션, Motion Titles Pack 활용, ShowBattleStart/ShowVictory/ShowDefeat)
 SaveManager (저장/불러오기, JsonUtility + 파일 I/O, RunSaveData/CharacterSaveData DTO, MetaSaveData 런 간 영구 통계, RecordRunEnd 자동 정리)
 GameDebugOptions (SRDebugger 인게임 디버그 옵션, Run State 조회 + 치트 메서드, TeamLog.EditorDebug 네임스페이스)
@@ -84,6 +85,11 @@ DeckViewerUI (파티 전체 스킬/아이템/유물 뷰어 오버레이, 캐릭�
 TutorialUI (인터랙티브 튜토리얼 오버레이, TutorialStep 진행 상태, MetaSaveData.HasCompletedTutorial 플래그, 4단계: MapNavigation/BattleBasics/ShopBasics/RestBasics)
 BattleSpeed (전투 속도 enum: Normal=1, Fast=2, BattleSceneSetup.ToggleBattleSpeed → Time.timeScale, TopBarUI 속도 버튼 "1x"/"2x")
 ShopUI.Sell (상점 판매 탭 partial, ShopManager.SellSkill/SellItem, 구매가 50% 환불, ConfirmationDialog 재사용)
+BalanceSimulator (자동 밸런스 시뮬레이터, Editor 전용 partial class 4분할, TeamLog.Editor 네임스페이스)
+    ├── Quick Combat 1000팩: F1~F3 일반/엘리트/보스 9카테고리 매트릭스 + SimulatedPlayerAI 휴리스틱 (Heal/Shield/Attack/Buff/Debuff/Purify 점수 평가)
+    ├── Full Run 100회: GameRunState.Create/Destroy로 매 런 격리, 맵 경로 자동 선택(위기시 Rest>Shop, 여유시 Elite>Battle), 노드별 자동 처리
+    ├── 리포트: Assets/09.Docs/BalanceReports/{QuickCombat,FullRun}_타임스탬프.csv + 콘솔 요약 (층별 승률, 사망 분포, 도달률)
+    └── 안전장치: MAX_TURNS=50 무한루프 방지, CombatEventBus.Clear/SkillExecutor.ClearEvents 매 팩 정리, Application.isPlaying 가드
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
     ├── HealthComponent (HP/쉴드 관리, OnHPChanged/OnShieldChanged/OnDeath + delta: OnDamageTaken/OnHealApplied/OnShieldAdded, OnPreDeath 사망 방지)
@@ -95,6 +101,7 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 SkillInstance (순수 C# 클래스, SkillData + UpgradeLevel, EffectivePower/Cost/Weight 계산 프로퍼티)
 
 CombatEventBus (static 전투 중앙 이벤트 버스 — DamageCalculator/SkillExecutor에서 발행, RelicHandler에서 구독)
+EnemyActionPattern (순수 C# 클래스, 상황인식 가중치 기반 스킬 선택 — 기본 가중치에 5규칙 배수 곱산: HP<30% 힐/쉴드 x3.0, HP<50% 힐/쉴드 x2.0, 약한 적 존재 공격 x2.5, 첫 턴 버프 x2.0, HP<50% 디버프 x1.5)
 RelicHandler (순수 C# 클래스, GameRunState 소속, 유물 트리거 매칭 → 효과 적용)
 
 AugmentOfferGenerator (순수 C# 클래스, 등급 가중치 증강 선택 + 호환성 체크 + 제안 조합, GameRunState.AugmentGenerator로 접근)
@@ -105,24 +112,34 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 ### 턴 사이클
 `Draw → PlayerAction(AP 관리) → Execution → EnemyTurn → BattleEnd`
 
+### VFX/임팩트 시스템
+스킬 사용 시 시각 효과는 두 경로로 분기:
+- **Health 이벤트 기반** (플레이어/적 공통): OnDamageTaken → PlayDamageVFX (Hit 또는 Critical + CameraShake + 화면 플래시 + 히트스톱), OnHealApplied → Heal VFX, OnShieldAdded → Shield VFX, OnDeath → Death VFX
+- **OnSkillApplied 기반** (플레이어 스킬 전용): 스킬 타입별 VFX — Attack(속성별 Burn/Poison/Freeze/Slash), Buff, Debuff, Purify. 사운드 분기와 동일 구조
+- **크리티컬 히트**: 데미지 ≥ 최대 HP의 35% 시 Critical VFX + 강한 흔들림(12px) + 백색 화면 플래시 + 0.04초 히트스톱(Time.timeScale)
+- **상태이상 적용**: Stun 시 StunStarExplosion VFX, OnEffectApplied 이벤트에서 처리
+
 ### 자원 시스템
 - **AP (Action Point)**: 파티 공유 자원, 매 턴 시작 시 `1 + 생존 파티원 수` 전량 회복
 - **스킬 Cost**: 0~3 (SkillData.Cost), 사용 시 AP 차감, 부족 시 스킬 사용 불가
 - **쉴드 (Shield)**: 일시적 보호막, HP 바 위 갈색 바로 표시, 데미지를 HP보다 먼저 흡수, 턴 시작 시 리셋
 - **리롤 (Reroll)**: 턴당 2회, 개별 슬롯 리롤만 지원, 이미 사용한 슬롯은 리롤 불가
+- **드로우 가중치**: 모든 플레이어 스킬 weight=25 균등 (SkillDrawSystem 가중치 랜덤)
+- **적 행동 가중치**: EnemyActionPattern — 기본 가중치(EnemyPatternTable weight)에 상황 배수(5규칙)를 곱해 매 턴 동적 선택. 의도는 공개되지만 행동은 매번 달라짐
 - 적은 AP/리롤 시스템에서 제외 (EnemyAIController가 독립적으로 행동 결정)
 
 ### 데이터 계층
 - **CharacterData** (ScriptableObject): 이름, 클래스, 기본 스탯, 스킬 목록, 적 특성(EnemyTrait)
 - **ItemData** (ScriptableObject): 이름, 효과타입, 값, 아이콘(Sprite, DataGenerator에서 ItemEffectType 기반 자동 할당)
-- **SkillData** (ScriptableObject): 이름, 타입(Attack/Heal/Buff/Debuff/Shield/Purify), 타겟타입, 위력, 비용, 가중치, 상태이상, 아이콘(Sprite, DataGenerator에서 SkillType+StatusEffect 기반 자동 할당)
+- **SkillData** (ScriptableObject): 이름, 타입(Attack/Heal/Buff/Debuff/Shield/Purify), 타겟타입, 위력, 비용, 가중치(플레이어 스킬 모두 25 균등), 상태이상, 아이콘(Sprite, DataGenerator에서 SkillType+StatusEffect 기반 자동 할당)
+- **EnemyPatternData** (ScriptableObject): enemyId, 스킬 목록, 스킬별 기본 가중치(_weights), EnemyPatternTable.csv(enemyId,order,skillId,weight)에서 생성
 - 모든 데이터는 `Assets/03.Data/`에 `TeamLog/` 메뉴로 생성
 - **DataGenerator 규칙**:
   - `GetOrCreateAsset<T>`로 기존 에셋 로드 우선 (GUID 보존, 참조 끊김 방지)
   - `Object.name = fileName` (에셋 파일명과 일치, Unity 경고 방지)
   - 한국어 표시명은 `_skillName`/`_characterName` 등 private 필드에 저장
   - 스킬 Cost 포함하여 모든 필드를 명시적으로 설정
-  - 파일 구조: DataGenerator.cs (진입점+스킬/캐릭터/유틸), DataGenerator.Augments.cs (증강+스폰패턴), DataGenerator.Content.cs (이벤트+유물+팔레트)
+  - 파일 구조: DataGenerator.cs (진입점+스킬/캐릭터/유틸), DataGenerator.Augments.cs (증강+스폰패턴), DataGenerator.Events.cs (이벤트), DataGenerator.Relics.cs (유물), DataGenerator.Palettes.cs (UI/오디오/VFX 팔레트)
 - **MapSceneBuilder 규칙**:
   - 에셋 필터링은 `Object.name`이 아닌 파일 경로 기반 (`namePrefix` 파라미터)
   - 층별 적 풀 분리: `FloorEnemyPool` 구조체로 층별(normal/elite/boss) 독립 관리
@@ -211,7 +228,15 @@ Editor/
 DataGenerator/
   DataGenerator.cs           — 진입점 + 상수 + 스킬/캐릭터/패턴 CSV 생성 + 유틸리티
   DataGenerator.Augments.cs  — 증강 데이터 + 스폰 패턴 테이블
-  DataGenerator.Content.cs   — 이벤트 + 유물 + 오디오/VFX 팔레트
+  DataGenerator.Events.cs    — 이벤트 데이터 생성
+  DataGenerator.Relics.cs    — 유물 데이터 생성
+  DataGenerator.Palettes.cs  — UI/오디오/VFX 팔레트 생성
+
+BalanceSimulator (자동 밸런스 시뮬레이터, `#if UNITY_EDITOR`):
+  BalanceSimulator.cs          — 진입점 + 상수 + 메뉴 + 에셋 로드 + Configuration
+  BalanceSimulator.Combat.cs   — SimulatedPlayerAI (private 중첩 클래스) + Quick Combat 1000팩 매트릭스
+  BalanceSimulator.Run.cs      — Full Run 100회 + 맵 노드 자동 결정 (Battle/Elite/Shop/Event/Rest)
+  BalanceSimulator.Report.cs   — ReportUtils 중첩 클래스 + 통계 집계 + CSV 출력 + 콘솔 요약
 ```
 
 - 각 partial 파일의 `namespace`와 `class` 선언은 동일하게 유지
@@ -312,12 +337,12 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - 5B: 스킬 성장 시스템 완료 (SkillInstance 래퍼 + 업그레이드 레벨, SkillDrawSystem/EfficientCost/Power, SkillUpgradeUI 휴식지 강화 선택지, 저장/로드 업그레이드 레벨 유지)
   - 5C: 유물 시스템 완료 (CombatEventBus 전투 중앙 이벤트 버스, RelicData SO 트리거+효과, RelicHandler 구독/적용, 12종 유물 DataGenerator 생성, DamageCalculator DealDamage/OnKill 이벤트 발행)
   - 5D: 폴리싱 완료 (ItemEffectApplier HealPerTurn/BonusGold/DrawWeight 처리, EventData 저주/상태이상 필드, EventManager 상태이상 적용)
-  - **잔여**: 런타임 플레이테스트 전체 검증, 밸런싱 추가 튜닝, GC 감사 후보 정리
+  - 5E: 전투 밸런스 재설계 완료 (드로우 가중치 25 통일, 적 AI 상황인식 가중치 시스템 5규칙, 적 스킬 위력 +20%, 스폰 패턴 6건 +1마리, 보스 HP +15%)
+  - 5F: 자동 밸런스 시뮬레이터 완료 (BalanceSimulator 4파일 분할 — Quick Combat 1000팩 + Full Run 100회, SimulatedPlayerAI 휴리스틱, CSV 리포트 + 콘솔 요약, MAX_TURNS 무한루프 방지, CombatEventBus 매 팩 정리)
+  - **잔여**: 런타임 플레이테스트 전체 검증 + 시뮬레이터 결과 기반 밸런스 튜닝
 
 ### 미구현 항목
-- VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, VFXPalette.asset에 13개 프리팹 참조 확인, 실제 파티클 표시 확인 필요)
-- 밸런싱 추가 튜닝 (플레이테스트 피드백 기반)
-- GC 감사 후보 정리 (GC_Report_2026-06-07.md 참조: 고아 CombatEventBus 이벤트, 미구현 유물 효과, 중복 패널 로직 등)
+- VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, VFXPalette.asset에 15개 프리팹 할당, 스킬 타입별 VFX 분기+크리티컬 임팩트 연결 완료, 실제 파티클 표시 확인 필요)
 
 ### 세션 종료 체크리스트
 

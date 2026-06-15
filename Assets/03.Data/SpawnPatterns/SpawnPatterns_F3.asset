@@ -16,13 +16,13 @@ MonoBehaviour:
   - patternName: "\uC2EC\uC5F0\uC758 \uADF8\uB9BC\uC790"
     enemies:
     - enemyData: {fileID: 11400000, guid: 14b0bd6e49092054ca1b531b25d638d5, type: 2}
-      count: 3
+      count: 4
     - enemyData: {fileID: 11400000, guid: 903e795ccb82dc544b0847f2830ade5e, type: 2}
       count: 2
   - patternName: "\uC545\uB9C8 \uAD70\uB2E8"
     enemies:
     - enemyData: {fileID: 11400000, guid: 9cbdbc447ef2b6d418c5be2177fd81c3, type: 2}
-      count: 3
+      count: 4
     - enemyData: {fileID: 11400000, guid: 14b0bd6e49092054ca1b531b25d638d5, type: 2}
       count: 2
   - patternName: "\uB9DD\uB839 \uB5BC"
@@ -34,8 +34,10 @@ MonoBehaviour:
   - patternName: "\uC11D\uC870 \uC218\uD638\uB300"
     enemies:
     - enemyData: {fileID: 11400000, guid: ad04d017cb2d28c418e409154754111c, type: 2}
-      count: 3
+      count: 2
     - enemyData: {fileID: 11400000, guid: 9cbdbc447ef2b6d418c5be2177fd81c3, type: 2}
+      count: 2
+    - enemyData: {fileID: 11400000, guid: 903e795ccb82dc544b0847f2830ade5e, type: 2}
       count: 1
   - patternName: "\uD63C\uC131 \uB9C8\uAD70"
     enemies:

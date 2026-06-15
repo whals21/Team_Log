@@ -28,7 +28,7 @@ MonoBehaviour:
   - patternName: "\uBBF8\uB77C \uAD70\uB2E8"
     enemies:
     - enemyData: {fileID: 11400000, guid: ed6c97ce3df014748ae3ce172b7fcc06, type: 2}
-      count: 2
+      count: 3
     - enemyData: {fileID: 11400000, guid: 09948b2a653edb84188ce00ce61d966d, type: 2}
       count: 2
   - patternName: "\uAD81\uC218 \uBD80\uB300"

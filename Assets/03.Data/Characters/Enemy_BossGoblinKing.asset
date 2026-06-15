@@ -15,9 +15,9 @@ MonoBehaviour:
   _characterName: "\uACE0\uBE14\uB9B0 \uC655"
   _characterClass: 0
   _description: Warrior
-  _baseHP: 130
-  _baseATK: 12
-  _baseDEF: 6
+  _baseHP: 150
+  _baseATK: 0
+  _baseDEF: 0
   _enemyTrait: 10
   _skills:
   - {fileID: 11400000, guid: 2a71579c30f6e4348bde847f0cb219da, type: 2}

@@ -16,7 +16,6 @@ MonoBehaviour:
   _description: "\uC801 \uCC98\uCE58\uB2F9 \uACF5\uACA9\uB825 +2 \uB204\uC801"
   _icon: {fileID: 0}
   _trigger: 6
-  _effectType: 10
   _effectValue: 2
   _rarity: 2
   _price: 180

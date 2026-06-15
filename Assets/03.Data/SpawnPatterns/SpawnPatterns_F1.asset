@@ -24,7 +24,7 @@ MonoBehaviour:
     - enemyData: {fileID: 11400000, guid: 0ca3cdc3ce49dc846a6d08a5af0ae587, type: 2}
       count: 2
     - enemyData: {fileID: 11400000, guid: 5339d9da1d43f2c4b8f46a88dac05325, type: 2}
-      count: 2
+      count: 3
   - patternName: "\uB3C5 \uD3EC\uC790 \uAD70\uB2E8"
     enemies:
     - enemyData: {fileID: 11400000, guid: a0554e5b2dde08e40a682e5103410dd7, type: 2}
@@ -34,11 +34,11 @@ MonoBehaviour:
   - patternName: "\uB291\uB300 \uBB34\uB9AC"
     enemies:
     - enemyData: {fileID: 11400000, guid: 5339d9da1d43f2c4b8f46a88dac05325, type: 2}
-      count: 4
+      count: 5
   - patternName: "\uACE0\uBE14\uB9B0 \uC57D\uD0C8\uB2E8"
     enemies:
     - enemyData: {fileID: 11400000, guid: 0ca3cdc3ce49dc846a6d08a5af0ae587, type: 2}
-      count: 3
+      count: 4
     - enemyData: {fileID: 11400000, guid: 8c3d19e253ce8cd47bdbe7c9e8bb99e9, type: 2}
       count: 1
   - patternName: "\uD63C\uC131 \uBD80\uB300"

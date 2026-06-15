@@ -16,7 +16,6 @@ MonoBehaviour:
   _description: "\uBC1B\uB294 \uD53C\uD574 -2"
   _icon: {fileID: 0}
   _trigger: 5
-  _effectType: 2
   _effectValue: 2
   _rarity: 0
   _price: 90

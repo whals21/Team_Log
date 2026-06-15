@@ -16,8 +16,8 @@ MonoBehaviour:
   _characterClass: 0
   _description: Necromancer
   _baseHP: 80
-  _baseATK: 9
-  _baseDEF: 3
+  _baseATK: 0
+  _baseDEF: 0
   _enemyTrait: 9
   _skills:
   - {fileID: 11400000, guid: 8f1f7b437c5824e4bb2783f86a8541bb, type: 2}

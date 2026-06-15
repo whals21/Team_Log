@@ -30,9 +30,7 @@ namespace TeamLog.Combat
             c.Health.OnHealApplied += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.HealColor);
             c.Health.OnShieldAdded += amount => SpawnFloatingText(c, $"+{amount}", FloatingTextUI.ShieldColor);
             c.Health.OnDamageTaken += _ => _battleUIManager?.FlashPanelForCharacter(c);
-            c.Health.OnDamageTaken += _ => _vfxManager?.PlayHitEffect(
-                _battleUIManager?.GetPanelTransform(c));
-            c.Health.OnDamageTaken += _ => CameraShake.Instance.Shake(_mainCanvasRect, 0.15f, 5f);
+            c.Health.OnDamageTaken += amount => PlayDamageVFX(c, amount);
             c.Health.OnHealApplied += _ => _vfxManager?.PlayHealEffect(
                 _battleUIManager?.GetPanelTransform(c));
             c.Health.OnShieldAdded += _ => _vfxManager?.PlayShieldEffect(
@@ -41,7 +39,7 @@ namespace TeamLog.Combat
             c.Health.OnDeath += () => _vfxManager?.PlayDeathEffect(
                 _battleUIManager?.GetPanelTransform(c));
             c.StatusEffects.OnEffectsChanged += () => OnCharacterStateChanged(c);
-            c.StatusEffects.OnEffectApplied += effect => OnStatusEffectApplied(effect);
+            c.StatusEffects.OnEffectApplied += effect => OnStatusEffectApplied(effect, c);
         }
 
         #endregion
@@ -64,25 +62,31 @@ namespace TeamLog.Combat
 
         private void OnSkillApplied(SkillData skill, Character target)
         {
+            var panel = _battleUIManager?.GetPanelTransform(target);
+
             switch (skill.Type)
             {
                 case SkillType.Attack:
                     PlayAttackSound(skill);
+                    PlayAttackVFX(skill, panel);
                     break;
                 case SkillType.Heal:
                     AudioManager.Instance.PlayHealImpact();
-                    break;
+                    break; // Heal VFX는 OnHealApplied에서 재생
                 case SkillType.Buff:
                     AudioManager.Instance.PlayBuffCast();
+                    _vfxManager?.PlayBuffEffect(panel);
                     break;
                 case SkillType.Debuff:
                     AudioManager.Instance.PlayDebuffCast();
+                    _vfxManager?.PlayDebuffEffect(panel);
                     break;
                 case SkillType.Shield:
                     AudioManager.Instance.PlayShieldCast();
-                    break;
+                    break; // Shield VFX는 OnShieldAdded에서 재생
                 case SkillType.Purify:
                     AudioManager.Instance.PlayPurifyCast();
+                    _vfxManager?.PlayPurifyEffect(panel);
                     break;
             }
         }
@@ -99,8 +103,33 @@ namespace TeamLog.Combat
                 AudioManager.Instance.PlayAttackHit();
         }
 
-        private void OnStatusEffectApplied(StatusEffectType effect)
+        /// <summary>
+        /// 공격 스킬 속성별 VFX. 기본 Hit/Critical VFX는 OnDamageTaken → PlayDamageVFX에서 재생됨.
+        /// 여기서는 원소별 추가 이펙트(불/독/얼음) 또는 물리 베기 궤적을 겹쳐 재생.
+        /// </summary>
+        private void PlayAttackVFX(SkillData skill, Transform panel)
         {
+            if (skill.StatusEffect == StatusEffectType.Burn)
+                _vfxManager?.PlayBurnEffect(panel);
+            else if (skill.StatusEffect == StatusEffectType.Poison)
+                _vfxManager?.PlayPoisonEffect(panel);
+            else if (skill.StatusEffect == StatusEffectType.Freeze)
+                _vfxManager?.PlayFreezeEffect(panel);
+            else
+                _vfxManager?.PlaySlashEffect(panel); // 일반 물리 공격 — 검 궤적
+        }
+
+        private void OnStatusEffectApplied(StatusEffectType effect, Character target)
+        {
+            var panel = _battleUIManager?.GetPanelTransform(target);
+
+            if (effect == StatusEffectType.Stun)
+            {
+                _vfxManager?.PlayStunEffect(panel);
+                AudioManager.Instance.PlayDebuffApply();
+                return;
+            }
+
             if (BuffEffects.Contains(effect))
                 AudioManager.Instance.PlayBuffApply();
             else if (DebuffEffects.Contains(effect))
@@ -209,6 +238,56 @@ namespace TeamLog.Combat
             var panelTransform = _battleUIManager?.GetPanelTransform(character);
             if (panelTransform == null) return;
             FloatingTextUI.Spawn(panelTransform, message, color, new Vector2(0, 30));
+        }
+
+        // ── 데미지 VFX — 크리티컬 히트 감지 + 임팩트 연출 ──
+
+        private bool _hitStopActive;
+
+        /// <summary>
+        /// 데미지 타격 VFX — 데미지 비례 강도 조절, 크리티컬 히트(최대 HP 35%+) 감지.
+        /// 크리티컬 시: Critical VFX + 강한 흔들림 + 화면 플래시 + 히트스톱.
+        /// 일반 시: Hit VFX + 데미지 비례 흔들림.
+        /// </summary>
+        private void PlayDamageVFX(Character c, int amount)
+        {
+            var panel = _battleUIManager?.GetPanelTransform(c);
+
+            bool isCritical = c.Health.MaxHP > 0 && amount >= c.Health.MaxHP * 0.35f;
+
+            if (isCritical)
+            {
+                _vfxManager?.PlayCriticalEffect(panel);
+                CameraShake.Instance.Shake(_mainCanvasRect, 0.3f, 12f);
+                _screenFlash?.Flash(Color.white, 0.2f);
+                StartCoroutine(HitStopRoutine());
+            }
+            else
+            {
+                _vfxManager?.PlayHitEffect(panel);
+                float ratio = c.Health.MaxHP > 0
+                    ? Mathf.Clamp01((float)amount / c.Health.MaxHP)
+                    : 0.2f;
+                float strength = Mathf.Lerp(3f, 8f, ratio);
+                CameraShake.Instance.Shake(_mainCanvasRect, 0.15f, strength);
+            }
+        }
+
+        /// <summary>
+        /// 크리티컬 히트 시 순간 정지 (0.04초) — 타격감 강조.
+        /// 중첩 방지: 이미 활성화 중이면 스킵.
+        /// </summary>
+        private IEnumerator HitStopRoutine()
+        {
+            if (_hitStopActive) yield break;
+            _hitStopActive = true;
+
+            float original = Time.timeScale;
+            Time.timeScale = 0.05f;
+            yield return new WaitForSecondsRealtime(0.04f);
+            Time.timeScale = original;
+
+            _hitStopActive = false;
         }
 
         #endregion

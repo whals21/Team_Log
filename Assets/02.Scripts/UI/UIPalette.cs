@@ -33,7 +33,6 @@ namespace TeamLog.UI
         public Color ShieldBrown = new Color(0.72f, 0.45f, 0.2f);
         public Color DamageColor = new Color(0.85f, 0.2f, 0.2f);
         public Color HealColor = new Color(0.15f, 0.68f, 0.38f);
-        public Color ShieldColor = new Color(0.72f, 0.45f, 0.2f);
 
         [Header("AP / Reroll")]
         public Color APNormal = new Color(0.96f, 0.82f, 0.25f);
@@ -69,6 +68,43 @@ namespace TeamLog.UI
         [Header("Slot States")]
         public Color SlotAffordable = new Color(0.1f, 0.1f, 0.18f, 0.9f);
         public Color SlotExpensive = new Color(0.15f, 0.05f, 0.05f, 0.9f);
+
+        [Header("Status Effect Colors")]
+        public Color EffectPoison = new Color(0.55f, 0.1f, 0.55f);
+        public Color EffectBurn = new Color(0.8f, 0.3f, 0.05f);
+        public Color EffectStun = new Color(0.6f, 0.6f, 0.1f);
+        public Color EffectFreeze = new Color(0.2f, 0.5f, 0.8f);
+        public Color EffectBleed = new Color(0.7f, 0.05f, 0.05f);
+        public Color EffectAttackUp = new Color(0.15f, 0.55f, 0.2f);
+        public Color EffectAttackDown = new Color(0.6f, 0.15f, 0.15f);
+        public Color EffectDefenseUp = new Color(0.1f, 0.5f, 0.3f);
+        public Color EffectDefenseDown = new Color(0.7f, 0.2f, 0.1f);
+        public Color EffectRegeneration = new Color(0.1f, 0.5f, 0.5f);
+        public Color EffectTaunt = new Color(0.6f, 0.45f, 0.1f);
+        public Color EffectSleep = new Color(0.4f, 0.3f, 0.6f);
+        public Color EffectShield = new Color(0.5f, 0.35f, 0.15f);
+        public Color EffectDefault = new Color(0.4f, 0.4f, 0.4f);
+
+        [Header("Trait Colors")]
+        public Color TraitRegenerate = new Color(0.1f, 0.5f, 0.5f);
+        public Color TraitOpportunist = new Color(0.6f, 0.15f, 0.15f);
+        public Color TraitPhaseShift = new Color(0.3f, 0.3f, 0.7f);
+        public Color TraitCounter = new Color(0.7f, 0.35f, 0.1f);
+        public Color TraitThorns = new Color(0.15f, 0.55f, 0.2f);
+        public Color TraitShell = new Color(0.5f, 0.45f, 0.35f);
+        public Color TraitSturdy = new Color(0.4f, 0.4f, 0.5f);
+        public Color TraitArcaneFury = new Color(0.4f, 0.15f, 0.6f);
+        public Color TraitCorrosive = new Color(0.3f, 0.5f, 0.15f);
+        public Color TraitRally = new Color(0.7f, 0.6f, 0.1f);
+        public Color TraitRampage = new Color(0.7f, 0.15f, 0.1f);
+        public Color TraitImmortal = new Color(0.55f, 0.1f, 0.55f);
+        public Color TraitDefault = new Color(0.4f, 0.4f, 0.4f);
+
+        [Header("Rarity / Grade Colors")]
+        public Color RarityCommon = Color.white;
+        public Color RarityRare = new Color(0.3f, 0.6f, 1f);
+        public Color RarityUnique = new Color(0.7f, 0.3f, 0.9f);
+        public Color GradeCursed = new Color(0.8f, 0.15f, 0.15f);
 
         // ── Static Access ──
 

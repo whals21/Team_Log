@@ -15,9 +15,9 @@ MonoBehaviour:
   _characterName: "\uB4DC\uB798\uACE4"
   _characterClass: 0
   _description: Mage
-  _baseHP: 160
-  _baseATK: 15
-  _baseDEF: 5
+  _baseHP: 184
+  _baseATK: 0
+  _baseDEF: 0
   _enemyTrait: 11
   _skills:
   - {fileID: 11400000, guid: 9c4959ed99abaa44da6207c041d23f71, type: 2}

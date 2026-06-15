@@ -76,11 +76,40 @@ namespace TeamLog.Combat
             var slot = _drawSystem.GetSlot(slotIndex);
             if (slot == null || slot.Skill == null || slot.IsSelected) return;
 
+            // 셔플 풀 — 같은 캐스터의 스킬 목록
+            var caster = slot.Caster;
+            var shufflePool = caster.SkillInventory.Skills;
+
+            // 리롤 — 새 스킬 결정
             _turnManager.RerollSlot(slotIndex);
 
-            // UI 갱신
-            _actionBar.UpdateActionSlots(_drawSystem.DrawnSlots);
+            // 리롤된 슬롯의 새 스킬
+            var newSlot = _drawSystem.GetSlot(slotIndex);
+            var finalSkill = newSlot.Skill;
+
+            // 리롤 카운트 즉시 갱신
             UpdateRerollUI();
+
+            // 셔플 애니메이션 (스킬이 2개 이상일 때만)
+            var slotUI = _actionBar.GetSlot(slotIndex);
+            if (slotUI != null && shufflePool.Count > 1)
+            {
+                slotUI.PlayRerollShuffle(finalSkill, caster, shufflePool, () =>
+                {
+                    // 애니메이션 완료 후 Affordable 상태 갱신
+                    int effectiveCost = newSlot.Instance?.EffectiveCost ?? finalSkill.Cost;
+                    slotUI.SetAffordable(newSlot.IsSelected || _turnManager.Context.CurrentAP >= effectiveCost);
+
+                    // 리롤이 남아있으면 리롤 버튼 다시 표시
+                    if (_drawSystem.CanReroll && !newSlot.IsSelected)
+                        slotUI.SetRerollAvailable(true);
+                });
+            }
+            else if (slotUI != null)
+            {
+                // 스킬이 1개뿐이면 즉시 갱신
+                slotUI.SetSkill(finalSkill, caster);
+            }
         }
 
         private void UpdateRerollUI()

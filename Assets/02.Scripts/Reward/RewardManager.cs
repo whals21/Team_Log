@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamLog.Map;
 using TeamLog.Skill;
+using TeamLog.UI;
 
 namespace TeamLog.Reward
 {
@@ -175,19 +176,21 @@ namespace TeamLog.Reward
         public AugmentData Augment;
         public AugmentOffer AugmentOfferData;
 
-        // 희귀도별 색상
+        // 희귀도별 색상 (UIPalette 토큰 참조)
         public Color GetRarityColor()
         {
+            var p = UIPalette.Default;
+
             // 저주 증강은 암적색
             if (Type == RewardType.AugmentOffer && AugmentOfferData != null && AugmentOfferData.IsCursed)
-                return new Color(0.8f, 0.15f, 0.15f);
+                return p.GradeCursed;
 
             return Rarity switch
             {
-                RewardRarity.Common => Color.white,
-                RewardRarity.Rare => new Color(0.3f, 0.6f, 1f),
-                RewardRarity.Unique => new Color(0.7f, 0.3f, 0.9f),
-                _ => Color.white
+                RewardRarity.Common => p.RarityCommon,
+                RewardRarity.Rare => p.RarityRare,
+                RewardRarity.Unique => p.RarityUnique,
+                _ => p.RarityCommon
             };
         }
     }

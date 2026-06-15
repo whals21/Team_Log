@@ -16,7 +16,6 @@ MonoBehaviour:
   _description: "\uBC29\uD328 \uC2A4\uD0AC \uC0AC\uC6A9 \uC2DC +3 \uC274\uB4DC"
   _icon: {fileID: 0}
   _trigger: 8
-  _effectType: 5
   _effectValue: 3
   _rarity: 0
   _price: 70

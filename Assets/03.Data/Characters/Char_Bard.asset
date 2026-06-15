@@ -16,8 +16,8 @@ MonoBehaviour:
   _characterClass: 0
   _description: Bard
   _baseHP: 75
-  _baseATK: 6
-  _baseDEF: 3
+  _baseATK: 0
+  _baseDEF: 0
   _enemyTrait: 3
   _skills:
   - {fileID: 11400000, guid: 4c6dad51bd171af479bccb852553e93b, type: 2}

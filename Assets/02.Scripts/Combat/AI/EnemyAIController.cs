@@ -43,7 +43,7 @@ namespace TeamLog.Combat.AI
         /// </summary>
         public void PrepareNextAction()
         {
-            _nextSkill = _pattern.GetNextSkill();
+            _nextSkill = _pattern.GetNextSkill(_owner, _players);
             _nextTargets = ResolveTargets(_nextSkill);
             _currentIntent = EnemyIntent.FromSkill(_nextSkill, _nextTargets, _owner);
             OnIntentChanged?.Invoke(_currentIntent);

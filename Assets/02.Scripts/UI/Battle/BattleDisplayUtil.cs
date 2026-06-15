@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using TeamLog.Characters;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Battle
 {
@@ -32,28 +33,32 @@ namespace TeamLog.UI.Battle
         };
 
         /// <summary>
-        /// 상태이상 타입 → 뱃지 배경색 (버프: 녹색계, 디버프: 빨간계, 특수: 노란계)
+        /// 상태이상 타입 → 뱃지 배경색 (UIPalette 토큰 참조)
         /// </summary>
-        public static Color GetEffectColor(StatusEffectType type) => type switch
+        public static Color GetEffectColor(StatusEffectType type)
         {
-            // 디버프 (빨간/보라 계열)
-            StatusEffectType.Poison => new Color(0.55f, 0.1f, 0.55f),   // 보라
-            StatusEffectType.Burn => new Color(0.8f, 0.3f, 0.05f),     // 주황
-            StatusEffectType.Stun => new Color(0.6f, 0.6f, 0.1f),     // 어두운 노랑
-            StatusEffectType.Freeze => new Color(0.2f, 0.5f, 0.8f),   // 파랑
-            StatusEffectType.Sleep => new Color(0.4f, 0.3f, 0.6f),    // 연보라
-            StatusEffectType.Bleed => new Color(0.7f, 0.05f, 0.05f),  // 진빨강
-            StatusEffectType.DefenseDown => new Color(0.7f, 0.2f, 0.1f),
-            StatusEffectType.AttackDown => new Color(0.6f, 0.15f, 0.15f),
-            // 버프 (녹색/청록 계열)
-            StatusEffectType.DefenseUp => new Color(0.1f, 0.5f, 0.3f),
-            StatusEffectType.AttackUp => new Color(0.15f, 0.55f, 0.2f),
-            StatusEffectType.Regeneration => new Color(0.1f, 0.5f, 0.5f),
-            StatusEffectType.Shield => new Color(0.5f, 0.35f, 0.15f), // 갈색 (쉴드 색)
-            // 특수
-            StatusEffectType.Taunt => new Color(0.6f, 0.45f, 0.1f),
-            _ => new Color(0.4f, 0.4f, 0.4f)
-        };
+            var p = UIPalette.Default;
+            return type switch
+            {
+                // 디버프 (빨간/보라 계열)
+                StatusEffectType.Poison => p.EffectPoison,
+                StatusEffectType.Burn => p.EffectBurn,
+                StatusEffectType.Stun => p.EffectStun,
+                StatusEffectType.Freeze => p.EffectFreeze,
+                StatusEffectType.Sleep => p.EffectSleep,
+                StatusEffectType.Bleed => p.EffectBleed,
+                StatusEffectType.DefenseDown => p.EffectDefenseDown,
+                StatusEffectType.AttackDown => p.EffectAttackDown,
+                // 버프 (녹색/청록 계열)
+                StatusEffectType.DefenseUp => p.EffectDefenseUp,
+                StatusEffectType.AttackUp => p.EffectAttackUp,
+                StatusEffectType.Regeneration => p.EffectRegeneration,
+                StatusEffectType.Shield => p.EffectShield,
+                // 특수
+                StatusEffectType.Taunt => p.EffectTaunt,
+                _ => p.EffectDefault
+            };
+        }
 
         /// <summary>
         /// 상태이상 타입 → 한국어 이니셜 (색맹 지원용)
@@ -119,25 +124,29 @@ namespace TeamLog.UI.Battle
             _ => ""
         };
 
-        public static Color GetTraitColor(EnemyTrait trait) => trait switch
+        public static Color GetTraitColor(EnemyTrait trait)
         {
-            // 일반 적
-            EnemyTrait.Regenerate => new Color(0.1f, 0.5f, 0.5f),      // 청록 (회복)
-            EnemyTrait.Opportunist => new Color(0.6f, 0.15f, 0.15f),   // 빨강 (약자 노림)
-            EnemyTrait.PhaseShift => new Color(0.3f, 0.3f, 0.7f),      // 파랑 (변이)
-            EnemyTrait.Counter => new Color(0.7f, 0.35f, 0.1f),        // 주황 (반격)
-            EnemyTrait.Thorns => new Color(0.15f, 0.55f, 0.2f),        // 녹색 (가시)
-            EnemyTrait.Shell => new Color(0.5f, 0.45f, 0.35f),         // 갈색 (껍질)
-            // 엘리트
-            EnemyTrait.Sturdy => new Color(0.4f, 0.4f, 0.5f),          // 강철색
-            EnemyTrait.ArcaneFury => new Color(0.4f, 0.15f, 0.6f),     // 보라 (마법)
-            EnemyTrait.Corrosive => new Color(0.3f, 0.5f, 0.15f),      // 녹색 (부식)
-            // 보스
-            EnemyTrait.Rally => new Color(0.7f, 0.6f, 0.1f),           // 금색 (소집령)
-            EnemyTrait.Rampage => new Color(0.7f, 0.15f, 0.1f),        // 빨강 (연소)
-            EnemyTrait.Immortal => new Color(0.55f, 0.1f, 0.55f),      // 진보라 (불사)
-            _ => new Color(0.4f, 0.4f, 0.4f)
-        };
+            var p = UIPalette.Default;
+            return trait switch
+            {
+                // 일반 적
+                EnemyTrait.Regenerate => p.TraitRegenerate,
+                EnemyTrait.Opportunist => p.TraitOpportunist,
+                EnemyTrait.PhaseShift => p.TraitPhaseShift,
+                EnemyTrait.Counter => p.TraitCounter,
+                EnemyTrait.Thorns => p.TraitThorns,
+                EnemyTrait.Shell => p.TraitShell,
+                // 엘리트
+                EnemyTrait.Sturdy => p.TraitSturdy,
+                EnemyTrait.ArcaneFury => p.TraitArcaneFury,
+                EnemyTrait.Corrosive => p.TraitCorrosive,
+                // 보스
+                EnemyTrait.Rally => p.TraitRally,
+                EnemyTrait.Rampage => p.TraitRampage,
+                EnemyTrait.Immortal => p.TraitImmortal,
+                _ => p.TraitDefault
+            };
+        }
 
         public static string GetTraitDescription(EnemyTrait trait) => trait switch
         {

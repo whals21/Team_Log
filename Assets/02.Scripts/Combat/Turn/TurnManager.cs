@@ -146,11 +146,11 @@ namespace TeamLog.Combat.Turn
                             foreach (var enemy in _enemies)
                                 if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance, 0.7f);
                         }
-                        // 저주 증강: AOEAuto — 자동 광역, 위력 50%
+                        // 저주 증강: AOEAuto — 자동 광역, 위력 65%
                         else if (instance != null && instance.HasAugment(AugmentType.AOEAuto))
                         {
                             foreach (var enemy in _enemies)
-                                if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance, 0.5f);
+                                if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance, 0.65f);
                         }
                         else
                         {

@@ -16,8 +16,8 @@ MonoBehaviour:
   _characterClass: 0
   _description: Rogue
   _baseHP: 30
-  _baseATK: 6
-  _baseDEF: 1
+  _baseATK: 0
+  _baseDEF: 0
   _enemyTrait: 2
   _skills:
   - {fileID: 11400000, guid: 243dfb2bc5701f34aa2da84102095e48, type: 2}

@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using TeamLog.Characters;
 using TeamLog.Combat.AI;
+using TeamLog.UI;
 
 namespace TeamLog.UI.Battle
 {
@@ -85,6 +86,11 @@ namespace TeamLog.UI.Battle
 
             if (_tabStatusButton != null)
                 _tabStatusButton.onClick.AddListener(() => SwitchTab(1));
+
+            // 색상 토큰을 UIPalette에서 초기화
+            var palette = UIPalette.Default;
+            _hpColor = palette.HPNormal;
+            _hpLowColor = palette.HPLow;
         }
 
         private T FindComponent<T>(string path) where T : Component
@@ -219,6 +225,10 @@ namespace TeamLog.UI.Battle
                     if (texts.Length > 0)
                         texts[0].text = $"<b>[다음 행동]</b> {_currentIntent.GetDisplayText()}";
 
+                    // 툴팁: 의도 스킬 상세
+                    if (_currentIntent.Skill != null)
+                        AttachSkillTooltip(intentEntry, _currentIntent.Skill);
+
                     // 수치 요약 줄: 위력 + 상태이상
                     if (_currentIntent.Skill != null)
                     {
@@ -246,8 +256,25 @@ namespace TeamLog.UI.Battle
                     var texts = entryObj.GetComponentsInChildren<TextMeshProUGUI>();
                     if (texts.Length > 0)
                         texts[0].text = FormatSkillEntry(skills[i]);
+
+                    AttachSkillTooltip(entryObj, skills[i]);
                 }
             }
+        }
+
+        /// <summary>
+        /// 스킬 엔트리에 툴팁 부착 — 이름 / 수치 요약 / 설명
+        /// </summary>
+        private void AttachSkillTooltip(GameObject entryObj, SkillData skill)
+        {
+            if (entryObj == null || skill == null) return;
+
+            var tooltip = entryObj.GetComponent<TooltipTarget>();
+            if (tooltip == null) tooltip = entryObj.AddComponent<TooltipTarget>();
+
+            string summary = BuildSkillSummary(skill);
+            string desc = string.IsNullOrEmpty(skill.Description) ? summary : skill.Description;
+            tooltip.SetContent(skill.SkillName, summary, desc);
         }
 
         /// <summary>
@@ -283,11 +310,20 @@ namespace TeamLog.UI.Battle
                 if (entryObj != null)
                 {
                     var texts = entryObj.GetComponentsInChildren<TextMeshProUGUI>();
+                    string valueText = $"{effect.Value} ({effect.RemainingTurns}턴)";
                     if (texts.Length >= 2)
                     {
                         texts[0].text = BattleDisplayUtil.GetEffectLabel(effect.Type);
-                        texts[1].text = $"{effect.Value} ({effect.RemainingTurns}턴)";
+                        texts[1].text = valueText;
                     }
+
+                    // 툴팁: 효과 이름 / 수치 / 설명
+                    var tooltip = entryObj.GetComponent<TooltipTarget>();
+                    if (tooltip == null) tooltip = entryObj.AddComponent<TooltipTarget>();
+                    tooltip.SetContent(
+                        BattleDisplayUtil.GetEffectLabel(effect.Type),
+                        valueText,
+                        BattleDisplayUtil.GetEffectDescription(effect.Type));
                 }
             }
         }

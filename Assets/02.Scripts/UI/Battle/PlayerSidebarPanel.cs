@@ -59,6 +59,11 @@ namespace TeamLog.UI.Battle
 
             _layoutElement = GetComponent<LayoutElement>();
 
+            // 색상 토큰을 UIPalette에서 초기화
+            var palette = UIPalette.Default;
+            _hpNormalColor = palette.HPNormal;
+            _hpLowColor = palette.HPLow;
+
             // 자식 Graphic들의 raycastTarget을 꺼서 부모 Button이 클릭을 받도록 함
             foreach (var graphic in GetComponentsInChildren<Graphic>())
             {

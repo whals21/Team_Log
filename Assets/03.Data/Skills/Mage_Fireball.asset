@@ -19,7 +19,7 @@ MonoBehaviour:
   _targetType: 0
   _power: 7
   _cost: 2
-  _weight: 35
+  _weight: 25
   _icon: {fileID: 21300000, guid: cf7c0d7b5cc9c48e8bbe436516401e61, type: 3}
   _statusEffect: 2
   _effectDuration: 2

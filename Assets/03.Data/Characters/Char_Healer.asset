@@ -16,8 +16,8 @@ MonoBehaviour:
   _characterClass: 0
   _description: Healer
   _baseHP: 80
-  _baseATK: 5
-  _baseDEF: 3
+  _baseATK: 0
+  _baseDEF: 0
   _enemyTrait: 1
   _skills:
   - {fileID: 11400000, guid: 4836e693326518a4a9bda867d38f69dd, type: 2}

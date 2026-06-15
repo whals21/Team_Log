@@ -150,6 +150,20 @@ namespace TeamLog.Editor
             SetPrivateField(sceneSetup, "_testRogueData", rogueData);
             SetPrivateField(sceneSetup, "_battleUIManager", uiManager);
 
+            // _mainCanvasRect 연결
+            var canvasGO = GameObject.Find("BattleUICanvas");
+            if (canvasGO != null)
+                SetPrivateField(sceneSetup, "_mainCanvasRect", canvasGO.GetComponent<RectTransform>());
+
+            // _titleManager 연결 — BattleTitleManager를 BattleUIRoot에 추가
+            if (root != null)
+            {
+                var titleMgr = root.GetComponent<BattleTitleManager>();
+                if (titleMgr == null)
+                    titleMgr = root.gameObject.AddComponent<BattleTitleManager>();
+                SetPrivateField(sceneSetup, "_titleManager", titleMgr);
+            }
+
             // BattleEndOverlay 연결
             var endOverlayGO = root.transform.Find("BattleEndOverlay");
             if (endOverlayGO != null)

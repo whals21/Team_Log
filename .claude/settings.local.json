@@ -43,7 +43,14 @@
       "Bash(do:*)",
       "Bash(du:*)",
       "Bash(\"/c/Program Files/Unity/Hub/Editor/6000.0.42f1/Editor/Unity.exe\":*)",
-      "Bash(\"C:/Program Files/Unity/Hub/Editor/6000.0.66f2/Editor/Unity.exe\":*)"
+      "Bash(\"C:/Program Files/Unity/Hub/Editor/6000.0.66f2/Editor/Unity.exe\":*)",
+      "mcp__ide__executeCode",
+      "Bash(/c/Unity/6000.0/Editor/Unity.exe:*)",
+      "Bash(\"/c/Program Files/Unity/Hub/Editor/6000.0.66f2/Editor/Unity.exe\":*)",
+      "Bash(\"C:/Unity/Projects/Team_Log/Assets/03.Data/Prefabs/PlayerSidebarPanel.prefab\":*)",
+      "Bash(/c/Unity/Editor/Unity.exe:*)",
+      "Bash(read f:*)",
+      "Bash(/c/Unity/Hub/Editor/6000.0.43f1/Editor/Unity.exe:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

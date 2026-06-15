@@ -48,6 +48,7 @@ namespace TeamLog.Combat
         private List<Character> _playerParty = new();
         private List<Character> _enemies = new();
         private VFXManager _vfxManager;
+        private BattleScreenFlash _screenFlash;
 
         // 전투 속도
         public enum BattleSpeed { Normal = 1, Fast = 2 }
@@ -178,6 +179,12 @@ namespace TeamLog.Combat
                 vfxGO.transform.SetParent(transform);
                 _vfxManager = vfxGO.AddComponent<VFXManager>();
                 _vfxManager.Initialize(_mainCanvasRect);
+
+                // 화면 플래시 초기화 — 크리티컬 히트 시 순간 점멸
+                var flashGO = new GameObject("BattleScreenFlash");
+                flashGO.transform.SetParent(transform);
+                _screenFlash = flashGO.AddComponent<BattleScreenFlash>();
+                _screenFlash.Initialize(_mainCanvasRect);
             }
 
             // HP/쉴드 변경 이벤트 구독 — 플레이어/적 공통 헬퍼 사용

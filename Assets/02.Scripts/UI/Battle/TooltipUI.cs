@@ -84,14 +84,15 @@ namespace TeamLog.UI.Battle
 
         private void UpdatePosition()
         {
-            if (_parentCanvas == null || _parentCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
-                return;
+            if (_parentCanvas == null) return;
+            // ScreenSpaceOverlay → worldCamera null, ScreenSpaceCamera → worldCamera 사용
+            Camera uiCamera = _parentCanvas.worldCamera;
 
             Vector2 mousePos;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _rectTransform.parent as RectTransform,
                 Input.mousePosition,
-                null,
+                uiCamera,
                 out mousePos);
 
             float offsetX = _offsetX;
@@ -134,28 +135,28 @@ namespace TeamLog.UI.Battle
             if (corners[0].x < 0)
             {
                 Vector2 screenLeft;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, Vector2.zero, null, out screenLeft);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, Vector2.zero, uiCamera, out screenLeft);
                 adjusted.x = screenLeft.x + _rectTransform.rect.width * (1f - _rectTransform.pivot.x);
             }
             // 우측
             if (corners[2].x > screenWidth)
             {
                 Vector2 screenRight;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, new Vector2(screenWidth, 0), null, out screenRight);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, new Vector2(screenWidth, 0), uiCamera, out screenRight);
                 adjusted.x = screenRight.x - _rectTransform.rect.width * _rectTransform.pivot.x;
             }
             // 하단
             if (corners[0].y < 0)
             {
                 Vector2 screenBottom;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, new Vector2(0, 0), null, out screenBottom);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, new Vector2(0, 0), uiCamera, out screenBottom);
                 adjusted.y = screenBottom.y + _rectTransform.rect.height * (1f - _rectTransform.pivot.y);
             }
             // 상단
             if (corners[1].y > screenHeight)
             {
                 Vector2 screenTop;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, new Vector2(0, screenHeight), null, out screenTop);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, new Vector2(0, screenHeight), uiCamera, out screenTop);
                 adjusted.y = screenTop.y - _rectTransform.rect.height * _rectTransform.pivot.y;
             }
 

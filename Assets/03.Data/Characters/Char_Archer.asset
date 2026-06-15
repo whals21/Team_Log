@@ -16,8 +16,8 @@ MonoBehaviour:
   _characterClass: 0
   _description: Archer
   _baseHP: 65
-  _baseATK: 11
-  _baseDEF: 2
+  _baseATK: 0
+  _baseDEF: 0
   _enemyTrait: 2
   _skills:
   - {fileID: 11400000, guid: e04cdab85b87d1046ba48756a8bbd2e1, type: 2}

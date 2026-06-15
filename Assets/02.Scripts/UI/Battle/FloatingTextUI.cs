@@ -86,6 +86,6 @@ namespace TeamLog.UI.Battle
 
         public static Color DamageColor => UIPalette.Default.DamageColor;
         public static Color HealColor => UIPalette.Default.HealColor;
-        public static Color ShieldColor => UIPalette.Default.ShieldColor;
+        public static Color ShieldColor => UIPalette.Default.ShieldBrown;
     }
 }

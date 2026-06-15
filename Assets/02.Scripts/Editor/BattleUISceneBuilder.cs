@@ -134,12 +134,17 @@ namespace TeamLog.Editor
 
         private static Canvas CreateCanvas(Scene scene)
         {
+            // Main Camera 확보 — ScreenSpaceCamera Canvas의 worldCamera로 사용
+            var mainCam = EnsureMainCamera(scene);
+
             var canvasGO = new GameObject("BattleUICanvas");
             SceneManager.MoveGameObjectToScene(canvasGO, scene);
 
             var canvas = canvasGO.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = mainCam;
             canvas.sortingOrder = 100;
+            canvas.planeDistance = 10f;
 
             var scaler = canvasGO.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -148,6 +153,59 @@ namespace TeamLog.Editor
 
             canvasGO.AddComponent<GraphicRaycaster>();
             return canvas;
+        }
+
+        /// <summary>
+        /// Main Camera 확보 + 설정 정규화 — ScreenSpaceCamera Canvas의 기준.
+        /// VFXManager는 이 카메라를 URP Base로 사용해 VFX Overlay Camera를 Stacking.
+        /// orthographicSize = 5.4 (1080/200) — VFX Camera와 정합성 유지.
+        /// cullingMask에서 VFX 레이어(30) 제외 — VFX는 Overlay Camera 전용.
+        /// </summary>
+        private static Camera EnsureMainCamera(Scene scene)
+        {
+            const int VFX_LAYER = 30;
+            const float PIXELS_PER_UNIT = 100f;
+
+            var mainCam = Camera.main;
+            if (mainCam == null)
+            {
+                var camGO = new GameObject("Main Camera");
+                SceneManager.MoveGameObjectToScene(camGO, scene);
+                mainCam = camGO.AddComponent<Camera>();
+                camGO.tag = "MainCamera";
+            }
+            else
+            {
+                // 씬 소속 보장 (DontDestroyOnLoad 씬에 있을 수 있음)
+                if (!scene.IsValid() || mainCam.gameObject.scene != scene)
+                    SceneManager.MoveGameObjectToScene(mainCam.gameObject, scene);
+            }
+
+            // Transform 정규화 — 기존 scale(0.01) 비정상값 교정
+            mainCam.transform.position = new Vector3(0f, 0f, -10f);
+            mainCam.transform.rotation = Quaternion.identity;
+            mainCam.transform.localScale = Vector3.one;
+
+            // Projection 설정 — VFX Camera와 정합
+            mainCam.orthographic = true;
+            mainCam.orthographicSize = Screen.height * 0.5f / PIXELS_PER_UNIT;
+            mainCam.nearClipPlane = 0.3f;
+            mainCam.farClipPlane = 100f;
+            mainCam.clearFlags = CameraClearFlags.SolidColor;
+            mainCam.backgroundColor = BgDark;
+            mainCam.depth = -1;
+            // VFX 레이어 제외 — VFX는 Overlay Camera에서만 렌더링 (중복 방지)
+            mainCam.cullingMask = ~(1 << VFX_LAYER);
+
+            // AudioListener 중복 방지
+            if (mainCam.GetComponent<AudioListener>() == null)
+            {
+                var listeners = Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
+                if (listeners.Length == 0)
+                    mainCam.gameObject.AddComponent<AudioListener>();
+            }
+
+            return mainCam;
         }
 
         // ── UI 오케스트레이터 ──
@@ -168,6 +226,7 @@ namespace TeamLog.Editor
             content.offsetMax = new Vector2(0, -44);
 
             CreateCenterArea(content);
+            CreateRightSidebar(content);
             CreatePlayerStrip(root);
 
             CreateCharacterPopup(root);

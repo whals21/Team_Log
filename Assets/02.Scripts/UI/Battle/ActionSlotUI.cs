@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -40,9 +42,12 @@ namespace TeamLog.UI.Battle
         private Color _originalBgColor;
         private bool _colorsStored;
         private Image _bgImage;
+        private bool _isShuffling;
+        private Coroutine _shuffleCoroutine;
 
         public SkillData Skill => _skill;
         public Character Caster => _caster;
+        public bool IsShuffling => _isShuffling;
 
         public event System.Action<int> OnSlotRerollRequested;
 
@@ -67,32 +72,16 @@ namespace TeamLog.UI.Battle
             _skill = skill;
             _caster = caster;
 
-            if (_skillNameText != null)
-                _skillNameText.text = skill?.SkillName ?? "---";
+            SetSkillVisualsOnly(skill, caster);
 
-            if (_costText != null)
-                _costText.text = skill?.Cost > 0 ? skill.Cost.ToString() : "";
-
-            if (_casterNameText != null)
-                _casterNameText.text = caster != null ? caster.Name : "";
-
+            // 색상 캐싱 (Affordable 토글용)
             if (_skillIcon != null)
             {
-                _skillIcon.sprite = skill?.Icon;
-                _skillIcon.color = GetSkillColor(skill);
                 _originalSkillColor = _skillIcon.color;
                 _colorsStored = true;
             }
-
             if (_costText != null)
                 _originalCostColor = _costText.color;
-
-            // 스킬 타입별 배경 틴트 (P1-1)
-            if (_bgImage != null)
-            {
-                var skillColor = GetSkillColor(skill);
-                _bgImage.color = new Color(skillColor.r * 0.25f, skillColor.g * 0.25f, skillColor.b * 0.25f, 0.9f);
-            }
 
             // 툴팁 설정
             if (skill != null)
@@ -110,10 +99,42 @@ namespace TeamLog.UI.Battle
             }
         }
 
+        /// <summary>
+        /// 시각적 요소만 갱신 (툴팁/색상 캐싱 없음) — 리롤 셔플 애니메이션용
+        /// </summary>
+        private void SetSkillVisualsOnly(SkillData skill, Character caster)
+        {
+            if (_skillNameText != null)
+                _skillNameText.text = skill?.SkillName ?? "---";
+
+            if (_costText != null)
+                _costText.text = skill?.Cost > 0 ? skill.Cost.ToString() : "";
+
+            if (_casterNameText != null)
+                _casterNameText.text = caster != null ? caster.Name : "";
+
+            if (_skillIcon != null)
+            {
+                _skillIcon.sprite = skill?.Icon;
+                _skillIcon.color = GetSkillColor(skill);
+            }
+
+            // 스킬 타입별 배경 틴트
+            if (_bgImage != null)
+            {
+                var skillColor = GetSkillColor(skill);
+                _bgImage.color = new Color(skillColor.r * 0.25f, skillColor.g * 0.25f, skillColor.b * 0.25f, 0.9f);
+            }
+        }
+
         public void Clear()
         {
             _skill = null;
             _caster = null;
+
+            // 툴팁 내용 비우기 — 이전 스킬 잔류 방지 (빈 슬롯에 툴팁 뜨는 것 차단)
+            var tooltip = GetComponent<TooltipTarget>();
+            if (tooltip != null) tooltip.SetContent("", "", "");
 
             if (_skillNameText != null)
                 _skillNameText.text = "---";
@@ -168,6 +189,7 @@ namespace TeamLog.UI.Battle
 
         public void SetRerollAvailable(bool available)
         {
+            if (_isShuffling) return;
             if (_rerollButton != null)
                 _rerollButton.gameObject.SetActive(available && _skill != null && !_isAssigned);
         }
@@ -234,6 +256,7 @@ namespace TeamLog.UI.Battle
 
         private void OnClick()
         {
+            if (_isShuffling) return;
             if (_skill != null && _parent != null)
             {
                 _parent.SelectSlot(_slotIndex);
@@ -243,7 +266,51 @@ namespace TeamLog.UI.Battle
 
         private void OnRerollClick()
         {
+            if (_isShuffling) return;
             OnSlotRerollRequested?.Invoke(_slotIndex);
+        }
+
+        // ── Reroll Shuffle Animation ──────────────────────────────
+
+        /// <summary>
+        /// 리롤 셔플 애니메이션 — 0.05초 간격으로 5회 랜덤 스킬 표시 후 최종 스킬로 안착
+        /// </summary>
+        public void PlayRerollShuffle(SkillData finalSkill, Character caster,
+            IReadOnlyList<SkillData> shufflePool, System.Action onComplete = null)
+        {
+            if (_shuffleCoroutine != null)
+                StopCoroutine(_shuffleCoroutine);
+            _shuffleCoroutine = StartCoroutine(RerollShuffleRoutine(finalSkill, caster, shufflePool, onComplete));
+        }
+
+        private IEnumerator RerollShuffleRoutine(SkillData finalSkill, Character caster,
+            IReadOnlyList<SkillData> shufflePool, System.Action onComplete)
+        {
+            _isShuffling = true;
+
+            // 셔플 중 리롤 버튼 숨기기
+            if (_rerollButton != null)
+                _rerollButton.gameObject.SetActive(false);
+
+            AudioManager.Instance.PlaySkillReroll();
+
+            // 셔플 — 0.05초 간격으로 5회 랜덤 스킬 표시
+            int shuffleCount = 5;
+            for (int i = 0; i < shuffleCount; i++)
+            {
+                if (shufflePool != null && shufflePool.Count > 0)
+                {
+                    var randomSkill = shufflePool[Random.Range(0, shufflePool.Count)];
+                    SetSkillVisualsOnly(randomSkill, caster);
+                }
+                yield return new WaitForSeconds(0.05f);
+            }
+
+            // 최종 안착 — SetSkill로 툴팁/색상 캐싱 등 모든 상태 갱신
+            SetSkill(finalSkill, caster);
+
+            _isShuffling = false;
+            onComplete?.Invoke();
         }
 
         public void OnPointerEnter(PointerEventData eventData)

@@ -33,6 +33,10 @@ MonoBehaviour:
     prefab: {fileID: 153912, guid: 932046b7eaf3b554f8d74c81e2f00558, type: 3}
   - name: Critical
     prefab: {fileID: 139844, guid: bd9cbf3a6ae77524788b4bbdb5422498, type: 3}
+  - name: Slash
+    prefab: {fileID: 1691668335544622, guid: 25f0520c9ecef6641af6ea648e95a88d, type: 3}
+  - name: Stun
+    prefab: {fileID: 188560, guid: 9c3b7f4ace8832b40abe6afe89fbcd91, type: 3}
   - name: Purify
     prefab: {fileID: 185744, guid: b88a52d0de3924c4db6011de30ecccd0, type: 3}
   - name: Victory

@@ -16,7 +16,6 @@ MonoBehaviour:
   _description: "\uB9E4 \uD134 3 HP \uD68C\uBCF5"
   _icon: {fileID: 0}
   _trigger: 3
-  _effectType: 3
   _effectValue: 3
   _rarity: 0
   _price: 60

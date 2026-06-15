@@ -19,9 +19,9 @@ MonoBehaviour:
   _tier: 3
   _icon: {fileID: 0}
   _isCursed: 1
-  _curseDescription: "HP 30% \uC774\uD558\uC77C \uB54C\uB9CC \uBC1C\uB3D9"
+  _curseDescription: "HP 50% \uC774\uD558\uC77C \uB54C\uB9CC \uBC1C\uB3D9"
   _keywords:
   - Type: 1
     Value: 2
     Trigger: 11
-    ConditionParam: 0.3
+    ConditionParam: 0.5

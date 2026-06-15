@@ -16,7 +16,6 @@ MonoBehaviour:
   _description: "\uACE8\uB4DC \uD68D\uB4DD \uC2DC +15 \uACE8\uB4DC"
   _icon: {fileID: 0}
   _trigger: 9
-  _effectType: 4
   _effectValue: 15
   _rarity: 1
   _price: 120

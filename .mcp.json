@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mcp-unity": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "C:/Unity/Projects/Team_Log/Library/PackageCache/com.gamelovers.mcp-unity@5dc92f540190/Server~/build/index.js"
+      ]
+    }
+  }
+}

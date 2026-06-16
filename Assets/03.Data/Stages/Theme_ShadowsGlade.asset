@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e099268e8219da449053c38430e6332, type: 3}
+  m_Name: Theme_ShadowsGlade
+  m_EditorClassIdentifier: 
+  themeId: ShadowsGlade
+  displayName: "\uADF8\uB9BC\uC790 \uACE8\uC9DC\uAE30"
+  stageNumber: 3
+  description: "\uC740\uC2E0\uACFC \uD68C\uD53C\uB85C \uC608\uCE21\uC744 \uC5B4\uB835\uAC8C
+    \uB9CC\uB4DC\uB294 \uACE8\uC9DC\uAE30."
+  normalEnemies:
+  - {fileID: 11400000, guid: 14b0bd6e49092054ca1b531b25d638d5, type: 2}
+  - {fileID: 11400000, guid: 52e3ca2b34facb245879578d7e2ff6b4, type: 2}
+  - {fileID: 11400000, guid: 903e795ccb82dc544b0847f2830ade5e, type: 2}
+  - {fileID: 11400000, guid: ad04d017cb2d28c418e409154754111c, type: 2}
+  eliteEnemies:
+  - {fileID: 11400000, guid: 15d1c2f8630aef84f8f93d063307093c, type: 2}
+  - {fileID: 11400000, guid: 10619358882f4de40b3d456f5b25c86b, type: 2}
+  - {fileID: 11400000, guid: 3edf3ecf71bfbe94b85a1080ad972b13, type: 2}
+  boss: {fileID: 11400000, guid: 234771f11567fe24bb7241c0232dc76f, type: 2}
+  spawnPatternTable: {fileID: 11400000, guid: bf20a021b7ac53848aef208bdec7db85, type: 2}
+  themeKeywords:
+  - "\uC740\uC2E0"
+  - "\uD68C\uD53C"

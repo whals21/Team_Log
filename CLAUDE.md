@@ -33,19 +33,20 @@ Assets/
 
 ### 핵심 클래스 관계
 ```
-맵 시스템 (Phase 3):
-MapSceneSetup (진입점, SaveManager.HasSave 분기, OnRunEnded → RunEndOverlay, 자동 저장)
-    ├── GameRunState (런 전체 상태: 층, 골드, 파티 HP 유지, BonusAP 명상 보너스, RerollTokens, BattlesWon/TotalGoldEarned 통계, AugmentGenerator 위임)
-    ├── FloorEnemyPool (층별 적 풀: normalEnemies/eliteEnemies/boss, MapSceneBuilder에서 와이어링)
-    ├── MapFloor (단일 층 맵)
-    │   └── MapNode (노드: 타입, 위치, 연결, 방문 상태)
+맵 시스템 (Phase 3 / 7A):
+MapSceneSetup (진입점, SaveManager.HasSave 분기, OnRunEnded → RunEndOverlay, 자동 저장, StageThemeCandidateList[] 보유)
+    ├── GameRunState (런 전체 상태: 4스테이지, 골드, 파티 HP 유지, BonusAP 명상 보너스, RerollTokens, BattlesWon/TotalGoldEarned 통계, AugmentGenerator 위임, SelectedThemes 리스트 + CurrentStageTheme 프로퍼티, 런 시작 시 테마 무작위 채택, ApplyEliteBonus/ApplyStageClearBonus + PendingShopDiscount/ExtraRelics/ExtraAugments 생명주기)
+    ├── StageThemeData (ScriptableObject: themeId/displayName/stageNumber/normalEnemies/eliteEnemies/boss/spawnPatternTable/themeKeywords/description, DataGenerator.Stages.cs에서 자동 생성)
+    ├── StageThemeCandidateList (스테이지별 3개 후보 배열, 런 시작 시 1개 무작위 채택)
+    ├── MapFloor (단일 스테이지 맵, 6 레이어: Start + 4 전투 + Boss, BranchingLayers={2,4}에서 Battle/Elite 선택)
+    │   └── MapNode (노드: 타입, 위치, 연결, 방문 상태, NodeData 객체 참조)
     ├── MapView (맵 시각화 UI)
-    ├── EventUI / ShopUI / RewardUI / RestUI / RunEndOverlay (노드별 서브 UI + 런 종료 오버레이)
-    └── MapGenerator (프로시저럴 맵 생성)
+    ├── EventUI / ShopUI / RewardUI / RestUI / RunEndOverlay / StageBonusUI (노드별 서브 UI + 런 종료 오버레이 + 엘리트/스테이지클리어 보상)
+    └── MapGenerator (프로시저럴 맵 생성, BranchingLayers에서 Battle+Elite 노드 쌍 생성, StageThemeData.eliteEnemies 존재 여부로 분기 폴백)
 
 전투 시스템 (Phase 1-2):
-BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신, bonusAP 명상 보너스 전달)
-    ├── TurnManager (턴 사이클 오케스트레이터, AP 관리, 대상 결정, bonusFirstTurnAP 첫 턴 AP 보너스)
+BattleSceneSetup (진입점, SetBattleData로 외부 데이터 수신, bonusAP 명상 보너스 전달, 순차 적 턴 코루틴 ExecuteEnemyTurnSequence — EnableSequentialEnemyTurn 모드에서 OnEnemyTurnSequenceStarted 이벤트 수신 시 적 한 명씩 행동 + 하이라이트/의도 클리어/VFX 지연, 매 행동 후 IsBattleEndedEarly 전멸 체크)
+    ├── TurnManager (턴 사이클 오케스트레이터, AP 관리, 대상 결정, bonusFirstTurnAP 첫 턴 AP 보너스, 순차 적 턴 모드: EnableSequentialEnemyTurn + ExecuteSingleEnemyAction/CompleteEnemyTurn/IsBattleEndedEarly + OnEnemyTurnSequenceStarted/OnEnemyActing 이벤트, 기본값은 동기 모드로 시뮬레이터 호환)
     │   ├── SkillExecutor (인스턴스, 타겟별 스킬 실행 + 증강 해석 + 키워드 해석, OnSkillApplied 이벤트)
     │   ├── DamageCalculator (static, 데미지 공식 + 특성 훅 + 유물 훅 + 카운터 데미지, TurnManager/EnemyAIController에서 호출)
     │   ├── SkillDrawSystem (가중치 랜덤 드로우)
@@ -85,10 +86,14 @@ DeckViewerUI (파티 전체 스킬/아이템/유물 뷰어 오버레이, 캐릭�
 TutorialUI (인터랙티브 튜토리얼 오버레이, TutorialStep 진행 상태, MetaSaveData.HasCompletedTutorial 플래그, 4단계: MapNavigation/BattleBasics/ShopBasics/RestBasics)
 BattleSpeed (전투 속도 enum: Normal=1, Fast=2, BattleSceneSetup.ToggleBattleSpeed → Time.timeScale, TopBarUI 속도 버튼 "1x"/"2x")
 ShopUI.Sell (상점 판매 탭 partial, ShopManager.SellSkill/SellItem, 구매가 50% 환불, ConfirmationDialog 재사용)
-BalanceSimulator (자동 밸런스 시뮬레이터, Editor 전용 partial class 4분할, TeamLog.Editor 네임스페이스)
+StageBonusUI (엘리트/스테이지클리어 보상 3택1 듀얼모드 — ShowEliteBonus/ShowStageClearBonus, 버튼 인덱스==enum값 매핑, UIAnimationHelper.FadeIn/FadeOut)
+EliteBonusType (enum: BonusRelic/PartyUpgrade/ShopDiscount — GameRunState.ApplyEliteBonus 처리)
+StageClearBonusType (enum: BurstReady/Recharge/IntelAdvantage — GameRunState.ApplyStageClearBonus 처리)
+BalanceSimulator (자동 밸런스 시뮬레이터, Editor 전용 partial class 5분할, TeamLog.Editor 네임스페이스)
     ├── Quick Combat 1000팩: F1~F3 일반/엘리트/보스 9카테고리 매트릭스 + SimulatedPlayerAI 휴리스틱 (Heal/Shield/Attack/Buff/Debuff/Purify 점수 평가)
     ├── Full Run 100회: GameRunState.Create/Destroy로 매 런 격리, 맵 경로 자동 선택(위기시 Rest>Shop, 여유시 Elite>Battle), 노드별 자동 처리
-    ├── 리포트: Assets/09.Docs/BalanceReports/{QuickCombat,FullRun}_타임스탬프.csv + 콘솔 요약 (층별 승률, 사망 분포, 도달률)
+    ├── Relic Synergy Test: 7카테고리 3-세트 유물 강제 지급 후 F2 전투 (일반30+보스15팩), 카테고리별 승률 비교
+    ├── 리포트: Assets/09.Docs/BalanceReports/{QuickCombat,FullRun,RelicSynergy}_타임스탬프.csv + 콘솔 요약
     └── 안전장치: MAX_TURNS=50 무한루프 방지, CombatEventBus.Clear/SkillExecutor.ClearEvents 매 팩 정리, Application.isPlaying 가드
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
@@ -100,9 +105,9 @@ Character (순수 C# 클래스, MonoBehaviour 아님)
 
 SkillInstance (순수 C# 클래스, SkillData + UpgradeLevel, EffectivePower/Cost/Weight 계산 프로퍼티)
 
-CombatEventBus (static 전투 중앙 이벤트 버스 — DamageCalculator/SkillExecutor에서 발행, RelicHandler에서 구독)
+CombatEventBus (static 전투 중앙 이벤트 버스 — 13종 이벤트: OnBattleStart/End, OnTurnStart/End, OnDamageDealt/Received, OnKill, OnHealApplied, OnShieldGained, OnGoldEarned, OnSkillUsed, OnRerollUsed, OnRelicTriggered)
 EnemyActionPattern (순수 C# 클래스, 상황인식 가중치 기반 스킬 선택 — 기본 가중치에 5규칙 배수 곱산: HP<30% 힐/쉴드 x3.0, HP<50% 힐/쉴드 x2.0, 약한 적 존재 공격 x2.5, 첫 턴 버프 x2.0, HP<50% 디버프 x1.5)
-RelicHandler (순수 C# 클래스, GameRunState 소속, 유물 트리거 매칭 → 효과 적용)
+RelicHandler (순수 C# 클래스, GameRunState 소속, 유물 트리거 매칭 → 효과 적용, _nextAttackBonusDamage 일시적 버프 시스템, _triggerDepth 무한루프 방지(MAX 5))
 
 AugmentOfferGenerator (순수 C# 클래스, 등급 가중치 증강 선택 + 호환성 체크 + 제안 조합, GameRunState.AugmentGenerator로 접근)
 
@@ -111,6 +116,10 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 
 ### 턴 사이클
 `Draw → PlayerAction(AP 관리) → Execution → EnemyTurn → BattleEnd`
+
+**적 턴 실행 모드**:
+- **순차 모드 (런타임, 기본)**: BattleSceneSetup이 `EnableSequentialEnemyTurn()` 호출 → StartEnemyTurn이 `OnEnemyTurnSequenceStarted` 이벤트 발행 → 코루틴이 적 한 명씩 `ExecuteSingleEnemyAction()` 실행 (하이라이트 → 행동 → 의도 클리어 → VFX 대기 → 전멸 체크) → `CompleteEnemyTurn()`. WaitForSeconds는 Time.timeScale 영향으로 1x/2x 자동 적용
+- **동기 모드 (시뮬레이터)**: `EnableSequentialEnemyTurn()` 미호출 → StartEnemyTurn이 `ExecuteEnemyActions()` 동기 실행 (모든 적 같은 프레임). BalanceSimulator는 수정 없이 동기 모드 유지
 
 ### VFX/임팩트 시스템
 스킬 사용 시 시각 효과는 두 경로로 분기:
@@ -139,13 +148,15 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
   - `Object.name = fileName` (에셋 파일명과 일치, Unity 경고 방지)
   - 한국어 표시명은 `_skillName`/`_characterName` 등 private 필드에 저장
   - 스킬 Cost 포함하여 모든 필드를 명시적으로 설정
-  - 파일 구조: DataGenerator.cs (진입점+스킬/캐릭터/유틸), DataGenerator.Augments.cs (증강+스폰패턴), DataGenerator.Events.cs (이벤트), DataGenerator.Relics.cs (유물), DataGenerator.Palettes.cs (UI/오디오/VFX 팔레트)
+  - 파일 구조: DataGenerator.cs (진입점+스킬/캐릭터/유틸), DataGenerator.Augments.cs (증강+스폰패턴), DataGenerator.Events.cs (이벤트), DataGenerator.Relics.cs (유물), DataGenerator.Palettes.cs (UI/오디오/VFX 팔레트), DataGenerator.Stages.cs (스테이지 테마)
 - **MapSceneBuilder 규칙**:
   - 에셋 필터링은 `Object.name`이 아닌 파일 경로 기반 (`namePrefix` 파라미터)
-  - 층별 적 풀 분리: `FloorEnemyPool` 구조체로 층별(normal/elite/boss) 독립 관리
-  - 층 배정: F1=숲(슬라임/고블린/늑대/독버섯), F2=유적(해골/박쥐/미라/궁수), F3=심연(망령/그림자/악마병사/가고일)
-  - 엘리트 배정: F2=기존3종, F3=신규3종(주술사/대장/악마마법사)
-  - 보스 배정: F1=고블린왕, F2=드래곤, F3=마왕
+  - 스테이지 테마 후보: `StageThemeCandidateList[]`로 4스테이지 × 3후보 관리 (Phase 7D: 12테마 정식 분화)
+  - 테마 데이터는 StageThemeData SO에 적/엘리트/보스/스폰테이블 통합 (FloorEnemyPool은 레거시 호환용)
+  - 테마 배정 (Phase 7D 정식): Stage1=GreyForest/FrostedPass/SunscorchedPlains, Stage2=CrimsonChapel/RotbloomBog/RuinedTemple, Stage3=AbyssalTrench/Stormpeak/ShadowsGlade, Stage4=EmberThrone/EternalTundra/DemonCitadel
+  - 적 풀 재조합 전략: 기존 F1/F2/F3 적 에셋을 테마별로 재조합 (신규 적 에셋 생성 없이 차별화), F4는 F3 풀 + GetFloorScaling(2.0f)으로 자동 강화
+  - 엘리트 보상 (Phase 7B): EliteBonusType 3택1 (BonusRelic / PartyUpgrade / ShopDiscount+100G)
+  - 스테이지 클리어 보상 (Phase 7C): StageClearBonusType 3택1 (BurstReady AP+2 / Recharge HP50% / IntelAdvantage 상점 진열 추가)
 
 ## 코딩 규칙
 
@@ -237,6 +248,7 @@ BalanceSimulator (자동 밸런스 시뮬레이터, `#if UNITY_EDITOR`):
   BalanceSimulator.Combat.cs   — SimulatedPlayerAI (private 중첩 클래스) + Quick Combat 1000팩 매트릭스
   BalanceSimulator.Run.cs      — Full Run 100회 + 맵 노드 자동 결정 (Battle/Elite/Shop/Event/Rest)
   BalanceSimulator.Report.cs   — ReportUtils 중첩 클래스 + 통계 집계 + CSV 출력 + 콘솔 요약
+  BalanceSimulator.Synergy.cs  — 유물 3-세트 시너지 테스트 (7카테고리 × F2 일반30+보스15팩)
 ```
 
 - 각 partial 파일의 `namespace`와 `class` 선언은 동일하게 유지
@@ -339,10 +351,18 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - 5D: 폴리싱 완료 (ItemEffectApplier HealPerTurn/BonusGold/DrawWeight 처리, EventData 저주/상태이상 필드, EventManager 상태이상 적용)
   - 5E: 전투 밸런스 재설계 완료 (드로우 가중치 25 통일, 적 AI 상황인식 가중치 시스템 5규칙, 적 스킬 위력 +20%, 스폰 패턴 6건 +1마리, 보스 HP +15%)
   - 5F: 자동 밸런스 시뮬레이터 완료 (BalanceSimulator 4파일 분할 — Quick Combat 1000팩 + Full Run 100회, SimulatedPlayerAI 휴리스틱, CSV 리포트 + 콘솔 요약, MAX_TURNS 무한루프 방지, CombatEventBus 매 팩 정리)
-  - **잔여**: 런타임 플레이테스트 전체 검증 + 시뮬레이터 결과 기반 밸런스 튜닝
+  - **6A**: 유물 시너지 시스템 (신규 26종 유물 — 총 42종, 9카테고리 시너지 설계, 신규 키워드/트리거: OnEnemyLowHP/OnRerollUsed, _nextAttackBonusDamage 일시적 버프, 트리거 체인 시스템, RelicSynergy 테스트 모드, F2 보스 HP 184→145 조정)
+- **Phase 7 (스테이지 시스템 재설계)**: 완료
+  - 7A: 4스테이지 인프라 완료 (StageThemeData SO 신규 정의, GameRunState.TotalFloors 3→4, SelectedThemes 리스트 + 무작위 채택 로직, MapGenerator BranchingLayers={2,4} Battle/Elite 노드 쌍 생성, FloorConfigs 4스테이지 6레이어 표준화, MapSceneSetup _stageThemeCandidates 필드 교체, SaveManager SelectedThemePaths 저장/로드)
+  - 7B: 엘리트 분기 보상 완료 (EliteBonusType 3택1 — BonusRelic/PartyUpgrade/ShopDiscount+100G, GameRunState.ApplyEliteBonus, StageBonusUI.ShowEliteBonus, PendingShopDiscount 생명주기: Peek→Save→Restore→Consume)
+  - 7C: 스테이지 클리어 보상 완료 (StageClearBonusType 3택1 — BurstReady AP+2/Recharge HP50%/IntelAdvantage 진열추가, GameRunState.ApplyStageClearBonus, StageBonusUI.ShowStageClearBonus, ShopManager.GenerateShopSlots extraAugments/extraRelics/discount 파라미터 확장)
+  - 7D: 테마 콘텐츠 확충 완료 (DataGenerator.Stages.cs 12테마 분화 — 4스테이지 × 3테마, 기존 적 에셋 재조합으로 차별화, 테마 키워드/설명 StageDesign.md 반영)
+  - 7E: BalanceSimulator 4스테이지 대응 완료 (FloorBossIds 4개 확장, _spawnTables F4 F3 폴백, Quick Combat 매트릭스 F4 추가 + 1000팩 유지, Report.cs 카테고리/사망분포/도달률 F4 포함)
+  - **잔여**: 런타임 엔드투엔드 런 클리어 검증 (F1→F2→F3→F4, 분기/엘리트/스테이지클리어 보상 정상 동작)
 
 ### 미구현 항목
 - VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, VFXPalette.asset에 15개 프리팹 할당, 스킬 타입별 VFX 분기+크리티컬 임팩트 연결 완료, 실제 파티클 표시 확인 필요)
+- 전투 밸런스 튜닝 (Quick Combat/Full Run 결과 기반 — F2 보스 급락, F3/F4 보스 1.3%, Full Run 0% 클리어율)
 
 ### 세션 종료 체크리스트
 

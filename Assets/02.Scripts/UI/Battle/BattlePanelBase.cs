@@ -64,13 +64,13 @@ namespace TeamLog.UI.Battle
                 UIAnimationHelper.FlashColor(_panelBgImage, Color.white, 0.15f);
         }
 
-        public void UpdateStats(int atk, int def)
+        public virtual void UpdateStats(int atk, int def)
         {
             if (_statText != null)
                 _statText.text = $"ATK {atk}  DEF {def}";
         }
 
-        public void UpdateStatusEffects(IEnumerable<ActiveEffect> effects)
+        public virtual void UpdateStatusEffects(IEnumerable<ActiveEffect> effects)
         {
             if (_statusEffectContainer == null) return;
 

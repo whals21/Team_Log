@@ -221,6 +221,7 @@ namespace TeamLog.Editor
             var deckViewerPanel = BuildDeckViewerPanel(canvasObj.transform, font);
             var tutorialOverlay = BuildTutorialOverlay(canvasObj.transform, font);
             var characterSelectPanel = BuildCharacterSelectPanel(canvasObj.transform, font);
+            var stageBonusPanel = BuildStageBonusPanel(canvasObj.transform, font);
 
             // ShopUI에 ConfirmationDialog 참조 연결
             var shopUISer = new SerializedObject(shopPanel.GetComponent<ShopUI>());
@@ -271,48 +272,33 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_testRogueData",
                 AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Rogue.asset"));
 
-            // EnemyData pools — 층별(floor-based) 적 풀 구성
-            var floorPoolsProp = setupSer.FindProperty("_floorPools");
-
-            // 층별 매핑 정의
-            string[][] floorNormals = new string[][]
+            // 스테이지 테마 후보 — StageDesign.md 기준 4스테이지 × 3테마 분화 (Phase 7D)
+            var themeCandidatesProp = setupSer.FindProperty("_stageThemeCandidates");
+            if (themeCandidatesProp != null)
             {
-                new[] { "Enemy_Slime", "Enemy_Goblin", "Enemy_Wolf", "Enemy_Mushroom" },           // Floor 1: 숲
-                new[] { "Enemy_Skeleton", "Enemy_Bat", "Enemy_Mummy", "Enemy_SkeletonArcher" },    // Floor 2: 유적
-                new[] { "Enemy_Wraith", "Enemy_Shadow", "Enemy_DemonSoldier", "Enemy_Gargoyle" }   // Floor 3: 심연
-            };
-            string[][] floorElites = new string[][]
-            {
-                new string[0],                                                                               // Floor 1: 엘리트 없음
-                new[] { "Enemy_EliteKnight", "Enemy_EliteMage", "Enemy_EliteDarkSlime" },                    // Floor 2
-                new[] { "Enemy_EliteGoblinShaman", "Enemy_EliteSkeletonCaptain", "Enemy_EliteDemonMage" }    // Floor 3
-            };
-            string[] floorBosses = new[] { "Enemy_BossGoblinKing", "Enemy_BossDragon", "Enemy_BossDemonLord" };
-
-            if (floorPoolsProp != null)
-            {
-                floorPoolsProp.arraySize = 3;
-                for (int f = 0; f < 3; f++)
+                var stageThemeNames = new[]
                 {
-                    var poolProp = floorPoolsProp.GetArrayElementAtIndex(f);
+                    new[] { "Theme_GreyForest", "Theme_FrostedPass", "Theme_SunscorchedPlains" },
+                    new[] { "Theme_CrimsonChapel", "Theme_RotbloomBog", "Theme_RuinedTemple" },
+                    new[] { "Theme_AbyssalTrench", "Theme_Stormpeak", "Theme_ShadowsGlade" },
+                    new[] { "Theme_EmberThrone", "Theme_EternalTundra", "Theme_DemonCitadel" },
+                };
 
-                    // Normal enemies
-                    var normalProp = poolProp.FindPropertyRelative("normalEnemies");
-                    var normals = LoadAssetsByNames<CharacterData>(CHAR_DIR, floorNormals[f]);
-                    normalProp.arraySize = normals.Count;
-                    for (int i = 0; i < normals.Count; i++)
-                        normalProp.GetArrayElementAtIndex(i).objectReferenceValue = normals[i];
-
-                    // Elite enemies
-                    var eliteProp = poolProp.FindPropertyRelative("eliteEnemies");
-                    var elites = LoadAssetsByNames<CharacterData>(CHAR_DIR, floorElites[f]);
-                    eliteProp.arraySize = elites.Count;
-                    for (int i = 0; i < elites.Count; i++)
-                        eliteProp.GetArrayElementAtIndex(i).objectReferenceValue = elites[i];
-
-                    // Boss
-                    var bossAsset = AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/{floorBosses[f]}.asset");
-                    poolProp.FindPropertyRelative("boss").objectReferenceValue = bossAsset;
+                const int STAGE_COUNT = 4;
+                themeCandidatesProp.arraySize = STAGE_COUNT;
+                for (int s = 0; s < STAGE_COUNT; s++)
+                {
+                    var entryProp = themeCandidatesProp.GetArrayElementAtIndex(s);
+                    var candidatesProp = entryProp.FindPropertyRelative("candidates");
+                    var names = stageThemeNames[s];
+                    candidatesProp.arraySize = names.Length;
+                    for (int i = 0; i < names.Length; i++)
+                    {
+                        var theme = AssetDatabase.LoadAssetAtPath<StageThemeData>($"Assets/03.Data/Stages/{names[i]}.asset");
+                        if (theme == null)
+                            Debug.LogWarning($"[MapSceneBuilder] 스테이지 {s + 1} 테마 누락: {names[i]}. TeamLog/Generate Stage Themes 먼저 실행하세요.");
+                        candidatesProp.GetArrayElementAtIndex(i).objectReferenceValue = theme;
+                    }
                 }
             }
 
@@ -326,26 +312,7 @@ namespace TeamLog.Editor
                     testEventsProp.GetArrayElementAtIndex(i).objectReferenceValue = eventAssets[i];
             }
 
-            // SpawnPatternTable — 층별 스폰 패턴 테이블 (F1/F2/F3)
-            var spawnPatternProp = setupSer.FindProperty("_spawnPatternTables");
-            if (spawnPatternProp != null)
-            {
-                string[] patternNames = { "SpawnPatterns_F1", "SpawnPatterns_F2", "SpawnPatterns_F3" };
-                spawnPatternProp.arraySize = patternNames.Length;
-                for (int i = 0; i < patternNames.Length; i++)
-                {
-                    var path = $"{SPAWN_PATTERN_DIR}/{patternNames[i]}.asset";
-                    // LoadAssetAtPath<SpawnPatternTable>이 스크립트 참조 누락으로 null을 반환할 수 있으므로
-                    // AssetDatabase.LoadMainAssetAtPath로 우회
-                    var obj = AssetDatabase.LoadMainAssetAtPath(path);
-                    var table = obj as SpawnPatternTable;
-                    if (table == null && obj != null)
-                        Debug.LogWarning($"[MapSceneBuilder] {patternNames[i]}: 로드됨({obj.GetType().Name})이지만 SpawnPatternTable로 캐스팅 실패");
-                    else if (table == null)
-                        Debug.LogWarning($"[MapSceneBuilder] {patternNames[i]}: 에셋 로드 실패 (path={path})");
-                    spawnPatternProp.GetArrayElementAtIndex(i).objectReferenceValue = table;
-                }
-            }
+            // SpawnPatternTable은 StageThemeData 내부에 임베드됨 (DataGenerator.Stages.cs)
 
             // AugmentData pool
             var augmentAssets = LoadAllAssets<AugmentData>(AUGMENT_DIR);
@@ -373,6 +340,7 @@ namespace TeamLog.Editor
 
             // CharacterSelectUI — 씬에 생성된 패널 와이어링
             WireProperty(setupSer, "_characterSelectUI", characterSelectPanel.GetComponent<CharacterSelectUI>());
+            WireProperty(setupSer, "_stageBonusUI", stageBonusPanel.GetComponent<StageBonusUI>());
 
             // RelicData pool
             var relicAssets = LoadAllAssets<RelicData>("Assets/03.Data/Relics");

@@ -287,7 +287,7 @@ namespace TeamLog.Editor
                     var chosen = ChooseBestReward(rewards);
                     if (chosen != null) rewardMgr.ApplyReward(chosen, runState);
                 }
-                // 다음 층 진입 (F3 보스면 런 클리어)
+                // 다음 층 진입 (마지막 층 보스면 런 클리어 — Phase 7E: F4)
                 runState.AdvanceToNextFloor();
                 return false;
             }

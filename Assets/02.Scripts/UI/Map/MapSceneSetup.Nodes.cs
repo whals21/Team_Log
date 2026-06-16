@@ -86,38 +86,38 @@ namespace TeamLog.UI.Map
 
         private void StartBattle(MapNode node)
         {
-            var pool = GetFloorPool();
-            if (pool == null)
+            var theme = _runState.CurrentStageTheme;
+            if (theme == null)
             {
-                Debug.LogWarning("[MapSceneSetup] 층별 적 풀이 비어 있습니다.");
+                Debug.LogWarning("[MapSceneSetup] 현재 스테이지 테마가 없습니다.");
                 return;
             }
 
-            var patternTable = GetSpawnPatternTable();
             var enemies = new List<Character>();
+            var patternTable = theme.spawnPatternTable;
 
             switch (node.NodeType)
             {
                 case MapNodeType.Boss:
-                    if (pool.boss != null)
-                        enemies.Add(new Character(pool.boss));
+                    if (theme.boss != null)
+                        enemies.Add(new Character(theme.boss));
                     break;
                 case MapNodeType.Elite:
                     if (patternTable != null)
                         enemies = patternTable.RollElitePattern();
-                    // 폴백: 패턴 테이블이 없으면 기존 방식
-                    if (enemies.Count == 0 && pool.eliteEnemies != null && pool.eliteEnemies.Length > 0)
-                        enemies.Add(new Character(pool.eliteEnemies[UnityEngine.Random.Range(0, pool.eliteEnemies.Length)]));
+                    // 폴백: 패턴 테이블이 없거나 비었으면 테마 엘리트 풀에서 무작위
+                    if (enemies.Count == 0 && theme.eliteEnemies != null && theme.eliteEnemies.Count > 0)
+                        enemies.Add(new Character(theme.eliteEnemies[UnityEngine.Random.Range(0, theme.eliteEnemies.Count)]));
                     break;
                 default: // 일반 전투
                     if (patternTable != null)
                         enemies = patternTable.RollNormalPattern();
-                    // 폴백: 패턴 테이블이 없으면 기존 방식
-                    if (enemies.Count == 0 && pool.normalEnemies != null && pool.normalEnemies.Length > 0)
+                    // 폴백: 패턴 테이블이 없거나 비었으면 테마 일반 풀에서 무작위 1~3마리
+                    if (enemies.Count == 0 && theme.normalEnemies != null && theme.normalEnemies.Count > 0)
                     {
                         int count = UnityEngine.Random.Range(1, 4);
                         for (int i = 0; i < count; i++)
-                            enemies.Add(new Character(pool.normalEnemies[UnityEngine.Random.Range(0, pool.normalEnemies.Length)]));
+                            enemies.Add(new Character(theme.normalEnemies[UnityEngine.Random.Range(0, theme.normalEnemies.Count)]));
                     }
                     break;
             }
@@ -128,7 +128,7 @@ namespace TeamLog.UI.Map
                 return;
             }
 
-            // 층별 적 스케일링 적용
+            // 스테이지별 적 스케일링 적용
             float scaling = _runState.GetFloorScaling();
             foreach (var enemy in enemies)
                 enemy.ApplyFloorScaling(scaling);
@@ -137,20 +137,6 @@ namespace TeamLog.UI.Map
             BattleSceneSetup.SetBattleData(_playerParty, enemies, bonusAP);
             BattleResult.SetBattleType(node.NodeType);
             SceneTransition.Instance.FadeToScene(BattleSceneName);
-        }
-
-        private FloorEnemyPool GetFloorPool()
-        {
-            if (_floorPools == null || _floorPools.Length == 0) return null;
-            int index = System.Math.Clamp(_runState.CurrentFloor - 1, 0, _floorPools.Length - 1);
-            return _floorPools[index];
-        }
-
-        private SpawnPatternTable GetSpawnPatternTable()
-        {
-            if (_spawnPatternTables == null || _spawnPatternTables.Length == 0) return null;
-            int index = System.Math.Clamp(_runState.CurrentFloor - 1, 0, _spawnPatternTables.Length - 1);
-            return _spawnPatternTables[index];
         }
 
         #region Sub-UI Handlers
@@ -220,8 +206,39 @@ namespace TeamLog.UI.Map
 
         private void OnRewardComplete()
         {
-            // 보스 클리어 시 다음 층으로 이동 (보상 선택 이후)
-            if (_runState.CurrentMap.IsCleared)
+            // 엘리트 전투 후 엘리트 보너스 표시
+            if (BattleResult.BattleType == MapNodeType.Elite && _stageBonusUI != null)
+            {
+                _stageBonusUI.ShowEliteBonus();
+                return;
+            }
+
+            // 보스 클리어 후 (런 미완료 시) 스테이지 클리어 보너스 표시
+            if (BattleResult.BattleType == MapNodeType.Boss
+                && _runState.CurrentMap != null
+                && _runState.CurrentMap.IsCleared
+                && !_runState.IsRunComplete
+                && _stageBonusUI != null)
+            {
+                _stageBonusUI.ShowStageClearBonus();
+                return;
+            }
+
+            ProceedAfterBonus();
+        }
+
+        /// <summary>
+        /// 엘리트/스테이지 클리어 보너스 선택 완료 후 진행
+        /// </summary>
+        private void OnStageBonusComplete()
+        {
+            ProceedAfterBonus();
+        }
+
+        private void ProceedAfterBonus()
+        {
+            // 보스 클리어 시 다음 층으로 이동
+            if (_runState.CurrentMap != null && _runState.CurrentMap.IsCleared)
             {
                 _runState.AdvanceToNextFloor();
             }

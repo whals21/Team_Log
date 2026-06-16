@@ -16,6 +16,24 @@ namespace TeamLog.UI.Battle
     /// </summary>
     public class EnemyDetailPanel : BattlePanelBase, IPointerClickHandler
     {
+        // 공용 흰색 스프라이트 — sprite 없는 Image는 raycast가 무시되는 버그 방지
+        private static Sprite _whiteSprite;
+        private static Sprite WhiteSprite
+        {
+            get
+            {
+                if (_whiteSprite == null)
+                {
+                    _whiteSprite = Sprite.Create(
+                        Texture2D.whiteTexture,
+                        new Rect(0f, 0f, 4f, 4f),
+                        new Vector2(0.5f, 0.5f),
+                        100f, 0u, SpriteMeshType.FullRect, Vector4.zero);
+                }
+                return _whiteSprite;
+            }
+        }
+
         [Header("UI References")]
         [SerializeField] private Image _avatarImage;
         [SerializeField] private TextMeshProUGUI _nameText;
@@ -47,8 +65,12 @@ namespace TeamLog.UI.Battle
         private EnemyIntent _intent;
         private BattleUIManager _uiManager;
         private Tween _hpTween;
+        private Tween _actingTween;
+        private Color _defaultBgColor = Color.white;
+        private bool _defaultBgCaptured;
 
         public int EnemyIndex => _enemyIndex;
+        public Characters.Character Target => _character;
         public event Action<int> OnPanelClicked;
 
         private void Awake()
@@ -85,6 +107,13 @@ namespace TeamLog.UI.Battle
             }
 
             InitPanelBase();
+
+            // 하이라이트 복원용 기본 배경색 캡처
+            if (_panelBgImage != null)
+            {
+                _defaultBgColor = _panelBgImage.color;
+                _defaultBgCaptured = true;
+            }
         }
 
         private void Start()
@@ -100,8 +129,14 @@ namespace TeamLog.UI.Battle
             var popup = _uiManager?.CharacterPopup;
             if (popup != null)
             {
+                // 패널 중심의 화면 좌표 전달 → 팝업이 근처에 표시
+                var rect = transform as RectTransform;
+                Vector2 screenPos = rect != null
+                    ? RectTransformUtility.WorldToScreenPoint(null, rect.position)
+                    : Input.mousePosition;
+
                 if (_character != null)
-                    popup.Show(_character, _intent);
+                    popup.Show(_character, _intent, screenPos);
                 else
                     popup.ShowSample(_nameText?.text ?? "Enemy", _hpText?.text ?? "??");
             }
@@ -131,23 +166,54 @@ namespace TeamLog.UI.Battle
 
         private void SetupTraitArea(Characters.Character character)
         {
-            if (_buttonArea == null) return;
+            // ButtonArea가 없으면 자동 생성 (구버전 프리팹 호환)
+            if (_buttonArea == null)
+            {
+                var btnObj = new GameObject("ButtonArea");
+                btnObj.transform.SetParent(transform, false);
+                var btnRect = btnObj.AddComponent<RectTransform>();
+                btnRect.sizeDelta = new Vector2(0, 24);
+                var hlg = btnObj.AddComponent<HorizontalLayoutGroup>();
+                hlg.childAlignment = TextAnchor.MiddleCenter;
+                hlg.childControlWidth = false;
+                hlg.childControlHeight = false;
+                hlg.childForceExpandWidth = false;
+                hlg.childForceExpandHeight = false;
+                _buttonArea = btnObj.transform;
+            }
 
             // 기존 자식(가디언/아크카 버튼) 제거
             for (int i = _buttonArea.childCount - 1; i >= 0; i--)
                 Destroy(_buttonArea.GetChild(i).gameObject);
 
-            var trait = character?.Data.Trait ?? EnemyTrait.None;
-            if (trait == EnemyTrait.None) return;
+            var trait = character?.Data?.Trait ?? EnemyTrait.None;
+            if (trait == EnemyTrait.None)
+            {
+                Debug.LogWarning($"[EnemyDetailPanel] Trait is None for {character?.Name ?? "null"} — trait label skipped");
+                return;
+            }
 
             // 특성 라벨
             var labelRect = new GameObject("TraitLabel").AddComponent<RectTransform>();
             labelRect.SetParent(_buttonArea, false);
+            labelRect.anchorMin = new Vector2(0.5f, 0.5f);
+            labelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            labelRect.pivot = new Vector2(0.5f, 0.5f);
+            labelRect.anchoredPosition = Vector2.zero;
             labelRect.sizeDelta = new Vector2(160, 32);
+            labelRect.SetAsLastSibling();
+
+            // LayoutElement로 명시적 크기 보장 (HorizontalLayoutGroup에 의한 왜곡 방지)
+            var le = labelRect.gameObject.AddComponent<LayoutElement>();
+            le.preferredWidth = 160;
+            le.preferredHeight = 32;
+            le.minWidth = 160;
+            le.minHeight = 32;
 
             var bg = labelRect.gameObject.AddComponent<Image>();
+            bg.sprite = WhiteSprite;
             bg.color = BattleDisplayUtil.GetTraitColor(trait);
-            bg.raycastTarget = true;
+            bg.raycastTarget = true; // hover 이벤트 수신 위해 필수
 
             var labelObj = new GameObject("T").AddComponent<RectTransform>();
             labelObj.SetParent(labelRect, false);
@@ -327,6 +393,39 @@ namespace TeamLog.UI.Battle
         {
             if (_targetIndicator != null)
                 _targetIndicator.SetActive(isTargetable);
+        }
+
+        // ── 순차 적 턴 — 행동 중인 적 하이라이트 ──
+        // DOTween.To() 직접 사용 (asmdef 경계 규칙 — CLAUDE.md 참조)
+
+        private static readonly Color ActingBgColor = new Color(1f, 0.92f, 0.65f);
+
+        public void HighlightActing()
+        {
+            _actingTween?.Kill();
+            var t = transform;
+            float elapsed = 0f;
+            const float dur = 0.18f;
+            _actingTween = DOTween.To(
+                () => elapsed,
+                x =>
+                {
+                    elapsed = x;
+                    // 펀치 곡선: 0→1→0
+                    float curve = Mathf.Sin(Mathf.PI * Mathf.Clamp01(elapsed / dur));
+                    t.localScale = Vector3.one * (1f + 0.08f * curve);
+                },
+                dur, dur);
+            if (_panelBgImage != null)
+                _panelBgImage.color = ActingBgColor;
+        }
+
+        public void ClearActingHighlight()
+        {
+            _actingTween?.Kill();
+            transform.localScale = Vector3.one;
+            if (_panelBgImage != null && _defaultBgCaptured)
+                _panelBgImage.color = _defaultBgColor;
         }
 
     }

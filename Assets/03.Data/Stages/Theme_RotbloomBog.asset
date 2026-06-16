@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e099268e8219da449053c38430e6332, type: 3}
+  m_Name: Theme_RotbloomBog
+  m_EditorClassIdentifier: 
+  themeId: RotbloomBog
+  displayName: "\uBD80\uD328 \uB2AA"
+  stageNumber: 2
+  description: "\uB3C5\uACFC \uC804\uC5FC\uC73C\uB85C \uB3C4\uD2B8 \uB370\uBBF8\uC9C0\uB97C
+    \uC785\uD788\uB294 \uB2AA\uC9C0\uB300."
+  normalEnemies:
+  - {fileID: 11400000, guid: a0554e5b2dde08e40a682e5103410dd7, type: 2}
+  - {fileID: 11400000, guid: 8c3d19e253ce8cd47bdbe7c9e8bb99e9, type: 2}
+  - {fileID: 11400000, guid: 52e3ca2b34facb245879578d7e2ff6b4, type: 2}
+  - {fileID: 11400000, guid: ed6c97ce3df014748ae3ce172b7fcc06, type: 2}
+  eliteEnemies:
+  - {fileID: 11400000, guid: d59c15a49f2731a4bb5f095cf7b7da4d, type: 2}
+  - {fileID: 11400000, guid: e3182ba91914e3f4787805291cefc6d4, type: 2}
+  - {fileID: 11400000, guid: 030262a7eea30df41a59429168f81dc6, type: 2}
+  boss: {fileID: 11400000, guid: 47031d4055aaec345b7bf39e7be445f0, type: 2}
+  spawnPatternTable: {fileID: 11400000, guid: 3875186067dbd7143b4dae299584ce35, type: 2}
+  themeKeywords:
+  - "\uB3C5"
+  - "\uC804\uC5FC"

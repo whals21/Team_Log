@@ -14,12 +14,13 @@ namespace TeamLog.Editor
     /// </summary>
     public static partial class BalanceSimulator
     {
-        // Quick Combat 카테고리 순서 (층/등급별 정렬용)
+        // Quick Combat 카테고리 순서 (층/등급별 정렬용) — Phase 7E: F4 확장
         private static readonly string[] QuickCombatCategoryOrder =
         {
             "F1_Normal", "F1_Elite", "F1_Boss",
             "F2_Normal", "F2_Elite", "F2_Boss",
-            "F3_Normal", "F3_Elite", "F3_Boss"
+            "F3_Normal", "F3_Elite", "F3_Boss",
+            "F4_Normal", "F4_Elite", "F4_Boss"
         };
 
         // ═══════════════════════════════════════════
@@ -159,9 +160,9 @@ namespace TeamLog.Editor
                 sb.AppendLine($"평균 획득 골드: {avgGold:F1}");
                 sb.AppendLine();
 
-                // 사망 분포 — 층별
+                // 사망 분포 — 층별 (Phase 7E: F4 포함 4층)
                 sb.AppendLine("── 사망 분포 (층별) ──");
-                for (int f = 1; f <= 3; f++)
+                for (int f = 1; f <= 4; f++)
                 {
                     int deaths = results.FindAll(r => !r.RunCompleted && r.DeathLocation != null && r.DeathLocation.StartsWith($"F{f}_")).Count;
                     float pct = 100f * deaths / results.Count;
@@ -181,9 +182,9 @@ namespace TeamLog.Editor
                 }
                 sb.AppendLine();
 
-                // 층별 클리어 진입률 — 해당 층에 도달한 런 비율
+                // 층별 클리어 진입률 — 해당 층에 도달한 런 비율 (Phase 7E: F4 포함)
                 sb.AppendLine("── 층별 도달률 ──");
-                for (int f = 1; f <= 3; f++)
+                for (int f = 1; f <= 4; f++)
                 {
                     int reached = results.FindAll(r => r.FloorReached >= f).Count;
                     sb.AppendLine($"  F{f} 도달: {reached,3}/{results.Count} ({100f * reached / results.Count:F1}%)");

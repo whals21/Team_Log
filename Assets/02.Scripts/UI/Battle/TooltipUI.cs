@@ -87,80 +87,53 @@ namespace TeamLog.UI.Battle
             if (_parentCanvas == null) return;
             // ScreenSpaceOverlay → worldCamera null, ScreenSpaceCamera → worldCamera 사용
             Camera uiCamera = _parentCanvas.worldCamera;
+            var parentRT = _rectTransform.parent as RectTransform;
+            if (parentRT == null) return;
 
-            Vector2 mousePos;
+            Vector3 mouseScreen = Input.mousePosition;
+
+            // 툴팁의 실제 스크린 픽셀 크기 (CanvasScaler / pivot 무관)
+            var worldCorners = new Vector3[4];
+            _rectTransform.GetWorldCorners(worldCorners);
+            Vector2 scrMin = RectTransformUtility.WorldToScreenPoint(uiCamera, worldCorners[0]);
+            Vector2 scrMax = RectTransformUtility.WorldToScreenPoint(uiCamera, worldCorners[2]);
+            float tooltipW = Mathf.Max(10f, scrMax.x - scrMin.x);
+            float tooltipH = Mathf.Max(10f, scrMax.y - scrMin.y);
+
+            // 좌하단 기준 위치 — 기본은 마우스 우측 하단
+            float left = mouseScreen.x + _offsetX;
+            float bottom = mouseScreen.y + _offsetY;
+
+            // 우측 넘침 → 마우스 좌측으로
+            if (left + tooltipW > Screen.width)
+                left = mouseScreen.x - _offsetX - tooltipW;
+            // 그래도 우측 넘침 → 화면 우측 끝에 붙임
+            if (left + tooltipW > Screen.width)
+                left = Screen.width - tooltipW - 4f;
+            // 좌측 넘침 → 화면 좌측 끝에 붙임 (마우스와 떨어지더라도 최소한 화면 안)
+            if (left < 0f)
+                left = 4f;
+
+            // 하단 넘침 → 마우스 위쪽으로
+            if (bottom < 0f)
+                bottom = mouseScreen.y - _offsetY + tooltipH;
+            // 상단 넘침 → 화면 상단 끝에 붙임
+            if (bottom + tooltipH > Screen.height)
+                bottom = Screen.height - tooltipH - 4f;
+            // 그래도 하단 넘침 → 화면 하단 끝에 붙임
+            if (bottom < 0f)
+                bottom = 4f;
+
+            // pivot 보정 → 툴팁 중심의 스크린 좌표
+            Vector2 tooltipCenterScreen = new Vector2(
+                left + tooltipW * _rectTransform.pivot.x,
+                bottom + tooltipH * _rectTransform.pivot.y);
+
+            // 스크린 좌표 → 부모 RectTransform 로컬 좌표
+            Vector2 localPos;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _rectTransform.parent as RectTransform,
-                Input.mousePosition,
-                uiCamera,
-                out mousePos);
-
-            float offsetX = _offsetX;
-            float offsetY = _offsetY;
-
-            // 1) 기본 위치 (마우스 우측 하단)
-            _rectTransform.anchoredPosition = mousePos + new Vector2(offsetX, offsetY);
-            _rectTransform.ForceUpdateRectTransforms();
-
-            var corners = new Vector3[4];
-            _rectTransform.GetWorldCorners(corners);
-
-            float screenWidth = Screen.width;
-            float screenHeight = Screen.height;
-
-            // 2) 우측 넘침 → 좌측으로 이동
-            if (corners[2].x > screenWidth)
-                offsetX = -_offsetX - _rectTransform.rect.width;
-
-            // 3) 좌측 넘침 → 다시 우측으로 (최소한 마우스 옆)
-            // (좌측 반전 후에도 넘치면 화면 좌측에 붙임)
-
-            // 4) 하단 넘침 → 마우스 위쪽으로
-            if (corners[0].y < 0)
-                offsetY = -_offsetY + _rectTransform.rect.height;
-
-            // 5) 상단 넘침 → 마우스 아래쪽으로
-            if (corners[1].y > screenHeight)
-                offsetY = _offsetY;
-
-            _rectTransform.anchoredPosition = mousePos + new Vector2(offsetX, offsetY);
-            _rectTransform.ForceUpdateRectTransforms();
-            _rectTransform.GetWorldCorners(corners);
-
-            // 6) 최종 clamp — 그래도 넘치면 화면 경계에 맞춤
-            var parentRect = _rectTransform.parent as RectTransform;
-            Vector2 adjusted = _rectTransform.anchoredPosition;
-
-            // 좌측
-            if (corners[0].x < 0)
-            {
-                Vector2 screenLeft;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, Vector2.zero, uiCamera, out screenLeft);
-                adjusted.x = screenLeft.x + _rectTransform.rect.width * (1f - _rectTransform.pivot.x);
-            }
-            // 우측
-            if (corners[2].x > screenWidth)
-            {
-                Vector2 screenRight;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, new Vector2(screenWidth, 0), uiCamera, out screenRight);
-                adjusted.x = screenRight.x - _rectTransform.rect.width * _rectTransform.pivot.x;
-            }
-            // 하단
-            if (corners[0].y < 0)
-            {
-                Vector2 screenBottom;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, new Vector2(0, 0), uiCamera, out screenBottom);
-                adjusted.y = screenBottom.y + _rectTransform.rect.height * (1f - _rectTransform.pivot.y);
-            }
-            // 상단
-            if (corners[1].y > screenHeight)
-            {
-                Vector2 screenTop;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, new Vector2(0, screenHeight), uiCamera, out screenTop);
-                adjusted.y = screenTop.y - _rectTransform.rect.height * _rectTransform.pivot.y;
-            }
-
-            _rectTransform.anchoredPosition = adjusted;
+                parentRT, tooltipCenterScreen, uiCamera, out localPos);
+            _rectTransform.anchoredPosition = localPos;
         }
     }
 }

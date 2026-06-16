@@ -158,6 +158,10 @@ namespace TeamLog.Combat
             _turnManager.OnPhaseChanged += OnPhaseChanged;
             _turnManager.OnTurnStarted += OnTurnStarted;
             _turnManager.OnBattleEnded += OnBattleEnded;
+            _turnManager.OnEnemyTurnSequenceStarted += OnEnemyTurnSequenceStarted;
+            _turnManager.OnEnemyActing += OnEnemyActing;
+            // 순차 적 턴 모드 — 코루틴 주도로 적을 한 명씩 행동시켜 시각적 인지 향상
+            _turnManager.EnableSequentialEnemyTurn();
 
             // ActionBar 초기화
             if (_actionBar != null)

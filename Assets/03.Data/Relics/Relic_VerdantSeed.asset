@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9a74261196ac94478d6e0936080038d, type: 3}
+  m_Name: Relic_VerdantSeed
+  m_EditorClassIdentifier: 
+  _relicName: "\uC2E0\uB85D\uC758 \uC528\uC557"
+  _description: "\uD790 \uD6A8\uACFC +30%"
+  _icon: {fileID: 0}
+  _trigger: 0
+  _effectValue: 0
+  _rarity: 1
+  _price: 130
+  _keywords:
+  - Type: 7
+    Value: 1.3
+    Trigger: 0
+    ConditionParam: 0

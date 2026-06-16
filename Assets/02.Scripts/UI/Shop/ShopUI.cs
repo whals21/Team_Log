@@ -87,11 +87,25 @@ namespace TeamLog.UI.Shop
             ClearSlots();
 
             _currentSlots.Clear();
-            var slots = _shopManager.GenerateShopSlots(floorNumber, _augmentPool, _relicPool);
+
+            // 보류 상점 보너스 소비 (Phase 7B/7C) — 할인 / 추가 진열
+            float discount = _runState != null ? _runState.ConsumeShopDiscount() : 0f;
+            int extraRelics = _runState != null ? _runState.ConsumePendingShopExtraRelics() : 0;
+            int extraAugments = _runState != null ? _runState.ConsumePendingShopExtraAugments() : 0;
+
+            var slots = _shopManager.GenerateShopSlots(floorNumber, _augmentPool, _relicPool,
+                extraAugments, extraRelics, discount);
             _currentSlots.AddRange(slots);
 
             if (_titleLabel != null)
-                _titleLabel.text = "상점";
+            {
+                string title = "상점";
+                if (discount > 0f)
+                    title += $" (할인 {Mathf.RoundToInt(discount * 100)}%)";
+                if (extraRelics > 0 || extraAugments > 0)
+                    title += " +진열";
+                _titleLabel.text = title;
+            }
 
             UpdateGoldDisplay();
 

@@ -26,5 +26,5 @@ Enemy_EliteGoblinShaman,고블린 주술사,강력한 주술을 사용하는 고
 Enemy_EliteSkeletonCaptain,해골 대장,해골 군단을 지휘하는 대장.,Warrior,70,0,0,Captain_Strike;Captain_ShieldWall;Captain_Warcry;Captain_BoneShield,Counter,1,
 Enemy_EliteDemonMage,악마 마법사,지헥의 마법을 다루는 악마 마법사.,Mage,48,0,0,DemonMage_Hellfire;DemonMage_DarkPulse;DemonMage_CurseBarrier;DemonMage_SoulBurn,Thorns,1,
 Enemy_BossGoblinKing,고블린 왕,고블린 부족의 왕. 강력한 군대를 이끕니다.,Warrior,150,0,0,BossGKing_CrownStrike;BossGKing_Rally;BossGKing_Warcry;BossGKing_RoyalGuard,Rally,1,
-Enemy_BossDragon,드래곤,고대의 붉은 드래곤. 파괴적인 브레스를 사용합니다.,Mage,184,0,0,BossDragon_Breath;BossDragon_TailSwipe;BossDragon_FireStorm;BossDragon_DragonFear,Rampage,1,
+Enemy_BossDragon,드래곤,고대의 붉은 드래곤. 파괴적인 브레스를 사용합니다.,Mage,145,0,0,BossDragon_Breath;BossDragon_TailSwipe;BossDragon_FireStorm;BossDragon_DragonFear,Rampage,1,
 Enemy_BossDemonLord,마왕,세계를 지배하려는 마왕. 모든 힘을 가집니다.,Warrior,230,0,0,BossDL_DarkBlade;BossDL_Curse;BossDL_Meteor;BossDL_DarkBarrier,Immortal,1,

@@ -54,8 +54,9 @@ namespace TeamLog.Editor
         // 기본 파티 클래스 — Char_Warrior, Char_Mage, Char_Healer, Char_Rogue
         private static readonly string[] DefaultPartyIds = { "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Rogue" };
 
-        // 층별 보스 에셋 파일명
-        private static readonly string[] FloorBossIds = { "Enemy_BossGoblinKing", "Enemy_BossDragon", "Enemy_BossDemonLord" };
+        // 층별 보스 에셋 파일명 — Phase 7E: 4스테이지 확장
+        // F4는 F3 보스(마왕) 재사용, GetFloorScaling(2.0f)으로 자동 강화
+        private static readonly string[] FloorBossIds = { "Enemy_BossGoblinKing", "Enemy_BossDragon", "Enemy_BossDemonLord", "Enemy_BossDemonLord" };
 
         // ═══════════════════════════════════════════
         // 메뉴 진입점
@@ -143,12 +144,14 @@ namespace TeamLog.Editor
                 if (data != null) _bossDataPool.Add(data);
             }
 
-            // 스폰 패턴 테이블 (층별)
+            // 스폰 패턴 테이블 (층별) — Phase 7E: F4는 SpawnPatterns_F3 재사용
             _spawnTables = new Dictionary<int, SpawnPatternTable>();
-            for (int f = 1; f <= 3; f++)
+            for (int f = 1; f <= 4; f++)
             {
                 var table = AssetDatabase.LoadAssetAtPath<SpawnPatternTable>($"{SPAWN_PATH}/SpawnPatterns_F{f}.asset");
                 if (table != null) _spawnTables[f] = table;
+                else if (f == 4 && _spawnTables.TryGetValue(3, out var f3Table))
+                    _spawnTables[4] = f3Table; // F4 폴백: F3 패턴 재사용 (GetFloorScaling으로 강화)
             }
 
             // 적 패턴 데이터 전체 로드 (EnemyPatternData → EnemyActionPattern 생성용)
@@ -188,7 +191,7 @@ namespace TeamLog.Editor
             }
             if (_spawnTables.Count < 3)
             {
-                Debug.LogError($"[BalanceSimulator][{label}] 스폰 패턴 테이블 누락 (found {_spawnTables.Count}/3).");
+                Debug.LogError($"[BalanceSimulator][{label}] 스폰 패턴 테이블 누락 (found {_spawnTables.Count}/3, F4는 F3 폴백).");
                 return false;
             }
             if (_bossDataPool.Count < FloorBossIds.Length)

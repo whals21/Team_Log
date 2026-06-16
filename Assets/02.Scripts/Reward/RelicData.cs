@@ -16,7 +16,8 @@ namespace TeamLog.Reward
         OnHealApplied,
         OnShieldGained,
         OnGoldEarned,
-        OnSkillUsed
+        OnSkillUsed,
+        OnRerollUsed
     }
 
     /// <summary>

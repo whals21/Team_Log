@@ -71,6 +71,8 @@ namespace TeamLog.Skill
         OnSkillUsed,        // 스킬 사용 시
         OnGoldEarned,       // 골드 획득 시
         HPBelow,            // HP가 일정 비율 미만일 때만 적용
+        OnEnemyLowHP,       // 대상 적 HP가 일정 비율 미만일 때 (ConditionParam = threshold)
+        OnRerollUsed,       // 리롤 1회 소비 시
     }
 
     /// <summary>

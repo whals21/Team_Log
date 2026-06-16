@@ -43,10 +43,18 @@ namespace TeamLog.Map
         private List<RelicData> _relicPool;
         private List<AugmentData> _augmentPool;
 
+        // 테마 후보 (MapSceneSetup에서 주입) — 스테이지별 3개 후보
+        private List<List<StageThemeData>> _themeCandidates;
+
+        // 보류된 상점 보너스 (엘리트 보상/스테이지 클리어 보상에서 적립, 상점 방문 시 소비)
+        private float _pendingShopDiscount;       // 0~1, 다음 상점 할인율
+        private int _pendingShopExtraRelics;      // 다음 상점 추가 유물 진열 수
+        private int _pendingShopExtraAugments;    // 다음 상점 추가 증강 진열 수
+
         // 맵 진행
         public int CurrentFloor { get; private set; } = 1;
         public MapFloor CurrentMap { get; private set; }
-        public int TotalFloors { get; } = 3;
+        public int TotalFloors { get; } = 4;
 
         // 리소스
         public int Gold { get; private set; }
@@ -58,6 +66,17 @@ namespace TeamLog.Map
 
         // 파티
         public IReadOnlyList<Character> PlayerParty => _playerParty;
+
+        // 스테이지 테마 — 런 시작 시 각 스테이지별 1개씩 무작위 채택
+        public List<StageThemeData> SelectedThemes { get; } = new();
+        public StageThemeData CurrentStageTheme
+        {
+            get
+            {
+                int idx = CurrentFloor - 1;
+                return (idx >= 0 && idx < SelectedThemes.Count) ? SelectedThemes[idx] : null;
+            }
+        }
 
         // 유물
         public RelicHandler RelicHandler { get; } = new();
@@ -95,13 +114,61 @@ namespace TeamLog.Map
             IsRunActive = true;
             IsRunComplete = false;
             CurrentFloor = 1;
+            SelectThemes();
+            AddLog($"런 시작 — 총 {TotalFloors}스테이지");
             GenerateCurrentFloorMap();
+        }
+
+        /// <summary>
+        /// 각 스테이지별 테마 무작위 채택 — 시작 시 1회 호출
+        /// </summary>
+        private void SelectThemes()
+        {
+            SelectedThemes.Clear();
+            if (_themeCandidates == null || _themeCandidates.Count == 0)
+            {
+                for (int i = 0; i < TotalFloors; i++)
+                    SelectedThemes.Add(null);
+                return;
+            }
+
+            for (int stage = 1; stage <= TotalFloors; stage++)
+            {
+                if (stage <= _themeCandidates.Count)
+                {
+                    var pool = _themeCandidates[stage - 1];
+                    if (pool != null && pool.Count > 0)
+                    {
+                        SelectedThemes.Add(pool[_rng.Next(pool.Count)]);
+                        continue;
+                    }
+                }
+                SelectedThemes.Add(null);
+            }
+        }
+
+        /// <summary>
+        /// 테마 후보 풀 주입 — MapSceneSetup에서 런 시작 전 호출
+        /// </summary>
+        public void SetThemeCandidates(List<List<StageThemeData>> candidates)
+        {
+            _themeCandidates = candidates;
+        }
+
+        /// <summary>
+        /// 저장 로드용 — 이미 선택된 테마를 직접 복원
+        /// </summary>
+        public void RestoreSelectedThemes(List<StageThemeData> themes)
+        {
+            SelectedThemes.Clear();
+            if (themes != null)
+                SelectedThemes.AddRange(themes);
         }
 
         public void GenerateCurrentFloorMap()
         {
             var generator = new MapGenerator();
-            CurrentMap = generator.GenerateFloor(CurrentFloor);
+            CurrentMap = generator.GenerateFloor(CurrentFloor, CurrentStageTheme);
             CurrentMap.StartFloor();
             OnMapChanged?.Invoke(CurrentMap);
         }
@@ -118,7 +185,7 @@ namespace TeamLog.Map
             }
 
             CurrentFloor++;
-            AddLog($"층 {CurrentFloor}(으)로 진입");
+            AddLog($"스테이지 {CurrentFloor}(으)로 진입");
             GenerateCurrentFloorMap();
             SaveManager.Save();
         }
@@ -135,7 +202,7 @@ namespace TeamLog.Map
         public void OnBattleVictory()
         {
             BattlesWon++;
-            AddLog($"층 {CurrentFloor} — 전투 승리");
+            AddLog($"스테이지 {CurrentFloor} — 전투 승리");
         }
 
         // ── 경제 ──
@@ -162,6 +229,7 @@ namespace TeamLog.Map
                 1 => 1.0f,
                 2 => 1.3f,
                 3 => 1.6f,
+                4 => 2.0f,
                 _ => 1.0f + (CurrentFloor - 1) * 0.3f
             };
         }
@@ -265,6 +333,123 @@ namespace TeamLog.Map
             if (removed)
                 AddLog($"유물 제거: {relic.RelicName}");
             return removed;
+        }
+
+        // ── 엘리트/스테이지 클리어 보너스 (Phase 7B/7C) ──
+
+        /// <summary>
+        /// 엘리트 격파 보너스 적용 — StageDesign 5.2
+        /// </summary>
+        public void ApplyEliteBonus(EliteBonusType type)
+        {
+            switch (type)
+            {
+                case EliteBonusType.BonusRelic:
+                    var relic = PeekRandomRelic();
+                    if (relic != null)
+                    {
+                        AcquireRelic(relic);
+                        AddLog("엘리트 보너스: 유물 획득");
+                    }
+                    else
+                    {
+                        AddGold(50);
+                        AddLog("엘리트 보너스: 유물 풀 비어 골드 +50 보상");
+                    }
+                    break;
+
+                case EliteBonusType.PartyUpgrade:
+                    int roll = _rng.Next(3);
+                    foreach (var member in _playerParty)
+                    {
+                        if (!member.IsAlive) continue;
+                        if (roll == 0)
+                        {
+                            member.Health.SetMaxHP(member.Health.MaxHP + 15);
+                            member.Health.Heal(15);
+                        }
+                        else if (roll == 1)
+                            member.Stats.AddPermanentBase(StatType.ATK, 2);
+                        else
+                            member.Stats.AddPermanentBase(StatType.DEF, 2);
+                    }
+                    string statName = roll == 0 ? "HP+15" : (roll == 1 ? "ATK+2" : "DEF+2");
+                    AddLog($"엘리트 보너스: 파티 영구 강화 ({statName})");
+                    break;
+
+                case EliteBonusType.ShopDiscount:
+                    if (0.5f > _pendingShopDiscount) _pendingShopDiscount = 0.5f;
+                    AddGold(100);
+                    AddLog("엘리트 보너스: 다음 상점 50% 할인 + 100G");
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 스테이지 클리어 보너스 적용 — StageDesign 6.1
+        /// </summary>
+        public void ApplyStageClearBonus(StageClearBonusType type)
+        {
+            switch (type)
+            {
+                case StageClearBonusType.BurstReady:
+                    BonusAP += 2;
+                    AddLog("스테이지 보너스: 다음 스테이지 첫 전투 AP +2");
+                    break;
+
+                case StageClearBonusType.Recharge:
+                    foreach (var member in _playerParty)
+                    {
+                        if (member.IsAlive)
+                        {
+                            int healAmount = member.Health.MaxHP / 2;
+                            member.Health.Heal(healAmount);
+                        }
+                    }
+                    AddLog("스테이지 보너스: 파티 HP 50% 회복");
+                    break;
+
+                case StageClearBonusType.IntelAdvantage:
+                    _pendingShopExtraRelics++;
+                    _pendingShopExtraAugments++;
+                    AddLog("스테이지 보너스: 다음 상점 진열 추가 (유물+1, 증강+1)");
+                    break;
+            }
+        }
+
+        // ── 보류 상점 보너스 (상점 방문 시 소비) ──
+
+        public float PeekShopDiscount() => _pendingShopDiscount;
+        public int PeekPendingShopExtraRelics() => _pendingShopExtraRelics;
+        public int PeekPendingShopExtraAugments() => _pendingShopExtraAugments;
+
+        public float ConsumeShopDiscount()
+        {
+            float d = _pendingShopDiscount;
+            _pendingShopDiscount = 0f;
+            return d;
+        }
+
+        public int ConsumePendingShopExtraRelics()
+        {
+            int n = _pendingShopExtraRelics;
+            _pendingShopExtraRelics = 0;
+            return n;
+        }
+
+        public int ConsumePendingShopExtraAugments()
+        {
+            int n = _pendingShopExtraAugments;
+            _pendingShopExtraAugments = 0;
+            return n;
+        }
+
+        /// <summary>저장 로드용 — 보류 보너스 복원</summary>
+        public void RestorePendingShopBonuses(float discount, int extraRelics, int extraAugments)
+        {
+            _pendingShopDiscount = discount;
+            _pendingShopExtraRelics = extraRelics;
+            _pendingShopExtraAugments = extraAugments;
         }
 
         private void AddLog(string entry)

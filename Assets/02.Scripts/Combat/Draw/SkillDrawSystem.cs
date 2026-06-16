@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TeamLog.Combat;
 using TeamLog.Map;
 
 // 네임스페이스 충돌 해결
@@ -76,6 +77,7 @@ namespace TeamLog.Combat.Draw
                 slot.SetInstance(newInstance);
                 _rerollCount++;
                 OnSlotRerolled?.Invoke();
+                CombatEventBus.FireRerollUsed();
                 return true;
             }
 

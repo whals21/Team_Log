@@ -44,6 +44,9 @@ namespace TeamLog.UI.Battle
         [Header("Background")]
         [SerializeField] private Button _backgroundButton;
 
+        [Header("Panel Positioning")]
+        [SerializeField] private RectTransform _panelRect;
+
         [Header("Colors")]
         [SerializeField] private Color _hpColor = new Color(0.15f, 0.68f, 0.38f);
         [SerializeField] private Color _hpLowColor = new Color(1f, 0.5f, 0f);
@@ -74,6 +77,7 @@ namespace TeamLog.UI.Battle
             if (_statusContent == null) _statusContent = FindChild("Panel/StatusContent");
             if (_statusEntryContainer == null) _statusEntryContainer = FindChild("Panel/StatusContent/Content")?.transform;
             if (_backgroundButton == null) _backgroundButton = GetComponent<Button>();
+            if (_panelRect == null) _panelRect = transform.Find("Panel")?.GetComponent<RectTransform>();
 
             if (_closeButton != null)
                 _closeButton.onClick.AddListener(Hide);
@@ -129,19 +133,60 @@ namespace TeamLog.UI.Battle
 
         public void Show(Character character)
         {
-            Show(character, null);
+            Show(character, null, Vector2.zero);
         }
 
         public void Show(Character character, EnemyIntent intent)
+        {
+            Show(character, intent, Vector2.zero);
+        }
+
+        /// <summary>
+        /// 팝업 표시 — anchorScreenPos가 zero가 아니면 해당 위치 근처로 패널 이동
+        /// </summary>
+        public void Show(Character character, EnemyIntent intent, Vector2 anchorScreenPos)
         {
             _currentCharacter = character;
             _currentIntent = intent;
             gameObject.SetActive(true);
 
+            PositionPanel(anchorScreenPos);
+
             UpdateHeader();
             UpdateHP();
             UpdateStats();
             SwitchTab(0);
+        }
+
+        /// <summary>
+        /// 패널을 클릭한 UI 요소 근처로 이동 (화면 경계 클램핑)
+        /// </summary>
+        private void PositionPanel(Vector2 screenPos)
+        {
+            if (_panelRect == null || screenPos == Vector2.zero) return;
+
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+
+            var canvasRT = canvas.rootCanvas.transform as RectTransform;
+            if (canvasRT == null) return;
+
+            // 화면 좌표 → 로컬 anchored position
+            Vector2 localPos;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, screenPos, canvas.rootCanvas.worldCamera, out localPos);
+
+            // 패널 크기의 절반을 오프셋으로 사용 (클릭 위치에서 살짝 떨어뜨림)
+            float panelHalfW = _panelRect.rect.width * 0.5f;
+            float panelHalfH = _panelRect.rect.height * 0.5f;
+
+            // 화면 경계 클램핑
+            float halfW = canvasRT.rect.width * 0.5f;
+            float halfH = canvasRT.rect.height * 0.5f;
+
+            localPos.x = Mathf.Clamp(localPos.x, -halfW + panelHalfW, halfW - panelHalfW);
+            localPos.y = Mathf.Clamp(localPos.y, -halfH + panelHalfH, halfH - panelHalfH);
+
+            _panelRect.anchoredPosition = localPos;
         }
 
         public void Hide()

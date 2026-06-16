@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e099268e8219da449053c38430e6332, type: 3}
+  m_Name: Theme_RuinedTemple
+  m_EditorClassIdentifier: 
+  themeId: RuinedTemple
+  displayName: "\uC720\uC801 \uC794\uD574"
+  stageNumber: 2
+  description: "\uC5B8\uB370\uB4DC\uC640 \uC800\uC8FC\uB85C \uC0C1\uD0DC\uC774\uC0C1
+    \uC815\uD654\uC758 \uAC00\uCE58\uB97C \uD559\uC2B5."
+  normalEnemies:
+  - {fileID: 11400000, guid: 09948b2a653edb84188ce00ce61d966d, type: 2}
+  - {fileID: 11400000, guid: 52e3ca2b34facb245879578d7e2ff6b4, type: 2}
+  - {fileID: 11400000, guid: ed6c97ce3df014748ae3ce172b7fcc06, type: 2}
+  - {fileID: 11400000, guid: 282d022d7d6307e468dfc1cc3a80810e, type: 2}
+  eliteEnemies:
+  - {fileID: 11400000, guid: d59c15a49f2731a4bb5f095cf7b7da4d, type: 2}
+  - {fileID: 11400000, guid: e3182ba91914e3f4787805291cefc6d4, type: 2}
+  - {fileID: 11400000, guid: 030262a7eea30df41a59429168f81dc6, type: 2}
+  boss: {fileID: 11400000, guid: 47031d4055aaec345b7bf39e7be445f0, type: 2}
+  spawnPatternTable: {fileID: 11400000, guid: 3875186067dbd7143b4dae299584ce35, type: 2}
+  themeKeywords:
+  - "\uC5B8\uB370\uB4DC"
+  - "\uC800\uC8FC"

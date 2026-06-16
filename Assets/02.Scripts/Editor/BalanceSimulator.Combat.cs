@@ -50,17 +50,21 @@ namespace TeamLog.Editor
             var results = new List<CombatResult>(QuickCombatPacks);
 
             // 시나리오 매트릭스 (카테고리, 층, 팩 수, 생성 방식)
+            // Phase 7E: F4 추가, 총 1000팩 유지하도록 분배 조정
             var matrix = new (string category, int floor, int count, bool isElite, bool isBoss)[]
             {
-                ("F1_Normal", 1, 200, false, false),
-                ("F1_Elite",  1, 100, true,  false),
-                ("F1_Boss",   1, 100, false, true),
-                ("F2_Normal", 2, 150, false, false),
-                ("F2_Elite",  2, 100, true,  false),
-                ("F2_Boss",   2, 100, false, true),
-                ("F3_Normal", 3, 100, false, false),
+                ("F1_Normal", 1, 150, false, false),
+                ("F1_Elite",  1, 75,  true,  false),
+                ("F1_Boss",   1, 75,  false, true),
+                ("F2_Normal", 2, 125, false, false),
+                ("F2_Elite",  2, 75,  true,  false),
+                ("F2_Boss",   2, 75,  false, true),
+                ("F3_Normal", 3, 75,  false, false),
                 ("F3_Elite",  3, 50,  true,  false),
-                ("F3_Boss",   3, 100, false, true),
+                ("F3_Boss",   3, 75,  false, true),
+                ("F4_Normal", 4, 100, false, false),
+                ("F4_Elite",  4, 50,  true,  false),
+                ("F4_Boss",   4, 75,  false, true),
             };
 
             int totalDone = 0;
@@ -110,6 +114,7 @@ namespace TeamLog.Editor
                 1 => 1.0f,
                 2 => 1.3f,
                 3 => 1.6f,
+                4 => 2.0f,
                 _ => 1.0f + (floor - 1) * 0.3f
             };
         }

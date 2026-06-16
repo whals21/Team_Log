@@ -27,6 +27,14 @@ namespace TeamLog.Map
 
         // 획득 유물 (에셋 경로로 저장)
         public List<string> AcquiredRelicPaths = new();
+
+        // 스테이지 테마 (에셋 경로, 빈 문자열 = null)
+        public List<string> SelectedThemePaths = new();
+
+        // 보류된 상점 보너스 (Phase 7B/7C)
+        public float PendingShopDiscount;
+        public int PendingShopExtraRelics;
+        public int PendingShopExtraAugments;
     }
 
     [System.Serializable]
@@ -162,6 +170,15 @@ namespace TeamLog.Map
             foreach (var relic in state.RelicHandler.Relics)
                 data.AcquiredRelicPaths.Add(GetAssetPath(relic));
 
+            // 스테이지 테마 경로
+            foreach (var theme in state.SelectedThemes)
+                data.SelectedThemePaths.Add(theme != null ? GetAssetPath(theme) : "");
+
+            // 보류 상점 보너스 (저장 시에는 Peek, 상점 방문 시에만 Consume)
+            data.PendingShopDiscount = state.PeekShopDiscount();
+            data.PendingShopExtraRelics = state.PeekPendingShopExtraRelics();
+            data.PendingShopExtraAugments = state.PeekPendingShopExtraAugments();
+
             string json = JsonUtility.ToJson(data, true);
             File.WriteAllText(SavePath, json);
 #if UNITY_EDITOR
@@ -238,6 +255,23 @@ namespace TeamLog.Map
                 if (relic != null)
                     state.AcquireRelic(relic);
             }
+
+            // 스테이지 테마 복원
+            var themes = new List<StageThemeData>();
+            foreach (var path in data.SelectedThemePaths)
+            {
+                if (string.IsNullOrEmpty(path))
+                    themes.Add(null);
+                else
+                    themes.Add(LoadAsset<StageThemeData>(path));
+            }
+            state.RestoreSelectedThemes(themes);
+
+            // 보류 상점 보너스 복원
+            state.RestorePendingShopBonuses(
+                data.PendingShopDiscount,
+                data.PendingShopExtraRelics,
+                data.PendingShopExtraAugments);
 
 #if UNITY_EDITOR
             Debug.Log($"[SaveManager] 로드 완료 — 층 {data.CurrentFloor}, 파티 {party.Count}명, 유물 {data.AcquiredRelicPaths.Count}개");

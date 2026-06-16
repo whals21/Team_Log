@@ -1,8 +1,9 @@
 # 적 특성 데이터 카탈로그
 
-> 최종 갱신: 2026-06-04
+> 최종 갱신: 2026-06-16
 > 구현 소스: `Assets/02.Scripts/Characters/EnemyTrait.cs`
 > UI 매핑: `Assets/02.Scripts/UI/Battle/BattleDisplayUtil.cs`
+> 특수 적 특성 7종은 설계 단계 (구현 전, `EncounterConcepts.md` 참조)
 
 ---
 
@@ -240,20 +241,153 @@
 
 ---
 
-## 4. 훅(Call Hook) 시스템 요약
+## 4. 특수 적 특성 (7종)
 
-| 훅 메서드 | 호출 시점 | 사용 특성 |
-|-----------|----------|----------|
-| `OnTurnStart(turnNumber)` | 턴 시작 | Regenerate, Sturdy, PhaseShift, Rampage, Shell |
-| `ModifyIncomingDamage(damage)` | 데미지 계산 중 | Sturdy |
-| `OnDamageReceived(attacker, damage)` | 데미지 받은 후 | Counter, Thorns, Rampage, ArcaneFury, Rally |
-| `OnDamageDealtTo(target)` | 데미지를 입혔을 때 | Corrosive |
-| `PreventDeath()` | 사망 직전 | Immortal |
-| `ShouldBlockEffect()` | 상태이상 적용 전 | Shell |
+> 특수 적 전용 메커니즘. `MonsterCatalog.md` 섹션 5의 7종 특수 적이 보유.
+> 상세 설계는 `EncounterConcepts.md` 참조.
+
+### TemporalAnchor — 시간 정점
+
+| 항목 | 내용 |
+|------|------|
+| 색상 | 은빛 청록 `rgb(89, 179, 179)` |
+| 발동 타이밍 | 치명적 피해 시 |
+| 효과 | HP가 0이 되어야 할 때 **HP 30%로 부활** + 1턴 무적 |
+| 발동 제한 | 1회/전투 |
+
+**파훼법**: 부활 후 즉시 CC기(Stun/Freeze)로 무적 턴을 무의미하게 만들거나, 부활 직후 폭딜로 재끝냄. 한 번에 30% 이하로 깎고 다음 턴 마무리하는 "2킬 플랜" 필요.
+
+**배정 적**: 크로노맨서 (Enemy_Chronomancer)
+
+**구현 훅**: `PreventDeath()` → HP를 1이 아닌 30%로 설정 + 1턴 무적 버프
 
 ---
 
-## 5. 특성-적 배정 현황
+### Trapper — 함정술사
+
+| 항목 | 내용 |
+|------|------|
+| 색상 | 진주황 `rgb(191, 89, 0)` |
+| 발동 타이밍 | 사망 시 |
+| 효과 | 사망 시 **자신이 설치한 모든 지뢰 자동 폭발** (위력 100%) |
+| 발동 제한 | 사망 시 1회 |
+
+**파훼법**: 폭파술사를 처결하기 전에 지뢰가 설치된 아군을 미리 벗겨내거나 쉴드/힐로 폭발에 대비. 또는 ChainReaction을 먼저 유도해 지뢰를 터뜨린 뒤 처결.
+
+**배정 적**: 폭파술사 (Enemy_Saboteur)
+
+**구현 훅**: `OnDeath()` → 활성 지뢰 전체 폭발 트리거
+
+---
+
+### Punisher — 처벌자
+
+| 항목 | 내용 |
+|------|------|
+| 색상 | 황금 갈색 `rgb(128, 89, 0)` |
+| 발동 타이밍 | 공격 시 |
+| 효과 | 공격할 때마다 대상에게 **임의의 약한 디버프 1개 추가** (중첩 폭탄) |
+| 추가 디버프 풀 | AttackDown, DefenseDown, Poison(1/턴), Burn(1/턴) 중 랜덤 |
+| 발동 제한 | 없음 (매 공격) |
+
+**파훼법**: 인퀴지터를 CC로 무력화하거나 한 턴에 처결. 장기전에서는 디버프가 누적되어 Judgment의 추가 데미지가 폭등함. 치유사 Purify로 주기적으로 정리.
+
+**배정 적**: 인퀴지터 (Enemy_Inquisitor)
+
+**구현 훅**: `OnDamageDealtTo(target)` → 랜덤 디버프 1개 적용
+
+---
+
+### Mirror — 거울
+
+| 항목 | 내용 |
+|------|------|
+| 색상 | 홀로그램 은색 `rgb(179, 179, 204)` |
+| 발동 타이밍 | 마법 데미지 수신 시 |
+| 효과 | 받은 마법 데미지의 **25%를 즉시 공격자에게 반사** |
+| 특이사항 | 물리 데미지는 반사 안 함 |
+| 발동 제한 | 없음 (매 마법 피격) |
+
+**파훼법**: 마법사는 도플갱어에게 약한 스킬만 사용. 도적/전사의 물리 딜이 주력. 또는 마법사의 메테오를 **도플갱어가 Echo로 복사하기 전에** 도적이 Backstab으로 암살.
+
+**배정 적**: 도플갱어 (Enemy_Doppelganger)
+
+**구현 훅**: `OnDamageReceived(attacker, damage, isMagic)` → 마법 여부 체크 후 반사
+
+---
+
+### Commander — 지휘관
+
+| 항목 | 내용 |
+|------|------|
+| 색상 | 짙은 금색 `rgb(128, 102, 26)` |
+| 발동 타이밍 | 아군 사망 시 |
+| 효과 | 아군이 처치될 때마다 자신의 **ATK 영구 +3, DEF 영구 +1** |
+| 특이사항 | 소환수 사망도 카운트 (역이용 가능) |
+| 발동 제한 | 없음 (매 아군 사망) |
+
+**파훼법**: 소환수를 잡으면 레기온이 강해지는 딜레마 → **레기온 본체를 우선 처결**해야 함. 소환수를 무시하면서 단일 폭딜로 본체 암살. 광역 딜은 소환수 정리에만 제한적으로 사용.
+
+**배정 적**: 레기온 (Enemy_Legion)
+
+**구현 훅**: `OnAllyDied(ally)` → 영구 스탯 증가
+
+---
+
+### AdaptiveArmor — 적응 장갑
+
+| 항목 | 내용 |
+|------|------|
+| 색상 | 회청색 `rgb(89, 89, 102)` |
+| 발동 타이밍 | 데미지 수신 시 |
+| 효과 | **같은 타입(물리/마법) 공격을 연속으로 받으면 저항 +20%** (최대 +60%) |
+| 리셋 | 다른 타입 공격 받으면 해당 타입 저항 0으로 초기화 |
+| 발동 제한 | 타입별 각각 중첩 |
+
+**파훼법**: **물리/마법 교대 공격** 필수. 전사(물리) → 마법사(마법) → 도적(물리) 순서로 번갈아 때려야 저항이 쌓이지 않음. 단일 타입 극단 파티는 가디안에게 막힘.
+
+**배정 적**: 가디안 (Enemy_Guardian)
+
+**구현 훅**: `ModifyIncomingDamage(damage, type)` → 타입별 저항 중첩 추적
+
+---
+
+### Regenerative — 재생 핵
+
+| 항목 | 내용 |
+|------|------|
+| 색상 | 형광 녹색 `rgb(89, 191, 89)` |
+| 발동 타이밍 | 턴 시작 |
+| 효과 | 매 턴 시작 시 **HP 10% 회복** |
+| 조건 | Poison/Burn/Stun 상태가 아닐 때만 발동 |
+| 특이사항 | 일반 적 Regenerate(5 고정)와 달리 **% 기반** — 분열 후에도 비율 유지 |
+
+**파훼법**: 도트(Poison/Burn)로 재생 봉쇄가 핵심. 분열로 마이토제 개체가 늘어나면 전체 도트 적용이 필수 (광역 디버프). Stun도 회복을 막으므로 CC기가 유효.
+
+**배정 적**: 마이토제 (Enemy_Mytoze)
+
+**구현 훅**: `OnTurnStart()` → % 기반 HP 회복
+
+---
+
+## 5. 훅(Call Hook) 시스템 요약
+
+| 훅 메서드 | 호출 시점 | 사용 특성 |
+|-----------|----------|----------|
+| `OnTurnStart(turnNumber)` | 턴 시작 | Regenerate, Sturdy, PhaseShift, Rampage, Shell, **Regenerative** |
+| `ModifyIncomingDamage(damage, type)` | 데미지 계산 중 | Sturdy, **AdaptiveArmor** (type: 물리/마법) |
+| `OnDamageReceived(attacker, damage)` | 데미지 받은 후 | Counter, Thorns, Rampage, ArcaneFury, Rally, **Mirror** |
+| `OnDamageDealtTo(target)` | 데미지를 입혔을 때 | Corrosive, **Punisher** |
+| `PreventDeath()` | 사망 직전 | Immortal, **TemporalAnchor** |
+| `ShouldBlockEffect()` | 상태이상 적용 전 | Shell |
+| `OnDeath()` | 사망 후 | **Trapper** (지뢰 전폭) |
+| `OnAllyDied(ally)` | 아군 사망 시 | **Commander** (영구 버프) |
+
+> **API 확장 필요**: 기존 `ModifyIncomingDamage(damage)`는 데미지 타입(물리/마법)을 인자로 받지 않음. AdaptiveArmor 구현 시 시그니처를 `ModifyIncomingDamage(damage, DamageType type)`로 확장해야 함 (기존 특성은 type 무시).
+
+---
+
+## 6. 특성-적 배정 현황
 
 | 특성 | 등급 | 배정 적 | 층 | 파훼 핵심 |
 |------|------|--------|-----|-----------|
@@ -272,3 +406,10 @@
 | Rally | 보스 | 고블린 왕 | 1 | 임계점 전 원킬 |
 | Rampage | 보스 | 드래곤 | 2 | 매 턴 공격 분배 |
 | Immortal | 보스 | 마왕 | 3 | 2킬 플랜 |
+| TemporalAnchor | 특수 | 크로노맨서 | 2~3 | 부활 후 CC/2킬 |
+| Trapper | 특수 | 폭파술사 | 2~3 | 지뢰 사전 정리 |
+| Punisher | 특수 | 인퀴지터 | 3 | 단기전/Purify |
+| Mirror | 특수 | 도플갱어 | 3 | 물리 딜 주력 |
+| Commander | 특수 | 레기온 | 2~3 | 본체 우선 처결 |
+| AdaptiveArmor | 특수 | 가디안 | 2~3 | 물리/마법 교대 |
+| Regenerative | 특수 | 마이토제 | 3 | 도트+Stun 봉쇄 |

@@ -33,10 +33,19 @@ namespace TeamLog.Combat.Turn
         public TurnPhase CurrentPhase => _context.CurrentPhase;
         public int TurnNumber => _context.TurnNumber;
 
+        /// <summary>코루틴이 순회할 적 컨트롤러 목록 (읽기 전용).</summary>
+        public IReadOnlyList<EnemyAIController> EnemyControllers => _enemyControllers;
+
         public event System.Action<TurnPhase, TurnPhase> OnPhaseChanged;
         public event System.Action<int> OnTurnStarted;
         public event System.Action OnBattleEnded;
         public event System.Action<int, int> OnAPChanged;
+
+        // 순차 적 턴 모드 — 코루틴 주도 실행 시 사용 (BattleSceneSetup)
+        public event System.Action OnEnemyTurnSequenceStarted; // 코루틴 시작 알림
+        public event System.Action<Character> OnEnemyActing;   // 개별 적 행동 시작 (하이라이트용)
+
+        private bool _sequentialEnemyTurn;
 
         public int CurrentAP => _context.CurrentAP;
         public int MaxAP => _context.MaxAP;
@@ -184,7 +193,51 @@ namespace TeamLog.Combat.Turn
         public void StartEnemyTurn()
         {
             _context.SetPhase(TurnPhase.EnemyTurn);
-            ExecuteEnemyActions();
+
+            if (_sequentialEnemyTurn)
+            {
+                // 코루틴에게 제어 위임 — 동기 실행하지 않음 (런타임 시각화용)
+                OnEnemyTurnSequenceStarted?.Invoke();
+                return;
+            }
+
+            ExecuteEnemyActions(); // 기존 동기 경로 (시뮬레이터)
+        }
+
+        /// <summary>순차 적 턴 모드 활성화 — BattleSceneSetup에서 호출.</summary>
+        public void EnableSequentialEnemyTurn() => _sequentialEnemyTurn = true;
+
+        /// <summary>
+        /// 코루틴에서 적 한 명 행동 실행. 하이라이트 후 호출됨.
+        /// </summary>
+        public void ExecuteSingleEnemyAction(EnemyAIController controller)
+        {
+            if (controller != null && controller.Owner.IsAlive)
+            {
+                OnEnemyActing?.Invoke(controller.Owner);
+                controller.ExecuteAction();
+            }
+        }
+
+        /// <summary>
+        /// 코루틴 종료 후 호출 — ProcessTurnEnd + CheckBattleEnd + StartNewTurn.
+        /// ExecuteEnemyActions의 후반부와 동일한 로직.
+        /// </summary>
+        public void CompleteEnemyTurn()
+        {
+            ProcessTurnEnd();
+            CheckBattleEnd();
+
+            if (CurrentPhase != TurnPhase.BattleEnd)
+                StartNewTurn();
+        }
+
+        /// <summary>
+        /// 매 행동 후 전멸 조기 종료 체크 (코루틴이 사용).
+        /// </summary>
+        public bool IsBattleEndedEarly()
+        {
+            return _playerParty.TrueForAll(p => p.IsDead) || _enemies.TrueForAll(e => e.IsDead);
         }
 
         private void ExecuteEnemyActions()

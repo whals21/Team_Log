@@ -109,7 +109,7 @@ namespace TeamLog.UI.Battle
                 SetupSingleRowContainer();
 
             float panelWidth = multiRow ? 120f : 180f;
-            float panelHeight = multiRow ? 240f : 320f;
+            float panelHeight = multiRow ? 280f : 320f;
 
             foreach (var enemy in _enemies)
             {
@@ -162,8 +162,8 @@ namespace TeamLog.UI.Battle
             int columns = Mathf.CeilToInt(count / 2f);
             if (columns > ENEMIES_PER_ROW) columns = ENEMIES_PER_ROW;
 
-            grid.cellSize = new Vector2(120f, 240f);
-            grid.spacing = new Vector2(8, 8);
+            grid.cellSize = new Vector2(120f, 280f);
+            grid.spacing = new Vector2(10, 28);
             grid.padding = new RectOffset(8, 8, 8, 8);
             grid.childAlignment = TextAnchor.MiddleCenter;
             grid.startAxis = GridLayoutGroup.Axis.Horizontal;
@@ -308,6 +308,36 @@ namespace TeamLog.UI.Battle
             var panel = GetEnemyPanel(enemyIndex);
             if (panel != null)
                 panel.SetIntent(intent);
+        }
+
+        /// <summary>순차 적 턴 — 행동 중인 적 패널 하이라이트.</summary>
+        public void HighlightActingEnemy(Character enemy)
+        {
+            var panel = GetEnemyPanelFor(enemy);
+            if (panel != null) panel.HighlightActing();
+        }
+
+        /// <summary>순차 적 턴 — 행동 종료 후 하이라이트 해제.</summary>
+        public void ClearActingEnemyHighlight(Character enemy)
+        {
+            var panel = GetEnemyPanelFor(enemy);
+            if (panel != null) panel.ClearActingHighlight();
+        }
+
+        /// <summary>순차 적 턴 — 행동을 마친 적의 의도를 즉시 비움.</summary>
+        public void ClearEnemyIntentFor(Character enemy)
+        {
+            if (_enemyPanels == null) return;
+            int idx = _enemyPanels.FindIndex(p => p != null && p.Target == enemy);
+            if (idx >= 0) SetEnemyIntent(idx, null);
+        }
+
+        private EnemyDetailPanel GetEnemyPanelFor(Character enemy)
+        {
+            if (_enemyPanels == null) return null;
+            foreach (var p in _enemyPanels)
+                if (p != null && p.Target == enemy) return p;
+            return null;
         }
 
         public void UpdateRerollCount(int remaining, int max)

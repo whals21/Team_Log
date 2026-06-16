@@ -17,6 +17,12 @@ namespace TeamLog.Combat
 {
     public partial class BattleSceneSetup
     {
+        // ── 순차 적 턴 타이밍 — Time.timeScale의 영향을 받아 1x/2x 자동 적용 ──
+        private const float EnemyTurnEntryDelay = 0.30f;   // 적 턴 진입 후 대기
+        private const float EnemyHighlightDelay = 0.15f;   // 하이라이트 후 행동까지
+        private const float EnemyActionVfxDelay = 0.55f;   // 행동 후 VFX 대기
+        private bool _isEnemyTurnRunning;                   // 코루틴 중복 실행 가드
+
         #region Character Event Subscription
 
         /// <summary>
@@ -166,6 +172,60 @@ namespace TeamLog.Combat
                     int idx = _enemyControllers.IndexOf(controller);
                     _battleUIManager?.SetEnemyIntent(idx, null);
                 }
+            }
+        }
+
+        // ── 순차 적 턴 — 코루틴 주도 실행 ──
+
+        private void OnEnemyTurnSequenceStarted()
+        {
+            if (_isEnemyTurnRunning) return; // 중복 실행 방지
+            StartCoroutine(ExecuteEnemyTurnSequence());
+        }
+
+        private void OnEnemyActing(Character enemy)
+        {
+            _battleUIManager?.HighlightActingEnemy(enemy);
+        }
+
+        /// <summary>
+        /// 순차 적 턴 코루틴 — 적 한 명씩 행동, 행동 사이 시각적 지연으로 "누가 무엇을 하는지" 인지.
+        /// 매 행동 후 전멸 체크 → 파티 전멸 시 즉시 종료.
+        /// </summary>
+        private IEnumerator ExecuteEnemyTurnSequence()
+        {
+            _isEnemyTurnRunning = true;
+            try
+            {
+                yield return new WaitForSeconds(EnemyTurnEntryDelay);
+
+                var controllers = _turnManager.EnemyControllers;
+                foreach (var controller in controllers)
+                {
+                    if (controller == null || !controller.Owner.IsAlive) continue;
+
+                    _turnManager.ExecuteSingleEnemyAction(controller);
+                    yield return new WaitForSeconds(EnemyHighlightDelay);
+
+                    // 행동한 적의 의도를 즉시 비워서 "이미 행동함" 시각화
+                    _battleUIManager?.ClearEnemyIntentFor(controller.Owner);
+                    yield return new WaitForSeconds(EnemyActionVfxDelay);
+
+                    _battleUIManager?.ClearActingEnemyHighlight(controller.Owner);
+
+                    // 중간 전멸 체크 → 조기 종료
+                    if (_turnManager.IsBattleEndedEarly())
+                    {
+                        _turnManager.CompleteEnemyTurn();
+                        yield break;
+                    }
+                }
+
+                _turnManager.CompleteEnemyTurn();
+            }
+            finally
+            {
+                _isEnemyTurnRunning = false;
             }
         }
 
@@ -357,6 +417,8 @@ namespace TeamLog.Combat
                 _turnManager.OnPhaseChanged -= OnPhaseChanged;
                 _turnManager.OnTurnStarted -= OnTurnStarted;
                 _turnManager.OnBattleEnded -= OnBattleEnded;
+                _turnManager.OnEnemyTurnSequenceStarted -= OnEnemyTurnSequenceStarted;
+                _turnManager.OnEnemyActing -= OnEnemyActing;
             }
 
             _actionController?.Shutdown();

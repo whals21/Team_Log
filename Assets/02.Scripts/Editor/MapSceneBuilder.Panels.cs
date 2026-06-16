@@ -545,6 +545,84 @@ namespace TeamLog.Editor
 
         #endregion
 
+        #region Stage Bonus Panel (엘리트/스테이지 클리어 보상)
+
+        private static GameObject BuildStageBonusPanel(Transform parent, TMP_FontAsset font)
+        {
+            var overlay = CreateOverlay("StageBonusPanel", parent, OverlayBg, withCanvasGroup: true);
+            var canvasGroup = overlay.GetComponent<CanvasGroup>();
+
+            var content = CreatePanel("Content", overlay.transform,
+                new Vector2(0.25f, 0.15f), new Vector2(0.75f, 0.85f), ContentPanel);
+
+            // 제목
+            var title = CreateText("TitleLabel", content.transform, font,
+                "보너스 선택", 28, AccentGold, TextAlignmentOptions.Center);
+            SetAnchors(title.GetComponent<RectTransform>(),
+                new Vector2(0f, 0.85f), new Vector2(1f, 1f));
+
+            // 설명
+            var desc = CreateText("DescLabel", content.transform, font,
+                "", 16, TextDim, TextAlignmentOptions.Center);
+            desc.enableWordWrapping = true;
+            SetAnchors(desc.GetComponent<RectTransform>(),
+                new Vector2(0.05f, 0.74f), new Vector2(0.95f, 0.85f));
+
+            // 선택지 컨테이너
+            var choiceContainer = CreateUIObject("ChoiceContainer", content.transform);
+            SetAnchors(choiceContainer.GetComponent<RectTransform>(),
+                new Vector2(0.08f, 0.1f), new Vector2(0.92f, 0.72f));
+            var vLayout = choiceContainer.AddComponent<VerticalLayoutGroup>();
+            vLayout.spacing = 12;
+            vLayout.childAlignment = TextAnchor.MiddleCenter;
+            vLayout.childControlWidth = true;
+            vLayout.childControlHeight = true;
+            vLayout.childForceExpandWidth = true;
+            vLayout.childForceExpandHeight = true;
+
+            // 선택지 버튼 3개
+            var buttons = new Button[3];
+            var labels = new TextMeshProUGUI[3];
+            for (int i = 0; i < 3; i++)
+            {
+                var btn = CreateButton($"Choice{i}", choiceContainer.transform, font,
+                    "", 20, TextWhite);
+                buttons[i] = btn.GetComponent<Button>();
+                labels[i] = btn.GetComponentInChildren<TextMeshProUGUI>();
+            }
+
+            var comp = overlay.AddComponent<StageBonusUI>();
+            var ser = new SerializedObject(comp);
+            WireProperty(ser, "_panel", overlay);
+            WireProperty(ser, "_canvasGroup", canvasGroup);
+            WireProperty(ser, "_titleLabel", title);
+            WireProperty(ser, "_descLabel", desc);
+
+            // 배열 필드 와이어링
+            var buttonsProp = ser.FindProperty("_choiceButtons");
+            if (buttonsProp != null && buttonsProp.isArray)
+            {
+                buttonsProp.arraySize = 3;
+                for (int i = 0; i < 3; i++)
+                    buttonsProp.GetArrayElementAtIndex(i).objectReferenceValue = buttons[i];
+            }
+            var labelsProp = ser.FindProperty("_choiceLabels");
+            if (labelsProp != null && labelsProp.isArray)
+            {
+                labelsProp.arraySize = 3;
+                for (int i = 0; i < 3; i++)
+                    labelsProp.GetArrayElementAtIndex(i).objectReferenceValue = labels[i];
+            }
+            ser.ApplyModifiedProperties();
+
+            // 초기 비활성화 (사용 전까지 숨김)
+            overlay.SetActive(false);
+
+            return overlay;
+        }
+
+        #endregion
+
         #region Character Select Panel
 
         private static GameObject BuildCharacterSelectPanel(Transform parent, TMP_FontAsset font)

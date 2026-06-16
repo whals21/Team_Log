@@ -226,7 +226,7 @@ namespace TeamLog.Editor
             content.offsetMax = new Vector2(0, -44);
 
             CreateCenterArea(content);
-            CreateRightSidebar(content);
+            // 전투로그 UI 제거 — CreateRightSidebar(content);
             CreatePlayerStrip(root);
 
             CreateCharacterPopup(root);

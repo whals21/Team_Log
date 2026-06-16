@@ -108,24 +108,7 @@ namespace TeamLog.Editor
                 }
             }
 
-            // 6) BattleLogUI 추가
-            var rightSidebar = root.transform.Find("ContentArea/RightSidebar");
-            if (rightSidebar != null)
-            {
-                var battleLogUI = rightSidebar.GetComponent<BattleLogUI>();
-                if (battleLogUI == null)
-                    battleLogUI = rightSidebar.gameObject.AddComponent<BattleLogUI>();
-
-                // LogText 자식 자동 연결
-                var logText = rightSidebar.Find("Viewport/LogText");
-                if (logText != null)
-                    SetPrivateField(battleLogUI, "_logText", logText.GetComponent<TMPro.TextMeshProUGUI>());
-
-                // ScrollRect 자동 연결
-                var scrollRect = rightSidebar.GetComponent<ScrollRect>();
-                if (scrollRect != null)
-                    SetPrivateField(battleLogUI, "_scrollRect", scrollRect);
-            }
+            // 6) BattleLogUI — 삭제됨 (전투로그 UI 제거)
 
             // 7) BattleSceneSetup 추가
             var setupGO = GameObject.Find("BattleSceneSetup");
@@ -431,10 +414,7 @@ namespace TeamLog.Editor
                 SetPrivateField(uiManager, "_enemyPanelPrefab", prefab != null ? prefab.GetComponent<EnemyDetailPanel>() : null);
             }
 
-            // BattleLog
-            var rightSidebar = root.Find("ContentArea/RightSidebar");
-            if (rightSidebar != null)
-                SetPrivateField(uiManager, "_battleLog", rightSidebar.GetComponent<BattleLogUI>());
+            // BattleLog — 삭제됨 (전투로그 UI 제거)
 
             // ActionBarUI
             var bottomBar = root.Find("BottomBar");

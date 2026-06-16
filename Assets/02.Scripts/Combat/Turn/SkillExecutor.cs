@@ -43,7 +43,7 @@ namespace TeamLog.Combat.Turn
                     ExecuteAttack(caster, target, skill, instance, powerMultiplier);
                     break;
                 case SkillType.Heal:
-                    ExecuteHeal(target, skill, instance, powerMultiplier);
+                    ExecuteHeal(caster, target, skill, instance, powerMultiplier);
                     break;
                 case SkillType.Buff:
                     ApplyEffect(skill, target, instance);
@@ -52,7 +52,7 @@ namespace TeamLog.Combat.Turn
                     ApplyEffect(skill, target, instance);
                     break;
                 case SkillType.Shield:
-                    ExecuteShield(target, skill, instance);
+                    ExecuteShield(caster, target, skill, instance);
                     break;
                 case SkillType.Purify:
                     ExecutePurify(target);
@@ -87,10 +87,32 @@ namespace TeamLog.Combat.Turn
                     basePower = System.Math.Max(1, (int)(basePower * conditionalMul));
             }
 
+            // 유물 PowerMul (Passive) — 시전자 기준
+            float relicPowerMul = GetAllKeywordMul(caster, KeywordType.PowerMul);
+            if (relicPowerMul > 0f && relicPowerMul != 1f)
+                basePower = System.Math.Max(1, (int)(basePower * relicPowerMul));
+
             int power = System.Math.Max(1, (int)(basePower * powerMultiplier));
 
-            // 키워드: DamageTakenMul — 대상이 이 키워드 보유 시 받는 피해 배율
-            float takenMul = GetKeywordMulForCharacter(target, KeywordType.DamageTakenMul);
+            // 유물: OnEnemyLowHP PowerMul (F3 ExecutionerBlade 등)
+            var relicHandler = GameRunState.Instance?.RelicHandler;
+            if (relicHandler != null)
+            {
+                float lowHPMul = relicHandler.GetEnemyLowHPPowerMul(target.Health.CurrentHP, target.Health.MaxHP);
+                if (lowHPMul > 1f)
+                    power = (int)(power * lowHPMul);
+            }
+
+            // 유물: 일시적 "다음 공격 강화" 버프 소비 (B2 AegisStrike, C3 MercyBlade 등)
+            if (relicHandler != null)
+            {
+                int nextBonus = relicHandler.ConsumeNextAttackBonus();
+                if (nextBonus > 0)
+                    power += nextBonus;
+            }
+
+            // 키워드: DamageTakenMul — 대상이 이 키워드 보유 시 받는 피해 배율 (스킬+유물)
+            float takenMul = GetAllKeywordMul(target, KeywordType.DamageTakenMul);
             if (takenMul > 0f && takenMul != 1f)
                 power = (int)(power * takenMul);
 
@@ -110,11 +132,10 @@ namespace TeamLog.Combat.Turn
                 DamageCalculator.DealDamage(caster, target, power);
             }
 
-            // 키워드: DamageDealtHealPercent — 준 데미지의 % 회복
-            if (instance != null && caster.IsAlive)
+            // 키워드: DamageDealtHealPercent — 준 데미지의 % 회복 (스킬+유물)
+            if (caster.IsAlive)
             {
-                var kw = instance.GetAllKeywords();
-                float healPercent = KeywordResolver.SumKeyword(kw, KeywordType.DamageDealtHealPercent);
+                float healPercent = GetAllKeywordSum(caster, KeywordType.DamageDealtHealPercent);
                 if (healPercent > 0f)
                 {
                     int healAmount = System.Math.Max(1, (int)(power * healPercent));
@@ -149,14 +170,13 @@ namespace TeamLog.Combat.Turn
             }
         }
 
-        private void ExecuteHeal(Character target, SkillData skill, SkillInstance instance = null,
+        private void ExecuteHeal(Character caster, Character target, SkillData skill, SkillInstance instance = null,
             float powerMultiplier = 1f)
         {
             float multiplier = powerMultiplier;
 
-            // 키워드: HealMul
-            if (instance != null)
-                multiplier *= KeywordResolver.MulKeyword(instance.GetAllKeywords(), KeywordType.HealMul);
+            // 키워드: HealMul (시전자의 스킬 + 유물)
+            multiplier *= GetAllKeywordMul(caster, KeywordType.HealMul);
 
             int amount = System.Math.Max(1, (int)((skill.Power) * multiplier));
             target.Health.Heal(amount);
@@ -187,13 +207,12 @@ namespace TeamLog.Combat.Turn
             }
         }
 
-        private void ExecuteShield(Character target, SkillData skill, SkillInstance instance = null)
+        private void ExecuteShield(Character caster, Character target, SkillData skill, SkillInstance instance = null)
         {
             float multiplier = 1f;
 
-            // 키워드: ShieldMul
-            if (instance != null)
-                multiplier = KeywordResolver.MulKeyword(instance.GetAllKeywords(), KeywordType.ShieldMul);
+            // 키워드: ShieldMul (시전자의 스킬 + 유물)
+            multiplier = GetAllKeywordMul(caster, KeywordType.ShieldMul);
 
             int amount = System.Math.Max(1, (int)(skill.Power * multiplier));
             target.Health.AddShield(amount);
@@ -209,7 +228,7 @@ namespace TeamLog.Combat.Turn
         // ── 키워드 헬퍼 ──
 
         /// <summary>
-        /// 캐릭터의 모든 스킬 키워드에서 지정 타입 합산 값 반환
+        /// 캐릭터의 모든 스킬 키워드에서 지정 타입 합산 값 반환 (증강만)
         /// </summary>
         public static int GetKeywordSumForCharacter(Character character, KeywordType type)
         {
@@ -217,17 +236,6 @@ namespace TeamLog.Combat.Turn
             foreach (var inst in character.SkillInventory.SkillInstances)
                 total += (int)KeywordResolver.SumKeyword(inst.GetAllKeywords(), type);
             return total;
-        }
-
-        /// <summary>
-        /// 캐릭터의 모든 스킬 키워드에서 지정 타입 곱 배율 반환
-        /// </summary>
-        public static float GetKeywordMulForCharacter(Character character, KeywordType type)
-        {
-            float result = 1f;
-            foreach (var inst in character.SkillInventory.SkillInstances)
-                result *= KeywordResolver.MulKeyword(inst.GetAllKeywords(), type);
-            return result;
         }
 
         /// <summary>
@@ -251,6 +259,31 @@ namespace TeamLog.Combat.Turn
                 }
             }
             return total;
+        }
+
+        /// <summary>
+        /// 캐릭터의 모든 스킬 + 유물 키워드에서 지정 타입 곱 배율 반환
+        /// </summary>
+        public static float GetAllKeywordMul(Character character, KeywordType type)
+        {
+            float result = 1f;
+            foreach (var inst in character.SkillInventory.SkillInstances)
+                result *= KeywordResolver.MulKeyword(inst.GetAllKeywords(), type);
+            // 유물 키워드 배율 추가
+            var relicHandler = GameRunState.Instance?.RelicHandler;
+            if (relicHandler != null)
+            {
+                foreach (var relic in relicHandler.Relics)
+                {
+                    if (relic.Keywords == null) continue;
+                    foreach (var kw in relic.Keywords)
+                    {
+                        if (kw.Type == type && kw.Trigger == KeywordTrigger.Passive)
+                            result *= kw.Value;
+                    }
+                }
+            }
+            return result;
         }
 
         /// <summary>

@@ -17,7 +17,7 @@ using TeamLog.UI.Shop;
 namespace TeamLog.UI.Map
 {
     /// <summary>
-    /// 층별 적 풀 — 각 층의 일반/엘리트/보스 적 데이터를 보관
+    /// 층별 적 풀 — 각 층의 일반/엘리트/보스 적 데이터를 보관 (레거시 호환)
     /// </summary>
     [Serializable]
     public class FloorEnemyPool
@@ -25,6 +25,16 @@ namespace TeamLog.UI.Map
         public CharacterData[] normalEnemies;
         public CharacterData[] eliteEnemies;
         public CharacterData boss;
+    }
+
+    /// <summary>
+    /// 스테이지 테마 후보 목록 — StageDesign.md 기준 각 스테이지마다 3개 테마 후보 보관.
+    /// 런 시작 시 이 중 1개가 무작위 채택됨.
+    /// </summary>
+    [Serializable]
+    public class StageThemeCandidateList
+    {
+        public StageThemeData[] candidates;
     }
 
     /// <summary>
@@ -46,6 +56,7 @@ namespace TeamLog.UI.Map
         [SerializeField] private Button _deckButton;
         [SerializeField] private TutorialUI _tutorialUI;
         [SerializeField] private CharacterSelectUI _characterSelectUI;
+        [SerializeField] private StageBonusUI _stageBonusUI;
 
         [Header("All Characters")]
         [SerializeField] private CharacterData[] _allCharacters;
@@ -60,11 +71,8 @@ namespace TeamLog.UI.Map
         [Header("Test Events")]
         [SerializeField] private EventData[] _testEvents;
 
-        [Header("Floor-based Enemy Pools")]
-        [SerializeField] private FloorEnemyPool[] _floorPools;
-
-        [Header("Spawn Pattern Tables (per floor)")]
-        [SerializeField] private SpawnPatternTable[] _spawnPatternTables;
+        [Header("Stage Theme Candidates (per stage, 3 candidates each)")]
+        [SerializeField] private StageThemeCandidateList[] _stageThemeCandidates;
 
         [Header("Data Pools")]
         [SerializeField] private RelicData[] _relicPool;
@@ -149,6 +157,9 @@ namespace TeamLog.UI.Map
                 _relicPool != null ? new List<RelicData>(_relicPool) : new List<RelicData>(),
                 _augmentPool != null ? new List<AugmentData>(_augmentPool) : new List<AugmentData>());
 
+            // 스테이지 테마 후보 주입
+            _runState.SetThemeCandidates(BuildThemeCandidates());
+
             InitializeSubUIs();
 
             _runState.StartRun();
@@ -157,6 +168,27 @@ namespace TeamLog.UI.Map
             var meta = SaveManager.Meta;
             meta.HasPendingRun = true;
             SaveManager.SaveMeta();
+        }
+
+        /// <summary>
+        /// 인스펙터에 설정된 _stageThemeCandidates를 List<List<StageThemeData>>로 변환
+        /// </summary>
+        private List<List<StageThemeData>> BuildThemeCandidates()
+        {
+            var result = new List<List<StageThemeData>>();
+            if (_stageThemeCandidates == null) return result;
+
+            foreach (var entry in _stageThemeCandidates)
+            {
+                var pool = new List<StageThemeData>();
+                if (entry != null && entry.candidates != null)
+                {
+                    foreach (var theme in entry.candidates)
+                        if (theme != null) pool.Add(theme);
+                }
+                result.Add(pool);
+            }
+            return result;
         }
 
         /// <summary>
@@ -212,6 +244,9 @@ namespace TeamLog.UI.Map
                 _relicPool != null ? new List<RelicData>(_relicPool) : new List<RelicData>(),
                 _augmentPool != null ? new List<AugmentData>(_augmentPool) : new List<AugmentData>());
 
+            // 테마 후보 주입 — 저장 데이터에 이미 선택된 테마가 있으면 그대로 유지됨
+            _runState.SetThemeCandidates(BuildThemeCandidates());
+
             InitializeSubUIs();
 
             // 현재 층 맵 재생성
@@ -247,6 +282,8 @@ namespace TeamLog.UI.Map
                 _deckButton.onClick.AddListener(OnDeckButtonClicked);
             if (_tutorialUI != null)
                 _tutorialUI.Initialize(_runState);
+            if (_stageBonusUI != null)
+                _stageBonusUI.Initialize(_runState, OnStageBonusComplete);
         }
 
         private void OnMapChanged(MapFloor mapFloor)

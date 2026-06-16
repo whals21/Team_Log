@@ -16,19 +16,22 @@ namespace TeamLog.Shop
 
         /// <summary>
         /// 랜덤 상점 슬롯 생성 (상점 노드 방문 시)
+        /// Phase 7B/7C: extraAugments/extraRelics/discount 지원
         /// </summary>
         public List<ShopSlot> GenerateShopSlots(int floorNumber,
-            IReadOnlyList<AugmentData> augmentPool, IReadOnlyList<RelicData> relicPool)
+            IReadOnlyList<AugmentData> augmentPool, IReadOnlyList<RelicData> relicPool,
+            int extraAugments = 0, int extraRelics = 0, float discount = 0f)
         {
             var slots = new List<ShopSlot>();
 
-            // 증강 3개
-            for (int i = 0; i < 3; i++)
+            // 증강 (기본 3개 + 추가)
+            int augmentCount = 3 + Mathf.Max(0, extraAugments);
+            for (int i = 0; i < augmentCount; i++)
             {
                 var slot = new ShopSlot
                 {
                     ContentType = ShopSlot.SlotContentType.Augment,
-                    Price = GetAugmentPrice(floorNumber),
+                    Price = ApplyDiscount(GetAugmentPrice(floorNumber), discount),
                     IsSold = false
                 };
 
@@ -38,13 +41,14 @@ namespace TeamLog.Shop
                 slots.Add(slot);
             }
 
-            // 유물 2개
-            for (int i = 0; i < 2; i++)
+            // 유물 (기본 2개 + 추가)
+            int relicCount = 2 + Mathf.Max(0, extraRelics);
+            for (int i = 0; i < relicCount; i++)
             {
                 var slot = new ShopSlot
                 {
                     ContentType = ShopSlot.SlotContentType.Relic,
-                    Price = GetRelicPrice(floorNumber),
+                    Price = ApplyDiscount(GetRelicPrice(floorNumber), discount),
                     IsSold = false
                 };
 
@@ -55,6 +59,12 @@ namespace TeamLog.Shop
             }
 
             return slots;
+        }
+
+        private static int ApplyDiscount(int price, float discount)
+        {
+            if (discount <= 0f) return price;
+            return Mathf.Max(1, Mathf.RoundToInt(price * (1f - Mathf.Clamp01(discount))));
         }
 
         /// <summary>

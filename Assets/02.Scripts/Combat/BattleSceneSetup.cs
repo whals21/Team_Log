@@ -62,6 +62,9 @@ namespace TeamLog.Combat
         private static List<Character> _pendingEnemies;
         private static int _pendingBonusAP;
 
+        // 전투 종료 후 돌아갈 씬 이름 — BattleTestSceneSetup이 변경 가능. 기본값 MapScene.
+        private static string _returnSceneName = "MapScene";
+
         /// <summary>
         /// 맵 시스템에서 전투 시작 시 파티와 적 데이터를 설정
         /// </summary>
@@ -70,6 +73,15 @@ namespace TeamLog.Combat
             _pendingParty = party;
             _pendingEnemies = enemies;
             _pendingBonusAP = bonusAP;
+        }
+
+        /// <summary>
+        /// 전투 종료 후 돌아갈 씬 이름 설정. 기본값 "MapScene".
+        /// BattleTestScene 등 다른 씬에서 전투를 시작할 때 사용.
+        /// </summary>
+        public static void SetReturnScene(string sceneName)
+        {
+            _returnSceneName = string.IsNullOrEmpty(sceneName) ? "MapScene" : sceneName;
         }
 
         private void Start()

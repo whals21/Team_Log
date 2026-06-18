@@ -6,7 +6,7 @@
 
 ```
 Assets/
-├── 01.Scenes/          # TitleScene, BattleScene, MapScene
+├── 01.Scenes/          # TitleScene, BattleScene, BattleTestScene, MapScene
 ├── 02.Scripts/
 │   ├── Characters/     # Character, CharacterData, Components/
 │   ├── Combat/         # AI/, Draw/, Turn/
@@ -22,8 +22,9 @@ Assets/
 │   │   ├── Shop/       # ShopUI, ShopItemSlot
 │   │   └── Event/      # EventUI
 │   ├── Debug/          # GameDebugOptions (SRDebugger 인게임 디버그)
-│   ├── Editor/         # DataGenerator, SceneBuilder, MapSceneBuilder
-│   └── Tests/          # Editor-mode 단위 테스트 (61개)
+│   ├── EditorDebug/    # BattleTestSceneSetup, BattleTestConfig, BattleTestTemplateStore (인터랙티브 전투 테스트 씬)
+│   ├── Editor/         # DataGenerator, SceneBuilder, MapSceneBuilder, BattleTestSceneBuilder
+│   └── Tests/          # Editor-mode 단위 테스트 (73개)
 ├── 03.Data/            # ScriptableObject 에셋
 ├── 08.Resource/        # 폰트, 이미지
 └── 09.Docs/            # 기획서, 가이드, 작업일지
@@ -95,6 +96,16 @@ BalanceSimulator (자동 밸런스 시뮬레이터, Editor 전용 partial class 
     ├── Relic Synergy Test: 7카테고리 3-세트 유물 강제 지급 후 F2 전투 (일반30+보스15팩), 카테고리별 승률 비교
     ├── 리포트: Assets/09.Docs/BalanceReports/{QuickCombat,FullRun,RelicSynergy}_타임스탬프.csv + 콘솔 요약
     └── 안전장치: MAX_TURNS=50 무한루프 방지, CombatEventBus.Clear/SkillExecutor.ClearEvents 매 팩 정리, Application.isPlaying 가드
+BattleTestSceneSetup (`TeamLog.EditorDebug` MonoBehaviour, 인터랙티브 전투 테스트 씬 진입점)
+    ├── 씬: BattleTestScene.unity (BattleScene.unity 복제 — 모든 인스펙터 참조 보존, ConfigCanvas + BattleTestConfigPanel 추가)
+    ├── 사이클: 단일 씬 자기 리로드 (설정 → 전투 → 설정). static 필드로 드롭다운 인덱스 보존
+    ├── 드롭다운 14개: 파티 4 (Char_ 8종), 유물 6 (Relic_ 42종), 적 4 (Enemy_ 18종=일반12+엘리트6), 층 1 (F1~F4), 보스 토글
+    ├── 전투 시작 시: BuildParty/BuildEnemies → GameRunState 생명주기 (Destroy→Create→SetDataPools→SetPlayerParty→SubscribeEvents→AcquireRelic) → BattleSceneSetup.SetBattleData + SetReturnScene("BattleTestScene") → FadeToScene 자기 리로드
+    ├── _pendingTestBattle static 분기: 씬 리로드 후 BattleSceneSetup GO를 SetActive(true)하여 Awake/Start 유도
+    ├── 빌더: BattleTestSceneBuilder (TeamLog/Scene/Build Battle Test Scene 메뉴, AssetDatabase.CopyAsset으로 BattleScene 복제, 에셋 배열 자동 바인딩)
+    ├── BattleTestConfig (순수 C# static 헬퍼, BuildParty/BuildEnemies + FloorScaling 로컬 복제, 런타임 호환 AssetDatabase 미사용)
+    ├── 템플릿 시스템: 파티/유물/적 조합 각각 독립 저장·불러오기·삭제 (BattleTestTemplateStore — JSON 파일 persistentDataPath 영속화, TemplateCategory enum 3종, 15개 SerializeField UI 바인딩)
+    └── 하위 호환: BattleSceneSetup.SetReturnScene("BattleTestScene") API 추가, 아무도 호출 안 하면 기존 MapScene 복귀 100% 보존
 
 Character (순수 C# 클래스, MonoBehaviour 아님)
     ├── HealthComponent (HP/쉴드 관리, OnHPChanged/OnShieldChanged/OnDeath + delta: OnDamageTaken/OnHealApplied/OnShieldAdded, OnPreDeath 사망 방지)
@@ -336,7 +347,7 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - 4F: UI 연동 완료 (FloatingText delta 이벤트, FadeIn/FadeOut 전환, ConfirmationDialog 활성화, 골드 부족 피드백)
   - 4G: 적 특성 시스템 완료 (8종 패시브 특성, TraitHandler 훅, TraitBadge UI, MISS 플로팅 텍스트)
   - 4H: 층별 적 풀 + 신규 적 9종 + 휴식 선택지 완료 (FloorEnemyPool 3층 분리, RestUI 3선택지, BonusAP 파이프라인)
-  - 4I: 버그 수정 2건 + 자동화 테스트 인프라 완료 (BattleEndOverlay/RewardUI 버그, 61개 단위 테스트, 어셈블리 분리)
+  - 4I: 버그 수정 2건 + 자동화 테스트 인프라 완료 (BattleEndOverlay/RewardUI 버그, 단위 테스트 인프라, 어셈블리 분리)
   - 4K: UI 종합 개선 완료 (UIPalette 토큰, HP 트윈/플래시/페이드 애니메이션, 색맹 이니셜, 툴팁 시스템, 로그 색상 코딩+스크롤, GUI 에셋 스프라이트, 베지에 곡선 연결선, 파티 상태 위젯, 사운드 시스템)
   - 4L: 사운드 시스템 완료 (42개 SFX 자동 할당 — CombatMagicSpellsVIISFX, 스킬 타입별 사운드 분기, SkillExecutor.OnSkillApplied 이벤트)
   - 4M: 에셋 활용 5단계 완료 (스킬 아이콘 ✅, DOTween 전환 ✅, SRDebugger ✅, CameraShake ✅, VFXManager URP Camera Stacking ✅)
@@ -358,11 +369,14 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - 7C: 스테이지 클리어 보상 완료 (StageClearBonusType 3택1 — BurstReady AP+2/Recharge HP50%/IntelAdvantage 진열추가, GameRunState.ApplyStageClearBonus, StageBonusUI.ShowStageClearBonus, ShopManager.GenerateShopSlots extraAugments/extraRelics/discount 파라미터 확장)
   - 7D: 테마 콘텐츠 확충 완료 (DataGenerator.Stages.cs 12테마 분화 — 4스테이지 × 3테마, 기존 적 에셋 재조합으로 차별화, 테마 키워드/설명 StageDesign.md 반영)
   - 7E: BalanceSimulator 4스테이지 대응 완료 (FloorBossIds 4개 확장, _spawnTables F4 F3 폴백, Quick Combat 매트릭스 F4 추가 + 1000팩 유지, Report.cs 카테고리/사망분포/도달률 F4 포함)
-  - **잔여**: 런타임 엔드투엔드 런 클리어 검증 (F1→F2→F3→F4, 분기/엘리트/스테이지클리어 보상 정상 동작)
+  - **7F**: 유물 검증 + 임계 버그 2건 수정 (단위 테스트 12개 추가 — 총 73개, OnKill 트리거 키워드 집계 누락 수정: VampireFang/SlayerSigil 작동, Full Run 시뮬레이터 RelicHandler 재구독 수정: 0%→1% 클리어율, F2 도달 20% 신규)
+  - **7G**: 인터랙티브 전투 테스트 씬 완료 (BattleTestScene.unity — 씬 복제 전략, 자기 리로드 사이클, SetReturnScene API 하위 호환 보존, 드롭다운 14개로 파티/유물/적/층/보스 세팅, 런타임 BattleSceneSetup 그대로 재사용)
+  - **잔여**: 런타임 엔드투엔드 런 클리어 검증 (F1→F2→F3→F4, 분기/엘리트/스테이지클리어 보상 정상 동작), BattleTestScene Play 모드 7가지 시나리오 검증
 
 ### 미구현 항목
 - VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, VFXPalette.asset에 15개 프리팹 할당, 스킬 타입별 VFX 분기+크리티컬 임팩트 연결 완료, 실제 파티클 표시 확인 필요)
-- 전투 밸런스 튜닝 (Quick Combat/Full Run 결과 기반 — F2 보스 급락, F3/F4 보스 1.3%, Full Run 0% 클리어율)
+- 전투 밸런스 튜닝 (Quick Combat/Full Run 결과 기반 — F1 사망 80%, F2 도달 20%, F3/F4 도달 2%, Full Run 1% 클리어율. 유물 효과는 정상 작동 검증 완료)
+- BattleTestScene 런타임 검증 (빌드 완료 — Play 모드 7가지 시나리오로 사용자 직접 검증 필요: 기본 전투/유물 효과/보스/재테스트/세팅 변경/층 스케일/일반 플레이 회귀)
 
 ### 세션 종료 체크리스트
 

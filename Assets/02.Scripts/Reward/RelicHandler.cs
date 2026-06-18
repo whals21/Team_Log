@@ -102,9 +102,49 @@ namespace TeamLog.Reward
             int bonus = QueryKeywordSum(KeywordType.BonusOutgoingDamage);
             // PowerAdd (Passive) — 공격력 가산
             bonus += QueryKeywordSum(KeywordType.PowerAdd);
-            // 누적형: StackingPowerOnKill
-            bonus += QueryKeywordSum(KeywordType.StackingPowerOnKill) * _killStackCount;
+            // 누적형: StackingPowerOnKill — OnKill 트리거이므로 QueryKeywordSum(Passive-only)에서 누락.
+            // 트리거 무관하게 값 조회 후 현재 스택 곱하기.
+            bonus += GetStackingPowerValue() * _killStackCount;
             return bonus;
+        }
+
+        /// <summary>
+        /// 유물에 의한 처치 시 HP 회복량 합산 (OnKill 트리거).
+        /// QueryKeywordSum은 Passive만 합산하므로 OnKill 트리거 키워드는 별도 조회 필요.
+        /// 영향 유물: VampireFang, MercyBlade 등.
+        /// </summary>
+        public int GetOnKillHealValue()
+        {
+            int total = 0;
+            foreach (var relic in _relics)
+            {
+                if (relic.Keywords == null) continue;
+                foreach (var kw in relic.Keywords)
+                {
+                    if (kw.Type == KeywordType.OnKillHeal)
+                        total += (int)kw.Value;
+                }
+            }
+            return total;
+        }
+
+        /// <summary>
+        /// 유물에 의한 처치당 누적 위력 가산치 합산 (트리거 무관).
+        /// 영향 유물: SlayerSigil (D 카테고리 학살춤).
+        /// </summary>
+        public int GetStackingPowerValue()
+        {
+            int total = 0;
+            foreach (var relic in _relics)
+            {
+                if (relic.Keywords == null) continue;
+                foreach (var kw in relic.Keywords)
+                {
+                    if (kw.Type == KeywordType.StackingPowerOnKill)
+                        total += (int)kw.Value;
+                }
+            }
+            return total;
         }
 
         /// <summary>유물에 의한 피해 감소</summary>

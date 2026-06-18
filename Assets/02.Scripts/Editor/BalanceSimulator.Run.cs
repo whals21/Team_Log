@@ -409,7 +409,21 @@ namespace TeamLog.Editor
             List<Character> party, List<Character> enemies,
             MapNodeType battleType, int floor, int bonusFirstTurnAP)
         {
-            ClearCombatEventBus();
+            // ★ 매 전투마다 RelicHandler 재구독 — ClearCombatEventBus가 모든 구독을 제거하므로
+            // 유물 트리거(OnTurnStart/OnKill/OnShieldGained 등)가 정상 작동하려면
+            // 전투 시작 전 SetPlayerParty + SubscribeEvents 호출 필수 (Phase 6A 버그 수정).
+            var runState = GameRunState.Instance;
+            if (runState != null)
+            {
+                runState.RelicHandler.UnsubscribeEvents();
+                ClearCombatEventBus();
+                runState.RelicHandler.SetPlayerParty(party);
+                runState.RelicHandler.SubscribeEvents();
+            }
+            else
+            {
+                ClearCombatEventBus();
+            }
 
             var enemyControllers = new List<EnemyAIController>(enemies.Count);
             foreach (var enemy in enemies)
@@ -445,6 +459,9 @@ namespace TeamLog.Editor
             if (turns >= MaxTurnsPerCombat && turnManager.CurrentPhase != TurnPhase.BattleEnd)
                 victory = false;
 
+            // 전투 종료 후 구독 해제 (다음 전투 시작 시 재구독)
+            if (runState != null)
+                runState.RelicHandler.UnsubscribeEvents();
             ClearCombatEventBus();
 
             return new CombatResult

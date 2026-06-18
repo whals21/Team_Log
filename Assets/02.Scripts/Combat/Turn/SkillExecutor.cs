@@ -162,6 +162,9 @@ namespace TeamLog.Combat.Turn
             if (target.IsDead && caster.IsAlive)
             {
                 int killHeal = GetAllKeywordSum(caster, KeywordType.OnKillHeal);
+                // OnKill 트리거 유물(VampireFang 등)은 GetAllKeywordSum이 Passive만 합산하므로 별도 조회
+                if (relicHandler != null)
+                    killHeal += relicHandler.GetOnKillHealValue();
                 if (killHeal > 0)
                 {
                     caster.Health.Heal(killHeal);

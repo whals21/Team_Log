@@ -272,7 +272,8 @@ namespace TeamLog.Combat
         private IEnumerator BattleEndTransition()
         {
             yield return null;
-            SceneTransition.Instance.FadeToScene("MapScene");
+            // _returnSceneName은 BattleTestSceneSetup.SetReturnScene()으로 변경 가능 (기본값 MapScene)
+            SceneTransition.Instance.FadeToScene(_returnSceneName);
         }
 
         #endregion
@@ -452,6 +453,10 @@ namespace TeamLog.Combat
 
             // 전투 속도 복원
             Time.timeScale = 1f;
+
+            // _returnSceneName 리셋 — 다음 전투는 기본적으로 MapScene 복귀
+            // (BattleTestSceneSetup이 SetReturnScene으로 바꾼 경우 다음 전투에 영향 안 가도록)
+            _returnSceneName = "MapScene";
         }
 
         #endregion

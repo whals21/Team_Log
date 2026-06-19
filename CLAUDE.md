@@ -123,6 +123,15 @@ RelicHandler (순수 C# 클래스, GameRunState 소속, 유물 트리거 매칭 
 AugmentOfferGenerator (순수 C# 클래스, 등급 가중치 증강 선택 + 호환성 체크 + 제안 조합, GameRunState.AugmentGenerator로 접근)
 
 ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
+
+메타프로세션 시스템 (Phase 8):
+MetaProgressionManager (순수 C# static, TeamLog.Meta — 런 보상 계산 CalculateRunReward / 특성 해금 TryPurchaseTrait / 강화 구매 TryPurchaseUpgrade / 장착 바인딩 TryEquipTrait+GetEquippedTraitId / 유물 풀 필터링 FilterRelicPool+RollRelics / 시작 유물 대수 GetStartingRelicGrantCount / ExtraReroll+PartyHealBoost 강화 조회. DefaultRelicIds HashSet 16종 기본 해금 유물 관리)
+MetaUpgradeData (ScriptableObject, TeamLog.Meta — 일회성 메타 강화. MetaUpgradeType enum: RelicUnlock/StartingRelicSlot/StartingRelicChoice/ExtraReroll/PartyHealBoost. 30종 DataGenerator.MetaUpgrades.cs에서 생성)
+CharacterTraitData (ScriptableObject, TeamLog.Characters — 캐릭터 장착형 특성 Loadout. KeywordEntry[] 기반, 8캐릭터 × 3특성 = 24종 DataGenerator.Traits.cs에서 생성. isDefault/unlockCost/soulUnlockCost 해금 정책)
+CharacterTraitHandler (순수 C# 클래스, TeamLog.Characters — Character 1명당 1개 소유. Character.PlayerTraitHandler. CombatEventBus 구독 + Owner 자신에게만 효과 적용. RelicHandler(파티 전체)와 달리 개인 한정. Phase 8C에 Character.cs에 추가 — EnemyTraitHandler 회귀 제로)
+MetaShopUI (MonoBehaviour, TeamLog.UI.Meta — 타이틀 화면 메타 상점 3탭: 특성/유물/강화. 잔고 표시 + 카드 동적 생성 + 구매 처리. TitleSceneSetup._metaShopUI)
+CharacterTraitSelectUI (MonoBehaviour, TeamLog.UI.Map — CharacterSelectUI 이후 표시되는 캐릭터별 장착 특성 선택 패널. 파티원 각각에 대해 해금된 특성 중 1개 선택. MapSceneSetup.OnCharacterSelectConfirmed → OnTraitSelectConfirmed 파이프라인)
+TraitBindingEntry ([Serializable] TeamLog.Map — CharacterName+TraitId 쌍. MetaSaveData.EquippedTraitBindings List로 저장)
 ```
 
 ### 턴 사이클
@@ -147,6 +156,13 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 - **드로우 가중치**: 모든 플레이어 스킬 weight=25 균등 (SkillDrawSystem 가중치 랜덤)
 - **적 행동 가중치**: EnemyActionPattern — 기본 가중치(EnemyPatternTable weight)에 상황 배수(5규칙)를 곱해 매 턴 동적 선택. 의도는 공개되지만 행동은 매번 달라짐
 - 적은 AP/리롤 시스템에서 제외 (EnemyAIController가 독립적으로 행동 결정)
+
+### 메타 재화 (Phase 8)
+- **기억의 조각 (MemoryFragments)**: 일반 메타 재화. 패배/승리 모두 획득. 공식: `floor*5(패배)/floor*10(승리) + battlesWon + (승리 시 +50) + gold/100`
+- **영혼 (Souls)**: 희귀 메타 재화. 승리 시만 획득. 공식: `1 + floor/2` (F1=1, F4=3)
+- **기본 해금 유물 16종**: Phase 5C 원본 유물 (DefaultRelicIds HashSet)
+- **메타 해금 유물 26종**: Phase 6A 시너지 유물 — RelicUnlock 강화 구매 필요
+- **캐릭터 특성**: 캐릭터당 3개 (1 기본 무료 + 2 메타 해금). 런 시작 시 1개 장착 선택
 
 ### 데이터 계층
 - **CharacterData** (ScriptableObject): 이름, 클래스, 기본 스탯, 스킬 목록, 적 특성(EnemyTrait)
@@ -173,18 +189,20 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 
 ### 필수
 - **네임스페이스**: `TeamLog` 최상위, 하위는 폴더 구조 따름
-  - `TeamLog.Characters` — Character, CharacterData, Components, SkillData
+  - `TeamLog.Characters` — Character, CharacterData, Components, SkillData, CharacterTraitData, CharacterTraitHandler
   - `TeamLog.Combat.Turn` — TurnManager, TurnPhase, TurnContext, SkillExecutor
   - `TeamLog.Combat.Draw` — SkillDrawSystem (SkillInstance 기반)
   - `TeamLog.Combat` — CombatEventBus (static 전투 이벤트 버스), DamageCalculator (static 데미지 계산)
   - `TeamLog.Combat.AI` — EnemyAIController, EnemyActionPattern
   - `TeamLog.Map` — MapNode, MapFloor, MapGenerator, GameRunState
+  - `TeamLog.Meta` — MetaProgressionManager (런 보상/해금/필터링 순수 C# static), MetaUpgradeData
   - `TeamLog.Reward` — RewardData, RewardManager, AugmentOfferGenerator
   - `TeamLog.Shop` — ShopData, ShopManager
   - `TeamLog.Event` — EventData, EventManager
   - `TeamLog.UI.Battle` — 전투 UI 클래스
-  - `TeamLog.UI.Map` — 맵 UI 클래스
+  - `TeamLog.UI.Map` — 맵 UI 클래스, CharacterTraitSelectUI
   - `TeamLog.UI.Title` — 타이틀 UI 클래스
+  - `TeamLog.UI.Meta` — MetaShopUI (메타 상점 3탭)
   - `TeamLog.UI.Reward` — 보상 UI 클래스
   - `TeamLog.UI.Shop` — 상점 UI 클래스
   - `TeamLog.UI.Event` — 이벤트 UI 클래스
@@ -372,6 +390,13 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - **7F**: 유물 검증 + 임계 버그 2건 수정 (단위 테스트 12개 추가 — 총 73개, OnKill 트리거 키워드 집계 누락 수정: VampireFang/SlayerSigil 작동, Full Run 시뮬레이터 RelicHandler 재구독 수정: 0%→1% 클리어율, F2 도달 20% 신규)
   - **7G**: 인터랙티브 전투 테스트 씬 완료 (BattleTestScene.unity — 씬 복제 전략, 자기 리로드 사이클, SetReturnScene API 하위 호환 보존, 드롭다운 14개로 파티/유물/적/층/보스 세팅, 런타임 BattleSceneSetup 그대로 재사용)
   - **잔여**: 런타임 엔드투엔드 런 클리어 검증 (F1→F2→F3→F4, 분기/엘리트/스테이지클리어 보상 정상 동작), BattleTestScene Play 모드 7가지 시나리오 검증
+- **Phase 8 (메타프로세션 + 캐릭터 특성 Loadout)**: 완료
+  - 8A: 데이터 계층 + DataGenerator 완료 (CharacterTraitData SO 신규 — 8 캐릭터 × 3 특성 = 24종, MetaUpgradeData SO 신규 — RelicUnlock 26 + 글로벌 4 = 30종, DataGenerator.Traits.cs/DataGenerator.MetaUpgrades.cs 8번째 9번째 partial 분할)
+  - 8B: 메타 재화 + 저장 확장 완료 (MetaSaveData 필드 추가 — MemoryFragments/Souls/UnlockedTraitIds/UnlockedRelicIds/PurchasedUpgradeIds/EquippedTraitBindings+TraitBindingEntry, MetaProgressionManager 신규 — CalculateRunReward/TryPurchaseTrait/TryPurchaseUpgrade/TryEquipTrait, SaveManager.RecordRunEnd 시그니처 확장 + 메타 재화 적립, RunEndOverlay.Show 메모리/영혼 표시, TitleSceneSetup 잔고 표시)
+  - 8C: 캐릭터 특성 런타임 적용 완료 (CharacterTraitHandler 신규 — Character 1명당 1개 소유, CombatEventBus 구독 Owner 한정 적용, Character.PlayerTraitHandler 프로퍼티 + EquipTrait 메서드 — EnemyTraitHandler 회귀 제로, SkillExecutor.GetAllKeywordSum/Mul + ExecuteAttack + ApplyEffect(caster) 시그니처 확장으로 특성 키워드 집계, DamageCalculator.DealDamage attacker/target 양쪽 훅, TurnManager StartBattle/StartNewTurn/ExecuteSkillImmediately/CheckBattleEnd 4곳 훅)
+  - 8D: 특성 선택 UI + 메타 상점 UI 완료 (CharacterTraitSelectUI 신규 — CharacterSelectUI 이후 캐릭터별 장착 특성 1개 선택, MetaShopUI 신규 — 타이틀 3탭 구조 특성/유물/강화, MapSceneSetup.OnCharacterSelectConfirmed → OnTraitSelectConfirmed 파이프라인, TitleSceneSetup 메타 상점 버튼 + _allCharacters 동적 계산, MapSceneBuilder.Panels.cs BuildCharacterTraitSelectPanel/BuildMetaShopPanel 신규, MapSceneBuilder.Helpers.cs WireMetaShopDataPools 헬퍼)
+  - 8E: 유물 해금 풀 + 시작 유물 지급 완료 (MetaProgressionManager.FilterRelicPool/RollRelics/GetStartingRelicGrantCount/GetExtraRerollCount/GetPartyHealBoost 추가, DefaultRelicIds HashSet 16종 기본 해금, MapSceneSetup.StartRunWithParty 필터링 + ApplyStartingRelics, BattleSceneSetup maxRerolls 메타 강화 반영, MapSceneSetup.Nodes.cs RestAtCampfire PartyHealBoost 가산)
+  - 8F: 회귀 버그 수정 + 단위 테스트 + 검증 완료 (SaveManager.CheckCharacterUnlocks Phase 7A 회귀 수정 — victory && floor >= N 기반, TitleSceneSetup.RefreshUI 하드코딩 4 → _allCharacters 동적 계산, MetaProgressionTests 10개 + CharacterTraitHandlerTests 5개 신규 — 총 88/88 통과, TitleScene/MapScene 리빌드 + 전 필드 와이어링 검증 완료)
 
 ### 미구현 항목
 - VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, VFXPalette.asset에 15개 프리팹 할당, 스킬 타입별 VFX 분기+크리티컬 임팩트 연결 완료, 실제 파티클 표시 확인 필요)

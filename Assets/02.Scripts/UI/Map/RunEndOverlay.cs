@@ -8,12 +8,14 @@ namespace TeamLog.UI.Map
 {
     /// <summary>
     /// 런 종료 오버레이 — 승리/패배 표시 후 타이틀로 복귀
+    /// Phase 8B: 획득 메타 재화(기억의 조각/영혼) 표시 추가
     /// </summary>
     public class RunEndOverlay : MonoBehaviour
     {
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private TextMeshProUGUI _resultText;
         [SerializeField] private TextMeshProUGUI _statsText;
+        [SerializeField] private TextMeshProUGUI _rewardText;
         [SerializeField] private Button _toTitleButton;
 
         public event System.Action OnReturnToTitle;
@@ -24,7 +26,11 @@ namespace TeamLog.UI.Map
                 _toTitleButton.onClick.AddListener(OnToTitleClicked);
         }
 
-        public void Show(bool victory, int floor, int gold, int battlesWon)
+        /// <summary>
+        /// 런 종료 오버레이 표시. earnedMemory/earnedSouls는 0 이상이어야 표시.
+        /// </summary>
+        public void Show(bool victory, int floor, int gold, int battlesWon,
+            int earnedMemoryFragments = 0, int earnedSouls = 0)
         {
             gameObject.SetActive(true);
             _canvasGroup.alpha = 0f;
@@ -34,6 +40,25 @@ namespace TeamLog.UI.Map
 
             if (_statsText != null)
                 _statsText.text = $"도달 층: {floor}\n획득 골드: {gold}\n전투 승리: {battlesWon}";
+
+            // Phase 8B: 메타 재화 표시
+            if (_rewardText != null)
+            {
+                if (earnedMemoryFragments > 0 || earnedSouls > 0)
+                {
+                    string memoryPart = earnedMemoryFragments > 0
+                        ? $"기억의 조각 +{earnedMemoryFragments}" : "";
+                    string soulPart = earnedSouls > 0
+                        ? $"영혼 +{earnedSouls}" : "";
+                    string join = (earnedMemoryFragments > 0 && earnedSouls > 0) ? "  " : "";
+                    _rewardText.text = memoryPart + join + soulPart;
+                    _rewardText.gameObject.SetActive(true);
+                }
+                else
+                {
+                    _rewardText.gameObject.SetActive(false);
+                }
+            }
 
             // FadeIn
             DOTween.To(() => _canvasGroup.alpha, x => _canvasGroup.alpha = x, 1f, 0.5f);

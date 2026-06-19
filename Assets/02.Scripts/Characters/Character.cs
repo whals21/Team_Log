@@ -16,6 +16,9 @@ namespace TeamLog.Characters
         public SkillInventoryComponent SkillInventory { get; }
         public EnemyTraitHandler TraitHandler { get; }
 
+        // 플레이어 장착 특성 처리기 (Phase 8C) — 적 캐릭터는 사용하지 않음 (null로 남음)
+        public CharacterTraitHandler PlayerTraitHandler { get; private set; }
+
         // 프로퍼티
         public CharacterData Data => _data;
         public string Name => _data.CharacterName;
@@ -33,12 +36,21 @@ namespace TeamLog.Characters
             StatusEffects = new StatusEffectComponent();
             SkillInventory = new SkillInventoryComponent();
             TraitHandler = new EnemyTraitHandler(data.Trait, this);
+            PlayerTraitHandler = new CharacterTraitHandler(this);
 
             // 특성 사망 방지 훅 연결
             if (TraitHandler.HasTrait)
                 Health.OnPreDeath += () => TraitHandler.PreventDeath();
 
             InitializeComponents();
+        }
+
+        /// <summary>
+        /// 플레이어 장착 특성 설정 (Phase 8C). null 전달 시 해제.
+        /// </summary>
+        public void EquipTrait(CharacterTraitData trait)
+        {
+            PlayerTraitHandler.EquipTrait(trait);
         }
 
         private void InitializeComponents()

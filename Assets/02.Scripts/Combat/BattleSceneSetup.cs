@@ -9,6 +9,7 @@ using TeamLog.Combat.AI;
 using TeamLog.UI;
 using TeamLog.UI.Battle;
 using TeamLog.Map;
+using TeamLog.Meta;
 using TeamLog.Reward;
 
 namespace TeamLog.Combat
@@ -166,7 +167,9 @@ namespace TeamLog.Combat
             }
 
             // TurnManager 생성 — AI 컨트롤러 전달
-            _turnManager = new TurnManager(_playerParty, _enemies, _enemyControllers, maxRerolls: 2, bonusFirstTurnAP: bonusAP);
+            // Phase 8E: 메타 강화 ExtraReroll 구매 시 턴당 리롤 +1
+            int extraReroll = MetaProgressionManager.GetExtraRerollCount(SaveManager.Meta);
+            _turnManager = new TurnManager(_playerParty, _enemies, _enemyControllers, maxRerolls: 2 + extraReroll, bonusFirstTurnAP: bonusAP);
             _turnManager.OnPhaseChanged += OnPhaseChanged;
             _turnManager.OnTurnStarted += OnTurnStarted;
             _turnManager.OnBattleEnded += OnBattleEnded;

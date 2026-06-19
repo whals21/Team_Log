@@ -42,6 +42,12 @@ namespace TeamLog.Combat
                 defense += relicHandler.GetDamageReduction();
             }
 
+            // Phase 8C: 장착 특성 — 공격자 PowerAdd/BonusOutgoingDamage + 대상 DamageReduction
+            if (attacker.PlayerTraitHandler != null && attacker.PlayerTraitHandler.HasTrait)
+                damage += attacker.PlayerTraitHandler.GetBonusOutgoingDamage();
+            if (target.PlayerTraitHandler != null && target.PlayerTraitHandler.HasTrait)
+                defense += target.PlayerTraitHandler.GetDamageReduction();
+
             int calculatedDamage = CalculateDamage(damage, defense);
 
             // 대상 특성: 들어오는 데미지 수정 (Sturdy 절반)

@@ -6,6 +6,7 @@ using TeamLog.UI.Event;
 using TeamLog.UI.Map;
 using TeamLog.UI.Shop;
 using TeamLog.UI.Reward;
+using TeamLog.UI.Meta;
 using TeamLog.UI;
 using TeamLog.Characters;
 
@@ -669,6 +670,181 @@ namespace TeamLog.Editor
             WireProperty(ser, "_startButton", startBtn.GetComponent<Button>());
             WireProperty(ser, "_titleLabel", title);
             WireProperty(ser, "_countLabel", countLabel);
+            ser.ApplyModifiedProperties();
+
+            return overlay;
+        }
+
+        #endregion
+
+        #region Character Trait Select Panel (Phase 8D)
+
+        /// <summary>
+        /// 캐릭터 장착 특성 선택 패널 — CharacterSelectUI 이후 표시.
+        /// 필드: _panel, _rowsContainer, _startButton, _backButton, _titleLabel, _hintLabel
+        /// </summary>
+        private static GameObject BuildCharacterTraitSelectPanel(Transform parent, TMP_FontAsset font)
+        {
+            var overlay = CreateOverlay("CharacterTraitSelectPanel", parent, OverlayBg);
+
+            var content = CreatePanel("Content", overlay.transform,
+                new Vector2(0.08f, 0.08f), new Vector2(0.92f, 0.92f), ContentPanel);
+
+            // 제목
+            var title = CreateText("TitleLabel", content.transform, font,
+                "특성 선택", 28, AccentGold, TextAlignmentOptions.Center);
+            SetAnchors(title.GetComponent<RectTransform>(),
+                new Vector2(0f, 0.9f), new Vector2(0.6f, 1f));
+
+            // 힌트 라벨
+            var hint = CreateText("HintLabel", content.transform, font,
+                "각 캐릭터의 장착 특성을 선택하세요", 18, TextDim, TextAlignmentOptions.Right);
+            SetAnchors(hint.GetComponent<RectTransform>(),
+                new Vector2(0.6f, 0.9f), new Vector2(1f, 1f));
+
+            // 행 컨테이너 (수직 스크롤)
+            var rowsContainer = CreateUIObject("RowsContainer", content.transform);
+            SetAnchors(rowsContainer.GetComponent<RectTransform>(),
+                new Vector2(0.05f, 0.18f), new Vector2(0.95f, 0.85f));
+            var vlg = rowsContainer.AddComponent<VerticalLayoutGroup>();
+            vlg.spacing = 8;
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // ContentSizeFitter로 행 높이 자동
+            var csf = rowsContainer.AddComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            // 시작 버튼 (좌측 하단)
+            var startBtn = CreateButton("StartButton", content.transform, font,
+                "모험 시작", 24, AccentGold);
+            SetAnchors(startBtn.GetComponent<RectTransform>(),
+                new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.14f));
+
+            // 뒤로 버튼 (우측 하단)
+            var backBtn = CreateButton("BackButton", content.transform, font,
+                "뒤로", 20, TextWhite);
+            SetAnchors(backBtn.GetComponent<RectTransform>(),
+                new Vector2(0.75f, 0.03f), new Vector2(0.95f, 0.14f));
+
+            var comp = overlay.AddComponent<CharacterTraitSelectUI>();
+            var ser = new SerializedObject(comp);
+            WireProperty(ser, "_panel", overlay);
+            WireProperty(ser, "_rowsContainer", rowsContainer.transform);
+            WireProperty(ser, "_startButton", startBtn.GetComponent<Button>());
+            WireProperty(ser, "_backButton", backBtn.GetComponent<Button>());
+            WireProperty(ser, "_titleLabel", title);
+            WireProperty(ser, "_hintLabel", hint);
+            ser.ApplyModifiedProperties();
+
+            return overlay;
+        }
+
+        #endregion
+
+        #region Meta Shop Panel (Phase 8D)
+
+        /// <summary>
+        /// 메타 상점 패널 (타이틀 씬) — 3탭 구조 (특성/유물/강화).
+        /// 필드: _panel, _closeButton, 3개 탭 버튼, _memoryLabel, _soulLabel,
+        ///       _contentContainer, _allTraits, _allUpgrades, _allRelics
+        /// </summary>
+        private static GameObject BuildMetaShopPanel(Transform parent, TMP_FontAsset font)
+        {
+            var overlay = CreateOverlay("MetaShopPanel", parent, OverlayBg);
+
+            var content = CreatePanel("Content", overlay.transform,
+                new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.95f), ContentPanel);
+
+            // 상단 바 — 잔고 표시
+            var topBar = CreateUIObject("TopBar", content.transform);
+            SetAnchors(topBar.GetComponent<RectTransform>(),
+                new Vector2(0f, 0.92f), new Vector2(1f, 1f));
+
+            var titleLabel = CreateText("TitleLabel", topBar.transform, font,
+                "메타 상점", 28, AccentGold, TextAlignmentOptions.Left);
+            SetAnchors(titleLabel.GetComponent<RectTransform>(),
+                new Vector2(0.02f, 0f), new Vector2(0.4f, 1f));
+
+            var memoryLabel = CreateText("MemoryLabel", topBar.transform, font,
+                "기억: 0", 20, new Color(0.6f, 0.85f, 1f), TextAlignmentOptions.Right);
+            SetAnchors(memoryLabel.GetComponent<RectTransform>(),
+                new Vector2(0.5f, 0f), new Vector2(0.75f, 1f));
+
+            var soulLabel = CreateText("SoulLabel", topBar.transform, font,
+                "영혼: 0", 20, new Color(0.85f, 0.6f, 1f), TextAlignmentOptions.Right);
+            SetAnchors(soulLabel.GetComponent<RectTransform>(),
+                new Vector2(0.75f, 0f), new Vector2(0.95f, 1f));
+
+            // 탭 버튼 행
+            var tabContainer = CreateUIObject("TabContainer", content.transform);
+            SetAnchors(tabContainer.GetComponent<RectTransform>(),
+                new Vector2(0.02f, 0.85f), new Vector2(0.98f, 0.92f));
+            var thlg = tabContainer.AddComponent<HorizontalLayoutGroup>();
+            thlg.spacing = 6;
+            thlg.childAlignment = TextAnchor.UpperLeft;
+            thlg.childControlWidth = true;
+            thlg.childControlHeight = true;
+            thlg.childForceExpandWidth = true;
+            thlg.childForceExpandHeight = true;
+
+            var traitsTab = CreateButton("TraitsTab", tabContainer.transform, font,
+                "특성", 22, AccentGold);
+            var relicsTab = CreateButton("RelicsTab", tabContainer.transform, font,
+                "유물", 22, TextWhite);
+            var upgradesTab = CreateButton("UpgradesTab", tabContainer.transform, font,
+                "강화", 22, TextWhite);
+
+            // 닫기 버튼 (우측 상단)
+            var closeBtn = CreateButton("CloseButton", content.transform, font,
+                "닫기", 22, TextDim);
+            SetAnchors(closeBtn.GetComponent<RectTransform>(),
+                new Vector2(0.85f, 0.92f), new Vector2(0.98f, 0.99f));
+
+            // 콘텐츠 스크롤 영역
+            var scrollObj = CreateUIObject("ContentScroll", content.transform);
+            SetAnchors(scrollObj.GetComponent<RectTransform>(),
+                new Vector2(0.02f, 0.02f), new Vector2(0.98f, 0.84f));
+            var scrollRect = scrollObj.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+
+            var viewport = CreateUIObject("Viewport", scrollObj.transform);
+            SetAnchors(viewport.GetComponent<RectTransform>(),
+                Vector2.zero, Vector2.one);
+            var viewportMask = viewport.AddComponent<RectMask2D>();
+
+            var contentContainer = CreateUIObject("ContentContainer", viewport.transform);
+            SetAnchors(contentContainer.GetComponent<RectTransform>(),
+                new Vector2(0f, 1f), Vector2.one);
+            var contentContainerRect = contentContainer.GetComponent<RectTransform>();
+            contentContainerRect.pivot = new Vector2(0.5f, 1f);
+            var contentVlg = contentContainer.AddComponent<VerticalLayoutGroup>();
+            contentVlg.spacing = 6;
+            contentVlg.childAlignment = TextAnchor.UpperCenter;
+            contentVlg.childControlWidth = true;
+            contentVlg.childControlHeight = false;
+            contentVlg.childForceExpandWidth = true;
+            contentVlg.childForceExpandHeight = false;
+            var contentCsf = contentContainer.AddComponent<ContentSizeFitter>();
+            contentCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            scrollRect.content = contentContainerRect;
+            scrollRect.viewport = viewport.GetComponent<RectTransform>();
+
+            var comp = overlay.AddComponent<MetaShopUI>();
+            var ser = new SerializedObject(comp);
+            WireProperty(ser, "_panel", overlay);
+            WireProperty(ser, "_closeButton", closeBtn.GetComponent<Button>());
+            WireProperty(ser, "_traitsTabButton", traitsTab.GetComponent<Button>());
+            WireProperty(ser, "_relicsTabButton", relicsTab.GetComponent<Button>());
+            WireProperty(ser, "_upgradesTabButton", upgradesTab.GetComponent<Button>());
+            WireProperty(ser, "_memoryLabel", memoryLabel);
+            WireProperty(ser, "_soulLabel", soulLabel);
+            WireProperty(ser, "_contentContainer", contentContainer.transform);
             ser.ApplyModifiedProperties();
 
             return overlay;

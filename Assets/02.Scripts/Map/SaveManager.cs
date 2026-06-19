@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using TeamLog.Characters;
+using TeamLog.Meta;
 using TeamLog.Reward;
 using TeamLog.Skill;
 
@@ -96,9 +97,17 @@ namespace TeamLog.Map
                 var meta = JsonUtility.FromJson<MetaSaveData>(json);
                 if (meta != null)
                 {
-                    // UnlockedCharacterIds가 null이면 초기화
+                    // List 필드 null 체크 — 구버전 세이브 호환
                     if (meta.UnlockedCharacterIds == null)
                         meta.UnlockedCharacterIds = new List<string>();
+                    if (meta.UnlockedTraitIds == null)
+                        meta.UnlockedTraitIds = new List<string>();
+                    if (meta.UnlockedRelicIds == null)
+                        meta.UnlockedRelicIds = new List<string>();
+                    if (meta.PurchasedUpgradeIds == null)
+                        meta.PurchasedUpgradeIds = new List<string>();
+                    if (meta.EquippedTraitBindings == null)
+                        meta.EquippedTraitBindings = new List<TraitBindingEntry>();
                     return meta;
                 }
             }
@@ -114,7 +123,7 @@ namespace TeamLog.Map
             string json = JsonUtility.ToJson(_metaCache, true);
             File.WriteAllText(MetaPath, json);
 #if UNITY_EDITOR
-            Debug.Log($"[SaveManager] 메타 저장 — 총 런: {_metaCache.TotalRuns}, 승리: {_metaCache.Victories}");
+            Debug.Log($"[SaveManager] 메타 저장 — 총 런: {_metaCache.TotalRuns}, 승리: {_metaCache.Victories}, 기억: {_metaCache.MemoryFragments}, 영혼: {_metaCache.Souls}");
 #endif
         }
 
@@ -290,9 +299,9 @@ namespace TeamLog.Map
         }
 
         /// <summary>
-        /// 런 종료 시 메타 통계 갱신 + 캐릭터 잠금해제 체크 + 런 저장 삭제
+        /// 런 종료 시 메타 통계 갱신 + 메타 재화 적립 + 캐릭터 잠금해제 체크 + 런 저장 삭제
         /// </summary>
-        public static void RecordRunEnd(bool victory, int floor, int gold)
+        public static void RecordRunEnd(bool victory, int floor, int gold, int battlesWon = 0)
         {
             var meta = Meta;
             meta.TotalRuns++;
@@ -301,39 +310,50 @@ namespace TeamLog.Map
             if (floor > meta.BestFloor) meta.BestFloor = floor;
             meta.HasPendingRun = false;
 
+            // Phase 8B: 메타 재화(기억의 조각/영혼) 적립
+            var reward = MetaProgressionManager.CalculateRunReward(victory, floor, gold, battlesWon);
+            meta.MemoryFragments += reward.memory;
+            meta.Souls += reward.souls;
+
             // 캐릭터 잠금해제 조건 체크
             CheckCharacterUnlocks(meta, victory, floor);
 
             SaveMeta();
+
+#if UNITY_EDITOR
+            Debug.Log($"[SaveManager] 런 종료 — 승리:{victory} 층:{floor} 획득: 기억 {reward.memory} / 영혼 {reward.souls}");
+#endif
 
             // 런 종료 시 세이브 파일 삭제
             DeleteSave();
         }
 
         /// <summary>
-        /// 캐릭터 잠금해제 조건 체크
+        /// 캐릭터 잠금해제 조건 체크 (Phase 8F: Phase 7A 회귀 버그 수정).
+        /// 기준: 보스 클리어(victory) + 도달한 층(floor) 기반.
+        /// F1 보스 클리어(floor>=2) → 궁수
+        /// F2 보스 클리어(floor>=3) → 네크로맨서
+        /// F3 보스 클리어(floor>=4) → 연금술사
+        /// F4 런 클리어(victories>=1) → 음유시인 (기존 승리 3회 → 1회로 완화)
         /// </summary>
         private static void CheckCharacterUnlocks(MetaSaveData meta, bool victory, int floor)
         {
-            // 잠금해제 조건:
-            // 1층 보스(고블린왕) 클리어 → 궁수 잠금해제
-            // 2층 보스(드래곤) 클리어 → 네크로맨서 잠금해제
-            // 3층 보스(마왕) 클리어 → 연금술사 잠금해제
-            // 총 승리 3회 달성 → 음유시인 잠금해제
-
             if (meta.UnlockedCharacterIds == null)
                 meta.UnlockedCharacterIds = new List<string>();
 
-            if (floor >= 1 && !meta.UnlockedCharacterIds.Contains("궁수"))
+            // 보스 클리어(victory)한 런에서만 해금 — 패배 시 의도치 않은 해금 방지
+            if (victory && floor >= 2 && !meta.UnlockedCharacterIds.Contains("궁수"))
                 meta.UnlockedCharacterIds.Add("궁수");
 
-            if (floor >= 2 && !meta.UnlockedCharacterIds.Contains("네크로맨서"))
+            if (victory && floor >= 3 && !meta.UnlockedCharacterIds.Contains("네크로맨서"))
                 meta.UnlockedCharacterIds.Add("네크로맨서");
 
-            if (floor >= 3 && !meta.UnlockedCharacterIds.Contains("연금술사"))
+            if (victory && floor >= 4 && !meta.UnlockedCharacterIds.Contains("연금술사"))
                 meta.UnlockedCharacterIds.Add("연금술사");
 
-            if (meta.Victories >= 3 && !meta.UnlockedCharacterIds.Contains("음유시인"))
+            // F4 런 완주 시 음유시인 해금 (기존 승리 3회 → 1회로 완화)
+            if (victory && floor >= 4 && meta.Victories >= 1 &&
+                !meta.UnlockedCharacterIds.Contains("음유시인"))
                 meta.UnlockedCharacterIds.Add("음유시인");
         }
 

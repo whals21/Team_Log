@@ -6,6 +6,7 @@ using UnityEngine;
 using TeamLog.Characters;
 using TeamLog.Combat;
 using TeamLog.Map;
+using TeamLog.Meta;
 using TeamLog.UI;
 using TeamLog.UI.Event;
 using TeamLog.UI.Shop;
@@ -71,7 +72,8 @@ namespace TeamLog.UI.Map
                         _restUI.Show();
                     else
                     {
-                        _runState.RestAtCampfire();
+                        float healBoost = MetaProgressionManager.GetPartyHealBoost(SaveManager.Meta);
+                        _runState.RestAtCampfire(0.3f + healBoost);
                         ToastUI.Show("파티가 휴식했습니다.");
                     }
                     break;
@@ -147,7 +149,8 @@ namespace TeamLog.UI.Map
             switch (choice)
             {
                 case 0: // 휴식
-                    _runState.RestAtCampfire();
+                    float boost = MetaProgressionManager.GetPartyHealBoost(SaveManager.Meta);
+                    _runState.RestAtCampfire(0.3f + boost);
                     ToastUI.Show("파티가 휴식하여 HP를 회복했습니다.");
                     break;
                 case 1: // 수련

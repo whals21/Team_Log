@@ -68,6 +68,13 @@ namespace TeamLog.Combat.Turn
 
         public void StartBattle()
         {
+            // Phase 8C: 플레이어 장착 특성 처리기 구독
+            foreach (var c in _playerParty)
+            {
+                if (c.PlayerTraitHandler != null && c.PlayerTraitHandler.HasTrait)
+                    c.PlayerTraitHandler.SubscribeEvents();
+            }
+
             CombatEventBus.FireBattleStart();
             StartNewTurn();
         }
@@ -96,11 +103,17 @@ namespace TeamLog.Combat.Turn
                 else if (hpChange < 0) c.Health.TakeDamage(-hpChange);
             }
 
-            // AP 리셋: 기본 1 + 생존 파티원 수 (+ 첫 턴 보너스 + 유물 ExtraAP)
+            // AP 리셋: 기본 1 + 생존 파티원 수 (+ 첫 턴 보너스 + 유물 ExtraAP + 장착 특성 ExtraAP)
             int aliveCount = _playerParty.FindAll(p => p.IsAlive).Count;
             int bonus = (_context.TurnNumber == 1) ? _bonusFirstTurnAP : 0;
             int relicAP = GameRunState.Instance?.RelicHandler.GetExtraAP() ?? 0;
-            _context.ResetAP(1 + aliveCount + bonus + relicAP);
+            int traitAP = 0;
+            foreach (var c in _playerParty)
+            {
+                if (c.IsAlive && c.PlayerTraitHandler != null && c.PlayerTraitHandler.HasTrait)
+                    traitAP += c.PlayerTraitHandler.GetExtraAP();
+            }
+            _context.ResetAP(1 + aliveCount + bonus + relicAP + traitAP);
 
             ExecuteDrawPhase();
 
@@ -132,8 +145,12 @@ namespace TeamLog.Combat.Turn
         {
             if (caster.IsDead) return false;
 
-            // AP 체크 — 증강 반영 코스트 사용
+            // AP 체크 — 증강 + 장착 특성 반영 코스트 사용
             int effectiveCost = instance != null ? instance.EffectiveCost : skill.Cost;
+            // Phase 8C: 장착 특성 CostAdd (궁수 속사 등)
+            if (caster.PlayerTraitHandler != null && caster.PlayerTraitHandler.HasTrait)
+                effectiveCost += caster.PlayerTraitHandler.QueryKeywordSum(KeywordType.CostAdd);
+            effectiveCost = System.Math.Max(0, effectiveCost);
             if (!_context.CanAfford(effectiveCost))
                 return false;
 
@@ -301,6 +318,12 @@ namespace TeamLog.Combat.Turn
 
             if (allPlayersDead || allEnemiesDead)
             {
+                // Phase 8C: 플레이어 장착 특성 처리기 정리
+                foreach (var c in _playerParty)
+                {
+                    if (c.PlayerTraitHandler != null && c.PlayerTraitHandler.HasTrait)
+                        c.PlayerTraitHandler.UnsubscribeEvents();
+                }
                 _context.SetPhase(TurnPhase.BattleEnd);
                 CombatEventBus.FireBattleEnd(allEnemiesDead);
                 CombatEventBus.Clear();

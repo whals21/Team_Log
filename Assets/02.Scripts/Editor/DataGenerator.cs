@@ -20,6 +20,9 @@ namespace TeamLog.Editor
     /// 이벤트 데이터: DataGenerator.Events.cs
     /// 유물 데이터: DataGenerator.Relics.cs
     /// 팔레트 (UI/오디오/VFX): DataGenerator.Palettes.cs
+    /// 스테이지 테마: DataGenerator.Stages.cs
+    /// 캐릭터 특성: DataGenerator.Traits.cs
+    /// 메타 강화: DataGenerator.MetaUpgrades.cs
     /// </summary>
     public static partial class DataGenerator
     {
@@ -56,6 +59,8 @@ namespace TeamLog.Editor
             GenerateUIPalette();
             GenerateAudioPalette();
             GenerateVFXPalette();
+            GenerateTraitData();
+            GenerateMetaUpgradeData();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

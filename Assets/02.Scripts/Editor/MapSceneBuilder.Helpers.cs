@@ -3,6 +3,9 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.UI;
 using TMPro;
+using TeamLog.Characters;
+using TeamLog.Meta;
+using TeamLog.Reward;
 
 namespace TeamLog.Editor
 {
@@ -18,6 +21,43 @@ namespace TeamLog.Editor
             var prop = ser.FindProperty(property);
             if (prop != null && value != null)
                 prop.objectReferenceValue = value;
+        }
+
+        /// <summary>
+        /// 메타 상점 데이터 풀 바인딩 (Phase 8D).
+        /// _allTraits / _allUpgrades / _allRelics — 각 에셋 디렉토리에서 로드.
+        /// </summary>
+        private static void WireMetaShopDataPools(SerializedObject ser)
+        {
+            // 캐릭터 특성 풀
+            var traitAssets = LoadAllAssets<CharacterTraitData>("Assets/03.Data/CharacterTraits");
+            var traitsProp = ser.FindProperty("_allTraits");
+            if (traitsProp != null && traitAssets.Count > 0)
+            {
+                traitsProp.arraySize = traitAssets.Count;
+                for (int i = 0; i < traitAssets.Count; i++)
+                    traitsProp.GetArrayElementAtIndex(i).objectReferenceValue = traitAssets[i];
+            }
+
+            // 메타 강화 풀
+            var upgradeAssets = LoadAllAssets<MetaUpgradeData>("Assets/03.Data/MetaUpgrades");
+            var upgradesProp = ser.FindProperty("_allUpgrades");
+            if (upgradesProp != null && upgradeAssets.Count > 0)
+            {
+                upgradesProp.arraySize = upgradeAssets.Count;
+                for (int i = 0; i < upgradeAssets.Count; i++)
+                    upgradesProp.GetArrayElementAtIndex(i).objectReferenceValue = upgradeAssets[i];
+            }
+
+            // 유물 풀 (메타 상점 표시용)
+            var relicAssets = LoadAllAssets<RelicData>("Assets/03.Data/Relics");
+            var relicsProp = ser.FindProperty("_allRelics");
+            if (relicsProp != null && relicAssets.Count > 0)
+            {
+                relicsProp.arraySize = relicAssets.Count;
+                for (int i = 0; i < relicAssets.Count; i++)
+                    relicsProp.GetArrayElementAtIndex(i).objectReferenceValue = relicAssets[i];
+            }
         }
 
         private static List<T> LoadAllAssets<T>(string folder, string namePrefix = null) where T : Object

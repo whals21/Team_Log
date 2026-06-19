@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c7aca290ce59e43ac62a41f53b2b65, type: 3}
+  m_Name: Meta_GoldenIdol
+  m_EditorClassIdentifier: 
+  _upgradeId: Meta_GoldenIdol
+  _displayName: "\uD669\uAE08 \uC6B0\uC0C1 \uD574\uAE08"
+  _description: "\uC804\uD22C \uC2DC\uC791 \uC2DC \uACE8\uB4DC +20 \uD68D\uB4DD"
+  _type: 0
+  _memoryCost: 60
+  _soulCost: 0
+  _targetRelicId: Relic_GoldenIdol

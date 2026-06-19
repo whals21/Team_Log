@@ -7,6 +7,7 @@ using TeamLog.Characters;
 using TeamLog.Combat;
 using TeamLog.Event;
 using TeamLog.Map;
+using TeamLog.Meta;
 using TeamLog.Reward;
 using TeamLog.Skill;
 using TeamLog.UI;
@@ -57,9 +58,13 @@ namespace TeamLog.UI.Map
         [SerializeField] private TutorialUI _tutorialUI;
         [SerializeField] private CharacterSelectUI _characterSelectUI;
         [SerializeField] private StageBonusUI _stageBonusUI;
+        [SerializeField] private CharacterTraitSelectUI _characterTraitSelectUI;
 
         [Header("All Characters")]
         [SerializeField] private CharacterData[] _allCharacters;
+
+        [Header("Character Traits Pool (Phase 8D)")]
+        [SerializeField] private CharacterTraitData[] _allCharacterTraits;
 
         [Header("Test Mode")]
         [SerializeField] private bool _useTestData = true;
@@ -116,7 +121,7 @@ namespace TeamLog.UI.Map
         }
 
         /// <summary>
-        /// 캐릭터 선택 완료 → 런 시작
+        /// 캐릭터 선택 완료 → 특성 선택 단계로 (Phase 8D)
         /// </summary>
         private void OnCharacterSelectConfirmed(List<CharacterData> selectedCharacters)
         {
@@ -124,7 +129,59 @@ namespace TeamLog.UI.Map
             foreach (var data in selectedCharacters)
                 _playerParty.Add(new Character(data));
 
+            // Phase 8D: 특성 선택 UI 표시 — _allCharacterTraits가 비활성이면 바로 런 시작
+            if (_characterTraitSelectUI != null && _allCharacterTraits != null && _allCharacterTraits.Length > 0)
+            {
+                _characterTraitSelectUI.Initialize(
+                    selectedCharacters.ToArray(),
+                    _allCharacterTraits,
+                    SaveManager.Meta,
+                    OnTraitSelectConfirmed);
+                _characterTraitSelectUI.Show();
+            }
+            else
+            {
+                StartRunWithParty();
+            }
+        }
+
+        /// <summary>
+        /// 특성 선택 완료 → meta 저장 + 파티에 특성 장착 + 런 시작
+        /// </summary>
+        private void OnTraitSelectConfirmed(List<CharacterTraitSelectUI.TraitSelection> selections)
+        {
+            var meta = SaveManager.Meta;
+            // meta.EquippedTraitBindings 업데이트
+            foreach (var sel in selections)
+            {
+                if (sel?.Character == null) continue;
+                string traitId = sel.Trait != null ? sel.Trait.TraitId : "";
+                MetaProgressionManager.TryEquipTrait(meta, sel.Character.CharacterName, traitId, requireUnlocked: false);
+            }
+            SaveManager.SaveMeta();
+
+            // 파티에 장착 적용
+            ApplyEquippedTraitsFromMeta(_playerParty);
+
             StartRunWithParty();
+        }
+
+        /// <summary>
+        /// meta에 저장된 장착 특성을 파티원에 적용 (Phase 8D).
+        /// 런 시작(OnTraitSelectConfirmed) 및 세이브 로드(ContinueFromSave) 양쪽에서 사용.
+        /// </summary>
+        private void ApplyEquippedTraitsFromMeta(List<Character> party)
+        {
+            if (_allCharacterTraits == null || party == null) return;
+            var meta = SaveManager.Meta;
+            foreach (var c in party)
+            {
+                if (c == null) continue;
+                string traitId = MetaProgressionManager.GetEquippedTraitId(meta, c.Data.CharacterName);
+                if (string.IsNullOrEmpty(traitId)) continue;
+                var trait = System.Array.Find(_allCharacterTraits, t => t != null && t.TraitId == traitId);
+                if (trait != null) c.EquipTrait(trait);
+            }
         }
 
         private void InitializeTestRun()
@@ -153,8 +210,12 @@ namespace TeamLog.UI.Map
             _runState = GameRunState.Create(_playerParty, startingGold: 50);
             _runState.OnMapChanged += OnMapChanged;
             _runState.OnRunEnded += OnRunEnded;
+
+            // Phase 8E: 유물 풀 필터링 (잠긴 유물 제외)
+            var meta = SaveManager.Meta;
+            var filteredRelicPool = MetaProgressionManager.FilterRelicPool(_relicPool, meta);
             _runState.SetDataPools(
-                _relicPool != null ? new List<RelicData>(_relicPool) : new List<RelicData>(),
+                filteredRelicPool,
                 _augmentPool != null ? new List<AugmentData>(_augmentPool) : new List<AugmentData>());
 
             // 스테이지 테마 후보 주입
@@ -164,10 +225,26 @@ namespace TeamLog.UI.Map
 
             _runState.StartRun();
 
+            // Phase 8E: 시작 유물 지급 (메타 강화로 해금 시)
+            ApplyStartingRelics(filteredRelicPool, meta);
+
             // 메타 데이터에 런 시작 기록
-            var meta = SaveManager.Meta;
             meta.HasPendingRun = true;
             SaveManager.SaveMeta();
+        }
+
+        /// <summary>
+        /// 메타 강화 기반 시작 유물 지급 (Phase 8E).
+        /// StartingRelicSlot: 랜덤 1개, StartingRelicChoice: 추가 랜덤 1개 (단순화 — 본래는 3选1 UI).
+        /// </summary>
+        private void ApplyStartingRelics(List<RelicData> filteredPool, MetaSaveData meta)
+        {
+            if (_runState == null || filteredPool == null || filteredPool.Count == 0) return;
+            int grantCount = MetaProgressionManager.GetStartingRelicGrantCount(meta);
+            if (grantCount <= 0) return;
+            var picks = MetaProgressionManager.RollRelics(filteredPool, grantCount);
+            foreach (var relic in picks)
+                _runState.AcquireRelic(relic);
         }
 
         /// <summary>
@@ -246,6 +323,9 @@ namespace TeamLog.UI.Map
 
             // 테마 후보 주입 — 저장 데이터에 이미 선택된 테마가 있으면 그대로 유지됨
             _runState.SetThemeCandidates(BuildThemeCandidates());
+
+            // Phase 8D: 저장된 장착 특성 복원
+            ApplyEquippedTraitsFromMeta(_playerParty);
 
             InitializeSubUIs();
 
@@ -343,12 +423,16 @@ namespace TeamLog.UI.Map
             int gold = _runState.TotalGoldEarned;
             int battlesWon = _runState.BattlesWon;
 
-            SaveManager.RecordRunEnd(victory, floor, gold);
+            // 메타 재화 보상 계산 — RecordRunEnd 이전에 산출하여 오버레이에 전달
+            var reward = TeamLog.Meta.MetaProgressionManager.CalculateRunReward(
+                victory, floor, gold, battlesWon);
+
+            SaveManager.RecordRunEnd(victory, floor, gold, battlesWon);
             GameRunState.Destroy();
 
             if (_runEndOverlay != null)
             {
-                _runEndOverlay.Show(victory, floor, gold, battlesWon);
+                _runEndOverlay.Show(victory, floor, gold, battlesWon, reward.memory, reward.souls);
             }
             else
             {

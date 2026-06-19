@@ -11,6 +11,7 @@ using TeamLog.UI.Event;
 using TeamLog.UI.Map;
 using TeamLog.UI.Reward;
 using TeamLog.UI.Shop;
+using TeamLog.UI.Meta;
 using TeamLog.UI;
 using TeamLog.UI.Title;
 using TeamLog.Skill;
@@ -104,6 +105,12 @@ namespace TeamLog.Editor
             var continueLayout = continueBtn.AddComponent<LayoutElement>();
             continueLayout.minHeight = 60;
 
+            // 메타 상점 버튼 (Phase 8D)
+            var metaShopBtn = CreateButton("MetaShopButton", btnContainer.transform, font,
+                "메타 상점", 32, AccentGold);
+            var metaShopLayout = metaShopBtn.AddComponent<LayoutElement>();
+            metaShopLayout.minHeight = 60;
+
             // 이어하기 차단 오버레이
             var continueBlock = CreateFullImage("ContinueBlock", continueBtn.transform,
                 new Color(0f, 0f, 0f, 0.6f));
@@ -112,14 +119,40 @@ namespace TeamLog.Editor
             SetAnchors(blockText.GetComponent<RectTransform>(),
                 Vector2.zero, Vector2.one);
 
+            // 메타 상점 패널 (Phase 8D) — 비활성 상태로 씬에 포함
+            var metaShopPanel = BuildMetaShopPanel(canvasObj.transform, font);
+            metaShopPanel.SetActive(false);
+
             // TitleSceneSetup 컴포넌트
             var setupObj = new GameObject("TitleSceneSetup");
             var setup = setupObj.AddComponent<TeamLog.UI.Title.TitleSceneSetup>();
             var setupSer = new SerializedObject(setup);
             WireProperty(setupSer, "_newGameButton", newGameBtn.GetComponent<Button>());
             WireProperty(setupSer, "_continueButton", continueBtn.GetComponent<Button>());
+            WireProperty(setupSer, "_metaShopButton", metaShopBtn.GetComponent<Button>());
             WireProperty(setupSer, "_statsLabel", statsLabel);
             WireProperty(setupSer, "_continueBlock", continueBlock);
+            WireProperty(setupSer, "_metaShopUI", metaShopPanel.GetComponent<MetaShopUI>());
+
+            // Phase 8F: All Characters 동적 바인딩 (TitleSceneSetup._allCharacters)
+            string[] titleCharNames = {
+                "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Rogue",
+                "Char_Archer", "Char_Necromancer", "Char_Alchemist", "Char_Bard"
+            };
+            var titleCharAssets = LoadAssetsByNames<CharacterData>(CHAR_DIR, titleCharNames);
+            var titleCharProp = setupSer.FindProperty("_allCharacters");
+            if (titleCharProp != null)
+            {
+                titleCharProp.arraySize = titleCharAssets.Count;
+                for (int i = 0; i < titleCharAssets.Count; i++)
+                    titleCharProp.GetArrayElementAtIndex(i).objectReferenceValue = titleCharAssets[i];
+            }
+
+            // 메타 상점 데이터 풀 — 특성/강화/유물
+            var metaShopSer = new SerializedObject(metaShopPanel.GetComponent<MetaShopUI>());
+            WireMetaShopDataPools(metaShopSer);
+            metaShopSer.ApplyModifiedProperties();
+
             setupSer.ApplyModifiedProperties();
 
             // EventSystem
@@ -221,6 +254,8 @@ namespace TeamLog.Editor
             var deckViewerPanel = BuildDeckViewerPanel(canvasObj.transform, font);
             var tutorialOverlay = BuildTutorialOverlay(canvasObj.transform, font);
             var characterSelectPanel = BuildCharacterSelectPanel(canvasObj.transform, font);
+            var characterTraitSelectPanel = BuildCharacterTraitSelectPanel(canvasObj.transform, font);
+            characterTraitSelectPanel.SetActive(false); // 비활성 시작
             var stageBonusPanel = BuildStageBonusPanel(canvasObj.transform, font);
 
             // ShopUI에 ConfirmationDialog 참조 연결
@@ -341,6 +376,18 @@ namespace TeamLog.Editor
             // CharacterSelectUI — 씬에 생성된 패널 와이어링
             WireProperty(setupSer, "_characterSelectUI", characterSelectPanel.GetComponent<CharacterSelectUI>());
             WireProperty(setupSer, "_stageBonusUI", stageBonusPanel.GetComponent<StageBonusUI>());
+
+            // Phase 8D: CharacterTraitSelectUI + 캐릭터 특성 풀
+            WireProperty(setupSer, "_characterTraitSelectUI",
+                characterTraitSelectPanel.GetComponent<CharacterTraitSelectUI>());
+            var charTraitAssets = LoadAllAssets<CharacterTraitData>("Assets/03.Data/CharacterTraits");
+            var charTraitProp = setupSer.FindProperty("_allCharacterTraits");
+            if (charTraitProp != null && charTraitAssets.Count > 0)
+            {
+                charTraitProp.arraySize = charTraitAssets.Count;
+                for (int i = 0; i < charTraitAssets.Count; i++)
+                    charTraitProp.GetArrayElementAtIndex(i).objectReferenceValue = charTraitAssets[i];
+            }
 
             // RelicData pool
             var relicAssets = LoadAllAssets<RelicData>("Assets/03.Data/Relics");

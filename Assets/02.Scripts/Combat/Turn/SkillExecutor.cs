@@ -46,10 +46,10 @@ namespace TeamLog.Combat.Turn
                     ExecuteHeal(caster, target, skill, instance, powerMultiplier);
                     break;
                 case SkillType.Buff:
-                    ApplyEffect(skill, target, instance);
+                    ApplyEffect(caster, skill, target, instance);
                     break;
                 case SkillType.Debuff:
-                    ApplyEffect(skill, target, instance);
+                    ApplyEffect(caster, skill, target, instance);
                     break;
                 case SkillType.Shield:
                     ExecuteShield(caster, target, skill, instance);
@@ -103,12 +103,29 @@ namespace TeamLog.Combat.Turn
                     power = (int)(power * lowHPMul);
             }
 
+            // Phase 8C: 장착 특성 OnEnemyLowHP PowerMul (궁수 약점 포착 등)
+            if (caster.PlayerTraitHandler != null && caster.PlayerTraitHandler.HasTrait)
+            {
+                float traitLowHPMul = caster.PlayerTraitHandler.GetEnemyLowHPPowerMul(
+                    target.Health.CurrentHP, target.Health.MaxHP);
+                if (traitLowHPMul > 1f)
+                    power = (int)(power * traitLowHPMul);
+            }
+
             // 유물: 일시적 "다음 공격 강화" 버프 소비 (B2 AegisStrike, C3 MercyBlade 등)
             if (relicHandler != null)
             {
                 int nextBonus = relicHandler.ConsumeNextAttackBonus();
                 if (nextBonus > 0)
                     power += nextBonus;
+            }
+
+            // Phase 8C: 장착 특성 일시적 버프 소비
+            if (caster.PlayerTraitHandler != null && caster.PlayerTraitHandler.HasTrait)
+            {
+                int traitBonus = caster.PlayerTraitHandler.ConsumeNextAttackBonus();
+                if (traitBonus > 0)
+                    power += traitBonus;
             }
 
             // 키워드: DamageTakenMul — 대상이 이 키워드 보유 시 받는 피해 배율 (스킬+유물)
@@ -165,6 +182,9 @@ namespace TeamLog.Combat.Turn
                 // OnKill 트리거 유물(VampireFang 등)은 GetAllKeywordSum이 Passive만 합산하므로 별도 조회
                 if (relicHandler != null)
                     killHeal += relicHandler.GetOnKillHealValue();
+                // Phase 8C: 장착 특성 OnKillHeal (힐러 순수 치유 등)
+                if (caster.PlayerTraitHandler != null && caster.PlayerTraitHandler.HasTrait)
+                    killHeal += caster.PlayerTraitHandler.GetOnKillHealValue();
                 if (killHeal > 0)
                 {
                     caster.Health.Heal(killHeal);
@@ -186,7 +206,7 @@ namespace TeamLog.Combat.Turn
             CombatEventBus.FireHealApplied(target, amount);
         }
 
-        private void ApplyEffect(SkillData skill, Character target, SkillInstance instance = null)
+        private void ApplyEffect(Character caster, SkillData skill, Character target, SkillInstance instance = null)
         {
             if (skill.StatusEffect != StatusEffectType.None)
             {
@@ -197,13 +217,22 @@ namespace TeamLog.Combat.Turn
                 int duration = skill.EffectDuration;
                 int value = skill.EffectValue;
 
-                // 키워드: DurationAdd
+                // 키워드: DurationAdd (증강)
                 if (instance != null)
                     duration += (int)KeywordResolver.SumKeyword(instance.GetAllKeywords(), KeywordType.DurationAdd);
 
-                // 키워드: EffectMul
+                // Phase 8C: 장착 특성 DurationAdd (도적 독 마스터, 연금술사 독성 폭발)
+                if (caster != null && caster.PlayerTraitHandler != null && caster.PlayerTraitHandler.HasTrait)
+                    duration += caster.PlayerTraitHandler.QueryKeywordSum(KeywordType.DurationAdd);
+
+                // 키워드: EffectMul (증강)
+                float effectMul = 1f;
                 if (instance != null)
-                    value = System.Math.Max(1, (int)(value * KeywordResolver.MulKeyword(instance.GetAllKeywords(), KeywordType.EffectMul)));
+                    effectMul *= KeywordResolver.MulKeyword(instance.GetAllKeywords(), KeywordType.EffectMul);
+                // Phase 8C: 장착 특성 EffectMul (네크로맨서 저주의 대가)
+                if (caster != null && caster.PlayerTraitHandler != null && caster.PlayerTraitHandler.HasTrait)
+                    effectMul *= caster.PlayerTraitHandler.QueryKeywordMul(KeywordType.EffectMul);
+                value = System.Math.Max(1, (int)(value * effectMul));
 
                 target.StatusEffects.ApplyEffect(skill.StatusEffect, duration, value);
                 target.ApplyStatModifiers();
@@ -242,7 +271,7 @@ namespace TeamLog.Combat.Turn
         }
 
         /// <summary>
-        /// 캐릭터의 모든 스킬 + 유물 키워드에서 지정 타입 합산
+        /// 캐릭터의 모든 스킬 + 유물 + 장착 특성 키워드에서 지정 타입 합산
         /// </summary>
         public static int GetAllKeywordSum(Character character, KeywordType type)
         {
@@ -261,11 +290,14 @@ namespace TeamLog.Combat.Turn
                     }
                 }
             }
+            // Phase 8C: 장착 특성 키워드 합산
+            if (character.PlayerTraitHandler != null && character.PlayerTraitHandler.HasTrait)
+                total += character.PlayerTraitHandler.QueryKeywordSum(type);
             return total;
         }
 
         /// <summary>
-        /// 캐릭터의 모든 스킬 + 유물 키워드에서 지정 타입 곱 배율 반환
+        /// 캐릭터의 모든 스킬 + 유물 + 장착 특성 키워드에서 지정 타입 곱 배율 반환
         /// </summary>
         public static float GetAllKeywordMul(Character character, KeywordType type)
         {
@@ -286,6 +318,9 @@ namespace TeamLog.Combat.Turn
                     }
                 }
             }
+            // Phase 8C: 장착 특성 키워드 배율 추가
+            if (character.PlayerTraitHandler != null && character.PlayerTraitHandler.HasTrait)
+                result *= character.PlayerTraitHandler.QueryKeywordMul(type);
             return result;
         }
 

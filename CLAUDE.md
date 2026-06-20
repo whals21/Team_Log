@@ -102,7 +102,7 @@ BattleTestSceneSetup (`TeamLog.EditorDebug` MonoBehaviour, 인터랙티브 전�
     ├── 드롭다운 14개: 파티 4 (Char_ 8종), 유물 6 (Relic_ 42종), 적 4 (Enemy_ 18종=일반12+엘리트6), 층 1 (F1~F4), 보스 토글
     ├── 전투 시작 시: BuildParty/BuildEnemies → GameRunState 생명주기 (Destroy→Create→SetDataPools→SetPlayerParty→SubscribeEvents→AcquireRelic) → BattleSceneSetup.SetBattleData + SetReturnScene("BattleTestScene") → FadeToScene 자기 리로드
     ├── _pendingTestBattle static 분기: 씬 리로드 후 BattleSceneSetup GO를 SetActive(true)하여 Awake/Start 유도
-    ├── 빌더: BattleTestSceneBuilder (TeamLog/Scene/Build Battle Test Scene 메뉴, AssetDatabase.CopyAsset으로 BattleScene 복제, 에셋 배열 자동 바인딩)
+    ├── 빌더: BattleTestSceneBuilder (TeamLog/Scene/Build Battle Test Scene 메뉴, AssetDatabase.CopyAsset으로 BattleScene 복제, 에셋 배열 자동 바인딩. Phase GC 정화: partial 2파일 분할 — BattleTestSceneBuilder.cs(323줄, 진입점/오케스트레이션/바인딩/에셋로드) + BattleTestSceneBuilder.UI.cs(506줄, UI 생성 헬퍼))
     ├── BattleTestConfig (순수 C# static 헬퍼, BuildParty/BuildEnemies + FloorScaling 로컬 복제, 런타임 호환 AssetDatabase 미사용)
     ├── 템플릿 시스템: 파티/유물/적 조합 각각 독립 저장·불러오기·삭제 (BattleTestTemplateStore — JSON 파일 persistentDataPath 영속화, TemplateCategory enum 3종, 15개 SerializeField UI 바인딩)
     └── 하위 호환: BattleSceneSetup.SetReturnScene("BattleTestScene") API 추가, 아무도 호출 안 하면 기존 MapScene 복귀 100% 보존
@@ -126,6 +126,8 @@ ItemEffectApplier (순수 C# static, 아이템 효과 런타임 적용)
 
 메타프로세션 시스템 (Phase 8):
 MetaProgressionManager (순수 C# static, TeamLog.Meta — 런 보상 계산 CalculateRunReward / 특성 해금 TryPurchaseTrait / 강화 구매 TryPurchaseUpgrade / 장착 바인딩 TryEquipTrait+GetEquippedTraitId / 유물 풀 필터링 FilterRelicPool+RollRelics / 시작 유물 대수 GetStartingRelicGrantCount / ExtraReroll+PartyHealBoost 강화 조회. DefaultRelicIds HashSet 16종 기본 해금 유물 관리)
+AscensionManager (순수 C# static, TeamLog.Meta — 어센션 시스템 중앙 관리자. Phase ASC-A. 15레벨 매핑: GetStackCountByLevel(type, level)로 스택 수 조회, GetEnemyHpMulByLevel/GetEnemyAtkMulByLevel/GetBossHpMulByLevel/GetPlayerMaxHpMulByLevel/GetHealMulByLevel/GetStartGoldDeltaByLevel/GetRerollDeltaByLevel로 누적 값. GetActiveModifiers(level)로 활성 modifier 리스트. GetAscensionLevel(meta) + ClampSelectedLevel(selected, meta). MetaSaveData 버전 GetXxxMul(meta) 헬퍼 포함. 레벨 임계값 — EnemyHp{1,7,13}, StartGold{2,8}, Reroll{3,9,14}, PlayerHp{4,10}, Heal{5,11}, EnemyAtk{6,12}, BossHp{15}. MaxLevel=15)
+AscensionModifierData (ScriptableObject, TeamLog.Meta — 어센션 modifier 정적 데이터. AscensionModifierType enum 7종: EnemyHpPercent/PlayerMaxHpPercent/RerollCount/StartGold/HealPercent/EnemyAtkPercent/BossHpPercent. 필드: modifierId/displayName/description/modifierType/intValue/floatValue. DataGenerator.Ascension.cs 10번째 partial에서 7종 자동 생성)
 MetaUpgradeData (ScriptableObject, TeamLog.Meta — 일회성 메타 강화. MetaUpgradeType enum: RelicUnlock/StartingRelicSlot/StartingRelicChoice/ExtraReroll/PartyHealBoost. 30종 DataGenerator.MetaUpgrades.cs에서 생성)
 CharacterTraitData (ScriptableObject, TeamLog.Characters — 캐릭터 장착형 특성 Loadout. KeywordEntry[] 기반, 8캐릭터 × 3특성 = 24종 DataGenerator.Traits.cs에서 생성. isDefault/unlockCost/soulUnlockCost 해금 정책)
 CharacterTraitHandler (순수 C# 클래스, TeamLog.Characters — Character 1명당 1개 소유. Character.PlayerTraitHandler. CombatEventBus 구독 + Owner 자신에게만 효과 적용. RelicHandler(파티 전체)와 달리 개인 한정. Phase 8C에 Character.cs에 추가 — EnemyTraitHandler 회귀 제로)
@@ -397,11 +399,28 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - 8D: 특성 선택 UI + 메타 상점 UI 완료 (CharacterTraitSelectUI 신규 — CharacterSelectUI 이후 캐릭터별 장착 특성 1개 선택, MetaShopUI 신규 — 타이틀 3탭 구조 특성/유물/강화, MapSceneSetup.OnCharacterSelectConfirmed → OnTraitSelectConfirmed 파이프라인, TitleSceneSetup 메타 상점 버튼 + _allCharacters 동적 계산, MapSceneBuilder.Panels.cs BuildCharacterTraitSelectPanel/BuildMetaShopPanel 신규, MapSceneBuilder.Helpers.cs WireMetaShopDataPools 헬퍼)
   - 8E: 유물 해금 풀 + 시작 유물 지급 완료 (MetaProgressionManager.FilterRelicPool/RollRelics/GetStartingRelicGrantCount/GetExtraRerollCount/GetPartyHealBoost 추가, DefaultRelicIds HashSet 16종 기본 해금, MapSceneSetup.StartRunWithParty 필터링 + ApplyStartingRelics, BattleSceneSetup maxRerolls 메타 강화 반영, MapSceneSetup.Nodes.cs RestAtCampfire PartyHealBoost 가산)
   - 8F: 회귀 버그 수정 + 단위 테스트 + 검증 완료 (SaveManager.CheckCharacterUnlocks Phase 7A 회귀 수정 — victory && floor >= N 기반, TitleSceneSetup.RefreshUI 하드코딩 4 → _allCharacters 동적 계산, MetaProgressionTests 10개 + CharacterTraitHandlerTests 5개 신규 — 총 88/88 통과, TitleScene/MapScene 리빌드 + 전 필드 와이어링 검증 완료)
+- **Phase E (이벤트 퀄리티 향상)**: 완료
+  - E1: 데이터 구조 확장 완료 (EventData/EventManager/EventUI 개편 — EventOutcome에 PermanentAtk/Def/RerollTokens/RandomOutcomes/NextEventId 추가, EventChoice에 MinGold/HP/AliveMembers 조건부, EventRiskLevel enum + GetRiskLevel 자동 분류. EventManager 영구 강화 처리 + 확률 Outcome 추첨 + ResultText 오염 방지(Clone 반환) + CanChoose 헬퍼. EventUI ChoiceDescription 표시 + 위험도 색상 코딩 + 조건부 비활성화 + 연쇄 이벤트)
+  - E2: 공통 이벤트 15개 신규 완료 (도박 4 / 저주 3 / 영구 강화 3 / Story 3 / 조건부 2 — 기존 10개 포함 총 25개 공통 이벤트)
+  - E3: 스테이지 테마별 전용 이벤트 24개 완료 (12테마 × 2개, StageThemeData.themeEvents 필드 추가, ExclusiveThemeId로 해당 테마에서만 등장. DataGenerator.Stages.cs GenerateThemeSpecificEvents + CreateTheme themeEventIds 파라미터)
+  - E4: 맵 노드 처리 개선 완료 (MapSceneSetup.Nodes.cs PickRandomEvent 헬퍼 — 테마 풀 70% / 공통 풀 30% 가중치, 폴백 체인)
+  - 테스트: EventManagerTests 12개 신규 (영구 강화/확률 Outcome/ResultText 복사본/가중치 분포/조건부 CanChoose/골드·HP·상태이상 회귀) — 총 100/100 통과
+- **Phase ASC (어센션 + 보스 12종 확장)**: 코드/데이터 완료, 런타임 검증 잔여
+  - ASC-A: 어센션 시스템 데이터+로직 완료 (AscensionModifierData SO + AscensionModifierType enum 7종 + BossHpPercent, AscensionManager 순수 C# static — GetStackCountByLevel/GetXxxByLevel/GetActiveModifiers, 15레벨 매핑: 1=EnemyHp+5% / 2=StartGold-10 / 3=Reroll-1 / 4=PlayerHp-5% / 5=Heal-10% / 6=EnemyAtk+5% / 7-12=동일 modifier 2스택 / 13=EnemyHp 3스택 / 14=Reroll 3스택 / 15=BossHp+20%. DataGenerator.Ascension.cs 10번째 partial — modifier 7종 자동 생성. MetaSaveData.AscensionLevel(달성)+SelectedAscensionLevel(선택) 필드 추가. SaveManager.RecordRunEnd 승리 시 +1(최대 15)+LoadOrCreateMeta 호환 마이그레이션. GameRunState.SelectedAscensionLevel 캐시. BattleSceneSetup.SetBattleData isBossBattle 매개변수 추가 + ApplyAscensionModifiers(적 HP/ATK/BossHp 스케일링, 리롤 delta). MapSceneSetup.StartRunWithParty 어센션 적용(시작 골드/MaxHP), Nodes.cs RestAtCampfire heal mul, StartBattle 보스 노드 isBossBattle=true. TitleSceneSetup 어센션 표시+선택 버튼. RunEndOverlay.Show ascensionNote 매개변수)
+  - ASC-B: 보스 12종 완전 교체 완료 (기존 보스 3종 제거 — GoblinKing/Dragon/DemonLord. 신규 12종 테마별 전용 보스 — Stage1: VerdantTerror/FrostMonarch/SandLeviathan, Stage2: BloodQueen/PlagueLord/LichKing, Stage3: Kraken/StormLord/VoidWalker, Stage4: FlameEmperor/IceGoddess/Archdemon. HP 130~320, ATK/DEF 층별 부여. 보스별 4스킬 × 12 = 48종 신규 스킬. CharacterTable/SkillTable/EnemyPatternTable CSV 교체. DataGenerator.Stages.cs 12 테마에 각 보스 연결. BalanceSimulator FloorBossIds 4종 대표 보스로 교체 + FloorBossCandidates 12종 후보 배열)
+  - 테스트: AscensionManagerTests 25개 신규 (스택 카운트/누적 값/활성 modifier/MetaSaveData 기반) — 총 130/130 통과. 0에러.
 
 ### 미구현 항목
 - VFXManager 런타임 시각 검증 (URP Camera Stacking 코드 완료, VFXPalette.asset에 15개 프리팹 할당, 스킬 타입별 VFX 분기+크리티컬 임팩트 연결 완료, 실제 파티클 표시 확인 필요)
-- 전투 밸런스 튜닝 (Quick Combat/Full Run 결과 기반 — F1 사망 80%, F2 도달 20%, F3/F4 도달 2%, Full Run 1% 클리어율. 유물 효과는 정상 작동 검증 완료)
+- 전투 밸런스 튜닝 (Quick Combat/Full Run 결과 기반 — 2026-06-19 조치 전: F1 사망 80%, F2 도달 20%, F3/F4 도달 2%, Full Run 1% 클리어율. **2026-06-19 조치 후(시뮬레이터 캐릭터 특성 반영 + F1 적 HP -12~14%)**: 클리어율 1%→**9%** (9배), F2 도달 20%→**72%** (+52%p), F3 도달 2%→**19%**, F4 도달 2%→**11%**. F2 보스 승률 20%→58.7%, F3 일반 40%→88%. 잔존 과제: F3 보스 9.3%, F4 보스 1.3% — 보스 자체 HP/위력 너프 필요. **Phase ASC-B 보스 12종 교체 후에는 재측정 필요** — BalanceSimulator FloorBossIds가 신규 4종 대표 보스(FrostMonarch/PlagueLord/Kraken/Archdemon)로 교체됨. 상세: `Assets/09.Docs/BalanceReports/Balance_Diagnostic_Report_2026-06-19.md`)
 - BattleTestScene 런타임 검증 (빌드 완료 — Play 모드 7가지 시나리오로 사용자 직접 검증 필요: 기본 전투/유물 효과/보스/재테스트/세팅 변경/층 스케일/일반 플레이 회귀)
+- Phase E 이벤트 런타임 검증 (Play 모드 — 테마별 이벤트 등장 / 확률 이벤트 결과 분포 / 영구 강화 적용 / ChoiceDescription 표시 / 위험도 색상 / 조건부 비활성화 / 연쇄 이벤트 NextEventId)
+- Phase E 밸런스 시뮬레이터 연계 (BalanceSimulator에 이벤트 효과 반영 — 현재 시뮬레이터는 RunSingleRunWithState에서 이벤트를 Choices[0] 고정 선택. 영구 강화/저주/확률이 승률에 미치는 영향 측정 필요)
+- **Phase ASC 데이터 생성 (사용자 실행 필요)** — `TeamLog/Generate Test Data` (보스 12종 + 스킬 48종 + 패턴 12종 생성), `TeamLog/Generate Ascension Data` (modifier 7종 생성), `TeamLog/Generate Stage Themes` (12 테마에 신규 보스 연결). CSV는 이미 교체됨 → 메뉴 실행 시 .asset 파일 자동 생성
+- **Phase ASC 어센션 런타임 검증 (Play 모드)** — 타이틀 어센션 표시/선택 UI(버튼 SerializeField 연결 필요), 런 시작 시 modifier 적용(리롤 감소/MaxHP 감소/시작 골드 감소 확인), F4 보스 클리어 시 어센션 +1 상승 확인, 어센션 15에서 보스 HP +20% 확인
+- **Phase ASC 보스 12종 런타임 검증 (Play 모드)** — 12 테마 각각 보스 다르게 등장 확인, 보스 스킬 4종 정상 작동, 보스 trait(Regenerate/Sturdy/PhaseShift/Immortal/Corrosive/ArcaneFury/Counter/Rampage) 정상 적용
+- **가비지 컬렉션 대상** — 기존 보스 3종 에셋(orphan): `Enemy_BossGoblinKing.asset` / `Enemy_BossDragon.asset` / `Enemy_BossDemonLord.asset` + 관련 스킬 12종 + 패턴 3종. CSV에서 제거됨 → DataGenerator 재실행 시 orphan. 사용자 승인 후 삭제 권장
+- **Phase CC (캐릭터 컨셉 개편 — 조건부 메카닉)**: 기획 설계 문서 완료 `Assets/09.Docs/CharacterConceptReview.md`. 10캐릭터(Warrior/Pyromancer/Cryomancer/Stormcaller/Healer/Rogue/Archer/Necromancer/Alchemist/Bard) 고유 메카닉 + 조건부 스킬 리워크 + 특성 30종 조건부화 + 신규 유물 10종. **★스킬 4개 설계 원칙** (단일 조건/만능 금지/서로 다른 조건/셋업-소비 분해) 확립. **★부활 시스템 정책** 확정 — 전투 종료 시 살아남은 자 HP 100%, 사망자 50% 부활 + MaxHP 영구 -10% 누적. **★Mage → 3원소 마법사 분할** (8→10 캐릭터, Mage 제거 + Pyromancer/Cryomancer/Stormcaller 신규). Warrior Bodyblock 재설계 (ForcedTarget 단일 도발 부여). SkillData에 SkillConditionType/ConditionalBonusType 필드 + StatusEffectType.ForcedTarget 신규 항목 확장 필요. 구현 로드맵 CC-0(부활 시스템 선행) → CC-1 → CC-1B(마법사 2종 추가) → CC-2 → CC-3 → CC-4. StS/DD/ItB 벤치마크. 상세: `Assets/09.Docs/WorkLog/2026-06-20.md`
 
 ### 세션 종료 체크리스트
 

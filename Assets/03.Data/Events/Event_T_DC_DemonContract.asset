@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_DC_DemonContract
+  m_EditorClassIdentifier: 
+  _eventName: "\uC545\uB9C8\uC758 \uACC4\uC57D"
+  _description: "\uB300\uB9C8\uC655\uC758 \uC0AC\uC790\uAC00 \uCD5C\uC885 \uACC4\uC57D\uC744
+    \uC81C\uC548\uD569\uB2C8\uB2E4. \uC601\uD63C\uC744 \uB2F4\uBCF4\uB85C \uD558\uB294
+    \uAC00\uC7A5 \uAC15\uB825\uD55C \uAC70\uB798\uC785\uB2C8\uB2E4."
+  _eventType: 4
+  _choices:
+  - ChoiceText: "\uACC4\uC57D\uC5D0 \uC11C\uBA85\uD55C\uB2E4"
+    ChoiceDescription: "\uC601\uAD6C ATK +8, \uC601\uAD6C DEF -3"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC601\uD63C\uC758 \uC77C\uBD80\uB97C \uBC14\uCE69\uB2C8\uB2E4!
+        \uD30C\uD2F0 ATK \uC601\uAD6C +8, DEF \uC601\uAD6C -3."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 8
+      PermanentDefBonus: -3
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uACC4\uC57D\uC744 \uCC22\uB294\uB2E4"
+    ChoiceDescription: "HP 20% \uD68C\uBCF5 + \uB9AC\uB864 +2"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uACC4\uC57D\uC744 \uCC22\uC790 \uC545\uB9C8\uAC00 \uB180\uB78D\uB2C8\uB2E4.
+        HP 20% \uD68C\uBCF5, \uB9AC\uB864 \uD1A0\uD070 2\uAC1C."
+      GoldChange: 0
+      HPPercentChange: 20
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 2
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: DemonCitadel

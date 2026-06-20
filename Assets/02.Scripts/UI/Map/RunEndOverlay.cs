@@ -28,9 +28,10 @@ namespace TeamLog.UI.Map
 
         /// <summary>
         /// 런 종료 오버레이 표시. earnedMemory/earnedSouls는 0 이상이어야 표시.
+        /// ascensionNote는 어센션 상승 알림 문구 (예: "어센션 상승! 2 → 3"). null/빈 값이면 미표시.
         /// </summary>
         public void Show(bool victory, int floor, int gold, int battlesWon,
-            int earnedMemoryFragments = 0, int earnedSouls = 0)
+            int earnedMemoryFragments = 0, int earnedSouls = 0, string ascensionNote = null)
         {
             gameObject.SetActive(true);
             _canvasGroup.alpha = 0f;
@@ -41,9 +42,11 @@ namespace TeamLog.UI.Map
             if (_statsText != null)
                 _statsText.text = $"도달 층: {floor}\n획득 골드: {gold}\n전투 승리: {battlesWon}";
 
-            // Phase 8B: 메타 재화 표시
+            // Phase 8B: 메타 재화 표시 + 어센션 상승 알림
             if (_rewardText != null)
             {
+                string ascLine = !string.IsNullOrEmpty(ascensionNote) ? ascensionNote : "";
+
                 if (earnedMemoryFragments > 0 || earnedSouls > 0)
                 {
                     string memoryPart = earnedMemoryFragments > 0
@@ -51,7 +54,16 @@ namespace TeamLog.UI.Map
                     string soulPart = earnedSouls > 0
                         ? $"영혼 +{earnedSouls}" : "";
                     string join = (earnedMemoryFragments > 0 && earnedSouls > 0) ? "  " : "";
-                    _rewardText.text = memoryPart + join + soulPart;
+                    string rewardLine = memoryPart + join + soulPart;
+
+                    _rewardText.text = !string.IsNullOrEmpty(ascLine)
+                        ? $"{ascLine}\n{rewardLine}"
+                        : rewardLine;
+                    _rewardText.gameObject.SetActive(true);
+                }
+                else if (!string.IsNullOrEmpty(ascLine))
+                {
+                    _rewardText.text = ascLine;
                     _rewardText.gameObject.SetActive(true);
                 }
                 else

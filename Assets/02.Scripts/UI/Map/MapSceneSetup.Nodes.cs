@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamLog.Characters;
 using TeamLog.Combat;
+using TeamLog.Event;
 using TeamLog.Map;
 using TeamLog.Meta;
 using TeamLog.UI;
@@ -73,7 +74,8 @@ namespace TeamLog.UI.Map
                     else
                     {
                         float healBoost = MetaProgressionManager.GetPartyHealBoost(SaveManager.Meta);
-                        _runState.RestAtCampfire(0.3f + healBoost);
+                        float ascMul = AscensionManager.GetHealMulByLevel(_runState.SelectedAscensionLevel);
+                        _runState.RestAtCampfire((0.3f + healBoost) * ascMul);
                         ToastUI.Show("파티가 휴식했습니다.");
                     }
                     break;
@@ -136,7 +138,8 @@ namespace TeamLog.UI.Map
                 enemy.ApplyFloorScaling(scaling);
 
             int bonusAP = _runState.ConsumeBonusAP();
-            BattleSceneSetup.SetBattleData(_playerParty, enemies, bonusAP);
+            bool isBossBattle = node.NodeType == MapNodeType.Boss;
+            BattleSceneSetup.SetBattleData(_playerParty, enemies, bonusAP, isBossBattle: isBossBattle);
             BattleResult.SetBattleType(node.NodeType);
             SceneTransition.Instance.FadeToScene(BattleSceneName);
         }
@@ -150,7 +153,8 @@ namespace TeamLog.UI.Map
             {
                 case 0: // 휴식
                     float boost = MetaProgressionManager.GetPartyHealBoost(SaveManager.Meta);
-                    _runState.RestAtCampfire(0.3f + boost);
+                    float ascMul = AscensionManager.GetHealMulByLevel(_runState.SelectedAscensionLevel);
+                    _runState.RestAtCampfire((0.3f + boost) * ascMul);
                     ToastUI.Show("파티가 휴식하여 HP를 회복했습니다.");
                     break;
                 case 1: // 수련
@@ -177,12 +181,43 @@ namespace TeamLog.UI.Map
         {
             if (_eventUI == null) return;
 
-            // 테스트 이벤트 데이터 있으면 사용, 없으면 스킵
-            if (_testEvents != null && _testEvents.Length > 0)
+            // Phase E3: 테마별 이벤트 우선 사용, 폴백으로 공통 풀
+            EventData selected = PickRandomEvent();
+            if (selected != null)
+                _eventUI.ShowEvent(selected);
+        }
+
+        /// <summary>
+        /// Phase E3: 이벤트 추첨 — 테마 전용 이벤트 70% / 공통 이벤트 30%
+        /// </summary>
+        private EventData PickRandomEvent()
+        {
+            var theme = _runState?.CurrentStageTheme;
+            bool hasThemeEvents = theme != null && theme.themeEvents != null && theme.themeEvents.Count > 0;
+            bool hasCommonEvents = _testEvents != null && _testEvents.Length > 0;
+
+            // 테마 이벤트 풀이 있으면 70% 확률로 우선 사용
+            if (hasThemeEvents && (UnityEngine.Random.value < 0.7f || !hasCommonEvents))
+            {
+                int idx = UnityEngine.Random.Range(0, theme.themeEvents.Count);
+                return theme.themeEvents[idx];
+            }
+
+            // 공통 이벤트 풀
+            if (hasCommonEvents)
             {
                 int index = UnityEngine.Random.Range(0, _testEvents.Length);
-                _eventUI.ShowEvent(_testEvents[index]);
+                return _testEvents[index];
             }
+
+            // 폴백: 테마 전용이라도
+            if (hasThemeEvents)
+            {
+                int idx = UnityEngine.Random.Range(0, theme.themeEvents.Count);
+                return theme.themeEvents[idx];
+            }
+
+            return null;
         }
 
         private void OpenShop()

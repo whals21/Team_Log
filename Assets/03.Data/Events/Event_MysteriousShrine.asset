@@ -19,6 +19,9 @@ MonoBehaviour:
   _choices:
   - ChoiceText: "\uAE30\uC6D0\uD55C\uB2E4"
     ChoiceDescription: "\uC2E0\uC804\uC5D0 \uAE30\uB3C4\uB97C \uC62C\uB9BD\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
     Outcome:
       ResultText: "\uB530\uB73B\uD55C \uBE5B\uC774 \uD30C\uD2F0\uB97C \uAC10\uC309\uB2C8\uB2E4.
         \uBAA8\uB4E0 \uD30C\uD2F0\uC6D0\uC758 HP\uAC00 30% \uD68C\uBCF5\uB418\uC5C8\uC2B5\uB2C8\uB2E4!"
@@ -26,11 +29,20 @@ MonoBehaviour:
       HPPercentChange: 30
       GiveRandomSkill: 0
       GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
       ApplyStatusEffect: 0
       StatusEffectDuration: 0
       StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
   - ChoiceText: "\uC81C\uBB3C\uC744 \uBC14\uCE5C\uB2E4"
-    ChoiceDescription: "\uACE8\uB4DC\uB97C \uC81C\uBB3C\uB85C \uBC14\uCE69\uB2C8\uB2E4."
+    ChoiceDescription: "\uACE8\uB4DC 20\uC744 \uC81C\uBB3C\uB85C \uBC14\uCE69\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
     Outcome:
       ResultText: "\uC2E0\uC804\uC774 \uBE5B\uB098\uBA70 \uBC18\uC751\uD569\uB2C8\uB2E4.
         \uD30C\uD2F0\uC6D0\uC758 HP\uAC00 50% \uD68C\uBCF5\uB418\uC5C8\uC2B5\uB2C8\uB2E4!"
@@ -38,17 +50,34 @@ MonoBehaviour:
       HPPercentChange: 50
       GiveRandomSkill: 0
       GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
       ApplyStatusEffect: 0
       StatusEffectDuration: 0
       StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
   - ChoiceText: "\uBB34\uC2DC\uD558\uACE0 \uC9C0\uB098\uAC04\uB2E4"
     ChoiceDescription: "\uADF8\uB0E5 \uC9C0\uB098\uAC11\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
     Outcome:
       ResultText: "\uC544\uBB34 \uC77C\uB3C4 \uC77C\uC5B4\uB098\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4."
       GoldChange: 0
       HPPercentChange: 0
       GiveRandomSkill: 0
       GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
       ApplyStatusEffect: 0
       StatusEffectDuration: 0
       StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: 

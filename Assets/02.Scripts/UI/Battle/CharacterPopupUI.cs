@@ -402,15 +402,8 @@ namespace TeamLog.UI.Battle
                 if (entry != null) Destroy(entry);
             _spawnedEntries.Clear();
 
-            ClearContainerChildren(_skillEntryContainer);
-            ClearContainerChildren(_statusEntryContainer);
-        }
-
-        private void ClearContainerChildren(Transform container)
-        {
-            if (container == null) return;
-            for (int i = container.childCount - 1; i >= 0; i--)
-                Destroy(container.GetChild(i).gameObject);
+            UIAnimationHelper.ClearContainerChildren(_skillEntryContainer);
+            UIAnimationHelper.ClearContainerChildren(_statusEntryContainer);
         }
 
         private string GetClassLabel(CharacterClass cls) => cls switch

@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_CC_VampireDeal
+  m_EditorClassIdentifier: 
+  _eventName: "\uBC40\uD30C\uC774\uC5B4\uC758 \uAC70\uB798"
+  _description: "\uACE0\uD48D\uC2A4\uB7EC\uC6B4 \uBC40\uD30C\uC774\uC5B4 \uB85C\uB4DC\uAC00
+    \uAC70\uB798\uB97C \uC81C\uC548\uD569\uB2C8\uB2E4. \uACE8\uB4DC\uB97C \uBC1B\uACE0
+    \uAC15\uB825\uD55C \uD798\uC744 \uC8FC\uACA0\uB2E4\uACE0 \uD569\uB2C8\uB2E4."
+  _eventType: 3
+  _choices:
+  - ChoiceText: "\uAC70\uB798\uB97C \uC218\uB77D\uD55C\uB2E4 (70 \uACE8\uB4DC)"
+    ChoiceDescription: "70 \uACE8\uB4DC \uBC1B\uACE0 \uD30C\uD2F0 \uC601\uAD6C ATK
+      +4"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uAC15\uB825\uD55C \uD761\uD608\uC758 \uD798\uC774 \uC8FC\uC785\uB429\uB2C8\uB2E4!
+        70 \uACE8\uB4DC\uB97C \uBC1B\uACE0 \uD30C\uD2F0 ATK \uC601\uAD6C +4."
+      GoldChange: 70
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 4
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uAC70\uC808\uD55C\uB2E4"
+    ChoiceDescription: "\uAC15\uC81C\uB85C HP -15% (\uBC40\uD30C\uC774\uC5B4\uC758
+      \uBD84\uB178)"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uAC70\uC808\uD558\uC790 \uBD84\uB178\uD55C \uBC40\uD30C\uC774\uC5B4\uAC00
+        \uACF5\uACA9\uD588\uC2B5\uB2C8\uB2E4! HP 15% \uAC10\uC18C."
+      GoldChange: 0
+      HPPercentChange: -15
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: CrimsonChapel

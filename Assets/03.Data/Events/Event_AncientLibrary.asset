@@ -18,26 +18,47 @@ MonoBehaviour:
   _eventType: 4
   _choices:
   - ChoiceText: "\uCC45\uC744 \uC77D\uB294\uB2E4"
-    ChoiceDescription: "\uACE0\uB300\uC758 \uC9C0\uC2DD\uC744 \uC5BB\uC2B5\uB2C8\uB2E4."
+    ChoiceDescription: "\uACE0\uB300\uC758 \uC9C0\uC2DD\uC744 \uC5BB\uC2B5\uB2C8\uB2E4.
+      \uD30C\uD2F0 \uC804\uC6D0 \uACF5\uACA9\uB825 \uC601\uAD6C +2"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
     Outcome:
       ResultText: "\uACE0\uB300\uC758 \uC9C0\uC2DD\uC744 \uC5BB\uC5C8\uC2B5\uB2C8\uB2E4!
         \uBAA8\uB4E0 \uD30C\uD2F0\uC6D0\uC758 \uACF5\uACA9\uB825\uC774 \uC601\uAD6C\uD788
-        \uC99D\uAC00\uD588\uC2B5\uB2C8\uB2E4."
+        2 \uC99D\uAC00\uD588\uC2B5\uB2C8\uB2E4."
       GoldChange: 0
       HPPercentChange: 0
       GiveRandomSkill: 0
       GiveRandomItem: 0
+      PermanentAtkBonus: 2
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
       ApplyStatusEffect: 0
       StatusEffectDuration: 0
       StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
   - ChoiceText: "\uCC45\uC744 \uD310\uB2E4"
     ChoiceDescription: "\uACE8\uB4DC\uB85C \uBC14\uAFC9\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
     Outcome:
       ResultText: "\uADC0\uC911\uD55C \uCC45\uC744 50 \uACE8\uB4DC\uC5D0 \uD310\uB9E4\uD588\uC2B5\uB2C8\uB2E4!"
       GoldChange: 50
       HPPercentChange: 0
       GiveRandomSkill: 0
       GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
       ApplyStatusEffect: 0
       StatusEffectDuration: 0
       StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: 

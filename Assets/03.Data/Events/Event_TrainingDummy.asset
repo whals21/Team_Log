@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_TrainingDummy
+  m_EditorClassIdentifier: 
+  _eventName: "\uD6C8\uB828\uC6A9 \uD5C8\uC218\uC544\uBE44"
+  _description: "\uC624\uB798\uB41C \uD6C8\uB828\uC6A9 \uD5C8\uC218\uC544\uBE44\uAC00
+    \uAE38\uAC00\uC5D0 \uC11C \uC788\uC2B5\uB2C8\uB2E4. \uC218\uB828\uD558\uBA74
+    \uC804\uD22C \uAC10\uAC01\uC744 \uB418\uCC3E\uC744 \uC218 \uC788\uC744 \uAC83
+    \uAC19\uC2B5\uB2C8\uB2E4."
+  _eventType: 3
+  _choices:
+  - ChoiceText: "\uC218\uB828\uD55C\uB2E4"
+    ChoiceDescription: "60 \uACE8\uB4DC\uB97C \uB0B4\uACE0 \uD30C\uD2F0 ATK \uC601\uAD6C
+      +2"
+    MinGoldRequired: 60
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC624\uB79C \uC218\uB828 \uB05D\uC5D0 \uC804\uD22C \uAC10\uAC01\uC744
+        \uB418\uCC3E\uC558\uC2B5\uB2C8\uB2E4! \uD30C\uD2F0 \uC804\uC6D0 \uACF5\uACA9\uB825
+        \uC601\uAD6C +2."
+      GoldChange: -60
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 2
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uBB34\uC2DC\uD55C\uB2E4"
+    ChoiceDescription: "\uC2DC\uAC04\uC744 \uC544\uB08D\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uD5C8\uC218\uC544\uBE44\uB97C \uC9C0\uB098\uCE69\uB2C8\uB2E4."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: 

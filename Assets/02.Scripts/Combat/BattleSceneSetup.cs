@@ -62,18 +62,21 @@ namespace TeamLog.Combat
         private static List<Character> _pendingParty;
         private static List<Character> _pendingEnemies;
         private static int _pendingBonusAP;
+        private static bool _pendingIsBossBattle;  // 어센션 BossHpPercent 적용 트리거
 
         // 전투 종료 후 돌아갈 씬 이름 — BattleTestSceneSetup이 변경 가능. 기본값 MapScene.
         private static string _returnSceneName = "MapScene";
 
         /// <summary>
-        /// 맵 시스템에서 전투 시작 시 파티와 적 데이터를 설정
+        /// 맵 시스템에서 전투 시작 시 파티와 적 데이터를 설정.
+        /// isBossBattle=true면 어센션 BossHpPercent modifier가 추가 적용됨.
         /// </summary>
-        public static void SetBattleData(List<Character> party, List<Character> enemies, int bonusAP = 0)
+        public static void SetBattleData(List<Character> party, List<Character> enemies, int bonusAP = 0, bool isBossBattle = false)
         {
             _pendingParty = party;
             _pendingEnemies = enemies;
             _pendingBonusAP = bonusAP;
+            _pendingIsBossBattle = isBossBattle;
         }
 
         /// <summary>
@@ -88,6 +91,7 @@ namespace TeamLog.Combat
         private void Start()
         {
             int bonusAP = 0;
+            bool isBossBattle = false;
 
             // 외부 데이터가 있으면 사용, 없으면 테스트 모드
             if (_pendingParty != null && _pendingEnemies != null)
@@ -95,16 +99,57 @@ namespace TeamLog.Combat
                 _playerParty = new List<Character>(_pendingParty);
                 _enemies = new List<Character>(_pendingEnemies);
                 bonusAP = _pendingBonusAP;
+                isBossBattle = _pendingIsBossBattle;
                 _pendingParty = null;
                 _pendingEnemies = null;
                 _pendingBonusAP = 0;
+                _pendingIsBossBattle = false;
             }
             else if (_useTestData)
             {
                 CreateTestData();
             }
 
+            // 어센션 modifier 적용 — GameRunState.SelectedAscensionLevel 기반.
+            // 시뮬레이터/BattleTestScene(런 미진행)은 SelectedAscensionLevel=0 → no-op.
+            ApplyAscensionModifiers(isBossBattle);
+
             InitializeBattle(bonusAP);
+        }
+
+        /// <summary>
+        /// 어센션 modifier를 적 전투 인스턴스에 적용.
+        /// - 적 HP/ATK: 모든 적 (mul)
+        /// - 보스 HP: isBossBattle=true일 때 추가 mul
+        /// 리롤 delta는 InitializeBattle의 maxRerolls 계산에서 적용.
+        /// </summary>
+        private void ApplyAscensionModifiers(bool isBossBattle)
+        {
+            var state = GameRunState.Instance;
+            if (state == null) return;
+            int asc = state.SelectedAscensionLevel;
+            if (asc <= 0) return;
+
+            float hpMul = AscensionManager.GetEnemyHpMulByLevel(asc);
+            float atkMul = AscensionManager.GetEnemyAtkMulByLevel(asc);
+            float bossMul = isBossBattle ? AscensionManager.GetBossHpMulByLevel(asc) : 1f;
+
+            foreach (var enemy in _enemies)
+            {
+                if (enemy == null) continue;
+                // HP — Initialize 재호출로 MaxHP 재설정. 현재 HP도 같이 스케일.
+                int scaledMax = System.Math.Max(1, (int)(enemy.Health.MaxHP * hpMul * bossMul));
+                enemy.Health.Initialize(scaledMax);
+                // ATK — AddPermanentBase로 베이스 증가 (해제 불가).
+                // atkMul 1.05 → baseATK 0이면 0. 영향 없음. baseATK > 0인 적에만 의미.
+                int baseAtk = enemy.Stats.GetBaseStat(StatType.ATK);
+                if (baseAtk > 0)
+                {
+                    int delta = System.Math.Max(0, (int)(baseAtk * atkMul) - baseAtk);
+                    if (delta > 0)
+                        enemy.Stats.AddPermanentBase(StatType.ATK, delta);
+                }
+            }
         }
 
         private void CreateTestData()
@@ -168,8 +213,14 @@ namespace TeamLog.Combat
 
             // TurnManager 생성 — AI 컨트롤러 전달
             // Phase 8E: 메타 강화 ExtraReroll 구매 시 턴당 리롤 +1
+            // Ascension: 런 선택 어센션 레벨에 따라 리롤 -1~-3 (최소 1 보장)
             int extraReroll = MetaProgressionManager.GetExtraRerollCount(SaveManager.Meta);
-            _turnManager = new TurnManager(_playerParty, _enemies, _enemyControllers, maxRerolls: 2 + extraReroll, bonusFirstTurnAP: bonusAP);
+            int ascRerollDelta = 0;
+            var runState = GameRunState.Instance;
+            if (runState != null)
+                ascRerollDelta = AscensionManager.GetRerollDeltaByLevel(runState.SelectedAscensionLevel);
+            int maxRerolls = System.Math.Max(1, 2 + extraReroll + ascRerollDelta);
+            _turnManager = new TurnManager(_playerParty, _enemies, _enemyControllers, maxRerolls: maxRerolls, bonusFirstTurnAP: bonusAP);
             _turnManager.OnPhaseChanged += OnPhaseChanged;
             _turnManager.OnTurnStarted += OnTurnStarted;
             _turnManager.OnBattleEnded += OnBattleEnded;

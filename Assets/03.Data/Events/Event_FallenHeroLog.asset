@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_FallenHeroLog
+  m_EditorClassIdentifier: 
+  _eventName: "\uC4F0\uB7EC\uC9C4 \uC601\uC6C5\uC758 \uC77C\uC9C0"
+  _description: "\uC804\uC0AC\uD55C \uC601\uC6C5\uC758 \uC77C\uC9C0\uB97C \uBC1C\uACAC\uD588\uC2B5\uB2C8\uB2E4.
+    \uB9C8\uC9C0\uB9C9 \uD398\uC774\uC9C0\uC5D0\uB294 \uBCF4\uC2A4\uC804\uC5D0 \uB300\uD55C
+    \uB2E8\uC11C\uAC00 \uC801\uD600 \uC788\uC2B5\uB2C8\uB2E4."
+  _eventType: 0
+  _choices:
+  - ChoiceText: "\uC77C\uC9C0\uB97C \uC77D\uB294\uB2E4"
+    ChoiceDescription: "\uBCF4\uC2A4\uC804 \uB2E8\uC11C\uB97C \uC5BB\uC5B4 \uB9AC\uB864
+      \uD1A0\uD070 +2"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC77C\uC9C0\uB97C \uD1B5\uD574 \uBCF4\uC2A4\uC758 \uC57D\uC810\uC744
+        \uD30C\uC545\uD588\uC2B5\uB2C8\uB2E4! \uB2E4\uC74C \uBCF4\uC2A4\uC804\uC5D0\uC11C
+        \uC720\uB9AC\uD560 \uAC83\uC785\uB2C8\uB2E4. \uB9AC\uB864 \uD1A0\uD070 2\uAC1C
+        \uD68D\uB4DD."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 2
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uC77C\uC9C0\uB97C \uD0DC\uC6B4\uB2E4"
+    ChoiceDescription: "\uACFC\uAC70\uB97C \uC78A\uACE0 30 \uACE8\uB4DC\uB97C \uBC1C\uACAC\uD569\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC77C\uC9C0\uB97C \uD0DC\uC6C1\uB2C8\uB2E4. \uC7AC \uC0AC\uC774\uC5D0\uC11C
+        30 \uACE8\uB4DC\uAC00 \uB098\uC654\uC2B5\uB2C8\uB2E4."
+      GoldChange: 30
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: 

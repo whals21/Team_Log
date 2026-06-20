@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_AT_DrownedChest
+  m_EditorClassIdentifier: 
+  _eventName: "\uC775\uC0AC\uC790\uC758 \uC0C1\uC790"
+  _description: "\uC2EC\uD574\uC5D0 \uAC00\uB77C\uC549\uC740 \uC0C1\uC790\uB97C \uAC74\uC9D1\uB2C8\uB2E4.
+    \uC5F4\uBA74 \uBCF4\uBB3C\uC774 \uC788\uC9C0\uB9CC, \uC775\uC0AC\uC790\uC758
+    \uC6D0\uD55C\uB3C4 \uD568\uAED8 \uB098\uC62C \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  _eventType: 1
+  _choices:
+  - ChoiceText: "\uC0C1\uC790\uB97C \uC5F0\uB2E4"
+    ChoiceDescription: "\uC274\uB4DC 50 + 60 \uACE8\uB4DC / AttackDown 3\uD134"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC274\uB4DC 50\uACFC 60 \uACE8\uB4DC\uB97C \uC5BB\uC5C8\uC9C0\uB9CC,
+        \uC775\uC0AC\uC790\uC758 \uC6D0\uD55C\uC774 \uD30C\uD2F0\uB97C \uC9D3\uB204\uB985\uB2C8\uB2E4.
+        AttackDown 3\uD134."
+      GoldChange: 60
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 12
+      StatusEffectDuration: 1
+      StatusEffectValue: 50
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uB3C4\uB85C \uB358\uC9C4\uB2E4"
+    ChoiceDescription: "\uC548\uC804\uD558\uAC8C 20 \uACE8\uB4DC \uBC1C\uACAC"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC0C1\uC790\uB97C \uB3C4\uB85C \uB358\uC9D1\uB2C8\uB2E4. \uD574\uBCC0\uC5D0\uC11C
+        20 \uACE8\uB4DC\uB97C \uBC1C\uACAC\uD588\uC2B5\uB2C8\uB2E4."
+      GoldChange: 20
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: AbyssalTrench

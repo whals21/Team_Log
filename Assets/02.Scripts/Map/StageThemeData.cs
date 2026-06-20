@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TeamLog.Characters;
+using TeamLog.Event;
 
 namespace TeamLog.Map
 {
@@ -13,7 +14,7 @@ namespace TeamLog.Map
     public class StageThemeData : ScriptableObject
     {
         [Header("Identity")]
-        [Tooltip("에셋 식별자 (예: S1_GreyForest)")]
+        [Tooltip("에셋 식별자 (예: GreyForest)")]
         public string themeId = "";
         [Tooltip("한국어 표시명 (예: 잿빛 숲)")]
         public string displayName = "";
@@ -33,5 +34,9 @@ namespace TeamLog.Map
         [Header("Theme Keywords (gimmick summary)")]
         [Tooltip("테마 기믹 요약 — 적 intent/특성 배지에 표시용")]
         public List<string> themeKeywords = new();
+
+        [Header("Theme-Specific Events (Phase E3)")]
+        [Tooltip("이 테마에서만 등장하는 전용 이벤트들. 미지정 시 공통 이벤트 풀만 사용")]
+        public List<EventData> themeEvents = new();
     }
 }

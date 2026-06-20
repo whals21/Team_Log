@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_CursedFountain
+  m_EditorClassIdentifier: 
+  _eventName: "\uC800\uC8FC\uBC1B\uC740 \uBD84\uC218"
+  _description: "\uC815\uCCB4\uBD88\uBA85\uC758 \uBD89\uC740 \uBB3C\uC774 \uC19F\uB294
+    \uBD84\uC218\uAC00 \uC788\uC2B5\uB2C8\uB2E4. \uB9C8\uC2DC\uBA74 \uD6A8\uACFC\uAC00
+    \uC788\uC744 \uAC83 \uAC19\uC9C0\uB9CC \uC704\uD5D8\uD574 \uBCF4\uC785\uB2C8\uB2E4."
+  _eventType: 4
+  _choices:
+  - ChoiceText: "\uBD84\uC218\uC758 \uBB3C\uC744 \uB9C8\uC2E0\uB2E4"
+    ChoiceDescription: "50% \uD30C\uD2F0 \uD480\uD68C\uBCF5 / 50% \uD30C\uD2F0 \uB3C5
+      5\uD134"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uBB3C\uC744 \uB9C8\uC2ED\uB2C8\uB2E4..."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes:
+      - ResultText: "\uB180\uB78D\uAC8C\uB3C4 \uD30C\uD2F0 \uC804\uC6D0\uC758 HP\uAC00
+          \uAC00\uB4DD \uCC3C\uC2B5\uB2C8\uB2E4!"
+        GoldChange: 0
+        HPPercentChange: 100
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 0
+        StatusEffectDuration: 0
+        StatusEffectValue: 0
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      - ResultText: "\uB3C5\uC774 \uBAB8\uC744 \uD37C\uC84C\uC2B5\uB2C8\uB2E4! \uD30C\uD2F0
+          \uC804\uC6D0\uC774 5\uD134\uAC04 \uB3C5\uC5D0 \uAC78\uB838\uC2B5\uB2C8\uB2E4."
+        GoldChange: 0
+        HPPercentChange: 0
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 1
+        StatusEffectDuration: 5
+        StatusEffectValue: 3
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uBB34\uC2DC\uD55C\uB2E4"
+    ChoiceDescription: "\uBD84\uC218\uB97C \uADF8\uB300\uB85C \uB461\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC2E0\uC911\uD558\uAC8C \uBD84\uC218\uB97C \uC9C0\uB098\uCE69\uB2C8\uB2E4."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: 

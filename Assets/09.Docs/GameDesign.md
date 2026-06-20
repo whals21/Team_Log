@@ -127,18 +127,29 @@ Skill
 
 ### 6.1 맵 구조
 
-- **층(Floor)**: 총 3층으로 구성. 각 층마다 독립 맵 생성
+> **Note**: Phase 7A에서 3층 → **4스테이지**로 확장, Phase 7B에서 엘리트 분기 보상 추가. 상세는 `StageDesign.md` 참조.
+
+- **스테이지(Stage)**: 총 4스테이지로 구성. 각 스테이지마다 독립 맵 생성. 런 시작 시 각 스테이지마다 3개 테마 후보 중 1개 무작위 채택 (4×3=12 테마, 81가지 조합)
 - **노드(Node)**: 플레이어가 방문할 수 있는 각 위치
-- **분기(Branch)**: Slay the Spire식 상향 분기 구조
+- **분기(Branch)**: Slay the Spire식 상향 분기 구조 (Layer 2, 4에서 Battle/Elite 선택)
 
 ```
-층 구성:
-┌──────────────────────────────────────────────────┐
-│ 층 1 (3단계)  시작 → 전투 → 전투/이벤트 → 보스   │
-│ 층 2 (4단계)  시작 → 전투 → 상점/이벤트 → 엘리트 → 보스 │
-│ 층 3 (5단계)  시작 → 전투 → 이벤트 → 엘리트 → 상점 → 최종보스 │
-└──────────────────────────────────────────────────┘
+스테이지 구성 (각 스테이지 6레이어 표준):
+┌──────────────────────────────────────────────────────────────┐
+│ Layer 0: [Start]                                              │
+│ Layer 1: [Battle #1]                              (필수 일반) │
+│ Layer 2: [Battle #2]  또는  [Elite #2]            (리스크/리턴)│
+│ Layer 3: [Battle #3] + [Shop/Event/Rest]          (메인+보조)  │
+│ Layer 4: [Battle #4]  또는  [Elite #4]            (분기)       │
+│ Layer 5: [Boss]                                   (스테이지 보스) │
+└──────────────────────────────────────────────────────────────┘
 ```
+
+**스테이지 테마 분포** (Phase 7D 정식 분화):
+- Stage 1 (튜토리얼): GreyForest / FrostedPass / SunscorchedPlains
+- Stage 2 (체력 관리): CrimsonChapel / RotbloomBog / RuinedTemple
+- Stage 3 (자원 압박): AbyssalTrench / Stormpeak / ShadowsGlade
+- Stage 4 (클라이맥스): EmberThrone / EternalTundra / DemonCitadel
 
 ### 6.2 노드 타입
 

@@ -108,6 +108,12 @@ namespace TeamLog.Map
                         meta.PurchasedUpgradeIds = new List<string>();
                     if (meta.EquippedTraitBindings == null)
                         meta.EquippedTraitBindings = new List<TraitBindingEntry>();
+
+                    // Ascension 호환성 — 구버전 세이브(필드 없음 → 0)는 AscensionLevel에 맞춰 SelectedAscensionLevel 동기화.
+                    if (meta.SelectedAscensionLevel > meta.AscensionLevel)
+                        meta.SelectedAscensionLevel = meta.AscensionLevel;
+                    else if (meta.AscensionLevel > 0 && meta.SelectedAscensionLevel == 0)
+                        meta.SelectedAscensionLevel = meta.AscensionLevel;
                     return meta;
                 }
             }
@@ -314,6 +320,21 @@ namespace TeamLog.Map
             var reward = MetaProgressionManager.CalculateRunReward(victory, floor, gold, battlesWon);
             meta.MemoryFragments += reward.memory;
             meta.Souls += reward.souls;
+
+            // Ascension: 런 클리어(F4 보스 처치) 시 자동 +1 (최대 15).
+            // floor >= 4 (= TotalFloors)에서 도달해야 클리어로 간주.
+            if (victory && floor >= 4)
+            {
+                int prev = meta.AscensionLevel;
+                meta.AscensionLevel = Mathf.Min(meta.AscensionLevel + 1, 15);
+                if (meta.AscensionLevel > prev)
+                {
+                    meta.SelectedAscensionLevel = meta.AscensionLevel; // 상승 시 선택값도 따라 상승
+#if UNITY_EDITOR
+                    Debug.Log($"[SaveManager] 어센션 상승! {prev} → {meta.AscensionLevel}");
+#endif
+                }
+            }
 
             // 캐릭터 잠금해제 조건 체크
             CheckCharacterUnlocks(meta, victory, floor);

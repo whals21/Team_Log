@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_RT_CursedSarcophagus
+  m_EditorClassIdentifier: 
+  _eventName: "\uC800\uC8FC\uBC1B\uC740 \uC11D\uAD00"
+  _description: "\uACE0\uB300 \uC11D\uAD00\uC774 \uBC18\uC9DD\uC785\uB2C8\uB2E4.
+    \uC5F4\uBA74 \uBCF4\uBB3C\uC774 \uC788\uC744 \uC218\uB3C4 \uC788\uC9C0\uB9CC,
+    \uC800\uC8FC\uAC00 \uAE43\uB4E4\uC5B4 \uC788\uC744 \uC218\uB3C4 \uC788\uC2B5\uB2C8\uB2E4."
+  _eventType: 1
+  _choices:
+  - ChoiceText: "\uC11D\uAD00\uC744 \uC5F0\uB2E4"
+    ChoiceDescription: "50% \uC720\uBB3C / 50% AttackDown 5\uD134"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC11D\uAD00\uC744 \uC5FD\uB2C8\uB2E4..."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes:
+      - ResultText: "\uACE0\uB300 \uC720\uBB3C\uC774\uC5C8\uC2B5\uB2C8\uB2E4! \uC720\uBB3C
+          \uD68D\uB4DD."
+        GoldChange: 0
+        HPPercentChange: 0
+        GiveRandomSkill: 0
+        GiveRandomItem: 1
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 0
+        StatusEffectDuration: 0
+        StatusEffectValue: 0
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      - ResultText: "\uC800\uC8FC\uAC00 \uBC1C\uB3D9\uD588\uC2B5\uB2C8\uB2E4! \uD30C\uD2F0
+          AttackDown 5\uD134."
+        GoldChange: 0
+        HPPercentChange: 0
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 10
+        StatusEffectDuration: 5
+        StatusEffectValue: 5
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uADF8\uB300\uB85C \uB454\uB2E4"
+    ChoiceDescription: "\uACBD\uAC74\uD558\uAC8C \uB5A0\uB0A9\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC11D\uAD00\uC744 \uADF8\uB300\uB85C \uB461\uB2C8\uB2E4. \uC791\uC740
+        \uACF5\uBB3C\uC744 \uBC1C\uACAC\uD588\uC2B5\uB2C8\uB2E4."
+      GoldChange: 20
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: RuinedTemple

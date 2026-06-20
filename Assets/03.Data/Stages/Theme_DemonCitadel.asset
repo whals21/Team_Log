@@ -31,3 +31,6 @@ MonoBehaviour:
   themeKeywords:
   - "\uC18C\uD658"
   - "\uB2E4\uC911\uD398\uC774\uC988"
+  themeEvents:
+  - {fileID: 11400000, guid: 808627591c9b7114cae5fdf3e90e9161, type: 2}
+  - {fileID: 11400000, guid: 9ab01b8bc3a615942ae0855fcc7af607, type: 2}

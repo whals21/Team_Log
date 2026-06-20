@@ -51,18 +51,54 @@ DarkSlime_CorruptStrike,오염 공격,어둠의 힘으로 공격합니다.,Attac
 DarkSlime_PoisonCloud,독 구름,맹독을 내뿜습니다.,Debuff,AllEnemies,0,0,25,Poison,3,3
 DarkSlime_DarkShield,어둠의 방패,쉴드를 얻습니다.,Shield,Self,8,0,25,None,0,0
 DarkSlime_Absorb,흡수,체력을 회복합니다.,Heal,Self,7,0,25,None,0,0
-BossGKing_CrownStrike,왕관 강타,강력한 공격입니다.,Attack,SingleEnemy,10,0,25,None,0,0
-BossGKing_Rally,소집,부하를 소환합니다.,Buff,Self,0,0,25,AttackUp,2,3
-BossGKing_Warcry,전쟁 함성,공격력과 방어력이 증가합니다.,Buff,Self,0,0,25,AttackUp,2,3
-BossGKing_RoyalGuard,왕실 근위대,쉴드를 얻습니다.,Shield,Self,14,0,25,None,0,0
-BossDragon_Breath,드래곤 브레스,화염 브레스로 전체 공격합니다.,Attack,AllEnemies,12,0,25,Burn,2,3
-BossDragon_TailSwipe,꼬리 휘두르기,강력한 물리 공격입니다.,Attack,SingleEnemy,14,0,25,None,0,0
-BossDragon_FireStorm,화염 폭풍,모든 적에게 강력한 데미지를 줍니다.,Attack,AllEnemies,10,0,25,Burn,2,3
-BossDragon_DragonFear,드래곤 공포,적의 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,2,3
-BossDL_DarkBlade,암흑의 검,강력한 어둠 공격입니다.,Attack,SingleEnemy,17,0,25,None,0,0
-BossDL_Curse,저주,모든 적을 저주합니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,3
-BossDL_Meteor,마왕의 메테오,모든 적에게 파괴적인 데미지를 줍니다.,Attack,AllEnemies,12,0,25,None,0,0
-BossDL_DarkBarrier,암흑 방어막,강력한 쉴드를 얻습니다.,Shield,Self,18,0,25,None,0,0
+BossVT_Strike,넝쿨 채찍,단일 물리 공격입니다.,Attack,SingleEnemy,10,0,25,None,0,0
+BossVT_PoisonBreath,독성 포자,전체에 독을 겁니다.,Attack,AllEnemies,7,0,25,Poison,3,3
+BossVT_Regrow,재생 성장,HP를 회복합니다.,Heal,Self,18,0,25,None,0,0
+BossVT_Roots,속박 뿌리,단일 적을 기절시킵니다.,Attack,SingleEnemy,8,0,25,Stun,1,0
+BossFM_IceLance,얼음 창,단일 빙결 공격입니다.,Attack,SingleEnemy,12,0,25,Freeze,1,0
+BossFM_FrostNova,서리 파열,전체 빙결 공격입니다.,Attack,AllEnemies,8,0,25,Freeze,1,0
+BossFM_IceBarrier,얼음 방벽,쉴드를 얻습니다.,Shield,Self,16,0,25,None,0,0
+BossFM_Chill,냉기 저하,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,3
+BossSL_SandBlast,모래 폭풍,단일 공격입니다.,Attack,SingleEnemy,11,0,25,None,0,0
+BossSL_Burrow,은폐 잠복,방어력을 증가시킵니다.,Buff,Self,0,0,25,DefenseUp,2,3
+BossSL_Devour,집어삼키기,강력한 단일 공격입니다.,Attack,SingleEnemy,16,0,25,None,0,0
+BossSL_Quicksand,유사,전체 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,2,3
+BossBQ_Bite,흡혈 송곳니,단일 공격입니다.,Attack,SingleEnemy,12,0,25,None,0,0
+BossBQ_BloodSwarm,피의 무리,전체에 독을 겁니다.,Attack,AllEnemies,9,0,25,Poison,3,3
+BossBQ_CrimsonRite,진홍 의식,대량 HP 회복입니다.,Heal,Self,25,0,25,None,0,0
+BossBQ_Mesmerize,매혹의 눈빛,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,3
+BossPL_ToxicSlash,부패 베기,단일 독 공격입니다.,Attack,SingleEnemy,14,0,25,Poison,3,4
+BossPL_PlagueCloud,역병 구름,전체 독 공격입니다.,Attack,AllEnemies,10,0,25,Poison,3,4
+BossPL_Festering,괴저,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,3
+BossPL_Regurgitate,역류 재생,HP를 회복합니다.,Heal,Self,18,0,25,None,0,0
+BossLK_DeathBolt,죽음의 화살,단일 공격입니다.,Attack,SingleEnemy,14,0,25,None,0,0
+BossLK_Curse,리치의 저주,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,4
+BossLK_SoulHarvest,영혼 수확,전체 공격입니다.,Attack,AllEnemies,11,0,25,None,0,0
+BossLK_Phylactery,생명의 항아리,강력한 쉴드를 얻습니다.,Shield,Self,20,0,25,None,0,0
+BossKr_Tentacle,촉수 타격,단일 공격입니다.,Attack,SingleEnemy,16,0,25,None,0,0
+BossKr_Whirlpool,소용돌이,전체 공격입니다.,Attack,AllEnemies,12,0,25,None,0,0
+BossKr_InkCloud,먹구름,전체 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,2,4
+BossKr_Constrict,조임 공격,단일 적을 기절시킵니다.,Attack,SingleEnemy,14,0,25,Stun,1,0
+BossSLo_Lightning,벼락,단일 기절 공격입니다.,Attack,SingleEnemy,17,0,25,Stun,1,0
+BossSLo_ChainBolt,연쇄 번개,전체 공격입니다.,Attack,AllEnemies,12,0,25,None,0,0
+BossSLo_ThunderStrike,뇌격,강력한 단일 공격입니다.,Attack,SingleEnemy,20,0,25,None,0,0
+BossSLo_StormAura,폭풍의 기운,공격력을 증가시킵니다.,Buff,Self,0,0,25,AttackUp,2,4
+BossVW_ShadowStrike,그림자 일격,단일 공격입니다.,Attack,SingleEnemy,18,0,25,None,0,0
+BossVW_PhaseShift,공허 이동,방어력을 증가시킵니다.,Buff,Self,0,0,25,DefenseUp,2,3
+BossVW_VoidRend,공허 찢기,전체 방어력을 감소시킵니다.,Attack,AllEnemies,11,0,25,DefenseDown,2,3
+BossVW_Drain,차원 흡수,단일 공격입니다.,Attack,SingleEnemy,14,0,25,None,0,0
+BossFE_Inferno,지옥불,전체 화염 공격입니다.,Attack,AllEnemies,14,0,25,Burn,3,5
+BossFE_CrownOfFire,화염의 왕관,공격력을 크게 증가시킵니다.,Buff,Self,0,0,25,AttackUp,3,5
+BossFE_Meteor,염황 메테오,전체 강력 화염 공격입니다.,Attack,AllEnemies,16,0,25,Burn,3,5
+BossFE_FireBreath,화염 숨결,단일 화염 공격입니다.,Attack,SingleEnemy,22,0,25,Burn,2,4
+BossIG_Glacier,빙하 강타,전체 빙결 공격입니다.,Attack,AllEnemies,13,0,25,Freeze,2,0
+BossIG_AbsoluteZero,절대영도,전체 강력 빙결 공격입니다.,Attack,AllEnemies,16,0,25,Freeze,2,0
+BossIG_FrostArmor,서리 갑옷,강력한 쉴드를 얻습니다.,Shield,Self,22,0,25,None,0,0
+BossIG_WinterBlessing,겨울의 축복,공격력을 크게 증가시킵니다.,Buff,Self,0,0,25,AttackUp,3,5
+BossAD_Hellfire,지옥의 불길,전체 화염 공격입니다.,Attack,AllEnemies,17,0,25,Burn,3,5
+BossAD_DarkPact,암흑 계약,대량 HP 회복입니다.,Heal,Self,30,0,25,None,0,0
+BossAD_LegionSummon,군단 소환,공격력을 크게 증가시킵니다.,Buff,Self,0,0,25,AttackUp,3,5
+BossAD_Apocalypse,대파멸,전체 강력 화염 공격입니다.,Attack,AllEnemies,20,0,25,Burn,3,5
 Mummy_Wrap,붕대 감기,붕대로 감아 독을 퍼뜨립니다.,Attack,SingleEnemy,5,0,25,Poison,2,2
 Mummy_Curse,저주,적의 방어력을 저주로 감소시킵니다.,Debuff,SingleEnemy,0,0,25,DefenseDown,2,2
 Mummy_Bandage,붕대 보호,붕대로 보호막을 만듭니다.,Shield,Self,7,0,25,None,0,0

@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_BloodPact
+  m_EditorClassIdentifier: 
+  _eventName: "\uD53C\uC758 \uACC4\uC57D"
+  _description: "\uC5B4\uB460 \uC18D\uC5D0\uC11C \uC18D\uC0AD\uC774\uB294 \uBAA9\uC18C\uB9AC\uAC00
+    \uB4E4\uB9BD\uB2C8\uB2E4. \"\uD798\uC744 \uC6D0\uD558\uB294\uAC00? \uB300\uAC00\uB294
+    \uC791\uC9C0 \uC54A\uB2E8\uB2E4.\""
+  _eventType: 4
+  _choices:
+  - ChoiceText: "\uACC4\uC57D\uC744 \uB9FA\uB294\uB2E4"
+    ChoiceDescription: "\uD30C\uD2F0 ATK \uC601\uAD6C +8, \uB300\uAC00\uB85C \uD30C\uD2F0
+      \uC804\uC6D0 \uD654\uC0C1 5\uD134"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uAC15\uB825\uD55C \uD798\uC774 \uC8FC\uC785\uB418\uC5C8\uC2B5\uB2C8\uB2E4!
+        \uD30C\uD2F0 \uACF5\uACA9\uB825\uC774 \uC601\uAD6C\uD788 8 \uC99D\uAC00\uD588\uC9C0\uB9CC,
+        \uC601\uD63C\uC774 \uC870\uAE08 \uD0C0\uB4E4\uC5B4\uAC11\uB2C8\uB2E4."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 8
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 2
+      StatusEffectDuration: 5
+      StatusEffectValue: 2
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uAC70\uC808\uD55C\uB2E4"
+    ChoiceDescription: "\uC704\uD5D8\uD55C \uAC70\uB798\uB97C \uD53C\uD569\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC18D\uC0AD\uC784\uC774 \uC0AC\uB77C\uC84C\uC2B5\uB2C8\uB2E4.
+        \uD558\uC9C0\uB9CC \uC791\uC740 \uCD95\uBCF5\uC744 \uBC1B\uC558\uC2B5\uB2C8\uB2E4."
+      GoldChange: 0
+      HPPercentChange: 10
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: 

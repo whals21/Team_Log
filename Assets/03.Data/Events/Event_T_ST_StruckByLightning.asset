@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_ST_StruckByLightning
+  m_EditorClassIdentifier: 
+  _eventName: "\uBCBC\uB77D \uB9DE\uC740 \uBB34\uB364"
+  _description: "\uBCBC\uB77D\uC5D0 \uB9DE\uC740 \uC11D\uC0C1\uC774 \uC5D0\uB108\uC9C0\uB97C
+    \uBFDC\uC5B4\uB0B4\uACE0 \uC788\uC2B5\uB2C8\uB2E4. \uB9CC\uC9C0\uBA74 \uD798\uC744
+    \uC5BB\uAC70\uB098, \uBCBC\uB77D\uC744 \uB9DE\uC744 \uC218\uB3C4 \uC788\uC2B5\uB2C8\uB2E4."
+  _eventType: 4
+  _choices:
+  - ChoiceText: "\uC11D\uC0C1\uC744 \uB9CC\uC9C4\uB2E4"
+    ChoiceDescription: "50% \uC601\uAD6C ATK +5 / 50% \uD30C\uD2F0 \uAE30\uC808 2\uD134"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC5D0\uB108\uC9C0\uAC00 \uC804\uD574\uC9D1\uB2C8\uB2E4..."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes:
+      - ResultText: "\uBCBC\uB77D\uC758 \uD798\uC774 \uC2A4\uBA70\uB4ED\uB2C8\uB2E4!
+          \uD30C\uD2F0 ATK \uC601\uAD6C +5."
+        GoldChange: 0
+        HPPercentChange: 0
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 5
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 0
+        StatusEffectDuration: 0
+        StatusEffectValue: 0
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      - ResultText: "\uBCBC\uB77D\uC774 \uB5A8\uC5B4\uC84C\uC2B5\uB2C8\uB2E4! \uD30C\uD2F0
+          \uC804\uC6D0 \uAE30\uC808 2\uD134."
+        GoldChange: 0
+        HPPercentChange: 0
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 3
+        StatusEffectDuration: 2
+        StatusEffectValue: 0
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uBA40\uB9AC\uD55C\uB2E4"
+    ChoiceDescription: "25 \uACE8\uB4DC \uBC1C\uACAC"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uAC70\uB9AC\uB97C \uB461\uB2C8\uB2E4. \uC8FC\uBCC0\uC5D0\uC11C
+        25 \uACE8\uB4DC\uB97C \uBC1C\uACAC\uD588\uC2B5\uB2C8\uB2E4."
+      GoldChange: 25
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: Stormpeak

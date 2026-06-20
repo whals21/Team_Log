@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_ET_EmberForge
+  m_EditorClassIdentifier: 
+  _eventName: "\uC794\uBD88\uC758 \uB300\uC7A5\uAC04"
+  _description: "\uC794\uBD88 \uC18D\uC5D0\uC11C \uC815\uB839 \uB300\uC7A5\uC7A5\uC774\uAC00
+    \uC791\uC5C5 \uC911\uC785\uB2C8\uB2E4. \uACE8\uB4DC\uB97C \uB0B4\uBA74 \uCD5C\uC885
+    \uACB0\uC804\uC744 \uC704\uD55C \uAC15\uB825\uD55C \uAC15\uD654\uB97C \uD574\uC90D\uB2C8\uB2E4."
+  _eventType: 3
+  _choices:
+  - ChoiceText: "\uAC15\uD654\uB97C \uC758\uB8B0\uD55C\uB2E4 (100 \uACE8\uB4DC)"
+    ChoiceDescription: "\uC601\uAD6C ATK +3, DEF +2"
+    MinGoldRequired: 100
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC815\uB839\uC758 \uBD88\uAF43\uC774 \uC7A5\uBE44\uB97C \uAC15\uD654\uD588\uC2B5\uB2C8\uB2E4!
+        \uD30C\uD2F0 ATK \uC601\uAD6C +3, DEF \uC601\uAD6C +2."
+      GoldChange: -100
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 3
+      PermanentDefBonus: 2
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uAD6C\uACBD\uB9CC \uD55C\uB2E4"
+    ChoiceDescription: "30 \uACE8\uB4DC \uBC1B\uACE0 \uB5A0\uB0A8"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC815\uB839\uC774 \uAC10\uD0C4\uD558\uBA70 30 \uACE8\uB4DC\uB97C
+        \uC90D\uB2C8\uB2E4."
+      GoldChange: 30
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: EmberThrone

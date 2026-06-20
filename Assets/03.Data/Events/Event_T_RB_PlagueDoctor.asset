@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_RB_PlagueDoctor
+  m_EditorClassIdentifier: 
+  _eventName: "\uC5ED\uBCD1 \uC758\uC0AC"
+  _description: "\uAC00\uBA74\uC744 \uC4F4 \uC758\uC0AC\uAC00 \uD574\uB3C5\uC81C\uB97C
+    \uD310\uB9E4\uD569\uB2C8\uB2E4. \uC815\uAC00\uB294 30 \uACE8\uB4DC\uC9C0\uB9CC,
+    \uBB34\uB8CC \uC0D8\uD50C\uC740 50% \uD655\uB960\uB85C \uC5ED\uBCD1\uC744 \uD37C\uB728\uB9BD\uB2C8\uB2E4."
+  _eventType: 3
+  _choices:
+  - ChoiceText: "\uC815\uAC00\uC5D0 \uAD6C\uB9E4 (30 \uACE8\uB4DC)"
+    ChoiceDescription: "\uB3C5/\uD654\uC0C1 \uC815\uD654 + \uD790 15%"
+    MinGoldRequired: 30
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC9C4\uC9DC \uD574\uB3C5\uC81C\uC600\uC2B5\uB2C8\uB2E4! \uB3C5\uACFC
+        \uD654\uC0C1\uC774 \uC815\uD654\uB418\uACE0 HP 15% \uD68C\uBCF5."
+      GoldChange: -30
+      HPPercentChange: 15
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uBB34\uB8CC \uC0D8\uD50C\uC744 \uBC1B\uB294\uB2E4"
+    ChoiceDescription: "50% HP 25% \uD68C\uBCF5 / 50% \uC5ED\uBCD1 5\uD134"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC0D8\uD50C\uC744 \uB9C8\uC2ED\uB2C8\uB2E4..."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes:
+      - ResultText: "\uD6A8\uACFC\uAC00 \uC788\uC5C8\uC2B5\uB2C8\uB2E4! HP 25% \uD68C\uBCF5."
+        GoldChange: 0
+        HPPercentChange: 25
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 0
+        StatusEffectDuration: 0
+        StatusEffectValue: 0
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      - ResultText: "\uC5ED\uBCD1\uC774\uC5C8\uC2B5\uB2C8\uB2E4! \uD30C\uD2F0 \uC804\uC6D0
+          \uB3C5 5\uD134."
+        GoldChange: 0
+        HPPercentChange: 0
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 1
+        StatusEffectDuration: 5
+        StatusEffectValue: 3
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: RotbloomBog

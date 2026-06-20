@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_RB_Bogwitch
+  m_EditorClassIdentifier: 
+  _eventName: "\uB2AA \uB9C8\uB140"
+  _description: "\uB2AA \uB9C8\uB140\uAC00 \uAC70\uB798\uB97C \uC81C\uC548\uD569\uB2C8\uB2E4.
+    \uC720\uBB3C\uC744 \uC8FC\uAC70\uB098 \uACE8\uB4DC\uB97C \uC904 \uC218 \uC788\uC9C0\uB9CC,
+    \uB458 \uB2E4 \uB300\uAC00\uAC00 \uC788\uC2B5\uB2C8\uB2E4."
+  _eventType: 3
+  _choices:
+  - ChoiceText: "\uC720\uBB3C\uC744 \uBC1B\uB294\uB2E4"
+    ChoiceDescription: "\uC720\uBB3C \uD68D\uB4DD, \uB300\uAC00\uB85C \uD30C\uD2F0
+      \uB3C5 5\uD134"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uB9C8\uB140\uAC00 \uC720\uBB3C\uC744 \uAC74\uB135\uB2C8\uB2E4.
+        \uC800\uC8FC\uB85C \uD30C\uD2F0 \uC804\uC6D0 \uB3C5 5\uD134."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 1
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 1
+      StatusEffectDuration: 5
+      StatusEffectValue: 2
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uACE8\uB4DC\uB97C \uBC1B\uB294\uB2E4"
+    ChoiceDescription: "50 \uACE8\uB4DC, \uB300\uAC00\uB85C HP -10%"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uB9C8\uB140\uAC00 50 \uACE8\uB4DC\uB97C \uC90D\uB2C8\uB2E4. \uCCB4\uB825\uC744
+        \uC870\uAE08 \uBE7C\uC557\uACBC\uC2B5\uB2C8\uB2E4."
+      GoldChange: 50
+      HPPercentChange: -10
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: RotbloomBog

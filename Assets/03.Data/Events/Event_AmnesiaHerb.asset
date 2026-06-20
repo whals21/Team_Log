@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_AmnesiaHerb
+  m_EditorClassIdentifier: 
+  _eventName: "\uB9DD\uAC01\uC758 \uD5C8\uBE0C"
+  _description: "\uC740\uBE5B \uBE5B\uC744 \uB0B4\uB294 \uD5C8\uBE0C\uB97C \uBC1C\uACAC\uD588\uC2B5\uB2C8\uB2E4.
+    \uC804\uC124\uC5D0 \uB530\uB974\uBA74 \uBB34\uC5B8\uAC00\uB97C \uC783\uC9C0\uB9CC
+    \uBB34\uC5B8\uAC00\uB97C \uC5BB\uB294\uB2E4\uACE0 \uD569\uB2C8\uB2E4."
+  _eventType: 4
+  _choices:
+  - ChoiceText: "\uD5C8\uBE0C\uB97C \uBA39\uB294\uB2E4"
+    ChoiceDescription: "50% \uB9AC\uB864 \uD1A0\uD070 +2 / 50% HP -10%"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uD5C8\uBE0C\uB97C \uC539\uC5B4 \uC0BC\uD0B5\uB2C8\uB2E4..."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes:
+      - ResultText: "\uC815\uC2E0\uC774 \uB9D1\uC544\uC9D1\uB2C8\uB2E4! \uB9AC\uB864
+          \uD1A0\uD070 2\uAC1C\uB97C \uD68D\uB4DD\uD588\uC2B5\uB2C8\uB2E4."
+        GoldChange: 0
+        HPPercentChange: 0
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 2
+        ApplyStatusEffect: 0
+        StatusEffectDuration: 0
+        StatusEffectValue: 0
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      - ResultText: "\uD63C\uB780\uC774 \uCC3E\uC544\uC654\uC2B5\uB2C8\uB2E4! \uD30C\uD2F0
+          \uC804\uC6D0 HP 10% \uAC10\uC18C."
+        GoldChange: 0
+        HPPercentChange: -10
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 0
+        StatusEffectDuration: 0
+        StatusEffectValue: 0
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uADF8\uB0E5 \uB454\uB2E4"
+    ChoiceDescription: "\uC704\uD5D8\uC744 \uD53C\uD569\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uD5C8\uBE0C\uB97C \uC6D0\uB798 \uC790\uB9AC\uC5D0 \uB461\uB2C8\uB2E4."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: 

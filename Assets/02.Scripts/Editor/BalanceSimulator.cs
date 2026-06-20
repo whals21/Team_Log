@@ -30,6 +30,7 @@ namespace TeamLog.Editor
         // ── 경로 상수 ──
         private const string REPORT_DIR = "Assets/09.Docs/BalanceReports";
         private const string CHAR_PATH = "Assets/03.Data/Characters";
+        private const string TRAIT_PATH = "Assets/03.Data/CharacterTraits";
         private const string PATTERN_PATH = "Assets/03.Data/Patterns";
         private const string SPAWN_PATH = "Assets/03.Data/SpawnPatterns";
         private const string RELIC_PATH = "Assets/03.Data/Relics";
@@ -50,13 +51,25 @@ namespace TeamLog.Editor
         private static List<RelicData> _relicPool;
         private static List<AugmentData> _augmentPool;
         private static List<EventData> _eventPool;
+        private static Dictionary<CharacterClass, CharacterTraitData> _defaultTraits;
 
         // 기본 파티 클래스 — Char_Warrior, Char_Mage, Char_Healer, Char_Rogue
         private static readonly string[] DefaultPartyIds = { "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Rogue" };
 
-        // 층별 보스 에셋 파일명 — Phase 7E: 4스테이지 확장
-        // F4는 F3 보스(마왕) 재사용, GetFloorScaling(2.0f)으로 자동 강화
-        private static readonly string[] FloorBossIds = { "Enemy_BossGoblinKing", "Enemy_BossDragon", "Enemy_BossDemonLord", "Enemy_BossDemonLord" };
+        // 층별 대표 보스 에셋 파일명 — Phase B: 보스 12종 교체.
+        // 각 층마다 3종 후보 중 시뮬레이터는 가장 강한 대표 보스 1종 사용.
+        // F1=서리 군주(150), F2=역병 군주(195), F3=크라켄(240), F4=대마왕(320)
+        private static readonly string[] FloorBossIds = {
+            "Enemy_BossFrostMonarch", "Enemy_BossPlagueLord", "Enemy_BossKraken", "Enemy_BossArchdemon"
+        };
+
+        // 각 층의 보스 3종 후보 (전수 검증 필요 시 사용)
+        private static readonly string[][] FloorBossCandidates = {
+            new[] { "Enemy_BossVerdantTerror", "Enemy_BossFrostMonarch", "Enemy_BossSandLeviathan" },
+            new[] { "Enemy_BossBloodQueen", "Enemy_BossPlagueLord", "Enemy_BossLichKing" },
+            new[] { "Enemy_BossKraken", "Enemy_BossStormLord", "Enemy_BossVoidWalker" },
+            new[] { "Enemy_BossFlameEmperor", "Enemy_BossIceGoddess", "Enemy_BossArchdemon" },
+        };
 
         // ═══════════════════════════════════════════
         // 메뉴 진입점
@@ -168,6 +181,19 @@ namespace TeamLog.Editor
             _relicPool = LoadAllAssets<RelicData>(RELIC_PATH);
             _augmentPool = LoadAllAssets<AugmentData>(AUGMENT_PATH);
             _eventPool = LoadAllAssets<EventData>(EVENT_PATH);
+
+            // Phase 8C: 캐릭터 기본 특성 (IsDefault=true) — 각 직업별 1개씩 매핑
+            // 시뮬레이터 파티에 EquipTrait 적용하여 PlayerTraitHandler 활성화
+            _defaultTraits = new Dictionary<CharacterClass, CharacterTraitData>();
+            var allTraits = LoadAllAssets<CharacterTraitData>(TRAIT_PATH);
+            foreach (var trait in allTraits)
+            {
+                if (trait.IsDefault && !_defaultTraits.ContainsKey(trait.TargetClass))
+                    _defaultTraits[trait.TargetClass] = trait;
+            }
+            Debug.Log($"[BalanceSimulator] 기본 특성 로드: {_defaultTraits.Count}종 (Warrior={_defaultTraits.ContainsKey(CharacterClass.Warrior)}, " +
+                      $"Mage={_defaultTraits.ContainsKey(CharacterClass.Mage)}, Healer={_defaultTraits.ContainsKey(CharacterClass.Healer)}, " +
+                      $"Rogue={_defaultTraits.ContainsKey(CharacterClass.Rogue)})");
         }
 
         private static List<T> LoadAllAssets<T>(string path) where T : UnityEngine.Object
@@ -211,7 +237,13 @@ namespace TeamLog.Editor
         {
             var party = new List<Character>(_playerCharPool.Count);
             foreach (var data in _playerCharPool)
-                party.Add(new Character(data));
+            {
+                var character = new Character(data);
+                // Phase 8C: 기본 특성 장착 — PlayerTraitHandler 활성화로 전투 훅 작동
+                if (_defaultTraits != null && _defaultTraits.TryGetValue(data.Class, out var trait))
+                    character.EquipTrait(trait);
+                party.Add(character);
+            }
             return party;
         }
 

@@ -19,6 +19,9 @@ MonoBehaviour:
   _choices:
   - ChoiceText: "\uC870\uC2EC\uC2A4\uB7FD\uAC8C \uC5F0\uB2E4"
     ChoiceDescription: "\uCC9C\uCC9C\uD788 \uC0C1\uC790\uB97C \uC5FD\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
     Outcome:
       ResultText: "\uC0C1\uC790 \uC548\uC5D0 \uAE08\uD654\uAC00 \uB4E4\uC5B4 \uC788\uC5C8\uC2B5\uB2C8\uB2E4!
         40 \uACE8\uB4DC\uB97C \uD68D\uB4DD\uD588\uC2B5\uB2C8\uB2E4."
@@ -26,11 +29,21 @@ MonoBehaviour:
       HPPercentChange: 0
       GiveRandomSkill: 0
       GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
       ApplyStatusEffect: 0
       StatusEffectDuration: 0
       StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
   - ChoiceText: "\uBB34\uC791\uC815 \uC5F0\uB2E4"
-    ChoiceDescription: "\uBE60\uB974\uAC8C \uC0C1\uC790\uB97C \uC5FD\uB2C8\uB2E4."
+    ChoiceDescription: "\uBE60\uB974\uAC8C \uC0C1\uC790\uB97C \uC5FD\uB2C8\uB2E4.
+      \uD568\uC815\uC774 \uC788\uC744 \uC218\uB3C4 \uC788\uC2B5\uB2C8\uB2E4."
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
     Outcome:
       ResultText: "\uD568\uC815\uC774 \uBC1C\uB3D9\uD588\uC2B5\uB2C8\uB2E4! \uC57D\uAC04\uC758
         \uB370\uBBF8\uC9C0\uB97C \uBC1B\uC558\uC9C0\uB9CC \uACE8\uB4DC\uB97C \uC5BB\uC5C8\uC2B5\uB2C8\uB2E4."
@@ -38,6 +51,14 @@ MonoBehaviour:
       HPPercentChange: -15
       GiveRandomSkill: 0
       GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
       ApplyStatusEffect: 0
       StatusEffectDuration: 0
       StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: 

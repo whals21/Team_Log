@@ -84,6 +84,10 @@ namespace TeamLog.Map
         // 증강 보상 생성기
         public AugmentOfferGenerator AugmentGenerator { get; private set; }
 
+        // 어센션 — 현재 런에서 플레이 중인 어센션 레벨 (런 시작 시 MetaSaveData.SelectedAscensionLevel 복사).
+        // 0 = 어센션 없음. BattleSceneSetup/MapSceneSetup.Nodes.cs에서 AscensionManager로 값 계산.
+        public int SelectedAscensionLevel { get; private set; }
+
         // 이력
         public IReadOnlyList<string> RunHistory => _runHistory;
 
@@ -115,8 +119,14 @@ namespace TeamLog.Map
             IsRunComplete = false;
             CurrentFloor = 1;
             SelectThemes();
-            AddLog($"런 시작 — 총 {TotalFloors}스테이지");
+            AddLog($"런 시작 — 총 {TotalFloors}스테이지" + (SelectedAscensionLevel > 0 ? $" (어센션 {SelectedAscensionLevel})" : ""));
             GenerateCurrentFloorMap();
+        }
+
+        /// <summary>런 시작 전 어센션 레벨 지정 (MapSceneSetup이 SaveManager.Meta에서 복사).</summary>
+        public void SetSelectedAscensionLevel(int level)
+        {
+            SelectedAscensionLevel = level < 0 ? 0 : (level > 15 ? 15 : level);
         }
 
         /// <summary>

@@ -207,12 +207,21 @@ namespace TeamLog.UI.Map
         /// </summary>
         private void StartRunWithParty()
         {
-            _runState = GameRunState.Create(_playerParty, startingGold: 50);
+            var meta = SaveManager.Meta;
+
+            // Ascension: 메타에 저장된 선택 레벨을 런에 복사.
+            // 파티 MaxHP / 시작 골드 modifier는 런 시작 1회 적용.
+            int ascLevel = AscensionManager.ClampSelectedLevel(meta.SelectedAscensionLevel, meta);
+            int startGold = System.Math.Max(0, 50 + AscensionManager.GetStartGoldDeltaByLevel(ascLevel));
+
+            _runState = GameRunState.Create(_playerParty, startingGold: startGold);
+            _runState.SetSelectedAscensionLevel(ascLevel);
+            ApplyAscensionToPartyMaxHp(ascLevel);
+
             _runState.OnMapChanged += OnMapChanged;
             _runState.OnRunEnded += OnRunEnded;
 
             // Phase 8E: 유물 풀 필터링 (잠긴 유물 제외)
-            var meta = SaveManager.Meta;
             var filteredRelicPool = MetaProgressionManager.FilterRelicPool(_relicPool, meta);
             _runState.SetDataPools(
                 filteredRelicPool,
@@ -231,6 +240,22 @@ namespace TeamLog.UI.Map
             // 메타 데이터에 런 시작 기록
             meta.HasPendingRun = true;
             SaveManager.SaveMeta();
+        }
+
+        /// <summary>
+        /// 어센션 PlayerMaxHpPercent modifier를 파티 MaxHP에 적용 (런 시작 1회).
+        /// asc 4 = -5%, asc 10 = -10%. 현재 HP도 MaxHP에 비례하여 감소.
+        /// </summary>
+        private void ApplyAscensionToPartyMaxHp(int ascLevel)
+        {
+            float mul = AscensionManager.GetPlayerMaxHpMulByLevel(ascLevel);
+            if (mul >= 1f) return;
+            foreach (var member in _playerParty)
+            {
+                if (member == null) continue;
+                int newMax = System.Math.Max(1, (int)(member.Health.MaxHP * mul));
+                member.Health.Initialize(newMax);
+            }
         }
 
         /// <summary>
@@ -427,12 +452,23 @@ namespace TeamLog.UI.Map
             var reward = TeamLog.Meta.MetaProgressionManager.CalculateRunReward(
                 victory, floor, gold, battlesWon);
 
+            // 어센션 상승 정보 — RecordRunEnd 이전 레벨 캡처
+            int ascBefore = SaveManager.Meta.AscensionLevel;
+
             SaveManager.RecordRunEnd(victory, floor, gold, battlesWon);
             GameRunState.Destroy();
 
+            string ascensionNote = null;
+            if (victory && floor >= 4)
+            {
+                int ascAfter = SaveManager.Meta.AscensionLevel;
+                if (ascAfter > ascBefore)
+                    ascensionNote = $"어센션 상승! {ascBefore} → {ascAfter}";
+            }
+
             if (_runEndOverlay != null)
             {
-                _runEndOverlay.Show(victory, floor, gold, battlesWon, reward.memory, reward.souls);
+                _runEndOverlay.Show(victory, floor, gold, battlesWon, reward.memory, reward.souls, ascensionNote);
             }
             else
             {

@@ -114,5 +114,16 @@ namespace TeamLog.UI
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
         }
+
+        /// <summary>
+        /// 컨테이너의 모든 자식 GameObject를 역순으로 파괴 (GC EHC-03 통합)
+        /// BattleUIManager / CharacterPopupUI / EventUI 등에서 공통 사용
+        /// </summary>
+        public static void ClearContainerChildren(Transform container)
+        {
+            if (container == null) return;
+            for (int i = container.childCount - 1; i >= 0; i--)
+                UnityEngine.Object.Destroy(container.GetChild(i).gameObject);
+        }
     }
 }

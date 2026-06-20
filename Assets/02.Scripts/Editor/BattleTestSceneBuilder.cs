@@ -21,8 +21,12 @@ namespace TeamLog.Editor
     /// 추가로 ConfigCanvas + BattleTestConfigPanel을 얹고 BattleTestSceneSetup 컴포넌트에 모든 에셋/참조 바인딩.
     ///
     /// 메뉴: TeamLog/Scene/Build Battle Test Scene
+    ///
+    /// Partial files:
+    /// - BattleTestSceneBuilder.cs        — 진입점 + 상수/색상 + 씬 복제 오케스트레이션 + 에셋 로드 + 바인딩 + 유틸
+    /// - BattleTestSceneBuilder.UI.cs     — UI 생성 (ConfigCanvas, 드롭다운, 토글, 버튼, 인풋필드)
     /// </summary>
-    public static class BattleTestSceneBuilder
+    public static partial class BattleTestSceneBuilder
     {
         private const string SCENE_PATH = "Assets/01.Scenes/BattleTestScene.unity";
         private const string SOURCE_SCENE = "Assets/01.Scenes/BattleScene.unity";
@@ -30,11 +34,11 @@ namespace TeamLog.Editor
         private const string RELIC_PATH = "Assets/03.Data/Relics";
 
         // 색상 토큰 — BattleUISceneBuilder와 동일
-        private static readonly Color BgDark = new(0.06f, 0.06f, 0.12f, 0.98f);
-        private static readonly Color AccentYellow = new(0.96f, 0.82f, 0.25f);
-        private static readonly Color AccentGreen = new(0.15f, 0.68f, 0.38f);
-        private static readonly Color TextWhite = Color.white;
-        private static readonly Color TextDim = new(0.82f, 0.82f, 0.87f);
+        internal static readonly Color BgDark = new(0.06f, 0.06f, 0.12f, 0.98f);
+        internal static readonly Color AccentYellow = new(0.96f, 0.82f, 0.25f);
+        internal static readonly Color AccentGreen = new(0.15f, 0.68f, 0.38f);
+        internal static readonly Color TextWhite = Color.white;
+        internal static readonly Color TextDim = new(0.82f, 0.82f, 0.87f);
 
         [MenuItem("TeamLog/Scene/Build Battle Test Scene", false, 100)]
         public static void BuildScene()
@@ -77,8 +81,6 @@ namespace TeamLog.Editor
                     battleSetupGO.SetActive(false); // Start()에서 _pendingTestBattle 분기 시 활성화
 
                     // 부모 BattleUICanvas의 Canvas 컴포넌트 비활성화 (렌더링/레이캐스트만 차단, GO는 활성 유지)
-                    // - 설정 모드에서 전투 UI가 화면에 표시되어 ConfigCanvas와 겹치는 문제 방지
-                    // - GO를 활성 상태로 유지하여 Awake/Start가 정상 호출되도록 보장
                     battleUICanvas = battleSetupGO.GetComponentInParent<Canvas>();
                     if (battleUICanvas != null)
                     {
@@ -93,7 +95,7 @@ namespace TeamLog.Editor
                     Debug.LogWarning("[BattleTestSceneBuilder] BattleSceneSetup GO를 찾지 못했습니다. BattleUISceneBuilder로 BattleScene을 먼저 빌드하세요.");
                 }
 
-                // 5. ConfigCanvas + 패널 + 드롭다운 생성
+                // 5. ConfigCanvas + 패널 + 드롭다운 생성 (UI partial)
                 var refs = CreateConfigCanvas(scene);
 
                 // 6. BattleTestSceneSetup GO + 컴포넌트 + 에셋/참조 바인딩
@@ -138,10 +140,14 @@ namespace TeamLog.Editor
         }
 
         // ══════════════════════════════════════════════════════════
-        //  ConfigCanvas + Panel + 드롭다운 생성
+        //  ConfigRefs — UI partial에서 생성, 여기서 바인딩에 사용
         // ══════════════════════════════════════════════════════════
 
-        private class ConfigRefs
+        /// <summary>
+        /// ConfigCanvas의 모든 UI 참조를 담는 컨테이너. UI partial에서 채워지고
+        /// BindBattleTestSceneSetup에서 BattleTestSceneSetup 컴포넌트로 바인딩.
+        /// </summary>
+        internal class ConfigRefs
         {
             public TMP_Dropdown[] PartySlots = new TMP_Dropdown[4];
             public TMP_Dropdown[] RelicSlots = new TMP_Dropdown[6];
@@ -169,198 +175,6 @@ namespace TeamLog.Editor
             public Button EnemyTemplateSaveButton;
             public Button EnemyTemplateLoadButton;
             public Button EnemyTemplateDeleteButton;
-        }
-
-        private static ConfigRefs CreateConfigCanvas(Scene scene)
-        {
-            var canvasGO = new GameObject("ConfigCanvas");
-            SceneManager.MoveGameObjectToScene(canvasGO, scene);
-
-            var canvas = canvasGO.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 200; // BattleUICanvas(100) 위에 표시
-
-            var scaler = canvasGO.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.matchWidthOrHeight = 0.5f;
-
-            canvasGO.AddComponent<GraphicRaycaster>();
-
-            // 패널 — 중앙 정렬 어두운 반투명 (96% 너비 — 어떤 화면 비율에서도 잘림 방지)
-            var panel = NewRect("ConfigPanel", canvasGO.transform);
-            panel.anchorMin = new Vector2(0.02f, 0.02f);
-            panel.anchorMax = new Vector2(0.98f, 0.98f);
-            panel.offsetMin = Vector2.zero;
-            panel.offsetMax = Vector2.zero;
-            var panelBg = panel.gameObject.AddComponent<Image>();
-            panelBg.color = BgDark;
-            var panelVlg = panel.gameObject.AddComponent<VerticalLayoutGroup>();
-            panelVlg.spacing = 14;
-            panelVlg.padding = new RectOffset(24, 24, 24, 24);
-            panelVlg.childAlignment = TextAnchor.MiddleCenter;  // 수직/수평 중앙 정렬 (패널이 커도 중앙에 모임)
-            panelVlg.childControlWidth = true;
-            panelVlg.childControlHeight = false;
-            panelVlg.childForceExpandWidth = true;
-            panelVlg.childForceExpandHeight = false;
-
-            // 제목
-            AddLabel(panel, "Battle Test 설정", 28, AccentYellow, 50f);
-
-            var refs = new ConfigRefs { ConfigPanel = panel.gameObject };
-
-            // 파티 행 (4 슬롯) + 템플릿 행
-            refs.PartySlots = CreateDropdownRow(panel, "파티:", 4, 30f);
-            CreateTemplateRow(panel, "파티 템플릿:",
-                out refs.PartyTemplateNameInput, out refs.PartyTemplateDropdown,
-                out refs.PartyTemplateSaveButton, out refs.PartyTemplateLoadButton, out refs.PartyTemplateDeleteButton);
-
-            // 유물 행 (6 슬롯) + 템플릿 행
-            refs.RelicSlots = CreateDropdownRow(panel, "유물 (최대 6):", 6, 30f);
-            CreateTemplateRow(panel, "유물 템플릿:",
-                out refs.RelicTemplateNameInput, out refs.RelicTemplateDropdown,
-                out refs.RelicTemplateSaveButton, out refs.RelicTemplateLoadButton, out refs.RelicTemplateDeleteButton);
-
-            // 적 행 (4 슬롯) + 템플릿 행
-            refs.EnemySlots = CreateDropdownRow(panel, "적:", 4, 30f);
-
-            // 층 + 보스 토글 행
-            var floorRow = NewRect("FloorRow", panel);
-            AddHeight(floorRow, 36f);
-            var floorHlg = floorRow.gameObject.AddComponent<HorizontalLayoutGroup>();
-            floorHlg.spacing = 12;
-            floorHlg.childAlignment = TextAnchor.MiddleCenter;
-            floorHlg.childControlWidth = false;
-            floorHlg.childForceExpandWidth = false;
-
-            AddLabel(floorRow, "층:", 18, TextWhite, 50f);
-            refs.FloorDropdown = CreateDropdown(floorRow, 140f, 30f);
-            AddLabel(floorRow, "  ", 18, TextWhite, 20f);
-            refs.BossToggle = CreateToggle(floorRow, "보스", 120f, 30f);
-
-            // 적 템플릿 행 (floor + boss 포함)
-            CreateTemplateRow(panel, "적 템플릿:",
-                out refs.EnemyTemplateNameInput, out refs.EnemyTemplateDropdown,
-                out refs.EnemyTemplateSaveButton, out refs.EnemyTemplateLoadButton, out refs.EnemyTemplateDeleteButton);
-
-            // 시작 버튼
-            var btnRow = NewRect("ButtonRow", panel);
-            AddHeight(btnRow, 60f);
-            var btnHlg = btnRow.gameObject.AddComponent<HorizontalLayoutGroup>();
-            btnHlg.childAlignment = TextAnchor.MiddleCenter;
-            refs.StartButton = CreateButton(btnRow, "전투 시작", 280f, 50f, AccentGreen);
-
-            return refs;
-        }
-
-        private static TMP_Dropdown[] CreateDropdownRow(Transform parent, string label, int count, float slotHeight)
-        {
-            var row = NewRect($"{label}Row", parent);
-            AddHeight(row, slotHeight + 4f);
-            var hlg = row.gameObject.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 8;
-            hlg.padding = new RectOffset(12, 12, 2, 2);
-            hlg.childAlignment = TextAnchor.MiddleLeft;
-            hlg.childControlWidth = true;
-            hlg.childForceExpandWidth = false;
-
-            // 행 라벨 — 고정 폭, 확장 안 함 (모든 행이 동일한 들여쓰기로 정렬)
-            var lblRect = AddLabel(row, label, 16, TextDim, 110f);
-            var lblLe = lblRect.gameObject.GetComponent<LayoutElement>();
-            lblLe.flexibleWidth = 0;
-
-            var slots = new TMP_Dropdown[count];
-            for (int i = 0; i < count; i++)
-            {
-                // 드롭다운만 배치 — 번호 라벨 제거 (visual clutter)
-                // 드롭다운의 flexibleWidth=1이 행 폭을 균등 분할하여 모든 슬롯이 동일 폭으로 정렬
-                slots[i] = CreateDropdown(row, 150f, slotHeight);
-            }
-            return slots;
-        }
-
-        /// <summary>
-        /// 템플릿 행 — 이름 입력 + 템플릿 목록 드롭다운 + 저장/불러오기/삭제 버튼.
-        /// 각 카테고리(파티/유물/적)별로 독립적인 템플릿 목록 관리.
-        /// </summary>
-        private static void CreateTemplateRow(Transform parent, string label,
-            out TMP_InputField nameInput, out TMP_Dropdown dropdown,
-            out Button saveBtn, out Button loadBtn, out Button deleteBtn)
-        {
-            var row = NewRect($"{label}Row", parent);
-            AddHeight(row, 34f);
-            var hlg = row.gameObject.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 6;
-            hlg.padding = new RectOffset(12, 12, 2, 2);
-            hlg.childAlignment = TextAnchor.MiddleLeft;
-            hlg.childControlWidth = false;
-            hlg.childForceExpandWidth = false;
-
-            AddLabel(row, label, 14, TextDim, 110f);
-            nameInput = CreateInputField(row, 160f, 28f, "이름...");
-            dropdown = CreateDropdown(row, 160f, 28f);
-            saveBtn = CreateButton(row, "저장", 60f, 28f, new Color(0.15f, 0.50f, 0.28f), 14);
-            loadBtn = CreateButton(row, "불러오기", 80f, 28f, new Color(0.22f, 0.38f, 0.62f), 14);
-            deleteBtn = CreateButton(row, "삭제", 60f, 28f, new Color(0.58f, 0.18f, 0.18f), 14);
-        }
-
-        /// <summary>
-        /// TMP_InputField 생성 — 텍스트 입력 필드 (템플릿 이름용).
-        /// TMP_DefaultControls.CreateInputField() 표준 구조: Root(Image) > Text Area(RectMask2D) > [Placeholder, Text]
-        /// </summary>
-        private static TMP_InputField CreateInputField(Transform parent, float width, float height, string placeholder)
-        {
-            var rect = NewRect("InputField", parent);
-            var le = rect.gameObject.AddComponent<LayoutElement>();
-            le.preferredWidth = width;
-            le.minWidth = width;
-            le.preferredHeight = height;
-            le.minHeight = height;
-
-            var bg = rect.gameObject.AddComponent<Image>();
-            bg.color = new Color(0.12f, 0.12f, 0.18f, 0.95f);
-
-            var input = rect.gameObject.AddComponent<TMP_InputField>();
-            input.targetGraphic = bg;
-
-            // Text Area — RectMask2D로 캐럿 클리핑 (TMP 표준)
-            var textAreaRect = NewRect("Text Area", rect);
-            textAreaRect.anchorMin = Vector2.zero;
-            textAreaRect.anchorMax = Vector2.one;
-            textAreaRect.offsetMin = new Vector2(6, 2);
-            textAreaRect.offsetMax = new Vector2(-6, -2);
-            textAreaRect.gameObject.AddComponent<RectMask2D>();
-
-            // Placeholder
-            var placeholderRect = NewRect("Placeholder", textAreaRect);
-            placeholderRect.anchorMin = Vector2.zero;
-            placeholderRect.anchorMax = Vector2.one;
-            placeholderRect.offsetMin = Vector2.zero;
-            placeholderRect.offsetMax = Vector2.zero;
-            var placeholderTmp = placeholderRect.gameObject.AddComponent<TextMeshProUGUI>();
-            placeholderTmp.text = placeholder;
-            placeholderTmp.fontSize = 14;
-            placeholderTmp.fontStyle = FontStyles.Italic;
-            placeholderTmp.color = new Color(0.5f, 0.5f, 0.55f, 0.5f);
-            placeholderTmp.alignment = TextAlignmentOptions.Left;
-
-            // Text
-            var textRect = NewRect("Text", textAreaRect);
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
-            var textTmp = textRect.gameObject.AddComponent<TextMeshProUGUI>();
-            textTmp.text = "";
-            textTmp.fontSize = 14;
-            textTmp.color = TextWhite;
-            textTmp.alignment = TextAlignmentOptions.Left;
-
-            input.textViewport = textAreaRect;
-            input.textComponent = textTmp;
-            input.placeholder = placeholderTmp;
-
-            return input;
         }
 
         // ══════════════════════════════════════════════════════════
@@ -495,308 +309,10 @@ namespace TeamLog.Editor
         }
 
         // ══════════════════════════════════════════════════════════
-        //  UI 유틸리티 (BattleUISceneBuilder 헬퍼와 동일 패턴, 자체 복제)
-        // ══════════════════════════════════════════════════════════
-
-        private static RectTransform NewRect(string name, Transform parent)
-        {
-            var go = new GameObject(name, typeof(RectTransform));
-            var rect = (RectTransform)go.transform;
-            rect.SetParent(parent, false);
-            return rect;
-        }
-
-        private static void AddHeight(RectTransform rect, float height)
-        {
-            var le = rect.gameObject.AddComponent<LayoutElement>();
-            le.preferredHeight = height;
-            le.minHeight = height;
-        }
-
-        private static RectTransform AddLabel(Transform parent, string text, int fontSize, Color color, float width)
-        {
-            var rect = NewRect("Label", parent);
-            var le = rect.gameObject.AddComponent<LayoutElement>();
-            le.preferredWidth = width;
-            le.minWidth = width;
-
-            var tmp = rect.gameObject.AddComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = fontSize;
-            tmp.color = color;
-            tmp.alignment = TextAlignmentOptions.Left;
-            return rect;
-        }
-
-        private static TMP_Dropdown CreateDropdown(Transform parent, float width, float height)
-        {
-            var rect = NewRect("Dropdown", parent);
-            var le = rect.gameObject.AddComponent<LayoutElement>();
-            le.preferredWidth = width;
-            le.minWidth = 80;          // 축소 허용 (행이 좁아질 때)
-            le.flexibleWidth = 1;      // 남은 행 폭을 균등 분할 (모든 슬롯 동일 폭)
-            le.preferredHeight = height;
-            le.minHeight = height;
-
-            var bg = rect.gameObject.AddComponent<Image>();
-            bg.color = new Color(0.15f, 0.15f, 0.22f, 0.95f);
-
-            var dropdown = rect.gameObject.AddComponent<TMP_Dropdown>();
-            dropdown.targetGraphic = bg;
-
-            // Label
-            var labelRect = NewRect("Label", rect);
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = new Vector2(10, 2);
-            labelRect.offsetMax = new Vector2(-25, -2);
-            var labelTmp = labelRect.gameObject.AddComponent<TextMeshProUGUI>();
-            labelTmp.fontSize = 16;
-            labelTmp.color = TextWhite;
-            labelTmp.alignment = TextAlignmentOptions.Left;
-            dropdown.captionText = labelTmp;
-
-            // Arrow
-            var arrowRect = NewRect("Arrow", rect);
-            arrowRect.anchorMin = new Vector2(1, 0.5f);
-            arrowRect.anchorMax = new Vector2(1, 0.5f);
-            arrowRect.pivot = new Vector2(1, 0.5f);
-            arrowRect.sizeDelta = new Vector2(20, 20);
-            arrowRect.anchoredPosition = new Vector2(-4, 0);
-            var arrowTmp = arrowRect.gameObject.AddComponent<TextMeshProUGUI>();
-            arrowTmp.text = "▼";
-            arrowTmp.fontSize = 12;
-            arrowTmp.color = TextDim;
-            arrowTmp.alignment = TextAlignmentOptions.Center;
-
-            // Template — 드롭다운 펼침 영역
-            // Template 높이 320px: 파티 9옵션(없음+8캐릭터)이 32px 간격으로 모두 표시 가능.
-            // 유물(43옵션)은 스크롤로 탐색. TMP_Dropdown이 Template에 자체 Canvas(sortingOrder=30000) 추가.
-            var templateRect = NewRect("Template", rect);
-            templateRect.anchorMin = new Vector2(0, 0);
-            templateRect.anchorMax = new Vector2(1, 0);
-            templateRect.pivot = new Vector2(0.5f, 1f);
-            templateRect.anchoredPosition = new Vector2(0, 2);
-            templateRect.sizeDelta = new Vector2(0, 320);
-            var templateBg = templateRect.gameObject.AddComponent<Image>();
-            templateBg.color = new Color(0.1f, 0.1f, 0.16f, 0.98f);
-            var scroll = templateRect.gameObject.AddComponent<ScrollRect>();
-            scroll.horizontal = false;              // 세로 전용
-            scroll.scrollSensitivity = 32f;         // 항목 1개씩 스크롤
-            scroll.movementType = ScrollRect.MovementType.Clamped;
-            // ★ Template에는 Mask를 두지 않음 — Mask는 Viewport에만 (표준 TMP 구조).
-            //   Template에 Mask를 추가하면 showMaskGraphic=true여도 자식이 클리핑되어 스크롤이 끊길 수 있음.
-
-            // Scrollbar — 세로 스크롤 표시 (유물 43옵션 등 긴 목록에서 스크롤 가능성 암시)
-            var scrollbarRect = NewRect("Scrollbar", templateRect);
-            scrollbarRect.anchorMin = new Vector2(1, 0);
-            scrollbarRect.anchorMax = new Vector2(1, 1);
-            scrollbarRect.pivot = new Vector2(1, 0.5f);
-            scrollbarRect.sizeDelta = new Vector2(16, 0);
-            scrollbarRect.anchoredPosition = Vector2.zero;
-            var scrollbarImg = scrollbarRect.gameObject.AddComponent<Image>();
-            scrollbarImg.color = new Color(0.08f, 0.08f, 0.12f, 0.9f);
-            var scrollbar = scrollbarRect.gameObject.AddComponent<Scrollbar>();
-            scrollbar.direction = Scrollbar.Direction.BottomToTop;
-            var slidingAreaRect = NewRect("Sliding Area", scrollbarRect);
-            slidingAreaRect.anchorMin = Vector2.zero;
-            slidingAreaRect.anchorMax = Vector2.one;
-            slidingAreaRect.offsetMin = new Vector2(4, 4);
-            slidingAreaRect.offsetMax = new Vector2(-4, -4);
-            var handleRect = NewRect("Handle", slidingAreaRect);
-            handleRect.anchorMin = Vector2.zero;
-            handleRect.anchorMax = Vector2.one;
-            handleRect.offsetMin = Vector2.zero;
-            handleRect.offsetMax = Vector2.zero;
-            var handleImg = handleRect.gameObject.AddComponent<Image>();
-            handleImg.color = new Color(0.4f, 0.4f, 0.5f, 0.8f);
-            scrollbar.targetGraphic = handleImg;
-            scrollbar.handleRect = handleRect;
-            scroll.verticalScrollbar = scrollbar;
-            scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
-            scroll.verticalScrollbarSpacing = -3;  // TMP_DefaultControls 표준값
-
-            // Viewport — Mask로 항목 클리핑 (TMP_DefaultControls 표준 구조: 자식 순서 Viewport 먼저)
-            var viewportRect = NewRect("Viewport", templateRect);
-            viewportRect.anchorMin = new Vector2(0, 0);
-            viewportRect.anchorMax = new Vector2(1, 1);
-            viewportRect.pivot = new Vector2(0, 1);
-            viewportRect.offsetMin = Vector2.zero;
-            viewportRect.offsetMax = new Vector2(-16, 0);
-            var viewportImg = viewportRect.gameObject.AddComponent<Image>();
-            var viewportMask = viewportRect.gameObject.AddComponent<Mask>();
-            viewportMask.showMaskGraphic = false;
-            // ★ Mask.Reset() (Editor 전용)이 Image.color와 pivot을 리셋할 수 있으므로
-            // Mask 추가 후에 다시 설정해야 함
-            viewportImg.color = Color.white;
-            viewportRect.pivot = new Vector2(0, 1);
-            scroll.viewport = viewportRect;
-
-            // Content — 자식으로 Item 배치
-            // ★ VerticalLayoutGroup / ContentSizeFitter 제거 — TMP_Dropdown.Show()가
-            // 항목 위치/크기를 수동 설정(TMP_Dropdown.cs L958-965)하므로 레이아웃 컴포넌트가
-            // 간섭하면 항목이 0px로 collapse되어 빈 목록이 됨. TMP_DefaultControls 표준은
-            // Content에 어떤 레이아웃 컴포넌트도 두지 않음.
-            var itemsRect = NewRect("Content", viewportRect);
-            itemsRect.anchorMin = new Vector2(0, 1);
-            itemsRect.anchorMax = new Vector2(1, 1);
-            itemsRect.pivot = new Vector2(0.5f, 1f);
-            itemsRect.sizeDelta = new Vector2(0, 28);
-            itemsRect.anchoredPosition = Vector2.zero;
-            scroll.content = itemsRect;
-
-            // Item — 표준 TMP Dropdown 구조와 동일하게 Item > [Item Background, Item Checkmark, Item Label]
-            // 주의: Item 자체는 Toggle만 가지며, targetGraphic=Item Background (자식 Image).
-            // TMP_Dropdown.SetupTemplate()이 Show() 시점에 자동으로 DropdownItem 컴포넌트를 Item에 추가하고
-            // m_ItemText/m_ItemImage 필드를 dropdown.itemText/itemImage에서 가져옵니다.
-            // (DropdownItem은 protected internal class라 외부에서 수동 AddComponent 불가)
-            var itemRect = NewRect("Item", itemsRect);
-            itemRect.anchorMin = new Vector2(0, 0.5f);
-            itemRect.anchorMax = new Vector2(1, 0.5f);
-            itemRect.sizeDelta = new Vector2(0, 28);
-            var itemToggle = itemRect.gameObject.AddComponent<Toggle>();
-            itemToggle.isOn = false;
-
-            // Item Background — Toggle.targetGraphic (선택/하이라이트 배경)
-            var itemBgRect = NewRect("Item Background", itemRect);
-            itemBgRect.anchorMin = Vector2.zero;
-            itemBgRect.anchorMax = Vector2.one;
-            itemBgRect.offsetMin = Vector2.zero;
-            itemBgRect.offsetMax = Vector2.zero;
-            var itemBgImg = itemBgRect.gameObject.AddComponent<Image>();
-            itemBgImg.color = new Color(0.18f, 0.18f, 0.26f, 0.95f);
-            itemToggle.targetGraphic = itemBgImg;
-
-            // Item Checkmark — Toggle.graphic (선택 시 표시)
-            var checkRect = NewRect("Item Checkmark", itemRect);
-            checkRect.anchorMin = new Vector2(0, 0.5f);
-            checkRect.anchorMax = new Vector2(0, 0.5f);
-            checkRect.pivot = new Vector2(0, 0.5f);
-            checkRect.sizeDelta = new Vector2(20, 20);
-            checkRect.anchoredPosition = new Vector2(8, 0);
-            var checkImg = checkRect.gameObject.AddComponent<Image>();
-            checkImg.color = AccentYellow;
-            itemToggle.graphic = checkImg;
-
-            // Item Label — 옵션 텍스트 (TMP)
-            var itemLabelRect = NewRect("Item Label", itemRect);
-            itemLabelRect.anchorMin = Vector2.zero;
-            itemLabelRect.anchorMax = Vector2.one;
-            itemLabelRect.offsetMin = new Vector2(32, 1);
-            itemLabelRect.offsetMax = new Vector2(-10, -2);
-            var itemLabelTmp = itemLabelRect.gameObject.AddComponent<TextMeshProUGUI>();
-            itemLabelTmp.fontSize = 16;
-            itemLabelTmp.color = TextWhite;
-            itemLabelTmp.alignment = TextAlignmentOptions.Left;
-
-            // ★ LayoutElement 제거 — TMP_Dropdown.Show()가 수동으로 itemRect.sizeDelta를 설정(TMP_Dropdown.cs L964).
-            // LayoutElement가 있으면 VerticalLayoutGroup 없이도 ContentSizeFitter 등에 의해
-            // preferredHeight가 잘못 해석될 수 있음. TMP_DefaultControls 표준은 Item에 LayoutElement 없음.
-
-            // ★ TMP_Dropdown 핵심 참조 — itemText가 없으면 AddItem에서 텍스트가 설정되지 않음
-            dropdown.template = templateRect;
-            dropdown.itemText = itemLabelTmp;
-            dropdown.targetGraphic = bg;
-            templateRect.gameObject.SetActive(false);
-
-            // 기본 옵션 1개 (씬 Start에서 PopulateDropdowns가 다시 채움)
-            dropdown.ClearOptions();
-            dropdown.AddOptions(new List<string> { "(로딩 중)" });
-            dropdown.value = 0;
-            dropdown.RefreshShownValue();
-
-            return dropdown;
-        }
-
-        private static Toggle CreateToggle(Transform parent, string label, float width, float height)
-        {
-            var rect = NewRect("Toggle", parent);
-            var le = rect.gameObject.AddComponent<LayoutElement>();
-            le.preferredWidth = width;
-            le.minWidth = width;
-            le.preferredHeight = height;
-            le.minHeight = height;
-
-            var toggle = rect.gameObject.AddComponent<Toggle>();
-
-            // Background
-            var bgRect = NewRect("Background", rect);
-            bgRect.anchorMin = new Vector2(0, 0.5f);
-            bgRect.anchorMax = new Vector2(0, 0.5f);
-            bgRect.pivot = new Vector2(0, 0.5f);
-            bgRect.sizeDelta = new Vector2(height - 4, height - 4);
-            bgRect.anchoredPosition = new Vector2(4, 0);
-            var bg = bgRect.gameObject.AddComponent<Image>();
-            bg.color = new Color(0.15f, 0.15f, 0.22f, 0.95f);
-            toggle.targetGraphic = bg;
-
-            // Checkmark
-            var checkRect = NewRect("Checkmark", bgRect);
-            checkRect.anchorMin = Vector2.zero;
-            checkRect.anchorMax = Vector2.one;
-            checkRect.sizeDelta = Vector2.zero;
-            checkRect.offsetMin = new Vector2(4, 4);
-            checkRect.offsetMax = new Vector2(-4, -4);
-            var check = checkRect.gameObject.AddComponent<Image>();
-            check.color = AccentGreen;
-            toggle.graphic = check;
-            toggle.isOn = false;
-
-            // Label
-            var labelRect = NewRect("Label", rect);
-            labelRect.anchorMin = new Vector2(0, 0);
-            labelRect.anchorMax = new Vector2(1, 1);
-            labelRect.offsetMin = new Vector2(height + 8, 0);
-            labelRect.offsetMax = Vector2.zero;
-            var tmp = labelRect.gameObject.AddComponent<TextMeshProUGUI>();
-            tmp.text = label;
-            tmp.fontSize = 16;
-            tmp.color = TextWhite;
-            tmp.alignment = TextAlignmentOptions.Left;
-
-            return toggle;
-        }
-
-        private static Button CreateButton(Transform parent, string label, float width, float height, Color color, int fontSize = 22)
-        {
-            var rect = NewRect("Button", parent);
-            var le = rect.gameObject.AddComponent<LayoutElement>();
-            le.preferredWidth = width;
-            le.minWidth = width;
-            le.preferredHeight = height;
-            le.minHeight = height;
-
-            var bg = rect.gameObject.AddComponent<Image>();
-            bg.color = color;
-
-            var btn = rect.gameObject.AddComponent<Button>();
-            btn.targetGraphic = bg;
-
-            // Hover 색상 변화
-            var colors = btn.colors;
-            colors.highlightedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
-            colors.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
-            btn.colors = colors;
-
-            var labelRect = NewRect("Label", rect);
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.sizeDelta = Vector2.zero;
-            var tmp = labelRect.gameObject.AddComponent<TextMeshProUGUI>();
-            tmp.text = label;
-            tmp.fontSize = fontSize;
-            tmp.color = Color.black;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.fontStyle = FontStyles.Bold;
-
-            return btn;
-        }
-
-        // ══════════════════════════════════════════════════════════
         //  Reflection 유틸리티
         // ══════════════════════════════════════════════════════════
 
-        private static void SetPrivateField(object obj, string fieldName, object value)
+        internal static void SetPrivateField(object obj, string fieldName, object value)
         {
             var field = obj.GetType().GetField(fieldName,
                 BindingFlags.NonPublic | BindingFlags.Instance);

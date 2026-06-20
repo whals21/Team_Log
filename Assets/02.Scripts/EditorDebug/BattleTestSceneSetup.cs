@@ -256,7 +256,7 @@ namespace TeamLog.EditorDebug
             }
 
             // BattleSceneSetup에 데이터 주입 (static 필드 → 씬 리로드 후에도 유지)
-            BattleSceneSetup.SetBattleData(party, enemies, 0);
+            BattleSceneSetup.SetBattleData(party, enemies, 0, isBossBattle: _lastIsBoss);
             BattleSceneSetup.SetReturnScene("BattleTestScene");
             BattleResult.SetBattleType(_lastIsBoss ? MapNodeType.Boss : MapNodeType.Battle);
 

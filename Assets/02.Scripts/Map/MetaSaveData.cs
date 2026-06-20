@@ -50,5 +50,11 @@ namespace TeamLog.Map
 
         // ── Phase 8B: 장착 바인딩 (CharacterName → TraitId) ──
         public List<TraitBindingEntry> EquippedTraitBindings = new();
+
+        // ── Ascension: 클리어 누적 난이도 ──
+        // AscensionLevel: 달성한 최대 어센션 레벨 (0~15). 런 클리어 시 자동 +1.
+        // SelectedAscensionLevel: 다음 런에 플레이할 어센션 레벨 (사용자 선택, 0~AscensionLevel).
+        public int AscensionLevel;
+        public int SelectedAscensionLevel;
     }
 }

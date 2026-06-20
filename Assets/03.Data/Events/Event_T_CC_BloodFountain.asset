@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_CC_BloodFountain
+  m_EditorClassIdentifier: 
+  _eventName: "\uD53C\uC758 \uBD84\uC218"
+  _description: "\uC608\uBC30\uB2F9 \uC911\uC559\uC5D0 \uBD89\uC740 \uBD84\uC218\uAC00
+    \uC19F\uC2B5\uB2C8\uB2E4. \uB9C8\uC2DC\uBA74 \uD798\uC774 \uB118\uCE58\uC9C0\uB9CC,
+    \uC800\uC8FC\uC5D0 \uBE60\uC9C8 \uC218\uB3C4 \uC788\uC2B5\uB2C8\uB2E4."
+  _eventType: 4
+  _choices:
+  - ChoiceText: "\uD53C\uB97C \uB9C8\uC2E0\uB2E4"
+    ChoiceDescription: "50% \uC601\uAD6C ATK +3 / 50% AttackDown 3\uD134"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uD53C\uB97C \uB4E4\uC774\uD0B5\uB2C8\uB2E4..."
+      GoldChange: 0
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes:
+      - ResultText: "\uAC15\uB825\uD55C \uD798\uC774 \uB053\uC5B4\uC62C\uB790\uC2B5\uB2C8\uB2E4!
+          \uD30C\uD2F0 ATK \uC601\uAD6C +3."
+        GoldChange: 0
+        HPPercentChange: 0
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 3
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 0
+        StatusEffectDuration: 0
+        StatusEffectValue: 0
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      - ResultText: "\uC800\uC8FC\uAC00 \uBFCC\uB9AC\uB0B4\uB838\uC2B5\uB2C8\uB2E4!
+          \uD30C\uD2F0 AttackDown 3\uD134."
+        GoldChange: 0
+        HPPercentChange: 0
+        GiveRandomSkill: 0
+        GiveRandomItem: 0
+        PermanentAtkBonus: 0
+        PermanentDefBonus: 0
+        RerollTokensBonus: 0
+        ApplyStatusEffect: 10
+        StatusEffectDuration: 3
+        StatusEffectValue: 5
+        RandomOutcomes: []
+        OutcomeWeights: []
+        NextEventId: 
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uAE30\uB3C4\uB9CC \uD55C\uB2E4"
+    ChoiceDescription: "HP 10% \uD68C\uBCF5"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uACBD\uAC74\uD558\uAC8C \uAE30\uB3C4\uB4DC\uB9BD\uB2C8\uB2E4.
+        HP 10% \uD68C\uBCF5."
+      GoldChange: 0
+      HPPercentChange: 10
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: CrimsonChapel

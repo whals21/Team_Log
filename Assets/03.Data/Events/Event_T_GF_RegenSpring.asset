@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_GF_RegenSpring
+  m_EditorClassIdentifier: 
+  _eventName: "\uC7AC\uC0DD\uC758 \uC0D8"
+  _description: "\uC624\uB798\uB41C \uC815\uB839\uC774 \uBE5B\uB098\uB294 \uC0D8\uBB3C\uC744
+    \uAC00\uAFB8\uACE0 \uC788\uC2B5\uB2C8\uB2E4. \uAE4A\uC740 \uB9C8\uC2E4\uC218\uB85D
+    \uB354 \uD070 \uCE58\uC720\uB97C \uC5BB\uC744 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  _eventType: 4
+  _choices:
+  - ChoiceText: "\uAE4A\uC774 \uB9C8\uC2E0\uB2E4"
+    ChoiceDescription: "HP 30% \uD68C\uBCF5 + \uC7AC\uC0DD 3\uD134"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC815\uB839\uC758 \uCD95\uBCF5\uC744 \uBC1B\uC558\uC2B5\uB2C8\uB2E4!
+        HP 30% \uD68C\uBCF5, 3\uD134\uAC04 \uC7AC\uC0DD \uD6A8\uACFC."
+      GoldChange: 0
+      HPPercentChange: 30
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 11
+      StatusEffectDuration: 3
+      StatusEffectValue: 5
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uC870\uAE08\uB9CC \uB9C8\uC2E0\uB2E4"
+    ChoiceDescription: "HP 10% \uD68C\uBCF5 (\uC548\uC804)"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uAC00\uBCCD\uAC8C \uD55C \uBAA8\uAE08 \uB9C8\uC168\uC2B5\uB2C8\uB2E4.
+        HP 10% \uD68C\uBCF5."
+      GoldChange: 0
+      HPPercentChange: 10
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: GreyForest

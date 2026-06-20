@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a1602dcba9cd143b97d6eb01d822fa, type: 3}
+  m_Name: Event_T_SG_BlindSeer
+  m_EditorClassIdentifier: 
+  _eventName: "\uB208 \uBA3C \uC608\uC5B8\uC790"
+  _description: "\uB208 \uBA3C \uB178\uC778\uC774 \uB2E4\uAC00\uC624\uB294 \uBCF4\uC2A4\uC804\uC5D0
+    \uB300\uD55C \uC608\uC5B8\uC744 \uD574\uC90D\uB2C8\uB2E4. \uACE8\uB4DC\uB97C
+    \uB0B4\uBA74 \uC815\uD655\uD55C \uC815\uBCF4\uB97C \uC904 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  _eventType: 3
+  _choices:
+  - ChoiceText: "\uC608\uC5B8\uC744 \uB4E3\uB294\uB2E4 (40 \uACE8\uB4DC)"
+    ChoiceDescription: "\uB9AC\uB864 \uD1A0\uD070 +3 (\uB2E4\uC74C \uBCF4\uC2A4\uC804
+      \uB300\uBE44)"
+    MinGoldRequired: 40
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uBCF4\uC2A4\uC758 \uC57D\uC810\uC744 \uC608\uC5B8\uBC1B\uC558\uC2B5\uB2C8\uB2E4!
+        \uB9AC\uB864 \uD1A0\uD070 3\uAC1C \uD68D\uB4DD."
+      GoldChange: -40
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 3
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  - ChoiceText: "\uBB34\uC2DC\uD55C\uB2E4"
+    ChoiceDescription: "10 \uACE8\uB4DC\uB97C \uB3C4\uB451\uC9C8"
+    MinGoldRequired: 0
+    MinPartyHPPercent: 0
+    RequiresAliveMembers: 0
+    Outcome:
+      ResultText: "\uC608\uC5B8\uC790\uC758 \uC9C0\uAC11\uC5D0\uC11C 10 \uACE8\uB4DC\uB97C
+        \uD6D4\uCCE4\uC2B5\uB2C8\uB2E4."
+      GoldChange: 10
+      HPPercentChange: 0
+      GiveRandomSkill: 0
+      GiveRandomItem: 0
+      PermanentAtkBonus: 0
+      PermanentDefBonus: 0
+      RerollTokensBonus: 0
+      ApplyStatusEffect: 0
+      StatusEffectDuration: 0
+      StatusEffectValue: 0
+      RandomOutcomes: []
+      OutcomeWeights: []
+      NextEventId: 
+  _weight: 10
+  _exclusiveThemeId: ShadowsGlade

@@ -70,7 +70,7 @@ namespace TeamLog.UI.Battle
         private void CreatePlayerPanels()
         {
             ClearPanels(_playerPanels);
-            ClearContainerChildren(_playerPanelContainer);
+            UIAnimationHelper.ClearContainerChildren(_playerPanelContainer);
 
             for (int i = 0; i < _playerParty.Count && i < _maxPlayerPanels; i++)
             {
@@ -98,7 +98,7 @@ namespace TeamLog.UI.Battle
                 Debug.LogError("[BattleUIManager] _enemyPanelContainer is null! Cannot create enemy panels.");
                 return;
             }
-            ClearContainerChildren(_enemyPanelContainer);
+            UIAnimationHelper.ClearContainerChildren(_enemyPanelContainer);
 
             int count = _enemies.Count;
             bool multiRow = count > ENEMIES_PER_ROW;
@@ -183,13 +183,6 @@ namespace TeamLog.UI.Battle
                 if (panel != null) Destroy(panel.gameObject);
             }
             panels.Clear();
-        }
-
-        private void ClearContainerChildren(Transform container)
-        {
-            if (container == null) return;
-            for (int i = container.childCount - 1; i >= 0; i--)
-                Destroy(container.GetChild(i).gameObject);
         }
 
         #endregion

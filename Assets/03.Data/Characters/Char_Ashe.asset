@@ -19,13 +19,13 @@ MonoBehaviour:
   _baseHP: 70
   _baseATK: 0
   _baseDEF: 0
-  _enemyTrait: 8
+  _enemyTrait: 0
   _isBoss: 0
   _skills:
   - {fileID: 11400000, guid: ef4beddc79a1cd54795c57225ea7b1ad, type: 2}
   - {fileID: 11400000, guid: eb866439e35248846bbe1c07765600b9, type: 2}
-  - {fileID: 11400000, guid: bcb6c109f5fde9a4bb2cfca7ef16f335, type: 2}
-  - {fileID: 11400000, guid: bba8969b5bd6cee44bebb15a78caf26c, type: 2}
+  - {fileID: 11400000, guid: a38ee04d9ad8313498296d4ce8a1b19e, type: 2}
+  - {fileID: 11400000, guid: 07776c728eed25645b6b49926988cef2, type: 2}
   _isDefault: 1
   _unlockCondition: 
   _resourceType: 1

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 359ccd898c414ec499c7b83b44f63fdd, type: 3}
+  m_Name: Lumi_Blizzard
+  m_EditorClassIdentifier: 
+  _skillName: "\uB208\uBCF4\uB77C"
+  _description: 
+  _skillType: 0
+  _targetType: 1
+  _power: 4
+  _cost: 2
+  _weight: 50
+  _icon: {fileID: 0}
+  _statusEffect: 4
+  _effectDuration: 1
+  _effectValue: 1
+  _behaviors: []
+  _resourceGainType: 3
+  _resourceGainAmount: 1
+  _resourceCostType: 0
+  _resourceCostAmount: 0
+  _resourcePowerPerStack: 0
+  _consumeAllResource: 0

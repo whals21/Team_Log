@@ -36,6 +36,10 @@ namespace TeamLog.Skill.Behaviors.Implementations
 
             // 기본 DealDamage를 스킵 — Pierce가 모든 데미지 처리를 담당
             ctx.SkipDefaultDamage = true;
+
+            // Phase CC: Pierce에도 피격 훅 작동 (Duran Vengeance 축적 등)
+            if (target.Resource != null && actualDealt > 0)
+                target.Resource.OnDamageTaken(target, actualDealt);
         }
     }
 }

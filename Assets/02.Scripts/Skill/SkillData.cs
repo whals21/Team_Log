@@ -47,6 +47,12 @@ namespace TeamLog.Characters
         [SerializeField] private ResourceType _resourceCostType = ResourceType.None;
         [SerializeField] private int _resourceCostAmount;
 
+        [Tooltip("자원 1스택당 추가 위력 (Phase CC). Brand of Ash=3(Ember×3), Revenge Strike=1(Vengearce×1) 등. 0이면 비활성.")]
+        [SerializeField] private int _resourcePowerPerStack;
+
+        [Tooltip("자원 전량 소모 여부 (Phase CC). true면 ResourceCostAmount 무시하고 보유 스택 전부 소모. Revenge Strike용.")]
+        [SerializeField] private bool _consumeAllResource;
+
         #region Properties
         public string SkillName => _skillName;
         public string Description => _description;
@@ -66,6 +72,8 @@ namespace TeamLog.Characters
         public int ResourceGainAmount => _resourceGainAmount;
         public ResourceType ResourceCostType => _resourceCostType;
         public int ResourceCostAmount => _resourceCostAmount;
+        public int ResourcePowerPerStack => _resourcePowerPerStack;
+        public bool ConsumeAllResource => _consumeAllResource;
         #endregion
     }
 

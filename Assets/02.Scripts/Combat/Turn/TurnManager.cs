@@ -167,11 +167,11 @@ namespace TeamLog.Combat.Turn
                 return false;
 
             // Phase CC: 자원 소모 체크 (Ember/Vengeance/Frost 등)
-            // 스킬이 자원을 소모하고, 시전자가 해당 자원을 가졌을 때만 검사.
-            // 자원 부족 시 스킬 사용 불가 (AP도 소비 안 함). 실제 소모는 스킬 실행 후.
+            // ConsumeAllResource(전량 소모)인 경우 체크 스킵 — 자원 0이어도 사용 가능 (위력만 낮아짐).
             if (caster.Resource != null
                 && skill.ResourceCostType != ResourceType.None
                 && skill.ResourceCostType == caster.Resource.Resource
+                && !skill.ConsumeAllResource
                 && !caster.Resource.CanConsume(skill.ResourceCostAmount))
             {
                 return false;
@@ -288,9 +288,14 @@ namespace TeamLog.Combat.Turn
                     && skill.ResourceGainAmount > 0)
                     caster.Resource.AddStacks(skill.ResourceGainAmount);
                 if (skill.ResourceCostType != ResourceType.None
-                    && skill.ResourceCostType == caster.Resource.Resource
-                    && skill.ResourceCostAmount > 0)
-                    caster.Resource.ConsumeStacks(skill.ResourceCostAmount);
+                    && skill.ResourceCostType == caster.Resource.Resource)
+                {
+                    // Phase CC: 전량 소모 (Revenge Strike) 또는 고정량 소모
+                    if (skill.ConsumeAllResource)
+                        caster.Resource.Reset();
+                    else if (skill.ResourceCostAmount > 0)
+                        caster.Resource.ConsumeStacks(skill.ResourceCostAmount);
+                }
             }
 
             // Phase ARCH-5: 스킬 사용 후 UsesThisBattle 증가

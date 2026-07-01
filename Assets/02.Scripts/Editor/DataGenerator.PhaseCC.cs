@@ -22,27 +22,76 @@ namespace TeamLog.Editor
         /// <summary>Phase CC 캐릭터 5종 생성 (Ashe/Duran/Lumi/Sibyl/Taranis).</summary>
         private static void GeneratePhaseCCCharacters()
         {
-            // ── 자원 연동 스킬 먼저 생성 (Ashe/Duran 전용) ──
+            // ════════════════════════════════════════════
+            // Ashe (Pyromancer) — Ember 자해 폭딜 스킬 4종
+            // ════════════════════════════════════════════
+            // 1. Cinder Accretion — 셋업: 단일 5 + Burn, Ember +2
             CreatePhaseCCSkill("Ashe_CinderAccretion", "잿빛 응축", SkillType.Attack, TargetType.SingleEnemy,
                 power: 5, cost: 1, statusEffect: StatusEffectType.Burn, effectDuration: 2, effectValue: 3,
-                gainType: ResourceType.Ember, gainAmount: 2); // Ember +2 획득 (충전)
+                gainType: ResourceType.Ember, gainAmount: 2);
 
+            // 2. Phoenix Renewal — 아군 힐 8 + Ember×3 추가 힐, Ember +1
+            CreatePhaseCCSkill("Ashe_PhoenixRenewal", "불사조 갱생", SkillType.Heal, TargetType.SingleAlly,
+                power: 8, cost: 1,
+                gainType: ResourceType.Ember, gainAmount: 1,
+                resourcePowerPerStack: 3); // Ember×3 추가 힐
+
+            // 3. Brand of Ash — 단일 8 + Ember×3 데미지, Ember -2 소모
             CreatePhaseCCSkill("Ashe_BrandOfAsh", "잿더미 낙인", SkillType.Attack, TargetType.SingleEnemy,
-                power: 20, cost: 2,
-                costType: ResourceType.Ember, costAmount: 2); // Ember 2 소모 (폭딜)
+                power: 8, cost: 2,
+                costType: ResourceType.Ember, costAmount: 2,
+                resourcePowerPerStack: 3); // Ember×3 추가 위력
 
+            // 4. Embrace of Cinders — 단일 30 + Ember×15, Ember 5 소모 (궁극기)
+            CreatePhaseCCSkill("Ashe_EmbraceOfCinders", "잔불의 포옹", SkillType.Attack, TargetType.SingleEnemy,
+                power: 30, cost: 3,
+                costType: ResourceType.Ember, costAmount: 5,
+                resourcePowerPerStack: 15); // Ember×15 추가 위력 — 풀충전 시 30+75=105
+
+            // ════════════════════════════════════════════
+            // Duran (Warrior) — Vengeance 복수 게이지 스킬 4종
+            // ════════════════════════════════════════════
+            // 1. Shield Wall — 아군 쉴드 10, AP 1 (셋업)
+            CreatePhaseCCSkill("Duran_ShieldWall", "방패벽", SkillType.Shield, TargetType.SingleAlly,
+                power: 10, cost: 1);
+
+            // 2. Provoking Shield — 자신 도발 부여, AP 1 (적이 Duran을 우선 공격)
+            CreatePhaseCCSkill("Duran_ProvokingShield", "도발 방패", SkillType.Buff, TargetType.Self,
+                power: 6, cost: 1, statusEffect: StatusEffectType.Taunt, effectDuration: 1, effectValue: 1);
+
+            // 3. Revenge Strike — 단일 10 + Vengeance×1, Vengeance 전량 소모
             CreatePhaseCCSkill("Duran_RevengeStrike", "복수의 일격", SkillType.Attack, TargetType.SingleEnemy,
-                power: 18, cost: 2,
-                costType: ResourceType.Vengeance, costAmount: 5); // Vengeance 5 소모 (폭딜)
+                power: 10, cost: 2,
+                costType: ResourceType.Vengeance, costAmount: 0,
+                resourcePowerPerStack: 1, consumeAllResource: true); // Vengeance 전량 소모
 
-            // ── Lumi (Cryomancer) Frost 연동 스킬 ──
+            // 4. Last Bastion — 자신 HP 25 회복 + 쉴드 25, Vengeance 15 소모 (궁극기)
+            CreatePhaseCCSkill("Duran_LastBastion", "최후의 보루", SkillType.Shield, TargetType.Self,
+                power: 25, cost: 3,
+                costType: ResourceType.Vengeance, costAmount: 15);
+
+            // ════════════════════════════════════════════
+            // Lumi (Cryomancer) — Frost 통제 스킬 4종
+            // ════════════════════════════════════════════
+            // 1. Frostbolt — 단일 5 + Freeze 1, Frost +1, AP 1
             CreatePhaseCCSkill("Lumi_Frostbolt", "서리 화살", SkillType.Attack, TargetType.SingleEnemy,
                 power: 5, cost: 1, statusEffect: StatusEffectType.Freeze, effectDuration: 1, effectValue: 1,
-                gainType: ResourceType.Frost, gainAmount: 1); // Frost +1 (충전)
+                gainType: ResourceType.Frost, gainAmount: 1);
 
+            // 2. Frost Armor — 아군 쉴드 10, Frost +1, AP 1
+            CreatePhaseCCSkill("Lumi_FrostArmor", "서리 갑옷", SkillType.Shield, TargetType.SingleAlly,
+                power: 10, cost: 1,
+                gainType: ResourceType.Frost, gainAmount: 1);
+
+            // 3. Blizzard — 광역 4 + Freeze 1, Frost +1, AP 2
+            CreatePhaseCCSkill("Lumi_Blizzard", "눈보라", SkillType.Attack, TargetType.AllEnemies,
+                power: 4, cost: 2, statusEffect: StatusEffectType.Freeze, effectDuration: 1, effectValue: 1,
+                gainType: ResourceType.Frost, gainAmount: 1);
+
+            // 4. Glacial Spike — 단일 12, Frost 3 소모 (폭딜)
             CreatePhaseCCSkill("Lumi_GlacialSpike", "빙하 창", SkillType.Attack, TargetType.SingleEnemy,
-                power: 16, cost: 2,
-                costType: ResourceType.Frost, costAmount: 3); // Frost 3 소모 (폭딜, 최대치 필요)
+                power: 12, cost: 2,
+                costType: ResourceType.Frost, costAmount: 3);
 
             // ── Taranis (Stormcaller) Charge Network 연동 스킬 ──
             // Charge 상태이상(value=스택수, duration=2턴)을 적에게 부여.
@@ -76,34 +125,32 @@ namespace TeamLog.Editor
             // Cinder Accretion(충전) + Brand of Ash(폭딜) + 기존 Mage 스킬 2종
             CreatePhaseCCCharacter("Char_Ashe", "아셰", CharacterClass.Pyromancer,
                 "화염 마법사. Ember 자원을 축적하여 자해 위험을 감수하고 폭딜을 낸다",
-                70, 0, 0, new[] { "Ashe_CinderAccretion", "Ashe_BrandOfAsh", "Mage_MagicShield", "Mage_Meteor" },
-                EnemyTrait.ArcaneFury, true, "", ResourceType.Ember);
+                70, 0, 0, new[] { "Ashe_CinderAccretion", "Ashe_BrandOfAsh", "Ashe_PhoenixRenewal", "Ashe_EmbraceOfCinders" },
+                EnemyTrait.None, true, "", ResourceType.Ember);
 
             // Duran — Warrior (Vengeance 복수 게이지).
-            // Revenge Strike(소비 폭딜) + 기존 Warrior 스킬 3종
             CreatePhaseCCCharacter("Char_Duran", "듀란", CharacterClass.Warrior,
                 "불멸의 성벽. 피격 시 Vengeance가 축적되며 소비 스킬로 버스트 딜",
-                120, 0, 0, new[] { "Duran_RevengeStrike", "Warrior_Shield", "Warrior_Taunt", "Warrior_Strike" },
-                EnemyTrait.Sturdy, true, "", ResourceType.Vengeance);
+                120, 0, 0, new[] { "Duran_RevengeStrike", "Duran_ShieldWall", "Duran_ProvokingShield", "Duran_LastBastion" },
+                EnemyTrait.None, true, "", ResourceType.Vengeance);
 
             // Lumi — Cryomancer (Frost 통제).
-            // Frostbolt(충전) + GlacialSpike(폭딜) + 기존 Mage 스킬 2종
             CreatePhaseCCCharacter("Char_Lumi", "루미", CharacterClass.Cryomancer,
                 "냉기 마법사. Frost를 축적하여 적을 얼린다",
-                75, 0, 0, new[] { "Lumi_Frostbolt", "Lumi_GlacialSpike", "Mage_MagicShield", "Mage_IceSpear" },
-                EnemyTrait.ArcaneFury, true, "", ResourceType.Frost);
+                75, 0, 0, new[] { "Lumi_Frostbolt", "Lumi_GlacialSpike", "Lumi_FrostArmor", "Lumi_Blizzard" },
+                EnemyTrait.None, true, "", ResourceType.Frost);
 
-            // Sibyl — Oracle (Prophecy 지연 발동 — 간소화 버전, 정식 1턴 뒤 발동은 추후)
+            // Sibyl — Oracle (Prophecy 지연 발동)
             CreatePhaseCCCharacter("Char_Sibyl", "시빌", CharacterClass.Oracle,
-                "예언자. 미래에 투자하는 서포터 (정식 Prophecy 1턴 뒤 발동은 추후 구현)",
+                "예언자. 미래에 투자하는 서포터 — 스킬이 1턴 뒤 발동",
                 80, 0, 0, new[] { "Sibyl_DeathProphecy", "Sibyl_VisionOfRenewal", "Sibyl_BorrowedFuture", "Sibyl_DéjàVu" },
-                EnemyTrait.Regenerate, true, "", ResourceType.None);
+                EnemyTrait.None, true, "", ResourceType.None);
 
-            // Taranis — Stormcaller (Charge Network — 적에게 Charge 상태이상 부여, 매 턴 연쇄 도트)
+            // Taranis — Stormcaller (Charge Network)
             CreatePhaseCCCharacter("Char_Taranis", "타라니스", CharacterClass.Stormcaller,
                 "폭풍 소환사. 적에게 전하를 부여하여 매 턴 연쇄 도트 데미지",
                 85, 0, 0, new[] { "Taranis_Wire", "Taranis_Branch", "Taranis_GroundingField", "Taranis_Thunderstorm" },
-                EnemyTrait.ArcaneFury, true, "", ResourceType.None);
+                EnemyTrait.None, true, "", ResourceType.None);
 
             Debug.Log("[DataGenerator] Phase CC 캐릭터 5종 생성 완료 (Ashe/Duran/Lumi/Sibyl/Taranis)");
         }
@@ -139,12 +186,13 @@ namespace TeamLog.Editor
             EditorUtility.SetDirty(character);
         }
 
-        /// <summary>Phase CC 스킬 생성 헬퍼 — 자원 획득/소모 포함.</summary>
+        /// <summary>Phase CC 스킬 생성 헬퍼 — 자원 획득/소모/비례 위력 포함.</summary>
         private static void CreatePhaseCCSkill(string fileName, string name, SkillType type, TargetType target,
             int power, int cost, StatusEffectType statusEffect = StatusEffectType.None,
             int effectDuration = 0, int effectValue = 0,
             ResourceType gainType = ResourceType.None, int gainAmount = 0,
             ResourceType costType = ResourceType.None, int costAmount = 0,
+            int resourcePowerPerStack = 0, bool consumeAllResource = false,
             params BehaviorTag[] behaviors)
         {
             var path = $"{SKILL_PATH}/{fileName}.asset";
@@ -163,6 +211,8 @@ namespace TeamLog.Editor
             SetPrivateField(skill, "_resourceGainAmount", gainAmount);
             SetPrivateField(skill, "_resourceCostType", costType);
             SetPrivateField(skill, "_resourceCostAmount", costAmount);
+            SetPrivateField(skill, "_resourcePowerPerStack", resourcePowerPerStack);
+            SetPrivateField(skill, "_consumeAllResource", consumeAllResource);
             SetPrivateField(skill, "_behaviors", behaviors ?? new BehaviorTag[0]);
 
             EditorUtility.SetDirty(skill);

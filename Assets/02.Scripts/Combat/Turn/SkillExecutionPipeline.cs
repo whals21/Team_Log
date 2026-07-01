@@ -69,6 +69,12 @@ namespace TeamLog.Combat.Turn
             foreach (var b in BehaviorRegistry.GetForPhase(tags, ExecutionPhase.PowerModify))
                 ctx.CurrentPower = b.ModifyPower(ctx.CurrentPower, ctx);
 
+            // Phase CC: 자원 기반 위력 보너스 (Ember×3, Vengeance×1 등)
+            // skill.ResourcePowerPerStack이 설정된 경우, 시전자의 현재 자원 스택 × perStack을 위력에 가산.
+            // Brand of Ash: 8 + Ember×3 (Ember 5일 때 23). Revenge Strike: 10 + Vengeance×1.
+            if (caster.Resource != null && skill.ResourcePowerPerStack > 0)
+                ctx.CurrentPower += caster.Resource.CurrentStacks * skill.ResourcePowerPerStack;
+
             // 1B. 키워드 conditionalMul (PowerMul with HPBelow) — 기존 line 114-122
             if (instance != null)
             {

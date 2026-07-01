@@ -28,3 +28,5 @@ MonoBehaviour:
   _resourceGainAmount: 0
   _resourceCostType: 0
   _resourceCostAmount: 0
+  _resourcePowerPerStack: 0
+  _consumeAllResource: 0

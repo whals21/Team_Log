@@ -15,12 +15,11 @@ MonoBehaviour:
   _characterName: "\uC2DC\uBE4C"
   _characterClass: 11
   _description: "\uC608\uC5B8\uC790. \uBBF8\uB798\uC5D0 \uD22C\uC790\uD558\uB294
-    \uC11C\uD3EC\uD130 (\uC815\uC2DD Prophecy 1\uD134 \uB4A4 \uBC1C\uB3D9\uC740 \uCD94\uD6C4
-    \uAD6C\uD604)"
+    \uC11C\uD3EC\uD130 \u2014 \uC2A4\uD0AC\uC774 1\uD134 \uB4A4 \uBC1C\uB3D9"
   _baseHP: 80
   _baseATK: 0
   _baseDEF: 0
-  _enemyTrait: 1
+  _enemyTrait: 0
   _isBoss: 0
   _skills:
   - {fileID: 11400000, guid: d5d47d3aef2fbc54aba20de073882df1, type: 2}

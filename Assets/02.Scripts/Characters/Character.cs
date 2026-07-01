@@ -65,7 +65,8 @@ namespace TeamLog.Characters
                 case ResourceType.Ember: return new EmberResourceComponent();
                 case ResourceType.Vengeance: return new VengeanceResourceComponent();
                 case ResourceType.Frost: return new FrostResourceComponent();
-                // Prophecy/Charge는 각 캐릭터 Phase에서 추가 (현재 None 처리)
+                case ResourceType.Prophecy: return new ProphecyResourceComponent();
+                // Charge는 각 캐릭터 Phase에서 추가 (현재 None 처리)
                 default: return null;
             }
         }

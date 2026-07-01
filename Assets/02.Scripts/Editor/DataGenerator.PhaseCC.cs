@@ -97,7 +97,8 @@ namespace TeamLog.Editor
             // Charge 상태이상(value=스택수, duration=2턴)을 적에게 부여.
             // 매 턴 종료 시 Charge 상태 적에게 value만큼 도트 데미지 (TurnManager.ProcessTurnEnd).
             CreatePhaseCCSkill("Taranis_Wire", "와이어", SkillType.Attack, TargetType.SingleEnemy,
-                power: 3, cost: 1, statusEffect: StatusEffectType.Charge, effectDuration: 2, effectValue: 2);
+                power: 3, cost: 1, statusEffect: StatusEffectType.Charge, effectDuration: 2, effectValue: 2,
+                behaviors: new BehaviorTag(BehaviorKeyword.Chain, 1)); // Chain=전파 (메인 타겟 + 무작위 1명 추가 Charge)
 
             CreatePhaseCCSkill("Taranis_Branch", "브랜치", SkillType.Attack, TargetType.AllEnemies,
                 power: 2, cost: 2, statusEffect: StatusEffectType.Charge, effectDuration: 2, effectValue: 1);
@@ -140,11 +141,11 @@ namespace TeamLog.Editor
                 75, 0, 0, new[] { "Lumi_Frostbolt", "Lumi_GlacialSpike", "Lumi_FrostArmor", "Lumi_Blizzard" },
                 EnemyTrait.None, true, "", ResourceType.Frost);
 
-            // Sibyl — Oracle (Prophecy 지연 발동)
+            // Sibyl — Oracle (Prophecy 지연 발동 — 스킬이 1턴 뒤 발동)
             CreatePhaseCCCharacter("Char_Sibyl", "시빌", CharacterClass.Oracle,
                 "예언자. 미래에 투자하는 서포터 — 스킬이 1턴 뒤 발동",
                 80, 0, 0, new[] { "Sibyl_DeathProphecy", "Sibyl_VisionOfRenewal", "Sibyl_BorrowedFuture", "Sibyl_DéjàVu" },
-                EnemyTrait.None, true, "", ResourceType.None);
+                EnemyTrait.None, true, "", ResourceType.Prophecy);
 
             // Taranis — Stormcaller (Charge Network)
             CreatePhaseCCCharacter("Char_Taranis", "타라니스", CharacterClass.Stormcaller,

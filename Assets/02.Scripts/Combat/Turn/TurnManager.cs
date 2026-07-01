@@ -11,6 +11,7 @@ using SkillInstance = TeamLog.Characters.SkillInstance;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
 using TargetType = TeamLog.Characters.TargetType;
 using ResourceType = TeamLog.Characters.ResourceType;
+using ProphecyResourceComponent = TeamLog.Characters.ProphecyResourceComponent;
 
 // Phase BK: 행동 키워드 타입 별칭
 using BehaviorKeyword = TeamLog.Skill.BehaviorKeyword;
@@ -115,6 +116,21 @@ namespace TeamLog.Combat.Turn
             foreach (var c in _playerParty)
                 if (c.IsAlive && c.Resource != null) c.Resource.OnTurnStart(c);
 
+            // Phase CC: Prophecy 예약된 스킬 발동 (Sibyl — 1턴 뒤 발동)
+            foreach (var c in _playerParty)
+            {
+                if (!c.IsAlive) continue;
+                if (c.Resource is ProphecyResourceComponent prophecy && prophecy.PendingCount > 0)
+                {
+                    var pending = prophecy.ConsumePending();
+                    foreach (var (pSkill, pInstance, pTarget) in pending)
+                    {
+                        if (pTarget != null && pTarget.IsAlive)
+                            _skillExecutor.ExecuteSkillInternal(c, pSkill, pTarget, pInstance);
+                    }
+                }
+            }
+
             // AP 리셋: 기본 1 + 생존 파티원 수 (+ 첫 턴 보너스 + 유물 ExtraAP + 장착 특성 ExtraAP)
             int aliveCount = _playerParty.FindAll(p => p.IsAlive).Count;
             int bonus = (_context.TurnNumber == 1) ? _bonusFirstTurnAP : 0;
@@ -178,6 +194,15 @@ namespace TeamLog.Combat.Turn
             }
 
             _context.SpendAP(effectiveCost);
+
+            // Phase CC: Prophecy — Sibyl 스킬은 1턴 뒤 발동 예약 (즉시 실행 안 함)
+            if (caster.Resource is ProphecyResourceComponent prophecy)
+            {
+                prophecy.Reserve(skill, target, instance);
+                instance?.IncrementUsesThisBattle();
+                CheckBattleEnd();
+                return CurrentPhase == TurnPhase.BattleEnd;
+            }
 
             switch (skill.Target)
             {

@@ -212,6 +212,10 @@ namespace TeamLog.Combat.Turn
 
             CombatEventBus.FireDamageDealt(caster, target, ctx.LastActualDamage);
             CombatEventBus.FireDamageReceived(target, ctx.LastActualDamage);
+
+            // Phase CC: 피격 시 자원 훅 (Duran Vengeance 축적 등)
+            if (target.Resource != null && ctx.LastActualDamage > 0)
+                target.Resource.OnDamageTaken(target, ctx.LastActualDamage);
         }
     }
 }

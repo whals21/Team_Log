@@ -24,3 +24,7 @@ MonoBehaviour:
   _effectDuration: 3
   _effectValue: 3
   _behaviors: []
+  _resourceGainType: 0
+  _resourceGainAmount: 0
+  _resourceCostType: 0
+  _resourceCostAmount: 0

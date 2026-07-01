@@ -156,6 +156,9 @@ namespace TeamLog.Editor
 
                 CreateCharacter(id, displayName, charClass, desc, hp, atk, def, skills, trait, isDefault, unlockCondition);
             }
+
+            // Phase CC: 신규 캐릭터 5종 추가 생성 (Ashe/Duran/Lumi/Sibyl/Taranis)
+            GeneratePhaseCCCharacters();
         }
 
         private static void CreateCharacter(string fileName, string name, CharacterClass charClass,

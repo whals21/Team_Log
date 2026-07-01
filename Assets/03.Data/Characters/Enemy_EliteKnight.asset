@@ -27,3 +27,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f86c7c8d596e35c449b32e14e9178e34, type: 2}
   _isDefault: 1
   _unlockCondition: 
+  _resourceType: 0

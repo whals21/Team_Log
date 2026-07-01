@@ -70,6 +70,9 @@ namespace TeamLog.Characters
         /// <summary>매 턴 종료 시 호출 (자원 효과 발동/소실 등). 기본: 아무 것도 안 함.</summary>
         public virtual void OnTurnEnd(Character owner) { }
 
+        /// <summary>피격 시 호출 (Vengeance 축적 등). 기본: 아무 것도 안 함.</summary>
+        public virtual void OnDamageTaken(Character owner, int damage) { }
+
         public override string ToString() => $"{Resource}({CurrentStacks}/{MaxStacks})";
     }
 }

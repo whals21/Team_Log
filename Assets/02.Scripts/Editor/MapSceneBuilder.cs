@@ -372,7 +372,9 @@ namespace TeamLog.Editor
             {
                 string[] charNames = {
                     "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Rogue",
-                    "Char_Archer", "Char_Necromancer", "Char_Alchemist", "Char_Bard"
+                    "Char_Archer", "Char_Necromancer", "Char_Alchemist", "Char_Bard",
+                    // Phase CC 신규 5종
+                    "Char_Ashe", "Char_Duran", "Char_Lumi", "Char_Sibyl", "Char_Taranis"
                 };
                 var charAssets = LoadAssetsByNames<CharacterData>(CHAR_DIR, charNames);
                 allCharProp.arraySize = charAssets.Count;

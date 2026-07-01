@@ -58,6 +58,9 @@ namespace TeamLog.Characters
             return true;
         }
 
+        /// <summary>소모 가능 여부만 체크 (실제 소모 안 함). CanUse 검사용.</summary>
+        public bool CanConsume(int amount) => amount <= 0 || CurrentStacks >= amount;
+
         /// <summary>스택 리셋 (전투 시작 시).</summary>
         public virtual void Reset()
         {

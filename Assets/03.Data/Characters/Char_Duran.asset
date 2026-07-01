@@ -22,10 +22,10 @@ MonoBehaviour:
   _enemyTrait: 7
   _isBoss: 0
   _skills:
-  - {fileID: 11400000, guid: a25928fc74aaa844ca3d74aaa8046395, type: 2}
+  - {fileID: 11400000, guid: 2dc12a0122406644d93f6151add4458e, type: 2}
   - {fileID: 11400000, guid: 31c473cf77370e94fbb29c4057ac025d, type: 2}
   - {fileID: 11400000, guid: 39dd7bb4ba851c9438b731084aa366f6, type: 2}
-  - {fileID: 11400000, guid: bf61d5c3f329b7341b326a091d57dadc, type: 2}
+  - {fileID: 11400000, guid: a25928fc74aaa844ca3d74aaa8046395, type: 2}
   _isDefault: 1
   _unlockCondition: 
   _resourceType: 2

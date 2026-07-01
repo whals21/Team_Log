@@ -22,8 +22,8 @@ MonoBehaviour:
   _enemyTrait: 8
   _isBoss: 0
   _skills:
-  - {fileID: 11400000, guid: aee84decafb2c944ea25b340265cfabb, type: 2}
-  - {fileID: 11400000, guid: d82f8ab92b4e03f41a7d5f93d3d09510, type: 2}
+  - {fileID: 11400000, guid: ef4beddc79a1cd54795c57225ea7b1ad, type: 2}
+  - {fileID: 11400000, guid: eb866439e35248846bbe1c07765600b9, type: 2}
   - {fileID: 11400000, guid: bcb6c109f5fde9a4bb2cfca7ef16f335, type: 2}
   - {fileID: 11400000, guid: bba8969b5bd6cee44bebb15a78caf26c, type: 2}
   _isDefault: 1

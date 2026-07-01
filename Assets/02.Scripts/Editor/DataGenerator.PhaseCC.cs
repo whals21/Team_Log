@@ -22,16 +22,31 @@ namespace TeamLog.Editor
         /// <summary>Phase CC 캐릭터 5종 생성 (Ashe/Duran/Lumi/Sibyl/Taranis).</summary>
         private static void GeneratePhaseCCCharacters()
         {
-            // Ashe — Pyromancer (Ember 자해 폭딜). Mage 스킬 임시 재사용.
+            // ── 자원 연동 스킬 먼저 생성 (Ashe/Duran 전용) ──
+            CreatePhaseCCSkill("Ashe_CinderAccretion", "잿빛 응축", SkillType.Attack, TargetType.SingleEnemy,
+                power: 5, cost: 1, statusEffect: StatusEffectType.Burn, effectDuration: 2, effectValue: 3,
+                gainType: ResourceType.Ember, gainAmount: 2); // Ember +2 획득 (충전)
+
+            CreatePhaseCCSkill("Ashe_BrandOfAsh", "잿더미 낙인", SkillType.Attack, TargetType.SingleEnemy,
+                power: 20, cost: 2,
+                costType: ResourceType.Ember, costAmount: 2); // Ember 2 소모 (폭딜)
+
+            CreatePhaseCCSkill("Duran_RevengeStrike", "복수의 일격", SkillType.Attack, TargetType.SingleEnemy,
+                power: 18, cost: 2,
+                costType: ResourceType.Vengeance, costAmount: 5); // Vengeance 5 소모 (폭딜)
+
+            // Ashe — Pyromancer (Ember 자해 폭딜).
+            // Cinder Accretion(충전) + Brand of Ash(폭딜) + 기존 Mage 스킬 2종
             CreatePhaseCCCharacter("Char_Ashe", "아셰", CharacterClass.Pyromancer,
                 "화염 마법사. Ember 자원을 축적하여 자해 위험을 감수하고 폭딜을 낸다",
-                70, 0, 0, new[] { "Mage_Fireball", "Mage_IceSpear", "Mage_MagicShield", "Mage_Meteor" },
+                70, 0, 0, new[] { "Ashe_CinderAccretion", "Ashe_BrandOfAsh", "Mage_MagicShield", "Mage_Meteor" },
                 EnemyTrait.ArcaneFury, true, "", ResourceType.Ember);
 
-            // Duran — Warrior (Vengeance 복수 게이지). Warrior 스킬 재사용.
+            // Duran — Warrior (Vengeance 복수 게이지).
+            // Revenge Strike(소비 폭딜) + 기존 Warrior 스킬 3종
             CreatePhaseCCCharacter("Char_Duran", "듀란", CharacterClass.Warrior,
                 "불멸의 성벽. 피격 시 Vengeance가 축적되며 소비 스킬로 버스트 딜",
-                120, 0, 0, new[] { "Warrior_Strike", "Warrior_Shield", "Warrior_Taunt", "Warrior_Rage" },
+                120, 0, 0, new[] { "Duran_RevengeStrike", "Warrior_Shield", "Warrior_Taunt", "Warrior_Strike" },
                 EnemyTrait.Sturdy, true, "", ResourceType.Vengeance);
 
             // Lumi — Cryomancer (Frost 통제). Mage 스킬 변형.
@@ -84,6 +99,35 @@ namespace TeamLog.Editor
             SetPrivateField(character, "_skills", skillList);
 
             EditorUtility.SetDirty(character);
+        }
+
+        /// <summary>Phase CC 스킬 생성 헬퍼 — 자원 획득/소모 포함.</summary>
+        private static void CreatePhaseCCSkill(string fileName, string name, SkillType type, TargetType target,
+            int power, int cost, StatusEffectType statusEffect = StatusEffectType.None,
+            int effectDuration = 0, int effectValue = 0,
+            ResourceType gainType = ResourceType.None, int gainAmount = 0,
+            ResourceType costType = ResourceType.None, int costAmount = 0,
+            params BehaviorTag[] behaviors)
+        {
+            var path = $"{SKILL_PATH}/{fileName}.asset";
+            var skill = GetOrCreateAsset<SkillData>(path);
+            skill.name = fileName;
+
+            SetPrivateField(skill, "_skillName", name);
+            SetPrivateField(skill, "_skillType", type);
+            SetPrivateField(skill, "_targetType", target);
+            SetPrivateField(skill, "_power", power);
+            SetPrivateField(skill, "_cost", cost);
+            SetPrivateField(skill, "_statusEffect", statusEffect);
+            SetPrivateField(skill, "_effectDuration", effectDuration);
+            SetPrivateField(skill, "_effectValue", effectValue);
+            SetPrivateField(skill, "_resourceGainType", gainType);
+            SetPrivateField(skill, "_resourceGainAmount", gainAmount);
+            SetPrivateField(skill, "_resourceCostType", costType);
+            SetPrivateField(skill, "_resourceCostAmount", costAmount);
+            SetPrivateField(skill, "_behaviors", behaviors ?? new BehaviorTag[0]);
+
+            EditorUtility.SetDirty(skill);
         }
     }
 }

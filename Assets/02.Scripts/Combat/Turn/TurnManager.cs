@@ -10,6 +10,7 @@ using SkillData = TeamLog.Characters.SkillData;
 using SkillInstance = TeamLog.Characters.SkillInstance;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
 using TargetType = TeamLog.Characters.TargetType;
+using ResourceType = TeamLog.Characters.ResourceType;
 
 // Phase BK: 행동 키워드 타입 별칭
 using BehaviorKeyword = TeamLog.Skill.BehaviorKeyword;
@@ -165,6 +166,17 @@ namespace TeamLog.Combat.Turn
             if (!_context.CanAfford(effectiveCost))
                 return false;
 
+            // Phase CC: 자원 소모 체크 (Ember/Vengeance/Frost 등)
+            // 스킬이 자원을 소모하고, 시전자가 해당 자원을 가졌을 때만 검사.
+            // 자원 부족 시 스킬 사용 불가 (AP도 소비 안 함). 실제 소모는 스킬 실행 후.
+            if (caster.Resource != null
+                && skill.ResourceCostType != ResourceType.None
+                && skill.ResourceCostType == caster.Resource.Resource
+                && !caster.Resource.CanConsume(skill.ResourceCostAmount))
+            {
+                return false;
+            }
+
             _context.SpendAP(effectiveCost);
 
             switch (skill.Target)
@@ -265,6 +277,20 @@ namespace TeamLog.Combat.Turn
                     foreach (var ally in _playerParty)
                         if (ally.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, ally, instance);
                     break;
+            }
+
+            // Phase CC: 자원 획득/소모 적용 (스킬 실행 후 — 1회 사용당 1번)
+            // Ember/Vengeance/Frost 스킬이 자원을 획득 또는 소모.
+            if (caster.Resource != null && caster.IsAlive)
+            {
+                if (skill.ResourceGainType != ResourceType.None
+                    && skill.ResourceGainType == caster.Resource.Resource
+                    && skill.ResourceGainAmount > 0)
+                    caster.Resource.AddStacks(skill.ResourceGainAmount);
+                if (skill.ResourceCostType != ResourceType.None
+                    && skill.ResourceCostType == caster.Resource.Resource
+                    && skill.ResourceCostAmount > 0)
+                    caster.Resource.ConsumeStacks(skill.ResourceCostAmount);
             }
 
             // Phase ARCH-5: 스킬 사용 후 UsesThisBattle 증가

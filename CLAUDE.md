@@ -428,7 +428,17 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - **Phase CC의 기반**: SkillData 본체에 `_behaviors` 필드가 있어 신규 캐릭터 스킬이 직관적으로 행동 내장 가능. Ashe (Pyromancer) BurningTouch+Bounce+Lifesteal 조합, Duran (Warrior) HeavyHit+Pierce+Execution 조합 등
 - **Phase CC-0 (부활 시스템 기반)**: 완료
   - CC-0: 전투 종료 시 사망자 50% 부활 + MaxHP 영구 0.9배 누적, 생존자 HP 100% 회복, 파티 전멸만 런 종료. HealthComponent.Revive(percentage) + ApplyMaxHpModifier(multiplier) + OnRevived 이벤트. GameRunState.ProcessBattleEnd(victory) → 부활/회복 처리 + IsRunEnded 플래그. CombatEventBus.OnPartyMemberRevived 이벤트 (유물/특성 훅 확장점). BattleSceneSetup 연결. 단위 테스트 N개. 어센션 × 사망 누적 시뮬레이션: 120×0.9^6=64HP 가혹 시 완화 정책 검토 필요 (CC-1 이후)
-- **Phase CC 기획 (캐릭터 컨셉 개편)**: 진행 중 — 코드 구현 전, 기획 문서화 단계
+- **Phase CC (캐릭터 컨셉 개편)**: 코드 구현 완료 — 5캐릭터 게임 통합, 검수 PASS. 206/206 테스트 통과
+  - **구현 완료**: Ashe(Ember 자해 폭딜) / Duran(Vengeance 복수) / Lumi(Frost 통제) / Sibyl(Prophecy 1턴 뒤 발동) / Taranis(Charge 네트워크 연쇄)
+  - **자원 시스템**: CharacterResourceComponent 기반 — Ember/Vengeance/Frost/Prophecy 4종 자원 컴포넌트. 매 턴 자동 작동 (OnTurnStart/OnTurnEnd/OnDamageTaken)
+  - **자원 비례 위력**: SkillData.ResourcePowerPerStack — Ember×3, Vengeance×1 등. Pipeline.ExecuteSkill에서 모든 스킬 타입(Attack/Heal/Shield/Buff)에 적용
+  - **자원 소모/획득**: TurnManager.ExecuteSkillImmediately에서 자원 체크(CanConsume) + 소모(ConsumeStacks/Reset). ConsumeAllResource(Revenge Strike 전량 소모)
+  - **Pipeline 통합**: ExecuteSkill이 모든 타입 분기 — ExecuteHealViaPipeline/ExecuteShieldViaPipeline/ApplyEffectViaPipeline. Heal/Shield에도 자원 비례+Behavior 적용
+  - **Prophecy 시스템**: Sibyl 스킬 사용 시 1턴 뒤 발동 예약(ProphecyResourceComponent.Reserve). 매 턴 시작 시 예약된 스킬 자동 발동
+  - **Charge 네트워크 연쇄**: Taranis Wire/Branch가 적에게 Charge 상태이상 부여. ProcessTurnEnd에서 다수전 N×(N-1) 연쇄 도트, 단일전 자기 도트
+  - **자원 UI**: PlayerSidebarPanel.UpdateStats에 Ember/Vengeance/Frost "현재/최대" 골드색 표시
+  - **검수 이력**: 1차 Fail(EnemyTrait 버그/자원 비례 미작동) → 2차 PASS(조건부)(Pipeline 통합) → 3차 PASS(네트워크 연쇄+쉴드 흡수 Vengeance)
+  - **스킬 20종**: 각 캐릭터 전용 4종 (Ashe_CinderAccretion/BrandOfAsh/PhoenixRenewal/EmbraceOfCinders 등). DataGenerator.PhaseCC.cs에서 생성
   - **캐릭터 수 확장**: 기존 8종 → **12종** (Mage 제거, Pyromancer/Cryomancer/Stormcaller 3종 추가, **Sibyl(Oracle)/Taranis(Stormcaller) 2종 신규 추가**). 상세: `Assets/09.Docs/CharacterConceptReview.md`, `Assets/09.Docs/Characters/`
   - **기획 완료 캐릭터 5종** (풀 기획안 문서 존재):
     - **Ashe, the Pyromancer** (Pyromancer 슬롯) — Ember 자해 폭딜. `Characters/Ashe_the_Pyromancer.md`

@@ -441,22 +441,38 @@ namespace TeamLog.Combat.Turn
             foreach (var c in _playerParty)
                 if (c.IsAlive && c.Resource != null) c.Resource.OnTurnEnd(c);
 
-            // Phase CC: Taranis Charge 네트워크 — Charge 상태인 적에게 매 턴 연쇄 도트 데미지
-            // Charge의 Value = 전하 스택 수. 1스택당 도트 1. (적에게 부여된 상태이상 기반)
-            foreach (var c in _enemies)
+            // Phase CC: Taranis Charge 네트워크 연쇄
+            // 기획: 각 전하 적이 자신의 스택 수만큼 "다른 전하 적"에게 도트 (1스택당 1).
+            // 다수전에서 네트워크가 폭발, 단일(보스전)에서는 자기 자신에게만 도트 (자연 약화).
+            var chargedEnemies = _enemies.FindAll(e => e.IsAlive && e.StatusEffects.HasEffect(StatusEffectType.Charge));
+            if (chargedEnemies.Count > 1)
             {
-                if (!c.IsAlive) continue;
-                if (c.StatusEffects.HasEffect(StatusEffectType.Charge))
+                // 네트워크 연쇄: 각 Charge 적이 다른 Charge 적들에게 자신의 스택 수만큼 도트
+                foreach (var attacker in chargedEnemies)
                 {
-                    foreach (var effect in c.StatusEffects.GetAllEffects())
+                    int myStacks = 0;
+                    foreach (var eff in attacker.StatusEffects.GetAllEffects())
+                        if (eff.Type == StatusEffectType.Charge) { myStacks = eff.Value; break; }
+                    if (myStacks <= 0) continue;
+
+                    foreach (var defender in chargedEnemies)
                     {
-                        if (effect.Type == StatusEffectType.Charge && effect.Value > 0)
-                        {
-                            c.Health.TakeDamage(effect.Value);
-                            CombatEventBus.FireDamageReceived(c, effect.Value);
-                            break;
-                        }
+                        if (defender == attacker) continue;
+                        defender.Health.TakeDamage(myStacks);
+                        CombatEventBus.FireDamageReceived(defender, myStacks);
                     }
+                }
+            }
+            else if (chargedEnemies.Count == 1)
+            {
+                // 단일 Charge 적 — 자기 자신에게만 도트 (네트워크 대상 없음 = 자연 약화)
+                int stacks = 0;
+                foreach (var eff in chargedEnemies[0].StatusEffects.GetAllEffects())
+                    if (eff.Type == StatusEffectType.Charge) { stacks = eff.Value; break; }
+                if (stacks > 0)
+                {
+                    chargedEnemies[0].Health.TakeDamage(stacks);
+                    CombatEventBus.FireDamageReceived(chargedEnemies[0], stacks);
                 }
             }
 

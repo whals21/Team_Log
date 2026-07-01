@@ -8,6 +8,7 @@ using SkillInstance = TeamLog.Characters.SkillInstance;
 using SkillType = TeamLog.Characters.SkillType;
 using StatType = TeamLog.Characters.StatType;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
+using ResourceType = TeamLog.Characters.ResourceType;
 
 namespace TeamLog.Combat.Turn
 {
@@ -214,15 +215,26 @@ namespace TeamLog.Combat.Turn
         private static void ApplyDefaultDamage(SkillExecContext ctx, Character caster, Character target)
         {
             int hpBefore = target.Health.CurrentHP;
+            int shieldBefore = target.Health.CurrentShield;
             DamageCalculator.DealDamage(caster, target, ctx.CurrentPower);
             ctx.LastActualDamage = hpBefore - target.Health.CurrentHP;
+
+            // 쉴드 흡수량 계산 (Duran 원격 Vengeance 축적용)
+            int shieldAbsorbed = shieldBefore - target.Health.CurrentShield;
 
             CombatEventBus.FireDamageDealt(caster, target, ctx.LastActualDamage);
             CombatEventBus.FireDamageReceived(target, ctx.LastActualDamage);
 
-            // Phase CC: 피격 시 자원 훅 (Duran Vengeance 축적 등)
+            // Phase CC: 피격 시 자원 훅 — HP 데미지 (Duran Vengeance 축적)
             if (target.Resource != null && ctx.LastActualDamage > 0)
                 target.Resource.OnDamageTaken(target, ctx.LastActualDamage);
+
+            // Phase CC: 쉴드 흡수 시 Vengeance 축적 (원격 흡수 간소화 버전)
+            // Duran 본인의 쉴드가 흡수한 데미지도 Vengeance로 축적.
+            // (아군에게 부여한 쉴드 추적은 HealthComponent 구조 변경 필요 — 다음 세션)
+            if (shieldAbsorbed > 0 && target.Resource != null
+                && target.Resource.Resource == ResourceType.Vengeance)
+                target.Resource.AddStacks(shieldAbsorbed);
         }
 
         // ═══════════════════════════════════════════

@@ -103,12 +103,21 @@ namespace TeamLog.Reward
         }
 
         /// <summary>
-        /// 증강 호환성 체크 — CompatibleSkillType, 중복, 슬롯
+        /// 증강 호환성 체크 — 이미 부착된 증강과의 BehaviorKeyword 충돌, 슬롯, 스킬 타입 호환성.
+        /// (스킬 본체 Behavior와의 충돌은 허용 — rank 합산 가능)
         /// </summary>
         private static bool IsAugmentCompatible(AugmentData augment, SkillInstance skillInst)
         {
-            // 이미 같은 타입 보유 시 불가
-            if (skillInst.HasAugment(augment.Type)) return false;
+            // Phase BK: 이미 부착된 증강 중 동일 BehaviorKeyword 보유 시 불가
+            if (augment.Behaviors.Count > 0)
+            {
+                foreach (var existing in skillInst.Augments)
+                {
+                    if (existing.Data.Behaviors == null) continue;
+                    foreach (var b in augment.Behaviors)
+                        if (BehaviorTagResolver.Has(existing.Data.Behaviors, b.Keyword)) return false;
+                }
+            }
             // 슬롯 가득 참
             if (skillInst.Augments.Count >= SkillInstance.MaxAugments) return false;
             // 스킬 타입 호환성

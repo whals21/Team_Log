@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Aug_Lingering
   m_EditorClassIdentifier: 
   _augmentName: "\uC794\uB958"
-  _description: "\uC0C1\uD0DC\uC774\uC0C1 \uC9C0\uC18D\uC2DC\uAC04\uC774 2\uD134
+  _description: "\uC0C1\uD0DC\uC774\uC0C1 \uC9C0\uC18D\uC2DC\uAC04\uC774 +2\uD134
     \uC99D\uAC00\uD569\uB2C8\uB2E4"
-  _type: 7
+  _behaviors:
+  - Keyword: 19
+    Rank: 2
   _compatibleSkillType: 3
   _tier: 1
   _icon: {fileID: 0}

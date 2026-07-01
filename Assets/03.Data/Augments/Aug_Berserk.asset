@@ -13,15 +13,14 @@ MonoBehaviour:
   m_Name: Aug_Berserk
   m_EditorClassIdentifier: 
   _augmentName: "\uAD11\uD3ED"
-  _description: "\uC704\uB825\uC774 2\uBC30\uAC00 \uB429\uB2C8\uB2E4"
-  _type: 17
+  _description: "HP \uC808\uBC18 \uC774\uD558\uC77C \uB54C \uC704\uB825\uC774 2\uBC30\uAC00
+    \uB429\uB2C8\uB2E4"
+  _behaviors:
+  - Keyword: 2
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 3
   _icon: {fileID: 0}
   _isCursed: 1
   _curseDescription: "HP 50% \uC774\uD558\uC77C \uB54C\uB9CC \uBC1C\uB3D9"
-  _keywords:
-  - Type: 1
-    Value: 2
-    Trigger: 11
-    ConditionParam: 0.5
+  _keywords: []

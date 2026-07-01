@@ -22,6 +22,7 @@ namespace TeamLog.Combat
         public static event System.Action<SkillData, Character> OnSkillUsed;             // skill, caster
         public static event System.Action<RelicData> OnRelicTriggered;                   // relic
         public static event System.Action OnRerollUsed;                                  // 리롤 1회 소비
+        public static event System.Action<Character> OnPartyMemberRevived;              // Phase CC-0: 파티원 부활
 
         public static void FireBattleStart() => OnBattleStart?.Invoke();
         public static void FireBattleEnd(bool victory) => OnBattleEnd?.Invoke(victory);
@@ -36,6 +37,7 @@ namespace TeamLog.Combat
         public static void FireSkillUsed(SkillData skill, Character caster) => OnSkillUsed?.Invoke(skill, caster);
         public static void FireRelicTriggered(RelicData relic) => OnRelicTriggered?.Invoke(relic);
         public static void FireRerollUsed() => OnRerollUsed?.Invoke();
+        public static void FirePartyMemberRevived(Character revived) => OnPartyMemberRevived?.Invoke(revived);
 
         /// <summary>
         /// 전투 종료 시 모든 이벤트 구독 해제 — 이벤트 누수 방지
@@ -55,6 +57,7 @@ namespace TeamLog.Combat
             OnSkillUsed = null;
             OnRelicTriggered = null;
             OnRerollUsed = null;
+            OnPartyMemberRevived = null;
         }
     }
 }

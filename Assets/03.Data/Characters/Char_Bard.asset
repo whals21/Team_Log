@@ -19,6 +19,7 @@ MonoBehaviour:
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 3
+  _isBoss: 0
   _skills:
   - {fileID: 11400000, guid: 4c6dad51bd171af479bccb852553e93b, type: 2}
   - {fileID: 11400000, guid: 5c01a4a1a08c4134593f461b3bdc509a, type: 2}

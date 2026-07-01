@@ -1,7 +1,9 @@
 {
   "env": {
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.1",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.1"
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "1000000",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.7",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.2[1m]",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.2[1m]"
   },
   "permissions": {
     "allow": [
@@ -51,7 +53,8 @@
       "Bash(/c/Unity/Editor/Unity.exe:*)",
       "Bash(read f:*)",
       "Bash(/c/Unity/Hub/Editor/6000.0.43f1/Editor/Unity.exe:*)",
-      "mcp__mcp-unity__delete_gameobject"
+      "mcp__mcp-unity__delete_gameobject",
+      "Bash(\"/c/Unity/Projects/Team_Log/Assets/09.Docs/WorkLog/2026-06-19.md\":*)"
     ]
   },
   "enableAllProjectMcpServers": true,

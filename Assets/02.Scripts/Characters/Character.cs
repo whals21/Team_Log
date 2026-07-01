@@ -19,6 +19,15 @@ namespace TeamLog.Characters
         // 플레이어 장착 특성 처리기 (Phase 8C) — 적 캐릭터는 사용하지 않음 (null로 남음)
         public CharacterTraitHandler PlayerTraitHandler { get; private set; }
 
+        // Phase CC: 캐릭터 고유 자원 (Ashe=Ember, Duran=Vengeance 등). null이면 자원 없는 캐릭터.
+        public CharacterResourceComponent Resource { get; private set; }
+
+        /// <summary>Phase CC: 자원 컴포넌트 장착 (캐릭터 생성 시 또는 런 시작 시).</summary>
+        public void SetResource(CharacterResourceComponent resource)
+        {
+            Resource = resource;
+        }
+
         // 프로퍼티
         public CharacterData Data => _data;
         public string Name => _data.CharacterName;
@@ -43,6 +52,20 @@ namespace TeamLog.Characters
                 Health.OnPreDeath += () => TraitHandler.PreventDeath();
 
             InitializeComponents();
+
+            // Phase CC: CharacterData.ResourceType에 따라 고유 자원 컴포넌트 인스턴스화
+            Resource = CreateResource(data.ResourceType);
+        }
+
+        /// <summary>Phase CC: 자원 종류에 따른 컴포넌트 생성. 각 캐릭터 Phase에서 케이스 추가.</summary>
+        private static CharacterResourceComponent CreateResource(ResourceType type)
+        {
+            switch (type)
+            {
+                case ResourceType.Ember: return new EmberResourceComponent();
+                // Vengeance/Frost/Prophecy/Charge는 각 캐릭터 Phase에서 추가
+                default: return null;
+            }
         }
 
         /// <summary>

@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Aug_Pierce
   m_EditorClassIdentifier: 
   _augmentName: "\uAD00\uD1B5"
-  _description: "\uC274\uB4DC\uB97C \uBB34\uC2DC\uD558\uACE0 \uBC29\uC5B4\uB825\uC758
-    50%\uB97C \uBB34\uC2DC\uD569\uB2C8\uB2E4"
-  _type: 2
+  _description: "\uC274\uB4DC\uC640 \uBC29\uC5B4\uB825\uC744 \uC644\uC804\uD788 \uBB34\uC2DC\uD569\uB2C8\uB2E4"
+  _behaviors:
+  - Keyword: 11
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 2
   _icon: {fileID: 0}

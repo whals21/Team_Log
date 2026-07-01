@@ -44,8 +44,8 @@ namespace TeamLog.Characters
         {
             if (_instances.Count == 0) return null;
 
-            // QuickDraw 증강이 있는 스킬은 항상 우선 뽑힘
-            var quickDraw = _instances.FirstOrDefault(i => i.HasAugment(AugmentType.QuickDraw));
+            // QuickDraw 행동 키워드가 있는 스킬은 항상 우선 뽑힘 (Phase BK)
+            var quickDraw = _instances.FirstOrDefault(i => i.HasBehavior(BehaviorKeyword.QuickDraw));
             if (quickDraw != null) return quickDraw;
 
             int totalWeight = 0;

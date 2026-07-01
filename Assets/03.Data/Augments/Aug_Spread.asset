@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _augmentName: "\uD655\uC0B0"
   _description: "\uB2E8\uC77C \uB300\uC0C1 \uC2A4\uD0AC\uC774 \uAD11\uC5ED\uC73C\uB85C
-    \uBCC0\uD569\uB2C8\uB2E4 (\uC704\uB825 70%)"
-  _type: 1
+    \uBCC0\uD569\uB2C8\uB2E4 (\uC704\uB825 \uC720\uC9C0)"
+  _behaviors:
+  - Keyword: 6
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 2
   _icon: {fileID: 0}

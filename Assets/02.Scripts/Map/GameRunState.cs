@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TeamLog.Characters;
+using TeamLog.Combat;
 using TeamLog.Reward;
 using TeamLog.Skill;
 
@@ -208,6 +209,44 @@ namespace TeamLog.Map
         }
 
         public bool IsPartyWiped() => _playerParty.TrueForAll(p => p.IsDead);
+
+        /// <summary>
+        /// Phase CC-0: 전투 종료 처리.
+        /// - victory=true: 생존자 HP 100% 회복, 사망자 50% 부활 + MaxHP 0.9배 누적.
+        ///   파티가 완전히 전멸한 상태라면(이론적으로 victory=false와 동일) 패배 처리.
+        /// - victory=false: 파티 전멸 → 런 종료.
+        /// 반환값 true = 런 종료, false = 계속 진행.
+        /// </summary>
+        public bool ProcessBattleEnd(bool victory)
+        {
+            if (!victory || IsPartyWiped())
+            {
+                EndRunDefeat();
+                return true;
+            }
+
+            int revived = 0;
+            foreach (var c in _playerParty)
+            {
+                if (c.IsAlive)
+                {
+                    c.Health.HealToFull();
+                }
+                else
+                {
+                    // 사망자: MaxHP 0.9배 누적 후 50% HP 부활
+                    c.Health.ApplyMaxHpModifier(0.9f);
+                    c.Health.Revive(0.5f);
+                    CombatEventBus.FirePartyMemberRevived(c);
+                    revived++;
+                }
+            }
+
+            if (revived > 0)
+                AddLog($"사망자 {revived}명 부활 (MaxHP -10% 누적)");
+
+            return false;
+        }
 
         public void OnBattleVictory()
         {

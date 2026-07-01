@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 127bd08492722a240a2fe9af60102ca8, type: 3}
+  m_Name: Aug_GiantSlayer
+  m_EditorClassIdentifier: 
+  _augmentName: "\uAC70\uC778\uC0B4\uD574\uC790"
+  _description: "\uCD5C\uB300\uCCB4\uB825 100 \uC774\uC0C1\uC778 \uC801\uC5D0\uAC8C
+    \uC704\uB825 +6 (\uC5D8\uB9AC\uD2B8/\uBCF4\uC2A4 \uD2B9\uD654)"
+  _behaviors:
+  - Keyword: 28
+    Rank: 6
+  _compatibleSkillType: 0
+  _tier: 3
+  _icon: {fileID: 0}
+  _isCursed: 0
+  _curseDescription: 
+  _keywords: []

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0914af7ca0c602241b3c3abcafabd26e, type: 3}
+  m_Name: Pattern_Enemy_BossFrostMonarch
+  m_EditorClassIdentifier: 
+  _enemyId: Enemy_BossFrostMonarch
+  _skills:
+  - {fileID: 11400000, guid: 46ccd7bf1f58b5d498cc1d0acc90fe9f, type: 2}
+  - {fileID: 11400000, guid: 63febe23577f6ad4a8bd0829f8139796, type: 2}
+  - {fileID: 11400000, guid: 56f4ec04322dbff47a57cbd93cafca6d, type: 2}
+  - {fileID: 11400000, guid: ebcd462930ef6ca469ebbeefdf19a4fd, type: 2}
+  _weights: 1e000000190000001400000019000000

@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Aug_Chain
   m_EditorClassIdentifier: 
   _augmentName: "\uC5F0\uC1C4"
-  _description: "\uD0C0\uACA9 \uD6C4 \uC778\uC811\uD55C \uC801\uC5D0\uAC8C \uC704\uB825
-    60%\uC758 \uC5F0\uC1C4 \uD53C\uD574\uB97C \uC90D\uB2C8\uB2E4"
-  _type: 3
+  _description: "\uD0C0\uACA9 \uD6C4 \uBB34\uC791\uC704 \uC801 1\uBA85\uC5D0\uAC8C
+    \uC704\uB825 100%\uB85C \uC5F0\uC1C4\uD569\uB2C8\uB2E4"
+  _behaviors:
+  - Keyword: 8
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 2
   _icon: {fileID: 0}

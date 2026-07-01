@@ -16,8 +16,8 @@ namespace TeamLog.Skill
         [TextArea(2, 4)]
         [SerializeField] private string _description;
 
-        [Header("증강 타입")]
-        [SerializeField] private AugmentType _type;
+        [Header("행동 키워드 (Phase BK)")]
+        [SerializeField] private BehaviorTag[] _behaviors = new BehaviorTag[0];
 
         [Header("호환성")]
         [SerializeField] private SkillType _compatibleSkillType; // All이면 모든 스킬 호환
@@ -39,7 +39,7 @@ namespace TeamLog.Skill
         #region Properties
         public string AugmentName => _augmentName;
         public string Description => _description;
-        public AugmentType Type => _type;
+        public IReadOnlyList<BehaviorTag> Behaviors => _behaviors ?? System.Array.Empty<BehaviorTag>();
         public SkillType CompatibleSkillType => _compatibleSkillType;
         public int Tier => _tier;
         public Sprite Icon => _icon;

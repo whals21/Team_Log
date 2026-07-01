@@ -26,7 +26,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d59c15a49f2731a4bb5f095cf7b7da4d, type: 2}
   - {fileID: 11400000, guid: e3182ba91914e3f4787805291cefc6d4, type: 2}
   - {fileID: 11400000, guid: 030262a7eea30df41a59429168f81dc6, type: 2}
-  boss: {fileID: 11400000, guid: 47031d4055aaec345b7bf39e7be445f0, type: 2}
+  boss: {fileID: 11400000, guid: ca6e89ae551d2204980e6986bd4372e8, type: 2}
   spawnPatternTable: {fileID: 11400000, guid: 3875186067dbd7143b4dae299584ce35, type: 2}
   themeKeywords:
   - "\uD761\uD608"

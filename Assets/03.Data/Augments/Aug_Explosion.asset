@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 127bd08492722a240a2fe9af60102ca8, type: 3}
+  m_Name: Aug_Explosion
+  m_EditorClassIdentifier: 
+  _augmentName: "\uD3ED\uBC1C"
+  _description: "\uAD11\uC5ED \uD0C0\uACA9 \uD6C4 \uBB34\uC791\uC704 2\uBA85\uC5D0\uAC8C
+    \uCD94\uAC00 \uD0C0\uACA9\uD569\uB2C8\uB2E4 (\uC704\uB825 \uC720\uC9C0)"
+  _behaviors:
+  - Keyword: 10
+    Rank: 2
+  _compatibleSkillType: 0
+  _tier: 2
+  _icon: {fileID: 0}
+  _isCursed: 0
+  _curseDescription: 
+  _keywords: []

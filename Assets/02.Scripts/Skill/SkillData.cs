@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using TeamLog.Skill; // Phase BK: BehaviorTag 참조
 
 namespace TeamLog.Characters
 {
@@ -33,6 +35,18 @@ namespace TeamLog.Characters
         [SerializeField] private int _effectDuration;
         [SerializeField] private int _effectValue;
 
+        [Header("행동 키워드 (Phase BK)")]
+        [SerializeField] private BehaviorTag[] _behaviors = new BehaviorTag[0];
+
+        [Header("자원 (Phase CC — 캐릭터 고유 메카닉)")]
+        [Tooltip("스킬 사용 시 획득하는 자원 스택 (양수). 자원 없는 캐릭터는 None.")]
+        [SerializeField] private ResourceType _resourceGainType = ResourceType.None;
+        [SerializeField] private int _resourceGainAmount;
+
+        [Tooltip("스킬 사용 시 소모하는 자원 스택 (양수). 소모 불가 시 스킬 사용 불가.")]
+        [SerializeField] private ResourceType _resourceCostType = ResourceType.None;
+        [SerializeField] private int _resourceCostAmount;
+
         #region Properties
         public string SkillName => _skillName;
         public string Description => _description;
@@ -45,6 +59,13 @@ namespace TeamLog.Characters
         public StatusEffectType StatusEffect => _statusEffect;
         public int EffectDuration => _effectDuration;
         public int EffectValue => _effectValue;
+        public IReadOnlyList<BehaviorTag> Behaviors => _behaviors ?? System.Array.Empty<BehaviorTag>();
+
+        // Phase CC 자원 프로퍼티
+        public ResourceType ResourceGainType => _resourceGainType;
+        public int ResourceGainAmount => _resourceGainAmount;
+        public ResourceType ResourceCostType => _resourceCostType;
+        public int ResourceCostAmount => _resourceCostAmount;
         #endregion
     }
 

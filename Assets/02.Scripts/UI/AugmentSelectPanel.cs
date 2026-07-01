@@ -99,7 +99,8 @@ namespace TeamLog.UI
             foreach (var inst in member.SkillInventory.SkillInstances)
             {
                 if (!IsCompatible(inst)) continue;
-                if (inst.HasAugment(_pendingAugment.Type)) continue;
+                // Phase BK: 동일 BehaviorKeyword 보유 시 제외 (빈 배열이면 제외 없음)
+                if (HasOverlappingBehavior(inst)) continue;
                 if (inst.Augments.Count >= SkillInstance.MaxAugments) continue;
 
                 var captured = inst;
@@ -120,6 +121,19 @@ namespace TeamLog.UI
             if (_pendingAugment.CompatibleSkillType == SkillType.Attack)
                 return true; // All은 Attack으로 처리 (모든 스킬 호환)
             return inst.Data.Type == _pendingAugment.CompatibleSkillType;
+        }
+
+        /// <summary>Phase BK: 이미 부착된 증강 중 대기 중인 증강과 동일 BehaviorKeyword를 가진 것이 있으면 true.</summary>
+        private bool HasOverlappingBehavior(SkillInstance inst)
+        {
+            if (_pendingAugment == null || _pendingAugment.Behaviors.Count == 0) return false;
+            foreach (var existing in inst.Augments)
+            {
+                if (existing.Data.Behaviors == null) continue;
+                foreach (var b in _pendingAugment.Behaviors)
+                    if (BehaviorTagResolver.Has(existing.Data.Behaviors, b.Keyword)) return true;
+            }
+            return false;
         }
 
         private void OnSkillSelected(SkillInstance targetSkill)

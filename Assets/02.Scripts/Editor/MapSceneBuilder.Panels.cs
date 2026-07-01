@@ -851,5 +851,58 @@ namespace TeamLog.Editor
         }
 
         #endregion
+
+        #region Ascension UI (Phase ASC)
+
+        /// <summary>
+        /// 어센션 레벨 표시/선택 패널 (우측 하단). TitleScene에서만 사용.
+        /// ▼ 버튼 + 라벨 + ▲ 버튼 가로 배치. TitleSceneSetup의 SerializeField와 연결됨.
+        /// out 파라미터로 Button/Label 참조를 직접 반환 (Find 계열 사용 회피).
+        /// </summary>
+        private static GameObject BuildAscensionPanel(Transform parent, TMP_FontAsset font,
+            out Button upButton, out Button downButton, out TextMeshProUGUI label)
+        {
+            var panel = CreateUIObject("AscensionPanel", parent);
+            var rt = panel.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(1f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot = new Vector2(1f, 0f);
+            rt.anchoredPosition = new Vector2(-30f, 30f);
+            rt.sizeDelta = new Vector2(320f, 70f);
+
+            var hlg = panel.AddComponent<HorizontalLayoutGroup>();
+            hlg.padding = new RectOffset(4, 4, 4, 4);
+            hlg.spacing = 8;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = false;
+            hlg.childForceExpandHeight = false;
+
+            var downBtn = CreateButton("AscensionDownButton", panel.transform, font,
+                "▼", 36, TextWhite);
+            var downLe = downBtn.AddComponent<LayoutElement>();
+            downLe.minWidth = 60;
+            downLe.minHeight = 60;
+
+            var labelTmp = CreateText("AscensionLabel", panel.transform, font,
+                "Ascension 0", 24, TextWhite, TextAlignmentOptions.Center);
+            var labelLe = labelTmp.gameObject.AddComponent<LayoutElement>();
+            labelLe.minWidth = 180;
+            labelLe.minHeight = 60;
+
+            var upBtn = CreateButton("AscensionUpButton", panel.transform, font,
+                "▲", 36, TextWhite);
+            var upLe = upBtn.AddComponent<LayoutElement>();
+            upLe.minWidth = 60;
+            upLe.minHeight = 60;
+
+            downButton = downBtn.GetComponent<Button>();
+            upButton = upBtn.GetComponent<Button>();
+            label = labelTmp;
+            return panel;
+        }
+
+        #endregion
     }
 }

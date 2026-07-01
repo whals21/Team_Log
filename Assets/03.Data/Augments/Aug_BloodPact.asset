@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _augmentName: "\uD53C\uC758 \uACC4\uC57D"
   _description: "\uC704\uB825\uC774 +5 \uC99D\uAC00\uD569\uB2C8\uB2E4"
-  _type: 13
+  _behaviors:
+  - Keyword: 3
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 2
   _icon: {fileID: 0}

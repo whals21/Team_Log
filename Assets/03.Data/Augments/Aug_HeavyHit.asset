@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Aug_HeavyHit
   m_EditorClassIdentifier: 
   _augmentName: "\uC911\uACA9"
-  _description: "\uC704\uB825\uC774 1.5\uBC30\uAC00 \uB418\uC9C0\uB9CC \uCF54\uC2A4\uD2B8\uAC00
-    1 \uC99D\uAC00\uD569\uB2C8\uB2E4"
-  _type: 5
+  _description: "\uC704\uB825\uC774 2\uBC30\uAC00 \uB418\uC9C0\uB9CC \uCF54\uC2A4\uD2B8\uAC00
+    +1 \uC99D\uAC00\uD569\uB2C8\uB2E4"
+  _behaviors:
+  - Keyword: 1
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 3
   _icon: {fileID: 0}
@@ -23,7 +25,7 @@ MonoBehaviour:
   _curseDescription: 
   _keywords:
   - Type: 1
-    Value: 1.5
+    Value: 2
     Trigger: 0
     ConditionParam: 0
   - Type: 3

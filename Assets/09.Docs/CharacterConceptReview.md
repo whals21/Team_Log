@@ -259,6 +259,8 @@ Team Log는 **매 턴 4슬롯에 가중치 랜덤**으로 스킬이 등장. 플�
 | Necromancer | TBD, the Necromancer | TBD, 네크로맨서 | 후속 정의 |
 | Alchemist | TBD, the Alchemist | TBD, 연금술사 | 후속 정의 |
 | Bard | TBD, the Bard | TBD, 음유시인 | 후속 정의 |
+| **Oracle** ⭐신규 | **Sibyl, the Oracle** | 시빌, 예언자 | 그리스 *sibulla* (예언자). "보되 바꿀 수 없는 자" |
+| **Stormcaller** ⭐신규 | **Taranis, the Stormcaller** | 타라니스, 폭풍 소환사 | 켈트 번개 신. "때리지 않는 자, 길만 만드는 자" |
 
 **규칙**:
 - 본 문서/대화/코드 주석에서 클래스명만으로 부르지 않는다 — "Pyromancer가..." (X) → **"Ashe가..." (O)**
@@ -284,7 +286,7 @@ Team Log는 **매 턴 4슬롯에 가중치 랜덤**으로 스킬이 등장. 플�
 ## 5. 캐릭터별 개편안
 
 > 각 캐릭터: (a) **고유 메카닉** 1개 + (b) **스킬 4종 리워크** (조건부 포함). 기존 스키마(SkillData + 새 SkillCondition 필드)에 맞춤.
-> **캐릭터 수 변경**: 기존 8종 → **10종**. Mage(4원소 혼합) 제거, **Pyromancer/Cryomancer/Stormcaller 3종 추가** (각 원소 전문 마법사로 컨셉 통일).
+> **캐릭터 수 변경**: 기존 8종 → **12종**. Mage(4원소 혼합) 제거, **Pyromancer/Cryomancer/Stormcaller 3종 추가** (각 원소 전문 마법사로 컨셉 통일). **Sibyl, the Oracle 11번째 신규 캐릭터** (2026-06-30, "미래에 투자"하는 시간 축) + **Taranis, the Stormcaller 12번째 신규 캐릭터** (2026-06-30, "네트워크에 투자"하는 공간 축) 추가. 마법사 3종 삼각(Ashe/Lumi/Taranis) 완성. 상세: [Characters/Sibyl_the_Oracle.md](Characters/Sibyl_the_Oracle.md) / [Characters/Taranis_the_Stormcaller.md](Characters/Taranis_the_Stormcaller.md)
 
 ### 5.1 Duran, the Warrior (전사) — "불멸의 성벽"
 
@@ -541,6 +543,102 @@ Team Log는 **매 턴 4슬롯에 가중치 랜덤**으로 스킬이 등장. 플�
 
 **플레이 루프**: Battle Song으로 리듬 축적 + AtkUp → Courage Chord로 버프받은 아군 힐 강화 → Dissonance로 군중 약화 → 리듬 4 도달 시 Grand Finale로 터뜨리기. 곡 사용이 셀프 시너지.
 
+### 5.12 Sibyl, the Oracle (예언자) — "보되 바꿀 수 없는 자" ⭐11번째 신규 캐릭터 (2026-06-30)
+
+**정체성**: 미래를 보되 바꿀 수 없는 예언자. 모든 스킬이 **"1AP + 1턴 뒤 발동"** 패턴 — **"미래에 투자"**하는 유일한 캐릭터.
+
+**역할군**: 주=서포터 / 부=디버퍼·finisher
+
+**고유 메카닉: Prophecy (예언 — 지연 발동)**
+- 모든 스킬이 "예언 1" (1턴 뒤, 즉 다음 턴 시작 시 발동)
+- 매 턴 시작 시 보류 예언 카운트 -1, 0 도달 시 자동 발동
+- 한 타겟에 여러 예언 중첩 가능. 타겟 사망 시 소멸.
+- **위력 보상**: 동급 일반 스킬 대비 약 +50~100% (1턴 지연 페널티 보상)
+
+**스킬 4종 (공통: 1AP + 1턴 뒤)**:
+
+| 스킬 | 타겟 | 기본 효과 | 강화 조건 후보 |
+|------|------|---------|---------------|
+| **죽음의 예언** (Death Prophecy) | 단일 적 | HP 임계 이하 처형 | 도트 디버프 시 임계값 +N |
+| **갱생의 환영** (Vision of Renewal) | 단일 아군 | 회복 | 대상 HP 50% 이하 시 힐 2배 |
+| **미래 차용** (Borrowed Future) | 자신 | 다음 턴 AP +2 | ⚠️사용 제약 필요 (런 N회 또는 다른 예언 보류 시) |
+| **데자부** (Déjà Vu) | 자신 | 직전 턴 예언 스킬 비용 0 재시전 | 사용 제약: 직전 턴 스킬 존재 |
+
+**특성 3종**:
+
+| 슬롯 | 특성 | 메커니즘 |
+|------|------|---------|
+| **기본** | **죽음의 표식** (Mark of Doom) | 매 턴 시작 시 무작위 적 표식. 이번 턴 안에 사망 시 → 무작위 적 피해 + 무작위 아군 회복 |
+| **메타1** | **운명의 손** (Hand of Fate) | 3턴마다 Sibyl 스킬 1개 무작위 자동 시전 (비용 0, 대상 무작위) |
+| **메타2** | **시간 붕괴** (Time Collapse) | 3턴마다 **이번 턴 Sibyl이 AP를 사용해 시전하는 스킬이 카운트 없이 즉시 발동** (Hand of Fate와 같은 턴) |
+
+**3턴 주기 콤보** (Sibyl 숙련도의 핵심):
+```
+턴 1-2: 예언 스킬 여러 개 시전 (1턴 뒤 발동 예정)
+턴 3: ⚡ 시간 붕괴 + ⚡ Hand of Fate 동시 발동
+      → 미래에 걸어둔 예언들 + 무작위 스킬이 한꺼번에 도래 → 폭발 턴
+턴 4: 새 사이클 시작
+```
+
+**조건 다양성 검증 (규칙 2)**: 스킬 자체는 모두 "셋업"에 가까우나, 강화 조건(대상 상태/HP/자원/이력)과 특성 3종(무작위 사망/3턴 주기/3턴 주기+AP 사용)이 매 턴 다른 퍼즐 생성 → **스킬 + 특성 합산 시 조건 다양성 충족**.
+
+**다른 서포터와의 차별화**: Healer="현재 힐", Bard="리듬 버프", Sibyl=**"미래 힐/딜"** — 타이밍 축에서만 작동하여 역할 충돌 없음.
+
+**강력한 파티 시너지**:
+- **Sibyl + Ashe (Pyromancer)** ★★★★★ — Burn 도트 → 죽음의 예언 임계값 보정 → 보스 처치 콤보
+- **Sibyl + Lumi (Cryomancer)** ★★★★★ — Freeze로 적 봉쇄 → 1턴 뒤 Sibyl 예언 안전 발동
+- **Sibyl + Duran (Warrior)** ★★★★ — ForcedTarget으로 적 고정 → Sibyl 처형 확정 타겟
+
+**편입 방식**: 11번째 캐릭터 (신규). 해금 조건 추천 = **어센션 5 달성 시** (숙련자용 메카닉). CharacterSelectUI 10→11 대응 필요.
+
+📖 **상세 설계 (스토리/밸런스/3턴 콤보 시나리오/어센션/구현 명세)**: [Characters/Sibyl_the_Oracle.md](Characters/Sibyl_the_Oracle.md)
+
+### 5.13 Taranis, the Stormcaller (폭풍 소환사) — "때리지 않는 자, 길만 만드는 자" ⭐12번째 신규 캐릭터 (2026-06-30)
+
+**정체성**: 번개의 혼돈을 도면으로 옮기는 설계자. **직접 때리지 않고**, 적들 사이에 전하 네트워크를 깔아두며, 적이 스스로를 지지게 놔두고, 적의 공격마저 네트워크의 연료로 삼는 "간접 딜러".
+
+**역할군**: 주=광역 딜러 (네트워크 기반 도트) / 부=서포터 (접지 장벽)
+
+**고유 메카닉: Charge Network (전하 네트워크)**
+- 전하(Charge) 부여 시 **자동 전파** (다른 적 1명, 전하 보유 적 우선)
+- **매 턴 종료 시 자동 연쇄** — 각 전하 적이 자신의 스택 수만큼 다른 전하 적에게 번개 도트 (1스택당 고정값 1)
+- **2턴마다 자연 소멸** (-1스택)
+- 한 적당 최대 3스택. 보스전(단일)은 연쇄 대상 없어 자동 약화
+
+**스킬 4종 (직접 딜 스킬 없음)**:
+
+| 스킬 | AP | 메커니즘 |
+|------|----|---------|
+| **Wire (와이어)** | 1 | 단일 적 전하 2스택 부여 + 전파 |
+| **Branch (브랜치)** | 2 | 광역(모든 적) 전하 1스택 부여 + 전파 |
+| **Grounding Field (접지 장벽)** | 2 | 파티 전체 쉴드 + **쉴드를 때린 적에게 전하 부여** (적 공격 역이용) |
+| **Thunderstorm (뇌우)** | 3 | 광역 데미지 + 모든 적 전하 3스택(풀충전) 부여 |
+
+**특성 3종**:
+
+| 슬롯 | 특성 | 메커니즘 |
+|------|------|---------|
+| **기본** | **Compounding (누적 가속)** | 같은 적에게 매 턥 도트가 누적될수록 위력 증가. "오래 살려둘수록 더 아프다" |
+| **메타1** | **Thunder God (뇌신)** | 매 턴 시작 시 모든 적에게 전하 1스택 부여 (런 3회) |
+| **메타2** | **Superconductor (초전도체)** | 연쇄 도트가 적 DEF 무시. 누적 가속과 완벽 시너지 |
+
+**핵심 플레이 루프 — "네트워크 설계 → 유지 → 보상"**:
+```
+[다수전] Wire/Branch로 전하 확산 → 매 턥 자동 연쇄로 도트 누적
+         + Grounding Field로 적 공격을 흡수하며 추가 전하 부여
+         → Compounding 특성으로 도트가 점점 강해짐
+[보스전] 단일이라 연쇄 약함 → 대신 Grounding Field로 파티 보호 (서포터 전환)
+         + Superconductor 특성으로 DEF 무시 도트 보강
+```
+
+**조건 다양성 검증 (규칙 2)**: 스킬 자체는 셋업 중심이나, **Branch 강화(네트워크 크기) + Grounding Field 자동 보상(적 공격 흡수)**가 매 턥 다른 상황 생성 → 메카닉이 퍼즐 다양화.
+
+**마법사 3종 삼각 완성**: Ashe(자해 폭딜) / Lumi(통제) / **Taranis(네트워크 딜+서포터)** — 딜/통제/네트워크 축. 파티 3인 시너지 (Ashe Burn + Lumi Freeze + Taranis Charge)의 정점.
+
+**편입 방식**: 12번째 캐릭터 (신규). 해금 조건 추천 = **F3 보스 클리어 시** (다수전 특화라 F3부터 자연스러움, Lumi F2 해금과 연속). CharacterSelectUI 11→12 대응.
+
+📖 **상세 설계 (스토리/밸런스/네트워크 메카닉/어센션/구현 명세)**: [Characters/Taranis_the_Stormcaller.md](Characters/Taranis_the_Stormcaller.md)
+
 ---
 
 ## 6. 조건부 특성 설계 (기존 24종 리워크)
@@ -746,7 +844,7 @@ if (_owner.StatusEffects.HasEffect(StatusEffectType.ForcedTarget))
 
 ---
 
-## 9. 구현 로드맵 (5단계)
+## 9. 구현 로드맵 (7단계 — CC-Sibyl + CC-Taranis 추가)
 
 ### Phase CC-0 (P0, 선행) — 부활 시스템 기반 (★모든 조건부 메카닉의 전제)
 
@@ -788,16 +886,36 @@ if (_owner.StatusEffects.HasEffect(StatusEffectType.ForcedTarget))
   - Stormcaller: F3 보스 클리어 해금
 - 캐릭터 선택 UI 8→10 대응
 
+### Phase CC-Taranis (P0, 1주) — Taranis, the Stormcaller 12번째 캐릭터 + Charge Network 메카닉 ⭐신규 (2026-06-30 기획 완료)
+
+**목표**: "네트워크에 투자"하는 공간 축 메카닉 도입. 마법사 3종 삼각(Ashe/Lumi/Taranis) 완성. 12번째 캐릭터 편입.
+
+- **신규 인프라**:
+  - `ChargeNetworkComponent` 신설 — 전하 부여/전파/매 턴 종료 자동 연쇄/2턴마다 자연 소멸
+  - `StatusEffectType` 신규 항목: `Charge` / `GroundingShield` / `Compounding` / `ThunderGodProc`
+  - `SkillData` 신규 필드: `_chargeStacksApplied` / `_triggersPropagation` / `_grantsShieldToParty` / `_chargesOnShieldAbsorb`
+  - TurnManager.OnTurnEnd에 자동 연쇄 훅
+  - HealthComponent.OnShieldAbsorbed 이벤트 확장 (공격자 정보 포함 → 접지 장벽 전하 역부여)
+- **Taranis 캐릭터 에셋**: CharacterTable/SkillTable 신규 1+4행 (Char_Stormcaller + Storm_Wire/Branch/GroundingField/Thunderstorm)
+- **특성 3종**: Trait_Compounding(기본) / Trait_ThunderGod(메타1) / Trait_Superconductor(메타2)
+- **접지 장벽 특수 로직**: 쉴드 흡수 시 공격자에게 전하 자동 부여 — 적 intent 공개 시스템과 찰떡
+- **해금 조건**: F3 보스 클리어 시 (다수전 특화라 F3부터 자연스러움, Lumi F2 해금과 연속)
+- **씬 통합**: CharacterSelectUI 11→12, CharacterTraitSelectUI, DataGenerator 12번째 분기
+- 단위 테스트 14개 (전하 부여/전파/매 턴 연쇄/자연 소멸/접지 장벽 역부여/Thunder God 자동 발동/Compounding 누적/Superconductor DEF 무시/보스전 연쇄 0 약점 등)
+- **리스크**: 다수전 폭발 밸런스 (4마리 네트워크), 접지 장벽 사기 가능성 — 도트 단위 1 + 자연 소멸 2턴으로 완화
+
+📖 **상세 기획**: [Characters/Taranis_the_Stormcaller.md](Characters/Taranis_the_Stormcaller.md)
+
 ### Phase CC-2 (P1, 1주) — 나머지 4개 메카닉 + 특성 리워크
 
 - Healer 생명 결속, Archer 표식 강화, Necromancer 미니언/영혼, Alchemist 시약 반응, Bard 리듬
-- 기존 21 특성(7캐릭터 × 3) + 마법사 3종 9특성 = 30특성 조건부 키워드로 리워크
+- 기존 21 특성(7캐릭터 × 3) + 마법사 3종 9특성 + **Sibyl 3특성 + Taranis 3특성 = 36특성** 조건부 키워드로 리워크
 - 캐릭터 패널 메카닉 게이지 UI
 
-### Phase CC-3 (P2, 1주) — 신규 유물 10종 + 메타 해금 특성 8종
+### Phase CC-3 (P2, 1주) — 신규 유물 10종 + 메타 해금 특성 12종
 
 - 조건부 유물 10종 DataGenerator 추가
-- 4번째 메타 해금 특성 10종 (CharacterTraitData)
+- 4번째 메타 해금 특성 12종 (CharacterTraitData) — **Sibyl + Taranis 포함 12캐릭터**
 - MetaShopUI 4번째 특성 탭 추가
 
 ### Phase CC-4 (P3, 1주) — 밸런스 튜닝 + 폴리싱

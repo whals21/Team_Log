@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_BossVoidWalker
+  m_EditorClassIdentifier: 
+  _characterName: "\uACF5\uD5C8\uC758 \uD589\uBCF4\uC790"
+  _characterClass: 0
+  _description: Rogue
+  _baseHP: 179
+  _baseATK: 0
+  _baseDEF: 0
+  _enemyTrait: 3
+  _isBoss: 1
+  _skills:
+  - {fileID: 11400000, guid: fc7baf14a8a6fac48a33c7031c95d4d5, type: 2}
+  - {fileID: 11400000, guid: 3dcfce975efe7ba4c9cea559e4748b24, type: 2}
+  - {fileID: 11400000, guid: 64150b1a53f181a4ba04e6c4f43eeffa, type: 2}
+  - {fileID: 11400000, guid: ca714262d38cbdb42b7bf2186f02b517, type: 2}
+  _isDefault: 1
+  _unlockCondition: 

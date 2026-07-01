@@ -14,13 +14,13 @@ namespace TeamLog.Meta
     ///   3: RerollCount         (리롤 -1)
     ///   4: PlayerMaxHpPercent  (파티 MaxHP -5%)
     ///   5: HealPercent         (힐/휴식 -10%)
-    ///   6: EnemyAtkPercent     (적 ATK +5%)
+    ///   6: (빈 레벨 — EnemyAtkPercent 제거됨)
     ///   7: EnemyHpPercent x2   (적 HP 총 +10%)
     ///   8: StartGold x2        (시작 골드 총 -20)
     ///   9: RerollCount x2      (리롤 총 -2)
     ///  10: PlayerMaxHpPercent x2 (파티 MaxHP 총 -10%)
     ///  11: HealPercent x2      (힐/휴식 총 -20%)
-    ///  12: EnemyAtkPercent x2  (적 ATK 총 +10%)
+    ///  12: (빈 레벨 — EnemyAtkPercent 제거됨)
     ///  13: EnemyHpPercent x3   (적 HP 총 +15%)
     ///  14: RerollCount x3      (리롤 총 -3)
     ///  15: BossHpPercent       (보스 HP +20%)
@@ -35,7 +35,6 @@ namespace TeamLog.Meta
         private static readonly int[] LvReroll = { 3, 9, 14 };
         private static readonly int[] LvPlayerHp = { 4, 10 };
         private static readonly int[] LvHeal = { 5, 11 };
-        private static readonly int[] LvEnemyAtk = { 6, 12 };
         private static readonly int[] LvBossHp = { 15 };
 
         // per-stack 값
@@ -44,7 +43,6 @@ namespace TeamLog.Meta
         private const int StackReroll = -1;              // -1 per stack
         private const float StackPlayerHpMul = -0.05f;   // -5% per stack
         private const float StackHealMul = -0.10f;       // -10% per stack
-        private const float StackEnemyAtkMul = 0.05f;    // +5% per stack
         private const float StackBossHpMul = 0.20f;      // +20% (단일)
 
         /// <summary>어센션 레벨 조회 (0~15). MetaSaveData가 null이면 0.</summary>
@@ -85,7 +83,6 @@ namespace TeamLog.Meta
                 case AscensionModifierType.RerollCount:        return CountStacks(asc, LvReroll);
                 case AscensionModifierType.PlayerMaxHpPercent: return CountStacks(asc, LvPlayerHp);
                 case AscensionModifierType.HealPercent:        return CountStacks(asc, LvHeal);
-                case AscensionModifierType.EnemyAtkPercent:    return CountStacks(asc, LvEnemyAtk);
                 case AscensionModifierType.BossHpPercent:      return CountStacks(asc, LvBossHp);
             }
             return 0;
@@ -96,10 +93,6 @@ namespace TeamLog.Meta
         /// <summary>적 HP 증감 비율 (1.0 = 변화 없음). asc 1 = 1.05, asc 7 = 1.10, asc 13 = 1.15.</summary>
         public static float GetEnemyHpMul(MetaSaveData meta)
             => GetEnemyHpMulByLevel(GetAscensionLevel(meta));
-
-        /// <summary>적 ATK 증감 비율. asc 6 = 1.05, asc 12 = 1.10.</summary>
-        public static float GetEnemyAtkMul(MetaSaveData meta)
-            => GetEnemyAtkMulByLevel(GetAscensionLevel(meta));
 
         /// <summary>보스 HP 증감 비율. asc 15 = 1.20, 그 외 = 1.0.</summary>
         public static float GetBossHpMul(MetaSaveData meta)
@@ -126,9 +119,6 @@ namespace TeamLog.Meta
         public static float GetEnemyHpMulByLevel(int ascensionLevel)
             => 1f + StackEnemyHpMul * GetStackCountByLevel(AscensionModifierType.EnemyHpPercent, ascensionLevel);
 
-        public static float GetEnemyAtkMulByLevel(int ascensionLevel)
-            => 1f + StackEnemyAtkMul * GetStackCountByLevel(AscensionModifierType.EnemyAtkPercent, ascensionLevel);
-
         public static float GetBossHpMulByLevel(int ascensionLevel)
             => 1f + StackBossHpMul * GetStackCountByLevel(AscensionModifierType.BossHpPercent, ascensionLevel);
 
@@ -148,7 +138,8 @@ namespace TeamLog.Meta
 
         /// <summary>
         /// 지정된 어센션 레벨에서 활성화된 modifier 타입 목록 (중복 포함 — 스택 수만큼).
-        /// 예: asc 7 → [EnemyHp, EnemyHp, StartGold, Reroll, PlayerHp, Heal, EnemyAtk]
+        /// 예: asc 7 → [EnemyHp, EnemyHp, StartGold, Reroll, PlayerHp, Heal]
+        /// 참고: 레벨 6/12는 EnemyAtkPercent 제거로 빈 레벨 (스택 증가 없음).
         /// </summary>
         public static List<AscensionModifierType> GetActiveModifiers(int ascensionLevel)
         {
@@ -159,7 +150,6 @@ namespace TeamLog.Meta
             AppendStacks(result, AscensionModifierType.RerollCount,        CountStacks(asc, LvReroll));
             AppendStacks(result, AscensionModifierType.PlayerMaxHpPercent, CountStacks(asc, LvPlayerHp));
             AppendStacks(result, AscensionModifierType.HealPercent,        CountStacks(asc, LvHeal));
-            AppendStacks(result, AscensionModifierType.EnemyAtkPercent,    CountStacks(asc, LvEnemyAtk));
             AppendStacks(result, AscensionModifierType.BossHpPercent,      CountStacks(asc, LvBossHp));
             return result;
         }

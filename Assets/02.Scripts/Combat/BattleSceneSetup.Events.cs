@@ -239,6 +239,16 @@ namespace TeamLog.Combat
 
             BattleResult.SetResult(victory);
 
+            // Phase CC-0: 부활 시스템 — 승리 시 사망자 부활 + MaxHP 0.9배 누적.
+            // 패배(파티 전멸) 시 런 종료 플래그 설정.
+            bool runEnded = false;
+            if (GameRunState.Instance != null && GameRunState.Instance.IsRunActive)
+            {
+                runEnded = GameRunState.Instance.ProcessBattleEnd(victory);
+                if (runEnded)
+                    _battleUIManager?.AddLog("런 종료 — 파티 전멸");
+            }
+
             if (_battleEndOverlay != null)
             {
                 _battleEndOverlay.Show(victory);

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_BossSandLeviathan
+  m_EditorClassIdentifier: 
+  _characterName: "\uBAA8\uB798 \uB9AC\uBC14\uC774\uC5B4\uB358"
+  _characterClass: 0
+  _description: Rogue
+  _baseHP: 130
+  _baseATK: 0
+  _baseDEF: 0
+  _enemyTrait: 3
+  _isBoss: 1
+  _skills:
+  - {fileID: 11400000, guid: 511031b7b66318f47902ba61567740e5, type: 2}
+  - {fileID: 11400000, guid: 4fd229a74df3a1348b0d8cb68f851239, type: 2}
+  - {fileID: 11400000, guid: 98d28f84a0cb79d418cf460836b67154, type: 2}
+  - {fileID: 11400000, guid: a1553ffdf135b9f439b9f10ba66f67b9, type: 2}
+  _isDefault: 1
+  _unlockCondition: 

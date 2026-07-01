@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 127bd08492722a240a2fe9af60102ca8, type: 3}
+  m_Name: Aug_Dominance
+  m_EditorClassIdentifier: 
+  _augmentName: "\uC9C0\uBC30"
+  _description: "\uC801 \uD604\uC7AC\uCCB4\uB825\uC774 \uB098\uBCF4\uB2E4 \uB0AE\uC744
+    \uB54C \uC704\uB825 +4"
+  _behaviors:
+  - Keyword: 29
+    Rank: 4
+  _compatibleSkillType: 0
+  _tier: 1
+  _icon: {fileID: 0}
+  _isCursed: 0
+  _curseDescription: 
+  _keywords: []

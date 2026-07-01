@@ -5,6 +5,8 @@
 > **데이터 소스**: BalanceReports CSV 8종, BalanceSimulator 코드 5종, CharacterData 에셋, DataCatalog, StageDesign.md
 > **결론**: **현재 밸런스는 출시 불가 수준. 근본 원인 2가지(데이터 결함 + 시뮬레이터 누락)로 인해 승률이 왜곡되어 있으며, F1 사망률 80%는 실제보다 과대평가일 수 있으나 밸런스 자체도 붕괴 상태.**
 
+> **🔔 2026-06-30 업데이트**: 본 보고서의 P0-1 "CharacterTable.csv atk=0/def=0 결함" 진단은 **오판이었음을 철회**합니다. atk=0/def=0은 "스킬 위력 = 실데미지" 단순화를 위한 **사용자 의도 설계**로, StS/Balatro식 "카드 숫자 = 타격수치" 철학입니다 (`DamageCalculator` 공식 `Max(1, ATK + Power - DEF)`에서 ATK=0/DEF=0이면 damage = Power 그대로). Phase ASC-B에서 보스 12종에만 atk/def를 넣은 것이 일관성을 훼손했으므로, 2026-06-30에 보스 atk/def도 0으로 되돌리고 스킬 위력으로 보전했습니다. 또한 이에 따라 무의미해진 어센션 `EnemyAtkPercent` modifier도 제거했습니다. 다른 P1/P2/P3 항목은 여전히 유효합니다.
+
 ---
 
 ## 🚨 핵심 요약 (Executive Summary)

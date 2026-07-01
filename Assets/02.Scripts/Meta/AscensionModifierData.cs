@@ -5,7 +5,8 @@ namespace TeamLog.Meta
     /// <summary>
     /// 어센션 modifier 유형 — 클리어 누적 난이도 상승.
     /// 런 클리어 시 자동 +1레벨 (최대 15).
-    /// 7개 핵심 modifier × 2~3회 누적 + 최종 BossHpPercent = 총 15레벨.
+    /// 6개 핵심 modifier × 2~3회 누적 + 최종 BossHpPercent = 총 13스택 + 레벨 6/12는 빈 레벨.
+    /// 참고: EnemyAtkPercent는 제거됨 — 시스템 전체 ATK=0 구조에서 무의미 (2026-06-30).
     /// </summary>
     public enum AscensionModifierType
     {
@@ -14,13 +15,12 @@ namespace TeamLog.Meta
         RerollCount,          // 턴당 리롤 ±N
         StartGold,            // 시작 골드 ±N
         HealPercent,          // 휴식/힐 효율 ±%
-        EnemyAtkPercent,      // 적 ATK ±%
         BossHpPercent         // 보스 HP ±% (어센션 15 전용)
     }
 
     /// <summary>
     /// 어센션 modifier 정적 데이터 (ScriptableObject).
-    /// DataGenerator.Ascension.cs에서 7종 생성 (BossHpPercent 제외 — 레벨 15 고정값 하드코딩).
+    /// DataGenerator.Ascension.cs에서 6종 생성 (BossHpPercent 포함 — 레벨 15 고정값).
     /// </summary>
     [CreateAssetMenu(fileName = "AscensionModifier", menuName = "TeamLog/Ascension Modifier")]
     public class AscensionModifierData : ScriptableObject

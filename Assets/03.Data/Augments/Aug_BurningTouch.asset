@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Aug_BurningTouch
   m_EditorClassIdentifier: 
   _augmentName: "\uD654\uC5FC"
-  _description: "\uACF5\uACA9 \uC2DC \uD654\uC0C1\uC744 \uCD94\uAC00\uD569\uB2C8\uB2E4
-    (2\uD134, \uC704\uB825 30%)"
-  _type: 10
+  _description: "\uACF5\uACA9 \uC2DC \uD654\uC0C1 1\uC2A4\uD0DD\uC744 \uCD94\uAC00\uB85C
+    \uBD80\uC5EC\uD569\uB2C8\uB2E4"
+  _behaviors:
+  - Keyword: 21
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 1
   _icon: {fileID: 0}

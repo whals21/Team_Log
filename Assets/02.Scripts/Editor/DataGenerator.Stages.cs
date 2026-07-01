@@ -1086,6 +1086,17 @@ namespace TeamLog.Editor
             var bossAsset = AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_PATH}/{boss}.asset");
             theme.boss = bossAsset;
 
+            // Phase BK: 보스 에셋에 _isBoss=true 설정 (Execution 즉사 제외용)
+            if (bossAsset != null)
+            {
+                SetPrivateField(bossAsset, "_isBoss", true);
+                EditorUtility.SetDirty(bossAsset);
+            }
+            else
+            {
+                Debug.LogWarning($"[DataGenerator.Stages] 보스 에셋 누락: {boss}");
+            }
+
             // Spawn pattern table
             var table = AssetDatabase.LoadAssetAtPath<SpawnPatternTable>($"{SPAWN_PATTERN_PATH}/{spawnTable}.asset");
             theme.spawnPatternTable = table;

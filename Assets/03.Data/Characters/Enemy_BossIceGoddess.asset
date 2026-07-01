@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_BossIceGoddess
+  m_EditorClassIdentifier: 
+  _characterName: "\uBE59\uACB0 \uC5EC\uC2E0"
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 216
+  _baseATK: 0
+  _baseDEF: 0
+  _enemyTrait: 8
+  _isBoss: 1
+  _skills:
+  - {fileID: 11400000, guid: 404bc1fb8d6275f4b8734659e82c2457, type: 2}
+  - {fileID: 11400000, guid: bc4dbd7580ba4e04d87156300e4e69d1, type: 2}
+  - {fileID: 11400000, guid: 1714e3702de191147b353ec793ad50e6, type: 2}
+  - {fileID: 11400000, guid: 4493bddaa00f4634397d575c47fe630e, type: 2}
+  _isDefault: 1
+  _unlockCondition: 

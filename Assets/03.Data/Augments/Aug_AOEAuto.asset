@@ -14,15 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _augmentName: "\uD30C\uB3D9"
   _description: "\uB2E8\uC77C \uB300\uC0C1 \uC2A4\uD0AC\uC774 \uC790\uB3D9\uC73C\uB85C
-    \uAD11\uC5ED\uC774 \uB429\uB2C8\uB2E4 (\uC704\uB825 65%)"
-  _type: 16
+    \uAD11\uC5ED\uC774 \uB429\uB2C8\uB2E4 (\uC704\uB825 \uC720\uC9C0)"
+  _behaviors:
+  - Keyword: 13
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 2
   _icon: {fileID: 0}
   _isCursed: 1
-  _curseDescription: "\uCF54\uC2A4\uD2B8 +1"
+  _curseDescription: "\uCF54\uC2A4\uD2B8 +2"
   _keywords:
   - Type: 3
-    Value: 1
+    Value: 2
     Trigger: 0
     ConditionParam: 0

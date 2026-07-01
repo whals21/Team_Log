@@ -4,7 +4,7 @@ namespace TeamLog.Skill
 {
     /// <summary>
     /// 키워드 효과 타입 — 증강/유물이 공유하는 수치 효과
-    /// 행동 변경(Spread, Pierce 등)은 AugmentType enum 유지
+    /// 행동 변경(Spread, Pierce 등)은 Phase BK에서 BehaviorKeyword enum으로 이관
     /// </summary>
     public enum KeywordType
     {

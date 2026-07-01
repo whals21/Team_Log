@@ -123,6 +123,10 @@ namespace TeamLog.Editor
             var metaShopPanel = BuildMetaShopPanel(canvasObj.transform, font);
             metaShopPanel.SetActive(false);
 
+            // 어센션 UI 패널 (Phase ASC) — 우측 하단
+            BuildAscensionPanel(canvasObj.transform, font,
+                out var ascensionUpBtn, out var ascensionDownBtn, out var ascensionLabel);
+
             // TitleSceneSetup 컴포넌트
             var setupObj = new GameObject("TitleSceneSetup");
             var setup = setupObj.AddComponent<TeamLog.UI.Title.TitleSceneSetup>();
@@ -133,6 +137,9 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_statsLabel", statsLabel);
             WireProperty(setupSer, "_continueBlock", continueBlock);
             WireProperty(setupSer, "_metaShopUI", metaShopPanel.GetComponent<MetaShopUI>());
+            WireProperty(setupSer, "_ascensionUpButton", ascensionUpBtn);
+            WireProperty(setupSer, "_ascensionDownButton", ascensionDownBtn);
+            WireProperty(setupSer, "_ascensionLabel", ascensionLabel);
 
             // Phase 8F: All Characters 동적 바인딩 (TitleSceneSetup._allCharacters)
             string[] titleCharNames = {

@@ -11,6 +11,9 @@ using SkillInstance = TeamLog.Characters.SkillInstance;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
 using TargetType = TeamLog.Characters.TargetType;
 
+// Phase BK: 행동 키워드 타입 별칭
+using BehaviorKeyword = TeamLog.Skill.BehaviorKeyword;
+
 namespace TeamLog.Combat.Turn
 {
     /// <summary>
@@ -73,6 +76,10 @@ namespace TeamLog.Combat.Turn
             {
                 if (c.PlayerTraitHandler != null && c.PlayerTraitHandler.HasTrait)
                     c.PlayerTraitHandler.SubscribeEvents();
+
+                // Phase ARCH-5: 모든 스킬의 UsesThisBattle 리셋 (Fatigue/Momentum/Escalation/Mastery)
+                foreach (var inst in c.SkillInventory.SkillInstances)
+                    inst.ResetUsesThisBattle();
             }
 
             CombatEventBus.FireBattleStart();
@@ -102,6 +109,10 @@ namespace TeamLog.Combat.Turn
                 if (hpChange > 0) c.Health.Heal(hpChange);
                 else if (hpChange < 0) c.Health.TakeDamage(-hpChange);
             }
+
+            // Phase CC: 캐릭터 고유 자원 턴 시작 훅 (Ashe Ember +1, Lumi Frost 유지 등)
+            foreach (var c in _playerParty)
+                if (c.IsAlive && c.Resource != null) c.Resource.OnTurnStart(c);
 
             // AP 리셋: 기본 1 + 생존 파티원 수 (+ 첫 턴 보너스 + 유물 ExtraAP + 장착 특성 ExtraAP)
             int aliveCount = _playerParty.FindAll(p => p.IsAlive).Count;
@@ -166,33 +177,99 @@ namespace TeamLog.Combat.Turn
                 case TargetType.SingleEnemy:
                     if (target != null && target.IsAlive)
                     {
-                        // Spread 증강: 단일→광역, 위력 70%
-                        if (instance != null && instance.HasAugment(AugmentType.Spread))
+                        // Phase BK: Spread 행동 키워드 — 단일 → 광역 (위력 100%)
+                        bool spread = instance != null && instance.HasBehavior(BehaviorKeyword.Spread);
+                        // Phase BK: AOEAuto 행동 키워드 — 자동 광역 (위력 100%, 코스트 +2)
+                        bool aoeAuto = instance != null && instance.HasBehavior(BehaviorKeyword.AOEAuto);
+
+                        if (spread || aoeAuto)
                         {
                             foreach (var enemy in _enemies)
-                                if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance, 0.7f);
-                        }
-                        // 저주 증강: AOEAuto — 자동 광역, 위력 65%
-                        else if (instance != null && instance.HasAugment(AugmentType.AOEAuto))
-                        {
-                            foreach (var enemy in _enemies)
-                                if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance, 0.65f);
+                                if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance, 1f);
+
+                            // Explosion: 광역 후 무작위 N명 추가 타격 (중복 허용, 위력 그대로)
+                            int explosionN = instance?.GetBehaviorRank(BehaviorKeyword.Explosion) ?? 0;
+                            if (explosionN > 0)
+                            {
+                                var aliveForExplosion = _enemies.FindAll(e => e.IsAlive);
+                                if (aliveForExplosion.Count > 0)
+                                {
+                                    for (int i = 0; i < explosionN; i++)
+                                    {
+                                        int idx = UnityEngine.Random.Range(0, aliveForExplosion.Count);
+                                        _skillExecutor.ExecuteSkillInternal(caster, skill, aliveForExplosion[idx], instance, 1f);
+                                        aliveForExplosion.RemoveAll(e => !e.IsAlive);
+                                        if (aliveForExplosion.Count == 0) break;
+                                    }
+                                }
+                            }
                         }
                         else
                         {
-                            _skillExecutor.ExecuteSkillInternal(caster, skill, target, instance);
+                            // 기본 단일 타격
+                            _skillExecutor.ExecuteSkillInternal(caster, skill, target, instance, 1f);
+
+                            // Bounce: 무작위 적 N회 추가 (같은 적 중복 허용, 위력 100%)
+                            int bounceN = instance?.GetBehaviorRank(BehaviorKeyword.Bounce) ?? 0;
+                            if (bounceN > 0)
+                            {
+                                var aliveForBounce = _enemies.FindAll(e => e.IsAlive);
+                                if (aliveForBounce.Count > 0)
+                                {
+                                    for (int i = 0; i < bounceN; i++)
+                                    {
+                                        int idx = UnityEngine.Random.Range(0, aliveForBounce.Count);
+                                        _skillExecutor.ExecuteSkillInternal(caster, skill, aliveForBounce[idx], instance, 1f);
+                                        aliveForBounce.RemoveAll(e => !e.IsAlive);
+                                        if (aliveForBounce.Count == 0) break;
+                                    }
+                                }
+                            }
+
+                            // MultiHit: 동일 대상 N회 추가 (위력 100%)
+                            int multiHitN = instance?.GetBehaviorRank(BehaviorKeyword.MultiHit) ?? 0;
+                            if (multiHitN > 0 && target.IsAlive)
+                            {
+                                for (int i = 0; i < multiHitN; i++)
+                                {
+                                    if (!target.IsAlive) break;
+                                    _skillExecutor.ExecuteSkillInternal(caster, skill, target, instance, 1f);
+                                }
+                            }
                         }
                     }
                     break;
                 case TargetType.AllEnemies:
+                    // 기본 광역 타격
                     foreach (var enemy in _enemies)
-                        if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance);
+                        if (enemy.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, enemy, instance, 1f);
+
+                    // Explosion: 광역 후 무작위 N명 추가 타격
+                    int allEnemyExplosionN = instance?.GetBehaviorRank(BehaviorKeyword.Explosion) ?? 0;
+                    if (allEnemyExplosionN > 0)
+                    {
+                        var aliveForExplosion = _enemies.FindAll(e => e.IsAlive);
+                        if (aliveForExplosion.Count > 0)
+                        {
+                            for (int i = 0; i < allEnemyExplosionN; i++)
+                            {
+                                int idx = UnityEngine.Random.Range(0, aliveForExplosion.Count);
+                                _skillExecutor.ExecuteSkillInternal(caster, skill, aliveForExplosion[idx], instance, 1f);
+                                aliveForExplosion.RemoveAll(e => !e.IsAlive);
+                                if (aliveForExplosion.Count == 0) break;
+                            }
+                        }
+                    }
                     break;
                 case TargetType.AllAllies:
                     foreach (var ally in _playerParty)
                         if (ally.IsAlive) _skillExecutor.ExecuteSkillInternal(caster, skill, ally, instance);
                     break;
             }
+
+            // Phase ARCH-5: 스킬 사용 후 UsesThisBattle 증가
+            // (Fatigue/Momentum/Escalation/Mastery의 다음 사용 EffectivePower/Cost에 반영)
+            instance?.IncrementUsesThisBattle();
 
             CheckBattleEnd();
             return CurrentPhase == TurnPhase.BattleEnd;
@@ -303,6 +380,10 @@ namespace TeamLog.Combat.Turn
         {
             foreach (var c in _playerParty) if (c.IsAlive) c.OnTurnEnd();
             foreach (var c in _enemies) if (c.IsAlive) c.OnTurnEnd();
+
+            // Phase CC: 캐릭터 고유 자원 턴 종료 훅 (Ashe Ember×2 자해, Lumi Frost 절반 소실 등)
+            foreach (var c in _playerParty)
+                if (c.IsAlive && c.Resource != null) c.Resource.OnTurnEnd(c);
 
             // 만료된 효과 제거 후 스탯 수정자 재계산
             foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();

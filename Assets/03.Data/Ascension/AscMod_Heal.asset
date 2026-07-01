@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ec0f87d006a1f14799cee2e0bcde6ef, type: 3}
+  m_Name: AscMod_Heal
+  m_EditorClassIdentifier: 
+  _modifierId: AscMod_Heal
+  _displayName: "\uD68C\uBCF5 \uC5B5\uC81C"
+  _description: "\uD734\uC2DD/\uD790 \uD6A8\uC728 -10% (11\uB819 \uB204\uC801 \uC2DC
+    -20%)"
+  _modifierType: 4
+  _intValue: 0
+  _floatValue: -0.1

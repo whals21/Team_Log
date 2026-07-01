@@ -21,65 +21,150 @@ namespace TeamLog.Editor
 
         private static void GenerateAugmentData()
         {
-            // (파일명, 표시명, 설명, AugmentType, 호환SkillType, 등급, 저주여부, 저주설명, 키워드[])
+            // (파일명, 표시명, 설명, BehaviorTag[], 호환SkillType, 등급, 저주여부, 저주설명, 키워드[])
+            // Phase BK: 행동 키워드 + 수치 키워드 분리. 빈 BehaviorTag[]는 일반 수치형 증강.
             var augments = new[]
             {
-                Mk("Aug_CostDown", "비용 감소", "스킬 코스트가 1 감소합니다 (최소 0)", AugmentType.CostDown, SkillType.Attack, 1, false, "",
+                // ── 일반 (Tier 1) ──
+                Mk("Aug_CostDown", "비용 감소", "스킬 코스트가 1 감소합니다 (최소 0)",
+                    BTags(BTag(BehaviorKeyword.CostDown, 1)), SkillType.Attack, 1, false, "",
                     Kw(KeywordType.CostAdd, -1)),
 
-                Mk("Aug_Spread", "확산", "단일 대상 스킬이 광역으로 변합니다 (위력 70%)", AugmentType.Spread, SkillType.Attack, 2, false, ""),
+                Mk("Aug_PowerUp", "위력 증폭", "스킬 위력이 +3 증가합니다",
+                    BTags(BTag(BehaviorKeyword.PowerUp, 3)), SkillType.Attack, 1, false, "",
+                    Kw(KeywordType.PowerAdd, 3)),
 
-                Mk("Aug_Pierce", "관통", "쉴드를 무시하고 방어력의 50%를 무시합니다", AugmentType.Pierce, SkillType.Attack, 2, false, ""),
+                Mk("Aug_Lifesteal", "흡혈", "준 데미지의 절반만큼 자신의 HP를 회복합니다",
+                    BTags(BTag(BehaviorKeyword.Lifesteal, 1)), SkillType.Attack, 1, false, ""),
 
-                Mk("Aug_Chain", "연쇄", "타격 후 인접한 적에게 위력 60%의 연쇄 피해를 줍니다", AugmentType.Chain, SkillType.Attack, 2, false, ""),
-
-                Mk("Aug_Drain", "흡혈", "데미지의 30%만큼 자신의 HP를 회복합니다", AugmentType.Drain, SkillType.Attack, 1, false, "",
-                    Kw(KeywordType.DamageDealtHealPercent, 0.3f)),
-
-                Mk("Aug_HeavyHit", "중격", "위력이 1.5배가 되지만 코스트가 1 증가합니다", AugmentType.HeavyHit, SkillType.Attack, 3, false, "",
-                    Kw(KeywordType.PowerMul, 1.5f),
-                    Kw(KeywordType.CostAdd, 1)),
-
-                Mk("Aug_QuickDraw", "신속", "가중치가 0이 되어 무조건 뽑힙니다 (위력 80%)", AugmentType.QuickDraw, SkillType.Attack, 1, false, "",
-                    Kw(KeywordType.PowerMul, 0.8f),
+                Mk("Aug_QuickDraw", "신속", "가중치가 0이 되어 무조건 뽑힙니다 (위력 절반)",
+                    BTags(BTag(BehaviorKeyword.QuickDraw, 1)), SkillType.Attack, 1, false, "",
+                    Kw(KeywordType.PowerMul, 0.5f),
                     Kw(KeywordType.DrawWeightOverride, 0f)),
 
-                Mk("Aug_Lingering", "잔류", "상태이상 지속시간이 2턴 증가합니다", AugmentType.Lingering, SkillType.Debuff, 1, false, "",
+                Mk("Aug_Lingering", "잔류", "상태이상 지속시간이 +2턴 증가합니다",
+                    BTags(BTag(BehaviorKeyword.Lingering, 2)), SkillType.Debuff, 1, false, "",
                     Kw(KeywordType.DurationAdd, 2)),
 
-                Mk("Aug_Intensify", "강화", "버프/디버프 효과가 1.5배가 됩니다", AugmentType.Intensify, SkillType.Buff, 2, false, "",
-                    Kw(KeywordType.EffectMul, 1.5f)),
+                Mk("Aug_VenomTouch", "맹독", "공격 시 중독 1스택을 추가로 부여합니다",
+                    BTags(BTag(BehaviorKeyword.VenomTouch, 1)), SkillType.Attack, 1, false, ""),
 
-                Mk("Aug_VenomTouch", "맹독", "공격 시 중독을 추가합니다 (2턴, 위력 30%)", AugmentType.VenomTouch, SkillType.Attack, 1, false, ""),
-                Mk("Aug_BurningTouch", "화염", "공격 시 화상을 추가합니다 (2턴, 위력 30%)", AugmentType.BurningTouch, SkillType.Attack, 1, false, ""),
+                Mk("Aug_BurningTouch", "화염", "공격 시 화상 1스택을 추가로 부여합니다",
+                    BTags(BTag(BehaviorKeyword.BurningTouch, 1)), SkillType.Attack, 1, false, ""),
 
-                Mk("Aug_ShieldBonus", "철벽", "쉴드 효과가 1.5배가 됩니다", AugmentType.ShieldBonus, SkillType.Shield, 1, false, "",
-                    Kw(KeywordType.ShieldMul, 1.5f)),
+                Mk("Aug_FreezeTouch", "빙결", "공격 시 빙결 1스택을 추가로 부여합니다",
+                    BTags(BTag(BehaviorKeyword.FreezeTouch, 1)), SkillType.Attack, 1, false, ""),
 
-                Mk("Aug_HealBonus", "치유 강화", "힐 효과가 1.5배가 됩니다", AugmentType.HealBonus, SkillType.Heal, 1, false, "",
-                    Kw(KeywordType.HealMul, 1.5f)),
+                Mk("Aug_ShieldBonus", "철벽", "쉴드 효과가 2배가 됩니다",
+                    BTags(BTag(BehaviorKeyword.ShieldBonus, 1)), SkillType.Shield, 1, false, "",
+                    Kw(KeywordType.ShieldMul, 2f)),
 
-                // 저주 증강
-                Mk("Aug_BloodPact", "피의 계약", "위력이 +5 증가합니다", AugmentType.BloodPact, SkillType.Attack, 2, true, "매턴 HP 2 감소",
+                Mk("Aug_HealBonus", "치유 강화", "힐 효과가 2배가 됩니다",
+                    BTags(BTag(BehaviorKeyword.HealBonus, 1)), SkillType.Heal, 1, false, "",
+                    Kw(KeywordType.HealMul, 2f)),
+
+                // ── 희귀 (Tier 2) ──
+                Mk("Aug_Spread", "확산", "단일 대상 스킬이 광역으로 변합니다 (위력 유지)",
+                    BTags(BTag(BehaviorKeyword.Spread, 1)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_Pierce", "관통", "쉴드와 방어력을 완전히 무시합니다",
+                    BTags(BTag(BehaviorKeyword.Pierce, 1)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_Chain", "연쇄", "타격 후 무작위 적 1명에게 위력 100%로 연쇄합니다",
+                    BTags(BTag(BehaviorKeyword.Chain, 1)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_Bounce", "바운스", "무작위 적에게 2회 추가 타격합니다 (중복 허용, 위력 유지)",
+                    BTags(BTag(BehaviorKeyword.Bounce, 2)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_MultiHit", "연타", "동일 대상에게 2회 추가 타격합니다 (위력 유지)",
+                    BTags(BTag(BehaviorKeyword.MultiHit, 2)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_Explosion", "폭발", "광역 타격 후 무작위 2명에게 추가 타격합니다 (위력 유지)",
+                    BTags(BTag(BehaviorKeyword.Explosion, 2)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_Intensify", "강화", "버프/디버프 효과가 2배가 됩니다",
+                    BTags(BTag(BehaviorKeyword.Intensify, 1)), SkillType.Buff, 2, false, "",
+                    Kw(KeywordType.EffectMul, 2f)),
+
+                // ── 전설 (Tier 3) ──
+                Mk("Aug_HeavyHit", "중격", "위력이 2배가 되지만 코스트가 +1 증가합니다",
+                    BTags(BTag(BehaviorKeyword.HeavyHit, 1)), SkillType.Attack, 3, false, "",
+                    Kw(KeywordType.PowerMul, 2f),
+                    Kw(KeywordType.CostAdd, 1)),
+
+                Mk("Aug_Execution", "사형 선고", "HP 10 이하의 적을 즉사시킵니다 (보스 제외)",
+                    BTags(BTag(BehaviorKeyword.Execution, 10)), SkillType.Attack, 3, false, ""),
+
+                // ── 저주 (강력 + 페널티) ──
+                Mk("Aug_BloodPact", "피의 계약", "위력이 +5 증가합니다",
+                    BTags(BTag(BehaviorKeyword.BloodPact, 1)), SkillType.Attack, 2, true, "매턴 HP 2 감소",
                     Kw(KeywordType.PowerAdd, 5),
                     Kw(KeywordType.HPPerTurn, -2, KeywordTrigger.Passive)),
 
-                Mk("Aug_GlassCannon", "유리 대포", "위력이 +8 증가합니다", AugmentType.GlassCannon, SkillType.Attack, 3, true, "받는 피해 +50%",
+                Mk("Aug_GlassCannon", "유리 대포", "위력이 +8 증가합니다",
+                    BTags(BTag(BehaviorKeyword.GlassCannon, 1)), SkillType.Attack, 3, true, "받는 피해 2배",
                     Kw(KeywordType.PowerAdd, 8),
-                    Kw(KeywordType.DamageTakenMul, 1.5f)),
+                    Kw(KeywordType.DamageTakenMul, 2f)),
 
-                Mk("Aug_Reaper", "수확자", "적을 처치할 때 HP 10을 회복합니다", AugmentType.Reaper, SkillType.Attack, 2, true, "코스트 +1",
+                Mk("Aug_Reaper", "수확자", "적을 처치할 때 HP 10을 회복합니다",
+                    BTags(BTag(BehaviorKeyword.Reaper, 10)), SkillType.Attack, 2, true, "코스트 +1",
                     Kw(KeywordType.OnKillHeal, 10),
                     Kw(KeywordType.CostAdd, 1)),
 
-                Mk("Aug_AOEAuto", "파동", "단일 대상 스킬이 자동으로 광역이 됩니다 (위력 65%)", AugmentType.AOEAuto, SkillType.Attack, 2, true, "코스트 +1",
-                    Kw(KeywordType.CostAdd, 1)),
+                Mk("Aug_AOEAuto", "파동", "단일 대상 스킬이 자동으로 광역이 됩니다 (위력 유지)",
+                    BTags(BTag(BehaviorKeyword.AOEAuto, 1)), SkillType.Attack, 2, true, "코스트 +2",
+                    Kw(KeywordType.CostAdd, 2)),
 
-                Mk("Aug_Berserk", "광폭", "위력이 2배가 됩니다", AugmentType.Berserk, SkillType.Attack, 3, true, "HP 50% 이하일 때만 발동",
-                    Kw(KeywordType.PowerMul, 2f, KeywordTrigger.HPBelow, 0.5f)),
+                Mk("Aug_Berserk", "광폭", "HP 절반 이하일 때 위력이 2배가 됩니다",
+                    BTags(BTag(BehaviorKeyword.Berserk, 1)), SkillType.Attack, 3, true, "HP 50% 이하일 때만 발동"),
+
+                // ── Phase ARCH-4 신규 (상황/상태 기반 위력 보상) ──
+                Mk("Aug_Bulwark", "방패벽", "쉴드 보유 시 위력 +5",
+                    BTags(BTag(BehaviorKeyword.Bulwark, 5)), SkillType.Attack, 1, false, ""),
+
+                Mk("Aug_Dominance", "지배", "적 현재체력이 나보다 낮을 때 위력 +4",
+                    BTags(BTag(BehaviorKeyword.Dominance, 4)), SkillType.Attack, 1, false, ""),
+
+                Mk("Aug_FirstBlood", "첫 피", "풀피 적에게 위력 +4",
+                    BTags(BTag(BehaviorKeyword.FirstBlood, 4)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_Cull", "도축", "체력이 절반 이하인 적에게 위력 +6",
+                    BTags(BTag(BehaviorKeyword.Cull, 6)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_Desperation", "절박", "잃은 체력 5당 위력 +1 (다칠수록 강해짐)",
+                    BTags(BTag(BehaviorKeyword.Desperation, 5)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_GiantSlayer", "거인살해자", "최대체력 100 이상인 적에게 위력 +6 (엘리트/보스 특화)",
+                    BTags(BTag(BehaviorKeyword.GiantSlayer, 6)), SkillType.Attack, 3, false, ""),
+
+                Mk("Aug_AllIn", "올인", "사용 후 AP가 0이면 추가 위력 +8 (마지막 스킬 보상)",
+                    BTags(BTag(BehaviorKeyword.AllIn, 8)), SkillType.Attack, 3, false, ""),
+
+                Mk("Aug_Bounty", "현상금", "이 스킬로 적 처치 시 HP 회복 보상 (rank=3)",
+                    BTags(BTag(BehaviorKeyword.Bounty, 3)), SkillType.Attack, 2, false, ""),
+
+                // ── Phase ARCH-5 신규 (사용 누적 — UsesThisBattle 기반) ──
+                Mk("Aug_Momentum", "관성", "이 전투에서 매 사용 시 위력 +2 (누적)",
+                    BTags(BTag(BehaviorKeyword.Momentum, 2)), SkillType.Attack, 2, false, ""),
+
+                Mk("Aug_Mastery", "숙련", "이 전투에서 매 사용 시 코스트 -1 (누적, 최소 0)",
+                    BTags(BTag(BehaviorKeyword.Mastery, 1)), SkillType.Attack, 3, false, ""),
+
+                // ── Phase ARCH-4/5 저주 (페널티 동반) ──
+                Mk("Aug_Wound", "상처", "기본 위력은 높으나 잃은 체력 5당 위력 -1 (다치면 약해짐)",
+                    BTags(BTag(BehaviorKeyword.Wound, 5)), SkillType.Attack, 2, true, "잃은 체력 비례 위력 감소",
+                    Kw(KeywordType.PowerAdd, 3)),
+
+                Mk("Aug_Fatigue", "피로", "매 사용 시 위력 -2 (누적). 대신 기본 위력 +3",
+                    BTags(BTag(BehaviorKeyword.Fatigue, 2)), SkillType.Attack, 2, true, "반복 사용 시 약화",
+                    Kw(KeywordType.PowerAdd, 3)),
+
+                Mk("Aug_Escalation", "에스컬레이션", "매 사용 시 코스트 +1 (누적). 대신 기본 위력 +3",
+                    BTags(BTag(BehaviorKeyword.Escalation, 1)), SkillType.Attack, 2, true, "반복 사용 시 비싸짐",
+                    Kw(KeywordType.PowerAdd, 3)),
             };
 
-            foreach (var (fileName, augmentName, description, type, compatSkillType, tier, isCursed, curseDesc, keywords) in augments)
+            foreach (var (fileName, augmentName, description, behaviors, compatSkillType, tier, isCursed, curseDesc, keywords) in augments)
             {
                 var path = $"{AUGMENT_PATH}/{fileName}.asset";
                 var augment = GetOrCreateAsset<AugmentData>(path);
@@ -87,7 +172,7 @@ namespace TeamLog.Editor
 
                 SetPrivateField(augment, "_augmentName", augmentName);
                 SetPrivateField(augment, "_description", description);
-                SetPrivateField(augment, "_type", type);
+                SetPrivateField(augment, "_behaviors", behaviors);
                 SetPrivateField(augment, "_compatibleSkillType", compatSkillType);
                 SetPrivateField(augment, "_tier", tier);
                 SetPrivateField(augment, "_isCursed", isCursed);
@@ -97,15 +182,45 @@ namespace TeamLog.Editor
                 EditorUtility.SetDirty(augment);
             }
 
-            Debug.Log($"[DataGenerator] 증강 데이터 {augments.Length}개 생성 완료");
+            // Phase BK: 기존 Aug_Drain.asset 제거 (Aug_Lifesteal로 교체됨, GUID 재발급 감수)
+            DeleteLegacyAsset("Aug_Drain");
+
+            Debug.Log($"[DataGenerator] 증강 데이터 {augments.Length}개 생성 완료 (Phase BK BehaviorKeyword)");
         }
 
-        /// <summary>증강 데이터 튜플 생성 헬퍼</summary>
-        private static (string, string, string, AugmentType, SkillType, int, bool, string, KeywordEntry[])
-            Mk(string fileName, string name, string desc, AugmentType type, SkillType compat, int tier, bool cursed, string curseDesc,
+        /// <summary>Phase BK: 구식 에셋 삭제 헬퍼 (Aug_Drain 등).</summary>
+        private static void DeleteLegacyAsset(string fileName)
+        {
+            string assetPath = $"{AUGMENT_PATH}/{fileName}.asset";
+            string metaPath = assetPath + ".meta";
+            if (AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath) != null)
+            {
+                bool ok = AssetDatabase.DeleteAsset(assetPath);
+                if (ok) Debug.Log($"[DataGenerator] 레거시 에셋 삭제: {fileName}");
+                else Debug.LogWarning($"[DataGenerator] 레거시 에셋 삭제 실패: {fileName}");
+            }
+            // .meta 파일이 남아있으면 수동 제거
+            if (System.IO.File.Exists(metaPath))
+            {
+                System.IO.File.Delete(metaPath);
+            }
+        }
+
+        /// <summary>증강 데이터 튜플 생성 헬퍼 (Phase BK)</summary>
+        private static (string, string, string, BehaviorTag[], SkillType, int, bool, string, KeywordEntry[])
+            Mk(string fileName, string name, string desc, BehaviorTag[] behaviors, SkillType compat, int tier, bool cursed, string curseDesc,
                params KeywordEntry[] keywords)
         {
-            return (fileName, name, desc, type, compat, tier, cursed, curseDesc, keywords);
+            return (fileName, name, desc, behaviors, compat, tier, cursed, curseDesc, keywords);
+        }
+
+        /// <summary>BehaviorTag 배열 생성 헬퍼 (params 단일 래퍼)</summary>
+        private static BehaviorTag[] BTags(params BehaviorTag[] tags) => tags;
+
+        /// <summary>BehaviorTag 생성 헬퍼</summary>
+        private static BehaviorTag BTag(BehaviorKeyword keyword, int rank = 0)
+        {
+            return new BehaviorTag(keyword, rank);
         }
 
         /// <summary>KeywordEntry 생성 헬퍼</summary>

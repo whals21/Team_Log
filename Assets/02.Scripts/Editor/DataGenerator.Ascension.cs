@@ -22,8 +22,9 @@ namespace TeamLog.Editor
         private const string ASCENSION_PATH = "Assets/03.Data/Ascension";
 
         /// <summary>
-        /// 7개 핵심 modifier 에셋 생성 (BossHpPercent 제외 — 레벨 15 단일 고정값은 AscensionManager에 하드코딩).
+        /// 6개 핵심 modifier 에셋 생성.
         /// 각 에셋의 값은 per-stack 값(단일 적용 시 효과) — 누적은 AscensionManager가 stack × value로 계산.
+        /// 참고: EnemyAtkPercent는 ATK=0 구조에서 무의미하여 제거됨 (2026-06-30). 레벨 6/12는 빈 레벨.
         /// </summary>
         [MenuItem("TeamLog/Generate Ascension Data", false, 112)]
         public static void GenerateAscensionModifiers()
@@ -33,10 +34,6 @@ namespace TeamLog.Editor
             CreateModifier("AscMod_EnemyHp", "적 강화",
                 "적 HP +5% (누적: 7렙 +10%, 13렙 +15%)",
                 AscensionModifierType.EnemyHpPercent, intValue: 0, floatValue: 0.05f);
-
-            CreateModifier("AscMod_EnemyAtk", "적 공격 강화",
-                "적 ATK +5% (12렙 누적 시 +10%)",
-                AscensionModifierType.EnemyAtkPercent, intValue: 0, floatValue: 0.05f);
 
             CreateModifier("AscMod_PlayerHp", "파티 쇠약",
                 "파티 MaxHP -5% (10렙 누적 시 -10%)",
@@ -58,9 +55,18 @@ namespace TeamLog.Editor
                 "보스 HP +20% (어센션 15 전용)",
                 AscensionModifierType.BossHpPercent, intValue: 0, floatValue: 0.20f);
 
+            // EnemyAtk 제거로 orphan 된 레거시 에셋 정리
+            string legacyPath = $"{ASCENSION_PATH}/AscMod_EnemyAtk.asset";
+            if (AssetDatabase.LoadAssetAtPath<AscensionModifierData>(legacyPath) != null)
+            {
+                bool ok = AssetDatabase.DeleteAsset(legacyPath);
+                if (ok) Debug.Log("[DataGenerator] 레거시 에셋 삭제: AscMod_EnemyAtk");
+                else Debug.LogWarning("[DataGenerator] 레거시 에셋 삭제 실패: AscMod_EnemyAtk");
+            }
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("[DataGenerator] 어센션 modifier 7종 생성 완료");
+            Debug.Log("[DataGenerator] 어센션 modifier 6종 생성 완료 (EnemyAtk 제거됨)");
         }
 
         private static void CreateModifier(string fileName, string displayName, string desc,

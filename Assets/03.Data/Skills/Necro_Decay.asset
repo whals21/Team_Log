@@ -24,3 +24,4 @@ MonoBehaviour:
   _statusEffect: 1
   _effectDuration: 3
   _effectValue: 3
+  _behaviors: []

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0914af7ca0c602241b3c3abcafabd26e, type: 3}
+  m_Name: Pattern_Enemy_BossKraken
+  m_EditorClassIdentifier: 
+  _enemyId: Enemy_BossKraken
+  _skills:
+  - {fileID: 11400000, guid: 2b5342d7b98c18f4585b18c7bde13e41, type: 2}
+  - {fileID: 11400000, guid: cefaca3c2a6ad5a4893370c25a81dfb9, type: 2}
+  - {fileID: 11400000, guid: 554f912f4f01b5643b1fac95e34604c4, type: 2}
+  - {fileID: 11400000, guid: 137ac5a3b86d6bd40bb3d9d4c8423323, type: 2}
+  _weights: 1e000000190000001900000014000000

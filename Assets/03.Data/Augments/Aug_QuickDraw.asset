@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _augmentName: "\uC2E0\uC18D"
   _description: "\uAC00\uC911\uCE58\uAC00 0\uC774 \uB418\uC5B4 \uBB34\uC870\uAC74
-    \uBF51\uD799\uB2C8\uB2E4 (\uC704\uB825 80%)"
-  _type: 6
+    \uBF51\uD799\uB2C8\uB2E4 (\uC704\uB825 \uC808\uBC18)"
+  _behaviors:
+  - Keyword: 17
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 1
   _icon: {fileID: 0}
@@ -23,7 +25,7 @@ MonoBehaviour:
   _curseDescription: 
   _keywords:
   - Type: 1
-    Value: 0.8
+    Value: 0.5
     Trigger: 0
     ConditionParam: 0
   - Type: 4

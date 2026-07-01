@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_BossFlameEmperor
+  m_EditorClassIdentifier: 
+  _characterName: "\uC5FC\uD669\uC81C"
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 224
+  _baseATK: 0
+  _baseDEF: 0
+  _enemyTrait: 11
+  _isBoss: 1
+  _skills:
+  - {fileID: 11400000, guid: 3c044bb8f23eb5d43b9b86f847afd0c4, type: 2}
+  - {fileID: 11400000, guid: 4884008ab93ce18449c51729198ecef7, type: 2}
+  - {fileID: 11400000, guid: 0512c2ae4487202499e78654d138e38e, type: 2}
+  - {fileID: 11400000, guid: cfd1860b18a4c0e4abe0b26c13e54a1a, type: 2}
+  _isDefault: 1
+  _unlockCondition: 

@@ -15,7 +15,9 @@ MonoBehaviour:
   _augmentName: "\uBE44\uC6A9 \uAC10\uC18C"
   _description: "\uC2A4\uD0AC \uCF54\uC2A4\uD2B8\uAC00 1 \uAC10\uC18C\uD569\uB2C8\uB2E4
     (\uCD5C\uC18C 0)"
-  _type: 0
+  _behaviors:
+  - Keyword: 16
+    Rank: 1
   _compatibleSkillType: 0
   _tier: 1
   _icon: {fileID: 0}

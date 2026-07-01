@@ -132,12 +132,6 @@ namespace TeamLog.Tests
             Assert.AreEqual(0.80f, AscensionManager.GetHealMulByLevel(11));
         }
 
-        [Test]
-        public void EnemyAtkMul_Level12_Returns1_10()
-        {
-            Assert.AreEqual(1.10f, AscensionManager.GetEnemyAtkMulByLevel(12));
-        }
-
         // ═══════════════════════════════════════════
         // 3. GetActiveModifiers — 활성 modifier 개수
         // ═══════════════════════════════════════════
@@ -175,11 +169,12 @@ namespace TeamLog.Tests
         }
 
         [Test]
-        public void ActiveModifiers_Level15_TotalStacks_Equals15()
+        public void ActiveModifiers_Level15_TotalStacks_Equals13()
         {
-            // 레벨 15: 모든 modifier의 스택 합 = 15
+            // 레벨 15: EnemyAtk 제거 후 스택 합 = 13
+            // (EnemyHp 3 + StartGold 2 + Reroll 3 + PlayerHp 2 + Heal 2 + BossHp 1)
             var list = AscensionManager.GetActiveModifiers(15);
-            Assert.AreEqual(15, list.Count);
+            Assert.AreEqual(13, list.Count);
         }
 
         // ═══════════════════════════════════════════

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0914af7ca0c602241b3c3abcafabd26e, type: 3}
+  m_Name: Pattern_Enemy_BossLichKing
+  m_EditorClassIdentifier: 
+  _enemyId: Enemy_BossLichKing
+  _skills:
+  - {fileID: 11400000, guid: 7bff0933b2e78dc4eb162b8d3d7577de, type: 2}
+  - {fileID: 11400000, guid: 10757be00c7713542aba084f00b84e50, type: 2}
+  - {fileID: 11400000, guid: 911ebcdaa4dbe5b46b47b303192702ed, type: 2}
+  - {fileID: 11400000, guid: b51128a6da039e0438ced25bbc6d95fe, type: 2}
+  _weights: 1e000000190000001900000014000000

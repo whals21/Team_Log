@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_BossStormLord
+  m_EditorClassIdentifier: 
+  _characterName: "\uD3ED\uD48D \uAD70\uC8FC"
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 187
+  _baseATK: 0
+  _baseDEF: 0
+  _enemyTrait: 4
+  _isBoss: 1
+  _skills:
+  - {fileID: 11400000, guid: 40f3491798453004f90b8ac1b25d2926, type: 2}
+  - {fileID: 11400000, guid: 51822693cbc70284da92313ef5e6276b, type: 2}
+  - {fileID: 11400000, guid: 0a61ef5a31c64de4ba4a9a87d43051d7, type: 2}
+  - {fileID: 11400000, guid: 2b945ad72fe54674586a140898a8cc10, type: 2}
+  _isDefault: 1
+  _unlockCondition: 

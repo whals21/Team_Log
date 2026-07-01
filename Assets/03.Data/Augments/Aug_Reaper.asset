@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _augmentName: "\uC218\uD655\uC790"
   _description: "\uC801\uC744 \uCC98\uCE58\uD560 \uB54C HP 10\uC744 \uD68C\uBCF5\uD569\uB2C8\uB2E4"
-  _type: 15
+  _behaviors:
+  - Keyword: 15
+    Rank: 10
   _compatibleSkillType: 0
   _tier: 2
   _icon: {fileID: 0}

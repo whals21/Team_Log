@@ -99,7 +99,12 @@ namespace TeamLog.Characters
         AttackDown,
         Regeneration,
         Shield,
-        Taunt
+        Taunt,
+
+        // ── Phase CC 신규 (캐릭터 고유 메카닉) ──
+        ForcedTarget,   // Duran — 단일 적이 지정 캐릭터만 공격 강제 (effectValue = 타겟 ID)
+        Prophecy,       // Sibyl — 1턴 뒤 발동 예약 (value = 예약된 스킬 효과 식별자)
+        Charge,         // Taranis — 전하 상태 (stacks = 전하 스택 수, 매 턴 연쇄)
     }
 
     public class ActiveEffect

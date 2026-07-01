@@ -119,9 +119,10 @@ namespace TeamLog.Combat
 
         /// <summary>
         /// 어센션 modifier를 적 전투 인스턴스에 적용.
-        /// - 적 HP/ATK: 모든 적 (mul)
+        /// - 적 HP: 모든 적 (mul)
         /// - 보스 HP: isBossBattle=true일 때 추가 mul
         /// 리롤 delta는 InitializeBattle의 maxRerolls 계산에서 적용.
+        /// 참고: EnemyAtkPercent는 제거됨 — 시스템 전체 ATK=0 구조에서 무의미 (2026-06-30).
         /// </summary>
         private void ApplyAscensionModifiers(bool isBossBattle)
         {
@@ -131,7 +132,6 @@ namespace TeamLog.Combat
             if (asc <= 0) return;
 
             float hpMul = AscensionManager.GetEnemyHpMulByLevel(asc);
-            float atkMul = AscensionManager.GetEnemyAtkMulByLevel(asc);
             float bossMul = isBossBattle ? AscensionManager.GetBossHpMulByLevel(asc) : 1f;
 
             foreach (var enemy in _enemies)
@@ -140,15 +140,6 @@ namespace TeamLog.Combat
                 // HP — Initialize 재호출로 MaxHP 재설정. 현재 HP도 같이 스케일.
                 int scaledMax = System.Math.Max(1, (int)(enemy.Health.MaxHP * hpMul * bossMul));
                 enemy.Health.Initialize(scaledMax);
-                // ATK — AddPermanentBase로 베이스 증가 (해제 불가).
-                // atkMul 1.05 → baseATK 0이면 0. 영향 없음. baseATK > 0인 적에만 의미.
-                int baseAtk = enemy.Stats.GetBaseStat(StatType.ATK);
-                if (baseAtk > 0)
-                {
-                    int delta = System.Math.Max(0, (int)(baseAtk * atkMul) - baseAtk);
-                    if (delta > 0)
-                        enemy.Stats.AddPermanentBase(StatType.ATK, delta);
-                }
             }
         }
 

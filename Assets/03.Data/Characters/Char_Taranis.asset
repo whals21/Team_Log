@@ -14,19 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _characterName: "\uD0C0\uB77C\uB2C8\uC2A4"
   _characterClass: 10
-  _description: "\uD3ED\uD48D \uC18C\uD658\uC0AC. \uB124\uD2B8\uC6CC\uD06C\uC5D0
-    \uD22C\uC790\uD558\uB294 \uAC04\uC811 \uB51C\uB7EC (Charge \uBA54\uCE74\uB2C9\uC740
-    \uCD94\uD6C4 \uAD6C\uD604)"
+  _description: "\uD3ED\uD48D \uC18C\uD658\uC0AC. \uC801\uC5D0\uAC8C \uC804\uD558\uB97C
+    \uBD80\uC5EC\uD558\uC5EC \uB9E4 \uD134 \uC5F0\uC1C4 \uB3C4\uD2B8 \uB370\uBBF8\uC9C0"
   _baseHP: 85
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 8
   _isBoss: 0
   _skills:
-  - {fileID: 11400000, guid: aee84decafb2c944ea25b340265cfabb, type: 2}
-  - {fileID: 11400000, guid: bba8969b5bd6cee44bebb15a78caf26c, type: 2}
-  - {fileID: 11400000, guid: bcb6c109f5fde9a4bb2cfca7ef16f335, type: 2}
-  - {fileID: 11400000, guid: d82f8ab92b4e03f41a7d5f93d3d09510, type: 2}
+  - {fileID: 11400000, guid: 2eb57184c51844143bce65a8fff754c4, type: 2}
+  - {fileID: 11400000, guid: 6089fee01e6a9644c8e95bfa9ad2babc, type: 2}
+  - {fileID: 11400000, guid: e86e68ebd4183a742a572a63cf1f01cc, type: 2}
+  - {fileID: 11400000, guid: b3e724b1f85e167419c704999cafd3d5, type: 2}
   _isDefault: 1
   _unlockCondition: 
   _resourceType: 0

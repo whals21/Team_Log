@@ -411,6 +411,25 @@ namespace TeamLog.Combat.Turn
             foreach (var c in _playerParty)
                 if (c.IsAlive && c.Resource != null) c.Resource.OnTurnEnd(c);
 
+            // Phase CC: Taranis Charge 네트워크 — Charge 상태인 적에게 매 턴 연쇄 도트 데미지
+            // Charge의 Value = 전하 스택 수. 1스택당 도트 1. (적에게 부여된 상태이상 기반)
+            foreach (var c in _enemies)
+            {
+                if (!c.IsAlive) continue;
+                if (c.StatusEffects.HasEffect(StatusEffectType.Charge))
+                {
+                    foreach (var effect in c.StatusEffects.GetAllEffects())
+                    {
+                        if (effect.Type == StatusEffectType.Charge && effect.Value > 0)
+                        {
+                            c.Health.TakeDamage(effect.Value);
+                            CombatEventBus.FireDamageReceived(c, effect.Value);
+                            break;
+                        }
+                    }
+                }
+            }
+
             // 만료된 효과 제거 후 스탯 수정자 재계산
             foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();
             foreach (var c in _enemies) if (c.IsAlive) c.ApplyStatModifiers();

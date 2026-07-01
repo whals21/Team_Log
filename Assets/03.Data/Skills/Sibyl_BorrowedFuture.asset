@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 359ccd898c414ec499c7b83b44f63fdd, type: 3}
+  m_Name: Sibyl_BorrowedFuture
+  m_EditorClassIdentifier: 
+  _skillName: "\uBBF8\uB798 \uCC28\uC6A9"
+  _description: 
+  _skillType: 2
+  _targetType: 4
+  _power: 0
+  _cost: 1
+  _weight: 50
+  _icon: {fileID: 0}
+  _statusEffect: 9
+  _effectDuration: 2
+  _effectValue: 3
+  _behaviors: []
+  _resourceGainType: 0
+  _resourceGainAmount: 0
+  _resourceCostType: 0
+  _resourceCostAmount: 0

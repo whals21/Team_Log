@@ -44,6 +44,34 @@ namespace TeamLog.Editor
                 power: 16, cost: 2,
                 costType: ResourceType.Frost, costAmount: 3); // Frost 3 소모 (폭딜, 최대치 필요)
 
+            // ── Taranis (Stormcaller) Charge Network 연동 스킬 ──
+            // Charge 상태이상(value=스택수, duration=2턴)을 적에게 부여.
+            // 매 턴 종료 시 Charge 상태 적에게 value만큼 도트 데미지 (TurnManager.ProcessTurnEnd).
+            CreatePhaseCCSkill("Taranis_Wire", "와이어", SkillType.Attack, TargetType.SingleEnemy,
+                power: 3, cost: 1, statusEffect: StatusEffectType.Charge, effectDuration: 2, effectValue: 2);
+
+            CreatePhaseCCSkill("Taranis_Branch", "브랜치", SkillType.Attack, TargetType.AllEnemies,
+                power: 2, cost: 2, statusEffect: StatusEffectType.Charge, effectDuration: 2, effectValue: 1);
+
+            CreatePhaseCCSkill("Taranis_GroundingField", "접지 장벽", SkillType.Shield, TargetType.AllAllies,
+                power: 10, cost: 2);
+
+            CreatePhaseCCSkill("Taranis_Thunderstorm", "뇌우", SkillType.Attack, TargetType.AllEnemies,
+                power: 10, cost: 3, statusEffect: StatusEffectType.Charge, effectDuration: 2, effectValue: 3);
+
+            // ── Sibyl (Oracle) Prophecy 연동 스킬 (간소화 — 일반 힐/딜로 처리, Prophecy 메카닉은 추후) ──
+            CreatePhaseCCSkill("Sibyl_DeathProphecy", "죽음의 예언", SkillType.Attack, TargetType.SingleEnemy,
+                power: 14, cost: 1); // 일반 딜 (정식 Prophecy 1턴 뒤 발동은 추후)
+
+            CreatePhaseCCSkill("Sibyl_VisionOfRenewal", "갱생의 환영", SkillType.Heal, TargetType.SingleAlly,
+                power: 12, cost: 1);
+
+            CreatePhaseCCSkill("Sibyl_BorrowedFuture", "미래 차용", SkillType.Buff, TargetType.Self,
+                power: 0, cost: 1, statusEffect: StatusEffectType.AttackUp, effectDuration: 2, effectValue: 3);
+
+            CreatePhaseCCSkill("Sibyl_DéjàVu", "데자부", SkillType.Attack, TargetType.SingleEnemy,
+                power: 10, cost: 1);
+
             // Ashe — Pyromancer (Ember 자해 폭딜).
             // Cinder Accretion(충전) + Brand of Ash(폭딜) + 기존 Mage 스킬 2종
             CreatePhaseCCCharacter("Char_Ashe", "아셰", CharacterClass.Pyromancer,
@@ -65,16 +93,16 @@ namespace TeamLog.Editor
                 75, 0, 0, new[] { "Lumi_Frostbolt", "Lumi_GlacialSpike", "Mage_MagicShield", "Mage_IceSpear" },
                 EnemyTrait.ArcaneFury, true, "", ResourceType.Frost);
 
-            // Sibyl — Oracle (Prophecy 지연 발동 — 자원 None 임시, 정식 메카닉은 추후)
+            // Sibyl — Oracle (Prophecy 지연 발동 — 간소화 버전, 정식 1턴 뒤 발동은 추후)
             CreatePhaseCCCharacter("Char_Sibyl", "시빌", CharacterClass.Oracle,
-                "예언자. 미래에 투자하는 서포터 (Prophecy 메카닉은 추후 구현)",
-                80, 0, 0, new[] { "Healer_Heal", "Healer_Barrier", "Healer_Purify", "Healer_Blessing" },
+                "예언자. 미래에 투자하는 서포터 (정식 Prophecy 1턴 뒤 발동은 추후 구현)",
+                80, 0, 0, new[] { "Sibyl_DeathProphecy", "Sibyl_VisionOfRenewal", "Sibyl_BorrowedFuture", "Sibyl_DéjàVu" },
                 EnemyTrait.Regenerate, true, "", ResourceType.None);
 
-            // Taranis — Stormcaller (Charge Network — 자원 None 임시, 정식 메카닉은 추후)
+            // Taranis — Stormcaller (Charge Network — 적에게 Charge 상태이상 부여, 매 턴 연쇄 도트)
             CreatePhaseCCCharacter("Char_Taranis", "타라니스", CharacterClass.Stormcaller,
-                "폭풍 소환사. 네트워크에 투자하는 간접 딜러 (Charge 메카닉은 추후 구현)",
-                85, 0, 0, new[] { "Mage_Fireball", "Mage_Meteor", "Mage_MagicShield", "Mage_IceSpear" },
+                "폭풍 소환사. 적에게 전하를 부여하여 매 턴 연쇄 도트 데미지",
+                85, 0, 0, new[] { "Taranis_Wire", "Taranis_Branch", "Taranis_GroundingField", "Taranis_Thunderstorm" },
                 EnemyTrait.ArcaneFury, true, "", ResourceType.None);
 
             Debug.Log("[DataGenerator] Phase CC 캐릭터 5종 생성 완료 (Ashe/Duran/Lumi/Sibyl/Taranis)");

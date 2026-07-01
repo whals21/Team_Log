@@ -215,6 +215,12 @@ namespace TeamLog.UI.Battle
         public override void UpdateStats(int atk, int def)
         {
             base.UpdateStats(atk, def);
+            // Phase CC: ATK/DEF 아래에 캐릭터 고유 자원(Ember/Vengeance/Frost) 표시
+            if (_character?.Resource != null && _statText != null)
+            {
+                string resourceName = _character.Resource.Resource.ToString();
+                _statText.text += $"\n<size=70%><color=#FFD700>{resourceName} {_character.Resource.CurrentStacks}/{_character.Resource.MaxStacks}</color></size>";
+            }
             UpdateTooltipContent();
         }
 

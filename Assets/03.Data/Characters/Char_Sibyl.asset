@@ -15,17 +15,18 @@ MonoBehaviour:
   _characterName: "\uC2DC\uBE4C"
   _characterClass: 11
   _description: "\uC608\uC5B8\uC790. \uBBF8\uB798\uC5D0 \uD22C\uC790\uD558\uB294
-    \uC11C\uD3EC\uD130 (Prophecy \uBA54\uCE74\uB2C9\uC740 \uCD94\uD6C4 \uAD6C\uD604)"
+    \uC11C\uD3EC\uD130 (\uC815\uC2DD Prophecy 1\uD134 \uB4A4 \uBC1C\uB3D9\uC740 \uCD94\uD6C4
+    \uAD6C\uD604)"
   _baseHP: 80
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 1
   _isBoss: 0
   _skills:
-  - {fileID: 11400000, guid: 4836e693326518a4a9bda867d38f69dd, type: 2}
-  - {fileID: 11400000, guid: 04a936e3b39ebce48bbcf25eb93404a9, type: 2}
-  - {fileID: 11400000, guid: 49dfc59d8b7d42a448704b391b1140f0, type: 2}
-  - {fileID: 11400000, guid: 79a815be6b20d15498c1ee20d67e64c6, type: 2}
+  - {fileID: 11400000, guid: d5d47d3aef2fbc54aba20de073882df1, type: 2}
+  - {fileID: 11400000, guid: 7767bca5a503c4d4e8016de368130226, type: 2}
+  - {fileID: 11400000, guid: d36b115b838c38d4f9d232e1daccd725, type: 2}
+  - {fileID: 11400000, guid: 96668b5b292e99a4680dd698050a74da, type: 2}
   _isDefault: 1
   _unlockCondition: 
   _resourceType: 0

@@ -35,6 +35,15 @@ namespace TeamLog.Editor
                 power: 18, cost: 2,
                 costType: ResourceType.Vengeance, costAmount: 5); // Vengeance 5 소모 (폭딜)
 
+            // ── Lumi (Cryomancer) Frost 연동 스킬 ──
+            CreatePhaseCCSkill("Lumi_Frostbolt", "서리 화살", SkillType.Attack, TargetType.SingleEnemy,
+                power: 5, cost: 1, statusEffect: StatusEffectType.Freeze, effectDuration: 1, effectValue: 1,
+                gainType: ResourceType.Frost, gainAmount: 1); // Frost +1 (충전)
+
+            CreatePhaseCCSkill("Lumi_GlacialSpike", "빙하 창", SkillType.Attack, TargetType.SingleEnemy,
+                power: 16, cost: 2,
+                costType: ResourceType.Frost, costAmount: 3); // Frost 3 소모 (폭딜, 최대치 필요)
+
             // Ashe — Pyromancer (Ember 자해 폭딜).
             // Cinder Accretion(충전) + Brand of Ash(폭딜) + 기존 Mage 스킬 2종
             CreatePhaseCCCharacter("Char_Ashe", "아셰", CharacterClass.Pyromancer,
@@ -49,10 +58,11 @@ namespace TeamLog.Editor
                 120, 0, 0, new[] { "Duran_RevengeStrike", "Warrior_Shield", "Warrior_Taunt", "Warrior_Strike" },
                 EnemyTrait.Sturdy, true, "", ResourceType.Vengeance);
 
-            // Lumi — Cryomancer (Frost 통제). Mage 스킬 변형.
+            // Lumi — Cryomancer (Frost 통제).
+            // Frostbolt(충전) + GlacialSpike(폭딜) + 기존 Mage 스킬 2종
             CreatePhaseCCCharacter("Char_Lumi", "루미", CharacterClass.Cryomancer,
                 "냉기 마법사. Frost를 축적하여 적을 얼린다",
-                75, 0, 0, new[] { "Mage_IceSpear", "Mage_Fireball", "Mage_MagicShield", "Mage_Meteor" },
+                75, 0, 0, new[] { "Lumi_Frostbolt", "Lumi_GlacialSpike", "Mage_MagicShield", "Mage_IceSpear" },
                 EnemyTrait.ArcaneFury, true, "", ResourceType.Frost);
 
             // Sibyl — Oracle (Prophecy 지연 발동 — 자원 None 임시, 정식 메카닉은 추후)

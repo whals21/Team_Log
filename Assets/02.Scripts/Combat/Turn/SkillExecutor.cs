@@ -47,37 +47,15 @@ namespace TeamLog.Combat.Turn
 
         /// <summary>
         /// 단일 대상에게 스킬 효과 적용 (타겟 분류는 TurnManager가 담당)
+        /// Phase CC 통합: 모든 스킬 타입을 Pipeline.ExecuteSkill로 위임.
+        /// Attack/Heal/Shield/Buff/Debuff/Purify 모두 Pipeline이 자원 비례 위력 + Behavior 처리.
         /// </summary>
         public void ExecuteSkillInternal(Character caster, SkillData skill, Character target,
             SkillInstance instance = null, float powerMultiplier = 1f)
         {
-            switch (skill.Type)
-            {
-                case SkillType.Attack:
-                    // Phase ARCH-3: 조립식 파이프라인으로 우회 (Behavior 자동 처리 + 글로벌 훅 포함)
-                    // 기존 ExecuteAttack + ApplyTouchEffects를 Pipeline이 통합 담당.
-                    _pipeline.ExecuteAttack(caster, skill, target, instance, powerMultiplier);
-                    break;
-                case SkillType.Heal:
-                    ExecuteHeal(caster, target, skill, instance, powerMultiplier);
-                    break;
-                case SkillType.Buff:
-                    ApplyEffect(caster, skill, target, instance);
-                    break;
-                case SkillType.Debuff:
-                    ApplyEffect(caster, skill, target, instance);
-                    break;
-                case SkillType.Shield:
-                    ExecuteShield(caster, target, skill, instance);
-                    break;
-                case SkillType.Purify:
-                    ExecutePurify(target);
-                    break;
-            }
-
-            // Phase ARCH-3: Touch 계열은 Pipeline.ExecuteAttack 내부 PostDamage Phase에서 처리.
-            // 비-Attack 타입이거나 Pipeline 미사용 시를 대비한 폴백 (현재는 Pipeline이 담당하므로 미호출).
-            // 기존 ApplyTouchEffects 호출 제거 — Pipeline이 BehaviorRegistry를 통해 자동 호출.
+            // Phase CC: 모든 타입을 Pipeline.ExecuteSkill로 통합 처리
+            // 자원 비례 위력(ResourcePowerPerStack)이 Heal/Shield에도 적용됨
+            _pipeline.ExecuteSkill(caster, skill, target, instance, powerMultiplier);
 
             OnSkillApplied?.Invoke(skill, target);
             CombatEventBus.FireSkillUsed(skill, caster);

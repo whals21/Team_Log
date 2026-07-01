@@ -7,6 +7,7 @@ using SkillData = TeamLog.Characters.SkillData;
 using SkillInstance = TeamLog.Characters.SkillInstance;
 using SkillType = TeamLog.Characters.SkillType;
 using StatType = TeamLog.Characters.StatType;
+using StatusEffectType = TeamLog.Characters.StatusEffectType;
 
 namespace TeamLog.Combat.Turn
 {
@@ -222,6 +223,131 @@ namespace TeamLog.Combat.Turn
             // Phase CC: 피격 시 자원 훅 (Duran Vengeance 축적 등)
             if (target.Resource != null && ctx.LastActualDamage > 0)
                 target.Resource.OnDamageTaken(target, ctx.LastActualDamage);
+        }
+
+        // ═══════════════════════════════════════════
+        // Phase CC 통합: 모든 스킬 타입을 Pipeline으로 처리
+        // Attack은 기존 ExecuteAttack 호출, Heal/Shield/Buff/Debuff/Purify는
+        // 각 전용 메서드에서 자원 비례 위력 + BehaviorTag 적용.
+        // ═══════════════════════════════════════════
+
+        /// <summary>모든 스킬 타입의 통합 진입점. 타입별로 적절한 실행 메서드 분기.</summary>
+        public void ExecuteSkill(Character caster, SkillData skill, Character target,
+            SkillInstance instance = null, float powerMultiplier = 1f, TurnContext turnCtx = null)
+        {
+            if (caster == null || target == null) return;
+
+            switch (skill.Type)
+            {
+                case SkillType.Attack:
+                    ExecuteAttack(caster, skill, target, instance, powerMultiplier, turnCtx);
+                    break;
+                case SkillType.Heal:
+                    ExecuteHealViaPipeline(caster, skill, target, instance, powerMultiplier);
+                    break;
+                case SkillType.Shield:
+                    ExecuteShieldViaPipeline(caster, skill, target, instance, powerMultiplier);
+                    break;
+                case SkillType.Buff:
+                case SkillType.Debuff:
+                    ApplyEffectViaPipeline(caster, skill, target, instance);
+                    break;
+                case SkillType.Purify:
+                    target.StatusEffects.ClearAllEffects();
+                    target.ApplyStatModifiers();
+                    break;
+            }
+        }
+
+        /// <summary>Heal 타입 Pipeline 처리 — 자원 비례 위력 + Behavior PowerModify 적용.</summary>
+        private void ExecuteHealViaPipeline(Character caster, SkillData skill, Character target,
+            SkillInstance instance, float powerMultiplier)
+        {
+            var ctx = new SkillExecContext
+            {
+                Caster = caster, InitialTarget = target, Skill = skill, Instance = instance,
+                PlayerParty = _playerParty, Enemies = _enemies, PowerMultiplier = powerMultiplier,
+            };
+            IReadOnlyList<BehaviorTag> tags = instance?.GetCombinedBehaviors() ?? skill.Behaviors;
+
+            // 위력 계산
+            int basePower = instance != null ? instance.EffectivePower : skill.Power;
+            ctx.CurrentPower = System.Math.Max(1, basePower);
+
+            // Behavior PowerModify (강화 조건 Behavior — FirstBlood/Cull 등)
+            foreach (var b in BehaviorRegistry.GetForPhase(tags, ExecutionPhase.PowerModify))
+                ctx.CurrentPower = b.ModifyPower(ctx.CurrentPower, ctx);
+
+            // Phase CC: 자원 비례 위력 (Heal에도 적용 — Phoenix Renewal Ember×3 등)
+            if (caster.Resource != null && skill.ResourcePowerPerStack > 0)
+                ctx.CurrentPower += caster.Resource.CurrentStacks * skill.ResourcePowerPerStack;
+
+            // 키워드 HealMul 배율
+            float healMul = SkillExecutor.GetAllKeywordMul(caster, KeywordType.HealMul);
+            ctx.CurrentPower = System.Math.Max(1, (int)(ctx.CurrentPower * powerMultiplier * healMul));
+
+            // 힐 적용
+            target.Health.Heal(ctx.CurrentPower);
+            CombatEventBus.FireHealApplied(target, ctx.CurrentPower);
+        }
+
+        /// <summary>Shield 타입 Pipeline 처리 — 자원 비례 위력 + Behavior PowerModify 적용.</summary>
+        private void ExecuteShieldViaPipeline(Character caster, SkillData skill, Character target,
+            SkillInstance instance, float powerMultiplier)
+        {
+            var ctx = new SkillExecContext
+            {
+                Caster = caster, InitialTarget = target, Skill = skill, Instance = instance,
+                PlayerParty = _playerParty, Enemies = _enemies, PowerMultiplier = powerMultiplier,
+            };
+            IReadOnlyList<BehaviorTag> tags = instance?.GetCombinedBehaviors() ?? skill.Behaviors;
+
+            int basePower = instance != null ? instance.EffectivePower : skill.Power;
+            ctx.CurrentPower = System.Math.Max(1, basePower);
+
+            foreach (var b in BehaviorRegistry.GetForPhase(tags, ExecutionPhase.PowerModify))
+                ctx.CurrentPower = b.ModifyPower(ctx.CurrentPower, ctx);
+
+            if (caster.Resource != null && skill.ResourcePowerPerStack > 0)
+                ctx.CurrentPower += caster.Resource.CurrentStacks * skill.ResourcePowerPerStack;
+
+            float shieldMul = SkillExecutor.GetAllKeywordMul(caster, KeywordType.ShieldMul);
+            ctx.CurrentPower = System.Math.Max(1, (int)(ctx.CurrentPower * powerMultiplier * shieldMul));
+
+            target.Health.AddShield(ctx.CurrentPower);
+            CombatEventBus.FireShieldGained(target, ctx.CurrentPower);
+        }
+
+        /// <summary>Buff/Debuff 타입 Pipeline 처리 — 기존 ApplyEffect 로직 이관 + 특성 훅.</summary>
+        private void ApplyEffectViaPipeline(Character caster, SkillData skill, Character target,
+            SkillInstance instance)
+        {
+            if (skill.StatusEffect == StatusEffectType.None) return;
+
+            // Shell 특성: 매 턴 첫 상태이상 무효화
+            if (target.TraitHandler.ShouldBlockEffect()) return;
+
+            int duration = skill.EffectDuration;
+            int value = skill.EffectValue;
+
+            // 증강 DurationAdd
+            if (instance != null)
+                duration += (int)KeywordResolver.SumKeyword(instance.GetAllKeywords(), KeywordType.DurationAdd);
+            // 장착 특성 DurationAdd (도적 독 마스터 등)
+            if (caster != null && caster.PlayerTraitHandler != null && caster.PlayerTraitHandler.HasTrait)
+                duration += caster.PlayerTraitHandler.QueryKeywordSum(KeywordType.DurationAdd);
+
+            // 증강 EffectMul
+            float effectMul = 1f;
+            if (instance != null)
+                effectMul *= KeywordResolver.MulKeyword(instance.GetAllKeywords(), KeywordType.EffectMul);
+            // 장착 특성 EffectMul (네크로맨서 저주의 대가 등)
+            if (caster != null && caster.PlayerTraitHandler != null && caster.PlayerTraitHandler.HasTrait)
+                effectMul *= caster.PlayerTraitHandler.QueryKeywordMul(KeywordType.EffectMul);
+            value = System.Math.Max(1, (int)(value * effectMul));
+
+            target.StatusEffects.ApplyEffect(skill.StatusEffect, duration, value);
+            target.ApplyStatModifiers();
         }
     }
 }

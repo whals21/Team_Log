@@ -60,7 +60,7 @@ namespace TeamLog.Combat
                 return;
             }
 
-            target.Health.TakeDamage(calculatedDamage);
+            target.Health.TakeDamage(calculatedDamage, attacker);
 
             // 공격자 특성: 피해를 입혔을 때 (Corrosive 방어감소)
             attacker.TraitHandler.OnDamageDealtTo(target);

@@ -105,7 +105,7 @@ namespace TeamLog.Combat.AI
                     DamageCalculator.DealDamage(caster, target, skill.Power);
                     break;
                 case SkillType.Shield:
-                    target.Health.AddShield(skill.Power);
+                    target.Health.AddShield(caster, skill.Power);
                     break;
                 case SkillType.Heal:
                     target.Health.Heal(skill.Power);

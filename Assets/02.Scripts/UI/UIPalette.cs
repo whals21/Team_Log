@@ -85,6 +85,13 @@ namespace TeamLog.UI
         public Color EffectShield = new Color(0.5f, 0.35f, 0.15f);
         public Color EffectDefault = new Color(0.4f, 0.4f, 0.4f);
 
+        [Header("Resource Colors (Phase CC)")]
+        public Color ResourceEmber = new Color(0.9f, 0.35f, 0.1f);      // Ashe — 주황/빨강 (화염)
+        public Color ResourceVengeance = new Color(0.55f, 0.15f, 0.7f);  // Duran — 보라 (복수)
+        public Color ResourceFrost = new Color(0.3f, 0.75f, 0.95f);      // Lumi — 청록 (냉기)
+        public Color ResourceProphecy = new Color(0.85f, 0.7f, 0.25f);   // Sibyl — 금색 (예언)
+        public Color ResourceDefault = new Color(0.6f, 0.6f, 0.6f);
+
         [Header("Trait Colors")]
         public Color TraitRegenerate = new Color(0.1f, 0.5f, 0.5f);
         public Color TraitOpportunist = new Color(0.6f, 0.15f, 0.15f);

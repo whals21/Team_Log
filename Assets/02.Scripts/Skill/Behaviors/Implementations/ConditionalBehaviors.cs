@@ -143,17 +143,17 @@ namespace TeamLog.Skill.Behaviors.Implementations
     }
 
     // ═══════════════════════════════════════════
-    // PostDamage Phase
+    // PostApply Phase
     // ═══════════════════════════════════════════
 
-    /// <summary>AllIn (컨셉 16) — 사용 후 AP가 0이면 +rank 위력. PostDamage에서 체크하여 추가 데미지.</summary>
+    /// <summary>AllIn (컨셉 16) — 사용 후 AP가 0이면 +rank 위력. PostApply에서 체크하여 추가 데미지.</summary>
     public class AllInBehavior : ISkillBehavior
     {
         public BehaviorKeyword Keyword => BehaviorKeyword.AllIn;
-        public ExecutionPhase Phases => ExecutionPhase.PostDamage;
+        public ExecutionPhase Phases => ExecutionPhase.PostApply;
         public int Order => 30; // Execution(10) 전에 발동하여 추가 데미지로 처치 유도
 
-        public void OnPostDamage(SkillExecContext ctx)
+        public void OnPostApply(SkillExecContext ctx)
         {
             // AP 0 조건: 스킬 사용 후 남은 AP가 0
             if (ctx.TurnCtx == null) return;

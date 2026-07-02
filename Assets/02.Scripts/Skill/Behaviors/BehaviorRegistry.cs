@@ -47,6 +47,14 @@ namespace TeamLog.Skill.Behaviors
                 Register(new Implementations.BulwarkBehavior());       // 18 — 쉴드 보유 시
                 Register(new Implementations.BountyBehavior());        // 21 — 킬 시 자원
 
+                // ── Phase CC: 캐릭터 고유 메카닉 ──
+                Register(new Implementations.PropagateBehavior());     // Taranis — Wire 전파
+                Register(new Implementations.TargetFreezeBehavior());  // Lumi — Frost Bite 강화
+
+                // ── 통합 파이프라인 검증 (2026-07-02): Pipeline 수정 0줄로 추가 ──
+                Register(new Implementations.CleanseLowTargetBehavior());        // Phoenix Renewal용 — Heal에 정화
+                Register(new Implementations.ResourceThresholdShieldBehavior()); // Shield Wall용 — Shield에 임계값 가산
+
                 // ── Phase ARCH-4 보류 (상태 추적/TurnManager 수정 필요) ──
                 // FollowUp(5) — hitsTakenThisTurn 인프라 필요
                 // Fatigue(8)/Momentum(9) — usesThisBattle 추적 필요

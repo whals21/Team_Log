@@ -78,6 +78,14 @@ namespace TeamLog.Skill
         MultiStrike,     // 매 타격 자유 지정
         TargetFullHP,    // 풀피 적에게만 사용 가능 (사용 제약)
         Flank,           // 행 가장자리 대상만 (선행: 적 행/열 시스템)
+
+        // ── Phase CC: 캐릭터 고유 메카닉 ──
+        Propagate,       // Taranis 전용 — 메인 타겟 이외의 다른 적 N명에게 Charge 부여 (rank = 전파 대상 수)
+        TargetFreeze,    // Lumi 등 — 대상이 Freeze 상태 시 +rank 위력 (PowerModify)
+
+        // ── 통합 파이프라인 검증용 (2026-07-02) — Pipeline 수정 0줄로 추가 가능한지 증명 ──
+        CleanseLowTarget,         // Phoenix Renewal용 — 대상 HP 50%- 시 Burn/Poison 정화 (PostApply)
+        ResourceThresholdShield,  // Duran Shield Wall용 — 자원 ≥ rank 시 쉴드 +N (ApplyMain)
     }
 
     /// <summary>

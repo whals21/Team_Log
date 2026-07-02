@@ -170,6 +170,53 @@ namespace TeamLog.UI.Battle
 
         #endregion
 
+        // ═══════════════════════════════════════════
+        // Phase CC 자원 (Resource) 헬퍼
+        // ═══════════════════════════════════════════
+
+        public static string GetResourceLabel(ResourceType type) => type switch
+        {
+            ResourceType.Ember => "잿빛",
+            ResourceType.Vengeance => "복수",
+            ResourceType.Frost => "서리",
+            ResourceType.Prophecy => "예언",
+            ResourceType.Charge => "전하",
+            _ => "자원",
+        };
+
+        public static string GetResourceInitial(ResourceType type) => type switch
+        {
+            ResourceType.Ember => "잿",
+            ResourceType.Vengeance => "복",
+            ResourceType.Frost => "설",
+            ResourceType.Prophecy => "예",
+            ResourceType.Charge => "전",
+            _ => "?",
+        };
+
+        public static Color GetResourceColor(ResourceType type)
+        {
+            var p = UIPalette.Default;
+            return type switch
+            {
+                ResourceType.Ember => p.ResourceEmber,
+                ResourceType.Vengeance => p.ResourceVengeance,
+                ResourceType.Frost => p.ResourceFrost,
+                ResourceType.Prophecy => p.ResourceProphecy,
+                _ => p.ResourceDefault,
+            };
+        }
+
+        public static string GetResourceDescription(ResourceType type) => type switch
+        {
+            ResourceType.Ember => "매 턴 +1 축적, 턴 종료 시 현재 잿빛×2 자해. 최대 5.",
+            ResourceType.Vengeance => "피격/쉴드 흡수 시 데미지 1:1 축적. 최대 20.",
+            ResourceType.Frost => "매 턴 종료 시 절반 소실. 최대 3.",
+            ResourceType.Prophecy => "1턴 뒤 발동 예약. 매 턴 시작 시 발동.",
+            ResourceType.Charge => "매 턴 종료 시 다른 전하 적에게 스택 수만큼 도트.",
+            _ => "캐릭터 고유 자원",
+        };
+
         /// <summary>
         /// 쉴드 바 앵커 갱신 — HP 바 끝점부터 겹쳐서 표시
         /// </summary>

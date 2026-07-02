@@ -20,8 +20,17 @@ namespace TeamLog.Characters
         {
             if (_activeEffects.TryGetValue(type, out var existing))
             {
-                existing.RemainingTurns = duration;
-                existing.Value = value;
+                // Phase CC: Charge는 value 누적 + 캡 3 (기획: 한 적당 최대 3스택)
+                if (type == StatusEffectType.Charge)
+                {
+                    existing.Value = System.Math.Min(3, existing.Value + value);
+                    existing.RemainingTurns = System.Math.Max(existing.RemainingTurns, duration);
+                }
+                else
+                {
+                    existing.RemainingTurns = duration;
+                    existing.Value = value;
+                }
             }
             else
             {
@@ -42,6 +51,7 @@ namespace TeamLog.Characters
 
         /// <summary>
         /// 턴 종료 시 호출 - 지속시간 감소
+        /// Phase CC: Charge는 duration 기반 소멸 스킵 (value 기반 자연 소멄은 TurnManager에서 처리)
         /// </summary>
         public List<StatusEffectType> TickTurnEnd()
         {
@@ -49,6 +59,8 @@ namespace TeamLog.Characters
 
             foreach (var kvp in _activeEffects)
             {
+                // Charge는 duration 기반 소멸 안 함 (TurnManager에서 value -1 처리)
+                if (kvp.Value.Type == StatusEffectType.Charge) continue;
                 kvp.Value.RemainingTurns--;
                 if (kvp.Value.RemainingTurns <= 0)
                     expiredEffects.Add(kvp.Key);

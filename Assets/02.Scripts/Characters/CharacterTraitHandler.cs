@@ -249,7 +249,7 @@ namespace TeamLog.Characters
                     int shieldAmount = (int)kw.Value;
                     if (shieldAmount > 0)
                     {
-                        _owner.Health.AddShield(shieldAmount);
+                        _owner.Health.AddShield(_owner, shieldAmount);
                         // 트리거 체인: 쉴드 획득 이벤트 재발행 (다른 특성/유물 활성화)
                         CombatEventBus.FireShieldGained(_owner, shieldAmount);
                     }

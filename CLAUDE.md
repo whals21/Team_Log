@@ -451,6 +451,21 @@ DOTween.To(() => cg.alpha, x => cg.alpha = x, 0f, 0.3f);
   - **신규 인프라 필요**: SkillData SkillConditionType/ConditionalBonusType 필드, StatusEffectType 신규 항목 (ForcedTarget/Prophecy/MarkOfDoom/HandOfFate/TimeCollapse/Charge/GroundingShield/Compounding/ThunderGodProc), ProphecyComponent, ChargeNetworkComponent
   - **Sibyl 핵심 결정 사항**: 스킬 4종 모두 1AP+1턴 뒤 패턴 통일, Hand of Fate/시간 붕괴 같은 턴(3/6/9...) 발동, 해금=어센션 5
   - **Taranis 핵심 결정 사항**: 전파 메카닉 (자동 다른 적 1명 전하 부여), 매 턴 종료 자동 연쇄(1스택당 도트 1 고정), 2턴마다 자연 소멸, Grounding Field(쉴드+역부여), 해금=F3 보스 클리어
+- **Phase UNIFIED-P (완전 통일 파이프라인)**: 완료 — 2026-07-02 2차 세션. 211/211 테스트 통과. ★사용자 철학 "모든 스킬 = 동일 파이프라인 + 조립식" 달성
+  - **배경**: Phase CC 진단 중 Heal/Shield/Buff/Purify가 Attack과 다른 경로(예외 처리)로 처리되는 한계 발견. StS/Balatro/DD 명작 아키텍처 비교 분석 후 완전 통일 결정
+  - **ExecutionPhase enum 의미 확장**: DamageApply → **ApplyMain**, PostDamage → **PostApply** (모든 타입의 본 효과/후처리로 일반화). TurnEnd 유지
+  - **ISkillBehavior 인터페이스 변경**: ApplyDamage → ApplyMain, OnPostDamage → OnPostApply (메서드 이름). SkillExecContext.SkipDefaultDamage → SkipDefaultApply
+  - **8개 Behavior 파일 업데이트**: Pierce(ApplyMain), Execution/Lifesteal/Chain/Touch 3종/AllIn/Propagate(PostApply). Phase 값 + 메서드 이름 일괄 변경
+  - **★ Pipeline.ExecuteSkill 완전 재작성**: 단일 흐름 (PowerModify→TargetModify→ApplyMain→PostApply→OnKill). 타입별 분기는 ApplyMain의 Default 헬퍼(ApplyDefaultByType)에서만 처리 — DefaultDamage/DefaultHeal/DefaultShield/DefaultEffect/DefaultPurify. 레거시 ExecuteHealViaPipeline/ExecuteShieldViaPipeline/ApplyEffectViaPipeline 제거
+  - **검증 (Open-Closed 원칙 달성 증명)**: 새 Behavior CleanseLowTargetBehavior(Phoenix Renewal 정화, PostApply) + ResourceThresholdShieldBehavior(Shield Wall 임계값 가산, ApplyMain) 추가 — **Pipeline 코드 수정 0줄**로 작동 확인. UnifiedPipelineVerificationTests 5개 신규
+  - **새 BehaviorKeyword**: Propagate(Taranis Wire 전파), TargetFreeze(Lumi Frost Bite 강화), CleanseLowTarget(Phoenix Renewal 정화), ResourceThresholdShield(Shield Wall 자원 임계값)
+- **Phase CC-2차 (Taranis/Duran/UI 정규화)**: 완료 — 2026-07-02 2차 세션
+  - **Taranis Wire 전파 정식**: PropagateBehavior (PostApply Phase) — 메인 타겟 제외 다른 적 N명(전하 보유 우선)에게 Charge 부여. Wire의 Chain(1) → Propagate(1) 교체
+  - **Taranis 자연 소멄**: 매 턴 Charge value -1 (기획서의 2턴마다 대신 단순화). TurnManager.ProcessTurnEnd에 추가. StatusEffectComponent에서 Charge는 duration 소멄 스킵, value 누적(캡 3)
+  - **Attack 스킬 StatusEffect 공통 부여**: Pipeline.ApplyMain에서 skill.StatusEffect != None이면 ApplyEffect. Wire-Charge 자동 작동 (이전엔 Attack+StatusEffect 조합이 부여 로직 자체가 없었음)
+  - **Duran 쉴드 추적 (ShieldInstance)**: HealthComponent.`int _currentShield` → `List<ShieldInstance>` 완전 교체. ShieldInstance(Caster/Amount/Flags). ShieldFlag enum (None/GivesChargeOnAbsorb). AddShield(caster, amount, flags) 시그니처. OnShieldAbsorbed 이벤트 → Character가 구독 → Vengeance 축적/Charge 역부여. Taranis Grounding Field도 같은 구조로 통합 (GivesChargeOnAbsorb 플래그)
+  - **P1 조건부 보너스 2종**: Ashe Brand of Ash+Berserk (자신 HP 50%- 시 2배), Lumi Frostbolt+TargetFreeze (Freeze 적 +3 위력)
+  - **UI 자원/특성 시각화**: ResourceBadge (자원별 고유 색상 + 스택/Max + DOTween 펀치 + 툴팁) + TraitBadge (장착 특성 이름 + 툴팁). UIPalette 자원색 4종 토큰 (Ember 주황/Vengeance 보라/Frost 청록/Prophecy 금). BattleDisplayUtil GetResourceColor/Label/Initial/Description 헬퍼. PlayerSidebarPanel.UpdateStats가 기존 텍스트 1줄 → 배지 2종으로 교체
 - **Phase ARCH (스킬 조립식 파이프라인)**: ARCH-1~5 전부 완료. 197/197 테스트 통과
   - **ARCH-1 (뼈대 완료)**: ISkillBehavior 인터페이스 + ExecutionPhase Flags enum + SkillExecContext + BehaviorRegistry static + SkillExecutionPipeline 클래스 신규 작성. `Assets/02.Scripts/Skill/Behaviors/` 폴더 신설
   - **ARCH-2 (핵심 5종 Behavior 추출 완료)**: BerserkBehavior/PierceBehavior/ExecutionBehavior/LifestealBehavior/ChainBehavior 5개 구현체. Order 프로퍼티로 Phase 내 순서 보장 (Execution=10 < Lifesteal=50 < Chain=200)

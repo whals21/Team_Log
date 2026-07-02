@@ -476,6 +476,23 @@ namespace TeamLog.Combat.Turn
                 }
             }
 
+            // Phase CC P0-3: Taranis Charge 자연 소멄 — 매 턴 모든 적의 Charge value -1.
+            // 기획: "2턴마다 -1스택"이나 단순화 매 턴 -1 (사용자 결정 2026-07-02).
+            // value가 0이 되면 제거. 연쇄 도트 처리 후에 실행되어 이번 턴 도트는 온전히 들어감.
+            var toRemove = new List<Character>();
+            foreach (var enemy in chargedEnemies)
+            {
+                foreach (var eff in enemy.StatusEffects.GetAllEffects())
+                {
+                    if (eff.Type != StatusEffectType.Charge) continue;
+                    eff.Value -= 1;
+                    if (eff.Value <= 0) toRemove.Add(enemy);
+                    break;
+                }
+            }
+            foreach (var enemy in toRemove)
+                enemy.StatusEffects.RemoveEffect(StatusEffectType.Charge);
+
             // 만료된 효과 제거 후 스탯 수정자 재계산
             foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();
             foreach (var c in _enemies) if (c.IsAlive) c.ApplyStatModifiers();

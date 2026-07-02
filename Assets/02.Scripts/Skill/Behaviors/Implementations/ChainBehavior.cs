@@ -13,10 +13,10 @@ namespace TeamLog.Skill.Behaviors.Implementations
     public class ChainBehavior : ISkillBehavior
     {
         public BehaviorKeyword Keyword => BehaviorKeyword.Chain;
-        public ExecutionPhase Phases => ExecutionPhase.PostDamage;
+        public ExecutionPhase Phases => ExecutionPhase.PostApply;
         public int Order => 200; // Execution(10)/Lifesteal(50) 이후 마지막
 
-        public void OnPostDamage(SkillExecContext ctx)
+        public void OnPostApply(SkillExecContext ctx)
         {
             // Chain rank 합산 (연쇄 횟수)
             var tags = ctx.Instance?.GetCombinedBehaviors() ?? ctx.Skill?.Behaviors;

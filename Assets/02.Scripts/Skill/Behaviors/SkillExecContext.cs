@@ -47,8 +47,8 @@ namespace TeamLog.Skill.Behaviors
         /// <summary>현재 타겟 리스트. TargetModify Phase에서 갱신. DamageApply부터는 이 리스트를 순회.</summary>
         public List<Character> CurrentTargets { get; set; }
 
-        /// <summary>Pierce가 true 설정 — 기본 DealDamage를 스킵하고 ApplyDamage 훅 사용.</summary>
-        public bool SkipDefaultDamage { get; set; }
+        /// <summary>Pierce 등 커스텀 ApplyMain Behavior가 true 설정 — 타입별 기본 본 효과(DefaultDamage/Heal/Shield/Effect/Purify) 스킵.</summary>
+        public bool SkipDefaultApply { get; set; }
 
         // ── 결과 기록 (후속 Behavior가 참조) ──
 

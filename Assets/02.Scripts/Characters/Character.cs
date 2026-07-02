@@ -41,6 +41,7 @@ namespace TeamLog.Characters
 
             // 컴포넌트 생성 및 초기화
             Health = new HealthComponent();
+            Health.SetOwner(this);  // Phase CC P1: 쉴드 흡수 이벤트에서 owner 전달용
             Stats = new StatComponent();
             StatusEffects = new StatusEffectComponent();
             SkillInventory = new SkillInventoryComponent();
@@ -50,6 +51,12 @@ namespace TeamLog.Characters
             // 특성 사망 방지 훅 연결
             if (TraitHandler.HasTrait)
                 Health.OnPreDeath += () => TraitHandler.PreventDeath();
+
+            // Phase CC P1: 쉴드 흡수 훅 — 부여자 기반 자원/상태이상 처리
+            // (caster가 부여한 쉴드가 attacker에 의해 흡수되었을 때)
+            // - caster의 자원이 Vengeance면 흡수량만큼 축적 (Duran 원격 Vengeance)
+            // - ShieldFlag.GivesChargeOnAbsorb 시 attacker에게 Charge 부여 (Taranis Grounding Field)
+            Health.OnShieldAbsorbed += OnShieldAbsorbedInternal;
 
             InitializeComponents();
 
@@ -160,6 +167,32 @@ namespace TeamLog.Characters
             int baseATK = Stats.GetBaseStat(StatType.ATK);
             int baseDEF = Stats.GetBaseStat(StatType.DEF);
             Stats.Initialize((int)(baseATK * multiplier), (int)(baseDEF * multiplier));
+        }
+
+        // ═══════════════════════════════════════════
+        // Phase CC P1: 쉴드 흡수 핸들러
+        // ═══════════════════════════════════════════
+
+        /// <summary>
+        /// 이 캐릭터의 쉴드가 흡수되었을 때 호출. 부여자 기반 자원/상태이상 처리.
+        /// - caster의 자원이 Vengeance면 흡수량 축적 (Duran 원격 Vengeance)
+        /// - ShieldFlag.GivesChargeOnAbsorb 시 attacker에게 Charge 부여 (Taranis Grounding Field)
+        /// </summary>
+        private void OnShieldAbsorbedInternal(Character caster, Character owner, int absorbed,
+            Character attacker, ShieldFlag flags)
+        {
+            // Duran Vengeance 원격 축적: caster가 Vengeance 자원 보유 시
+            if (caster != null && caster.Resource != null
+                && caster.Resource.Resource == ResourceType.Vengeance)
+            {
+                caster.Resource.AddStacks(absorbed);
+            }
+
+            // Taranis Grounding Field: 썰드 흡수 시 공격자에게 Charge 부여
+            if ((flags & ShieldFlag.GivesChargeOnAbsorb) != 0 && attacker != null && attacker.IsAlive)
+            {
+                attacker.StatusEffects.ApplyEffect(StatusEffectType.Charge, 3, 1);
+            }
         }
     }
 }

@@ -4,10 +4,12 @@ using Character = TeamLog.Characters.Character;
 namespace TeamLog.Skill.Behaviors
 {
     /// <summary>
-    /// 개별 BehaviorKeyword의 로직을 캡슐화하는 인터페이스 (Phase ARCH).
+    /// 개별 BehaviorKeyword의 로직을 캡슐화하는 인터페이스 (Phase ARCH + 통합 파이프라인).
     /// 각 BehaviorKeyword은 하나의 ISkillBehavior 구현체를 가진다.
-    /// SkillExecutor는 더 이상 개별 키워드를 하드코딩하지 않고,
-    /// BehaviorRegistry에서 조회한 구현체들의 Phase별 훅을 호출만 한다.
+    ///
+    /// ★ 통합 파이프라인 (2026-07-02):
+    /// 모든 스킬 타입(Attack/Heal/Shield/Buff/Debuff/Purify)이 동일한 Phase 순서를 거친다.
+    /// ApplyMain/PostApply가 모든 타입에 적용되며, 타입별 본 효과는 Pipeline 본체의 Default 헬퍼가 담당.
     /// </summary>
     public interface ISkillBehavior
     {
@@ -28,11 +30,11 @@ namespace TeamLog.Skill.Behaviors
         /// <summary>TargetModify: 타겟 리스트 변경. 기본 targets 그대로 반환.</summary>
         List<Character> ModifyTargets(List<Character> targets, SkillExecContext ctx) => targets;
 
-        /// <summary>DamageApply: 데미지 적용. ctx.SkipDefaultDamage = true 설정 시 기본 DealDamage 스킵.</summary>
-        void ApplyDamage(SkillExecContext ctx) { }
+        /// <summary>ApplyMain: 본 효과 적용. ctx.SkipDefaultApply = true 설정 시 기본 본 효과 스킵 (Pierce 등).</summary>
+        void ApplyMain(SkillExecContext ctx) { }
 
-        /// <summary>PostDamage: 데미지 후처리 (Lifesteal 회복, Touch 상태이상 부여 등).</summary>
-        void OnPostDamage(SkillExecContext ctx) { }
+        /// <summary>PostApply: 본 효과 후처리 (Lifesteal 회복, Touch 상태이상 부여, Cleanse 등).</summary>
+        void OnPostApply(SkillExecContext ctx) { }
 
         /// <summary>OnKill: 이 스킬로 대상 사망 시킨 시점. (ctx.InitialTarget이 방금 사망)</summary>
         void OnKill(SkillExecContext ctx) { }

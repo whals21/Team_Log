@@ -50,6 +50,10 @@ namespace TeamLog.UI.Battle
         private LayoutElement _layoutElement;
         private TooltipTarget _panelTooltip;
 
+        // Phase CC: 자원 배지 + 장착 특성 배지
+        private ResourceBadge _resourceBadge;
+        private TraitBadge _traitBadge;
+
         public int PanelIndex => _panelIndex;
         public event Action<int> OnPanelClicked;
 
@@ -215,12 +219,26 @@ namespace TeamLog.UI.Battle
         public override void UpdateStats(int atk, int def)
         {
             base.UpdateStats(atk, def);
-            // Phase CC: ATK/DEF 아래에 캐릭터 고유 자원(Ember/Vengeance/Frost) 표시
-            if (_character?.Resource != null && _statText != null)
+
+            // Phase CC: 자원 배지 (Ember/Vengeance/Frost/Prophecy)
+            // 기존 텍스트 한 줄 표시를 전용 배지로 교체 — 자원별 고유 색상 + 변화 시 펀치 애니 + 툴팁.
+            if (_character?.Resource != null && _statusEffectContainer != null)
             {
-                string resourceName = _character.Resource.Resource.ToString();
-                _statText.text += $"\n<size=70%><color=#FFD700>{resourceName} {_character.Resource.CurrentStacks}/{_character.Resource.MaxStacks}</color></size>";
+                if (_resourceBadge == null)
+                    _resourceBadge = ResourceBadge.Create(_statusEffectContainer, _character.Resource);
+                else
+                    _resourceBadge.Refresh();
             }
+
+            // Phase CC: 장착 특성 배지 (최초 1회 생성, 이후 갱신)
+            if (_character?.PlayerTraitHandler != null && _character.PlayerTraitHandler.HasTrait)
+            {
+                if (_traitBadge == null && _nameText != null)
+                    _traitBadge = TraitBadge.Create(_nameText.transform.parent, _character.PlayerTraitHandler.Trait);
+                else if (_traitBadge != null)
+                    _traitBadge.Refresh(_character.PlayerTraitHandler.Trait);
+            }
+
             UpdateTooltipContent();
         }
 

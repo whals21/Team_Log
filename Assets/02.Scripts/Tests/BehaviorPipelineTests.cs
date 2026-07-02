@@ -75,7 +75,7 @@ namespace TeamLog.Tests
             Assert.AreEqual(1, powerBehaviors.Count, "PowerModify Phase에 Berserk 1개만 해당");
             Assert.AreEqual(BehaviorKeyword.Berserk, powerBehaviors[0].Keyword);
 
-            var damageBehaviors = BehaviorRegistry.GetForPhase(tags, ExecutionPhase.DamageApply);
+            var damageBehaviors = BehaviorRegistry.GetForPhase(tags, ExecutionPhase.ApplyMain);
             Assert.AreEqual(1, damageBehaviors.Count);
             Assert.AreEqual(BehaviorKeyword.Pierce, damageBehaviors[0].Keyword);
         }
@@ -90,7 +90,7 @@ namespace TeamLog.Tests
                 new(BehaviorKeyword.Lifesteal, 0),   // Order=50
             };
 
-            var postDamage = BehaviorRegistry.GetForPhase(tags, ExecutionPhase.PostDamage);
+            var postDamage = BehaviorRegistry.GetForPhase(tags, ExecutionPhase.PostApply);
             Assert.AreEqual(3, postDamage.Count);
             // Order 오름차순: Execution(10) → Lifesteal(50) → Chain(200)
             Assert.AreEqual(BehaviorKeyword.Execution, postDamage[0].Keyword);
@@ -119,7 +119,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // ATK 0, power 10 (×2 배) - DEF 0 = 20
@@ -141,7 +141,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // 위력 2배 미발동: power 10 - DEF 0 = 10
@@ -168,7 +168,7 @@ namespace TeamLog.Tests
 
             int hpBefore = enemy.Health.CurrentHP;
             int shieldBefore = enemy.Health.CurrentShield;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // Pierce: ATK 5 + power 10 = 15 직접 HP 데미지. 쉴드는 그대로.
@@ -195,7 +195,7 @@ namespace TeamLog.Tests
             var pipeline = new SkillExecutionPipeline(
                 new List<Character> { player }, new List<Character> { enemy });
 
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             Assert.IsTrue(enemy.IsDead, "Execution(rank 10)이 HP 5 일반 적을 즉사시켜야 함");
         }
@@ -214,7 +214,7 @@ namespace TeamLog.Tests
             var pipeline = new SkillExecutionPipeline(
                 new List<Character> { player }, new List<Character> { boss });
 
-            pipeline.ExecuteAttack(player, skill, boss, instance);
+            pipeline.ExecuteSkill(player, skill, boss, instance);
 
             // 보스는 Execution 면역. 일반 공격 power 1만 적용
             Assert.IsTrue(boss.IsAlive, "Execution은 보스에게 작동하지 않아야 함");
@@ -239,7 +239,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int playerHpBefore = player.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             // power 20 → 적에게 20 데미지. Lifesteal 회복 = 20/2 = 10
             int heal = player.Health.CurrentHP - playerHpBefore;
@@ -269,7 +269,7 @@ namespace TeamLog.Tests
             int hp2Before = e2.Health.CurrentHP;
             int hp3Before = e3.Health.CurrentHP;
 
-            pipeline.ExecuteAttack(player, skill, e1, instance);
+            pipeline.ExecuteSkill(player, skill, e1, instance);
 
             // 메인 타겟 e1은 반드시 데미지
             int d1 = hp1Before - e1.Health.CurrentHP;
@@ -295,7 +295,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // 단일 적 → 연쇄 대상 없음. 메인 타겟에게만 power 10
@@ -323,7 +323,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int playerHpBefore = player.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             // Berserk 발동: power 10 × 2 = 20 데미지
             // Lifesteal: 20 / 2 = 10 회복
@@ -344,7 +344,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             Assert.AreEqual(10, damage, "Behavior 없는 스킬은 기본 DealDamage로 power 10 적용");
@@ -367,7 +367,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // 풀피 적 → power 10 + 4 = 14
@@ -388,7 +388,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // 풀피 아님 → power 10
@@ -409,7 +409,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // 절반 이하 → power 8 + 6 = 14
@@ -431,7 +431,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // power 10 + (50/5) = 20
@@ -453,7 +453,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // power 10 - (20/5) = 6
@@ -474,7 +474,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // 쉴드 보유 → power 10 + 5 = 15
@@ -495,7 +495,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // 적 HP 40 < 나 HP 100 → power 10 + 4 = 14
@@ -515,7 +515,7 @@ namespace TeamLog.Tests
                 new List<Character> { player }, new List<Character> { enemy });
 
             int hpBefore = enemy.Health.CurrentHP;
-            pipeline.ExecuteAttack(player, skill, enemy, instance);
+            pipeline.ExecuteSkill(player, skill, enemy, instance);
 
             int damage = hpBefore - enemy.Health.CurrentHP;
             // MaxHP 150 >= 100 → power 8 + 6 = 14

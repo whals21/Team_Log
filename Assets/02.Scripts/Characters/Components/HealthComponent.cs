@@ -1,20 +1,36 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TeamLog.Characters
 {
     /// <summary>
     /// 체력 관리 컴포넌트
+    /// Phase CC P1: 쉴드를 List<ShieldInstance>로 관리. 부여자(caster) 추적 + 흡수 시 부여자에게 알림.
     /// </summary>
     public class HealthComponent
     {
         private int _currentHP;
         private int _maxHP;
-        private int _currentShield;
+        private readonly List<ShieldInstance> _shields = new();
+        private int _cachedTotalShield;  // 매번 Sum 호출 방지용 캐시
+        private bool _shieldCacheDirty = true;
         private bool _isDead;
 
         public int CurrentHP => _currentHP;
         public int MaxHP => _maxHP;
-        public int CurrentShield => _currentShield;
+        public int CurrentShield
+        {
+            get
+            {
+                if (_shieldCacheDirty)
+                {
+                    _cachedTotalShield = 0;
+                    foreach (var s in _shields) _cachedTotalShield += s.Amount;
+                    _shieldCacheDirty = false;
+                }
+                return _cachedTotalShield;
+            }
+        }
         public bool IsDead => _isDead;
         public bool IsAlive => !_isDead;
 
@@ -25,6 +41,13 @@ namespace TeamLog.Characters
         public event System.Action<int> OnDamageTaken;       // HP 실제 손실량 (쉴드 흡수 후)
         public event System.Action<int> OnHealApplied;       // 실제 회복량
         public event System.Action<int> OnShieldAdded;       // 쉴드 획득량
+
+        /// <summary>
+        /// Phase CC P1: 쉴드 흡수 발생 — (caster, owner, absorbed, attacker, flags).
+        /// caster가 부여한 쉴드가 attacker에 의해 owner(이 캐릭터)에서 흡수됨.
+        /// CombatEventBus나 외부 처리기가 구독 → Vengeance 축적 / Charge 부여.
+        /// </summary>
+        public event System.Action<Character, Character, int, Character, ShieldFlag> OnShieldAbsorbed;
 
         /// <summary>
         /// 사망 직전 호출. true 반환 시 HP=1로 생존 (Immortal 특성용)
@@ -38,28 +61,34 @@ namespace TeamLog.Characters
         {
             _maxHP = maxHP;
             _currentHP = maxHP;
-            _currentShield = 0;
+            _shields.Clear();
+            _shieldCacheDirty = true;
             _isDead = false;
         }
 
-        public void TakeDamage(int damage)
+        public void TakeDamage(int damage, Character attacker = null)
         {
             if (_isDead) return;
 
-            // 쉴드가 먼저 데미지를 흡수
-            if (_currentShield > 0)
+            // 쉴드가 먼저 데미지를 흡수 — 리스트 순회하며 각 쉴드에서 차감
+            if (_shields.Count > 0 && damage > 0)
             {
-                if (damage <= _currentShield)
+                for (int i = _shields.Count - 1; i >= 0 && damage > 0; i--)
                 {
-                    _currentShield -= damage;
-                    damage = 0;
+                    var shield = _shields[i];
+                    int absorbed = Mathf.Min(damage, shield.Amount);
+                    shield.Amount -= absorbed;
+                    damage -= absorbed;
+
+                    // 부여자에게 흡수 알림 (Duran Vengeance 축적 / Taranis Charge 역부여)
+                    if (absorbed > 0)
+                        OnShieldAbsorbed?.Invoke(shield.Caster, _owner, absorbed, attacker, shield.Flags);
                 }
-                else
-                {
-                    damage -= _currentShield;
-                    _currentShield = 0;
-                }
-                OnShieldChanged?.Invoke(_currentShield);
+
+                // 소진된 쉴드 제거
+                _shields.RemoveAll(s => s.Amount <= 0);
+                _shieldCacheDirty = true;
+                OnShieldChanged?.Invoke(CurrentShield);
             }
 
             if (damage > 0)
@@ -158,7 +187,8 @@ namespace TeamLog.Characters
             int targetHP = Mathf.Max(1, Mathf.RoundToInt(_maxHP * Mathf.Clamp01(hpPercentage)));
             _isDead = false;
             _currentHP = Mathf.Min(targetHP, _maxHP);
-            _currentShield = 0;
+            _shields.Clear();
+            _shieldCacheDirty = true;
             OnHPChanged?.Invoke(_currentHP, _maxHP);
             OnRevived?.Invoke(_currentHP);
         }
@@ -177,22 +207,41 @@ namespace TeamLog.Characters
                 OnHealApplied?.Invoke(actualHeal);
         }
 
-        public void AddShield(int amount)
-        {
-            if (_isDead) return;
+        // ═══════════════════════════════════════════
+        // Phase CC P1: Shield API (부여자 추적)
+        // ═══════════════════════════════════════════
 
-            _currentShield += amount;
-            OnShieldChanged?.Invoke(_currentShield);
+        /// <summary>기본 AddShield — 부여자 불명 (null) + 속성 없음.</summary>
+        public void AddShield(int amount) => AddShield(null, amount, ShieldFlag.None);
+
+        /// <summary>부여자 명시 AddShield — Phase CC P1.</summary>
+        public void AddShield(Character caster, int amount, ShieldFlag flags = ShieldFlag.None)
+        {
+            if (_isDead || amount <= 0) return;
+
+            _shields.Add(new ShieldInstance
+            {
+                Caster = caster,
+                Amount = amount,
+                Flags = flags,
+            });
+            _shieldCacheDirty = true;
+            OnShieldChanged?.Invoke(CurrentShield);
             OnShieldAdded?.Invoke(amount);
         }
 
         public void ResetShield()
         {
-            if (_currentShield == 0) return;
+            if (_shields.Count == 0) return;
 
-            _currentShield = 0;
-            OnShieldChanged?.Invoke(_currentShield);
+            _shields.Clear();
+            _shieldCacheDirty = true;
+            OnShieldChanged?.Invoke(CurrentShield);
         }
+
+        /// <summary>외부에서 OnShieldAbsorbed 구독용 (Character 생성 시 사용).</summary>
+        internal void SetOwner(Character owner) => _owner = owner;
+        private Character _owner;
 
         /// <summary>
         /// 모든 이벤트 구독 해제 — 씬 전환 시 BattleSceneSetup에서 호출
@@ -206,6 +255,7 @@ namespace TeamLog.Characters
             OnHealApplied = null;
             OnShieldAdded = null;
             OnPreDeath = null;
+            OnShieldAbsorbed = null;
         }
     }
 }

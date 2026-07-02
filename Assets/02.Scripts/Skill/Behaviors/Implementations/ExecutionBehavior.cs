@@ -4,16 +4,15 @@ namespace TeamLog.Skill.Behaviors.Implementations
 {
     /// <summary>
     /// Execution — HP rank 이하 적 즉사 (보스 제외, Phase ARCH-2 추출).
-    /// 기존 SkillExecutor.ExecuteAttack의 if(Execution) 블록과 동일한 로직.
-    /// PostDamage Phase에서 데미지 적용 후 남은 HP가 임계값 이하면 즉사.
+    /// PostApply Phase에서 본 효과 적용 후 남은 HP가 임계값 이하면 즉사.
     /// </summary>
     public class ExecutionBehavior : ISkillBehavior
     {
         public BehaviorKeyword Keyword => BehaviorKeyword.Execution;
-        public ExecutionPhase Phases => ExecutionPhase.PostDamage;
-        public int Order => 10; // PostDamage 중 가장 먼저 (Lifesteal/Chain보다 먼저 사망 판정)
+        public ExecutionPhase Phases => ExecutionPhase.PostApply;
+        public int Order => 10; // PostApply 중 가장 먼저 (Lifesteal/Chain보다 먼저 사망 판정)
 
-        public void OnPostDamage(SkillExecContext ctx)
+        public void OnPostApply(SkillExecContext ctx)
         {
             var target = ctx.InitialTarget;
             if (target == null || !target.IsAlive) return;

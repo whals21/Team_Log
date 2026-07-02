@@ -31,16 +31,21 @@ namespace TeamLog.Editor
                 gainType: ResourceType.Ember, gainAmount: 2);
 
             // 2. Phoenix Renewal — 아군 힐 8 + Ember×3 추가 힐, Ember +1
+            // 강화 조건: 대상 HP 50%- 시 Burn/Poison 정화 추가 (CleanseLowTarget).
+            // ★ 통합 파이프라인 검증: Heal 타입이 PostApply Phase 거쳐서 정화 자동 작동.
             CreatePhaseCCSkill("Ashe_PhoenixRenewal", "불사조 갱생", SkillType.Heal, TargetType.SingleAlly,
                 power: 8, cost: 1,
                 gainType: ResourceType.Ember, gainAmount: 1,
-                resourcePowerPerStack: 3); // Ember×3 추가 힐
+                resourcePowerPerStack: 3, // Ember×3 추가 힐
+                behaviors: new BehaviorTag(BehaviorKeyword.CleanseLowTarget, 0));
 
             // 3. Brand of Ash — 단일 8 + Ember×3 데미지, Ember -2 소모
+            // 강화 조건: 자신 HP 50%- 시 데미지 2배 (Berserk). Ashe는 자해 메카닉이라 임계 도달 잦음.
             CreatePhaseCCSkill("Ashe_BrandOfAsh", "잿더미 낙인", SkillType.Attack, TargetType.SingleEnemy,
                 power: 8, cost: 2,
                 costType: ResourceType.Ember, costAmount: 2,
-                resourcePowerPerStack: 3); // Ember×3 추가 위력
+                resourcePowerPerStack: 3, // Ember×3 추가 위력
+                behaviors: new BehaviorTag(BehaviorKeyword.Berserk, 0)); // 자신 HP 50%- 시 2배
 
             // 4. Embrace of Cinders — 단일 30 + Ember×15, Ember 5 소모 (궁극기)
             CreatePhaseCCSkill("Ashe_EmbraceOfCinders", "잔불의 포옹", SkillType.Attack, TargetType.SingleEnemy,
@@ -52,8 +57,11 @@ namespace TeamLog.Editor
             // Duran (Warrior) — Vengeance 복수 게이지 스킬 4종
             // ════════════════════════════════════════════
             // 1. Shield Wall — 아군 쉴드 10, AP 1 (셋업)
+            // 강화 조건: Vengeance 5+ 시 썰드 +5 (ResourceThresholdShield).
+            // ★ 통합 파이프라인 검증: Shield 타입이 ApplyMain Phase 거쳐서 임계값 가산 자동 작동.
             CreatePhaseCCSkill("Duran_ShieldWall", "방패벽", SkillType.Shield, TargetType.SingleAlly,
-                power: 10, cost: 1);
+                power: 10, cost: 1,
+                behaviors: new BehaviorTag(BehaviorKeyword.ResourceThresholdShield, 5));
 
             // 2. Provoking Shield — 자신 도발 부여, AP 1 (적이 Duran을 우선 공격)
             CreatePhaseCCSkill("Duran_ProvokingShield", "도발 방패", SkillType.Buff, TargetType.Self,
@@ -74,9 +82,11 @@ namespace TeamLog.Editor
             // Lumi (Cryomancer) — Frost 통제 스킬 4종
             // ════════════════════════════════════════════
             // 1. Frostbolt — 단일 5 + Freeze 1, Frost +1, AP 1
+            // 강화 조건: 대상 이미 Freeze 상태 시 +3 위력 (총 8). Lumi 콤보: Frost Armor/Blizzard로 Freeze 건 뒤 사용.
             CreatePhaseCCSkill("Lumi_Frostbolt", "서리 화살", SkillType.Attack, TargetType.SingleEnemy,
                 power: 5, cost: 1, statusEffect: StatusEffectType.Freeze, effectDuration: 1, effectValue: 1,
-                gainType: ResourceType.Frost, gainAmount: 1);
+                gainType: ResourceType.Frost, gainAmount: 1,
+                behaviors: new BehaviorTag(BehaviorKeyword.TargetFreeze, 3)); // Freeze 적 +3
 
             // 2. Frost Armor — 아군 쉴드 10, Frost +1, AP 1
             CreatePhaseCCSkill("Lumi_FrostArmor", "서리 갑옷", SkillType.Shield, TargetType.SingleAlly,
@@ -94,20 +104,20 @@ namespace TeamLog.Editor
                 costType: ResourceType.Frost, costAmount: 3);
 
             // ── Taranis (Stormcaller) Charge Network 연동 스킬 ──
-            // Charge 상태이상(value=스택수, duration=2턴)을 적에게 부여.
-            // 매 턴 종료 시 Charge 상태 적에게 value만큼 도트 데미지 (TurnManager.ProcessTurnEnd).
+            // Charge 상태이상(value=스택수, duration=3 — 자연 소멄은 value 기반으로 매 턴 -1, StatusEffectComponent에서 duration 소멸 스킵).
+            // 매 턴 종료 시 다른 Charge 적에게 자신의 스택 수만큼 도트 데미지 (TurnManager.ProcessTurnEnd).
             CreatePhaseCCSkill("Taranis_Wire", "와이어", SkillType.Attack, TargetType.SingleEnemy,
-                power: 3, cost: 1, statusEffect: StatusEffectType.Charge, effectDuration: 2, effectValue: 2,
-                behaviors: new BehaviorTag(BehaviorKeyword.Chain, 1)); // Chain=전파 (메인 타겟 + 무작위 1명 추가 Charge)
+                power: 3, cost: 1, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 2,
+                behaviors: new BehaviorTag(BehaviorKeyword.Propagate, 1)); // Propagate=전파 (메인 타겟 + 다른 적 1명 추가 Charge 1스택)
 
             CreatePhaseCCSkill("Taranis_Branch", "브랜치", SkillType.Attack, TargetType.AllEnemies,
-                power: 2, cost: 2, statusEffect: StatusEffectType.Charge, effectDuration: 2, effectValue: 1);
+                power: 2, cost: 2, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 1);
 
             CreatePhaseCCSkill("Taranis_GroundingField", "접지 장벽", SkillType.Shield, TargetType.AllAllies,
-                power: 10, cost: 2);
+                power: 10, cost: 2, shieldFlags: ShieldFlag.GivesChargeOnAbsorb);
 
             CreatePhaseCCSkill("Taranis_Thunderstorm", "뇌우", SkillType.Attack, TargetType.AllEnemies,
-                power: 10, cost: 3, statusEffect: StatusEffectType.Charge, effectDuration: 2, effectValue: 3);
+                power: 10, cost: 3, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 3);
 
             // ── Sibyl (Oracle) Prophecy 연동 스킬 (간소화 — 일반 힐/딜로 처리, Prophecy 메카닉은 추후) ──
             CreatePhaseCCSkill("Sibyl_DeathProphecy", "죽음의 예언", SkillType.Attack, TargetType.SingleEnemy,
@@ -187,13 +197,14 @@ namespace TeamLog.Editor
             EditorUtility.SetDirty(character);
         }
 
-        /// <summary>Phase CC 스킬 생성 헬퍼 — 자원 획득/소모/비례 위력 포함.</summary>
+        /// <summary>Phase CC 스킬 생성 헬퍼 — 자원 획득/소모/비례 위력 + 쉴드 속성 포함.</summary>
         private static void CreatePhaseCCSkill(string fileName, string name, SkillType type, TargetType target,
             int power, int cost, StatusEffectType statusEffect = StatusEffectType.None,
             int effectDuration = 0, int effectValue = 0,
             ResourceType gainType = ResourceType.None, int gainAmount = 0,
             ResourceType costType = ResourceType.None, int costAmount = 0,
             int resourcePowerPerStack = 0, bool consumeAllResource = false,
+            ShieldFlag shieldFlags = ShieldFlag.None,
             params BehaviorTag[] behaviors)
         {
             var path = $"{SKILL_PATH}/{fileName}.asset";
@@ -214,6 +225,7 @@ namespace TeamLog.Editor
             SetPrivateField(skill, "_resourceCostAmount", costAmount);
             SetPrivateField(skill, "_resourcePowerPerStack", resourcePowerPerStack);
             SetPrivateField(skill, "_consumeAllResource", consumeAllResource);
+            SetPrivateField(skill, "_shieldFlags", shieldFlags);
             SetPrivateField(skill, "_behaviors", behaviors ?? new BehaviorTag[0]);
 
             EditorUtility.SetDirty(skill);

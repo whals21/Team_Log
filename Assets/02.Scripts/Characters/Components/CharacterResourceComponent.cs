@@ -23,6 +23,7 @@ namespace TeamLog.Characters
     /// - 자원은 "스택" 기반 (CurrentStacks). 자원 종류별로 최대 스택 다름.
     /// - 매 턴 시작/종료 시 TurnManager가 OnTurnStart/OnTurnEnd 호출 → 자원 특유 효과 처리.
     /// - 스킬 사용 시 SkillData.ResourceGain/Cost로 스택 증감.
+    /// - ★ UI 갱신: OnStacksChanged(delta) 이벤트로 스택 변화 알림 (ResourceBadge 갱신 + 플로팅 텍스트).
     /// </summary>
     public abstract class CharacterResourceComponent
     {
@@ -35,6 +36,15 @@ namespace TeamLog.Characters
         /// <summary>최대 스택 (자원별 상이).</summary>
         public abstract int MaxStacks { get; }
 
+        /// <summary>
+        /// ★ 위험 임계값 — 이 값 이상 시 UI 경고(빨강 글로우/깜빡임).
+        /// 기본: MaxStacks - 1 (자원별 override 가능). Ember 4/5, Vengeance 19/20 등.
+        /// </summary>
+        public virtual int WarningThreshold => System.Math.Max(1, MaxStacks - 1);
+
+        /// <summary>★ 스택 변화 이벤트 — 양수=획득, 음수=소모. UI 갱신/플로팅 텍스트용.</summary>
+        public event System.Action<int> OnStacksChanged;
+
         /// <summary>현재 스택을 최대치로 제한.</summary>
         protected void ClampStacks()
         {
@@ -45,8 +55,10 @@ namespace TeamLog.Characters
         /// <summary>스택 추가 (Clamp 적용).</summary>
         public virtual void AddStacks(int amount)
         {
+            if (amount == 0) return;
             CurrentStacks += amount;
             ClampStacks();
+            OnStacksChanged?.Invoke(amount);
         }
 
         /// <summary>스택 소모 — 성공 시 true, 부족 시 false (소모 안 함).</summary>
@@ -55,6 +67,7 @@ namespace TeamLog.Characters
             if (amount <= 0) return true;
             if (CurrentStacks < amount) return false;
             CurrentStacks -= amount;
+            OnStacksChanged?.Invoke(-amount);
             return true;
         }
 

@@ -23,10 +23,13 @@ MonoBehaviour:
   _statusEffect: 0
   _effectDuration: 0
   _effectValue: 0
-  _behaviors: []
+  _behaviors:
+  - Keyword: 49
+    Rank: 5
   _resourceGainType: 0
   _resourceGainAmount: 0
   _resourceCostType: 0
   _resourceCostAmount: 0
   _resourcePowerPerStack: 0
   _consumeAllResource: 0
+  _shieldFlags: 0

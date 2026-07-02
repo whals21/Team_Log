@@ -21,10 +21,10 @@ MonoBehaviour:
   _weight: 50
   _icon: {fileID: 0}
   _statusEffect: 16
-  _effectDuration: 2
+  _effectDuration: 3
   _effectValue: 2
   _behaviors:
-  - Keyword: 8
+  - Keyword: 46
     Rank: 1
   _resourceGainType: 0
   _resourceGainAmount: 0
@@ -32,3 +32,4 @@ MonoBehaviour:
   _resourceCostAmount: 0
   _resourcePowerPerStack: 0
   _consumeAllResource: 0
+  _shieldFlags: 0

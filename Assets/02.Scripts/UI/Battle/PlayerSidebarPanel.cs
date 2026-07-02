@@ -98,12 +98,46 @@ namespace TeamLog.UI.Battle
             _panelTooltip = GetComponent<TooltipTarget>();
             if (_panelTooltip == null)
                 _panelTooltip = gameObject.AddComponent<TooltipTarget>();
+
+            // Phase CC: 자원 배지(원형)가 패널 좌상단(Avatar 영역)을 차지.
+            // 캐릭터 이름은 NameRow(HPBar 바로 위 행)에서 전체 너비를 사용.
+            // Stats(ATK/DEF)는 NameRow 우측에 작게 배치 — 이름과 공존.
+            if (_nameText != null)
+            {
+                var nameRect = _nameText.rectTransform;
+                nameRect.anchorMin = new Vector2(0f, 0f);
+                nameRect.anchorMax = new Vector2(1f, 1f);
+                nameRect.pivot = new Vector2(0f, 0.5f);
+                nameRect.anchoredPosition = new Vector2(2f, -1f);
+                nameRect.sizeDelta = new Vector2(-52f, -2f); // 우측 50px은 Stats 영역
+                nameRect.SetAsLastSibling();
+                _nameText.alignment = TextAlignmentOptions.Left;
+            }
+            if (_statText != null)
+            {
+                var statRect = _statText.rectTransform;
+                statRect.anchorMin = new Vector2(1f, 0.5f);
+                statRect.anchorMax = new Vector2(1f, 0.5f);
+                statRect.pivot = new Vector2(1f, 0.5f);
+                statRect.anchoredPosition = new Vector2(-2f, 0f);
+                statRect.sizeDelta = new Vector2(48f, 16f);
+                statRect.SetAsLastSibling();
+                _statText.alignment = TextAlignmentOptions.Right;
+                if (_statText.fontSize > 12f) _statText.fontSize = 12f;
+            }
         }
 
         private void Start()
         {
             if (_panelButton != null)
                 _panelButton.onClick.AddListener(() => OnPanelClicked?.Invoke(_panelIndex));
+        }
+
+        private void OnDestroy()
+        {
+            // Phase CC: 자원 이벤트 구독 해제 — 누수 방지
+            if (_character?.Resource != null)
+                _character.Resource.OnStacksChanged -= OnResourceStacksChanged;
         }
 
         private void ShowPopup()
@@ -220,14 +254,28 @@ namespace TeamLog.UI.Battle
         {
             base.UpdateStats(atk, def);
 
-            // Phase CC: 자원 배지 (Ember/Vengeance/Frost/Prophecy)
-            // 기존 텍스트 한 줄 표시를 전용 배지로 교체 — 자원별 고유 색상 + 변화 시 펀치 애니 + 툴팁.
-            if (_character?.Resource != null && _statusEffectContainer != null)
+            // Phase CC: 자원 배지 — 캐릭터 초상화 옆에 큰 원형 (StS/Hearthstone 스타일).
+            // 자원 변화 시 OnStacksChanged 이벤트로 자동 갱신 + '+1 잿빛' 플로팅 텍스트.
+            if (_character?.Resource != null)
             {
                 if (_resourceBadge == null)
-                    _resourceBadge = ResourceBadge.Create(_statusEffectContainer, _character.Resource);
+                {
+                    // 초상화 부모(LeftSection/Avatar 컨테이너)에 배치 — 초상화 옆 위계
+                    Transform badgeParent = _avatarBgImage != null
+                        ? _avatarBgImage.transform.parent
+                        : (_statusEffectContainer != null ? _statusEffectContainer.parent : transform);
+                    _resourceBadge = ResourceBadge.Create(badgeParent, _character.Resource);
+                    // 자원 변화 이벤트 구독 — UI 자동 갱신 + 플로팅 텍스트
+                    _character.Resource.OnStacksChanged += OnResourceStacksChanged;
+                }
                 else
                     _resourceBadge.Refresh();
+            }
+            else if (_resourceBadge != null)
+            {
+                // 자원 없는 캐릭터로 교체 시 기존 배지 제거 (일반적으론 발생 안 함)
+                Destroy(_resourceBadge.gameObject);
+                _resourceBadge = null;
             }
 
             // Phase CC: 장착 특성 배지 (최초 1회 생성, 이후 갱신)
@@ -240,6 +288,25 @@ namespace TeamLog.UI.Battle
             }
 
             UpdateTooltipContent();
+        }
+
+        /// <summary>자원 스택 변화 핸들러 — 배지 갱신 + 플로팅 텍스트.</summary>
+        private void OnResourceStacksChanged(int delta)
+        {
+            if (this == null || !gameObject.activeInHierarchy) return;
+            if (delta == 0 || _character?.Resource == null) return;
+
+            // 배지 갱신 + 펄스 애니
+            if (_resourceBadge != null)
+                _resourceBadge.OnStacksChanged(delta);
+
+            // 플로팅 텍스트 (+1 잿빛 / -2 잿빛) — FloatingTextUI 직접 호출
+            string sign = delta > 0 ? "+" : "";
+            string resName = BattleDisplayUtil.GetResourceLabel(_character.Resource.Resource);
+            Color color = delta > 0
+                ? BattleDisplayUtil.GetResourceColor(_character.Resource.Resource)
+                : FloatingTextUI.DamageColor;
+            FloatingTextUI.Spawn(transform, $"{sign}{delta} {resName}", color, new Vector2(0, 40));
         }
 
         public override void UpdateStatusEffects(IEnumerable<ActiveEffect> effects)

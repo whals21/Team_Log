@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using TeamLog.Characters;
+using TeamLog.Skill;
 using TeamLog.UI;
 
 namespace TeamLog.UI.Battle
@@ -11,6 +12,13 @@ namespace TeamLog.UI.Battle
     /// </summary>
     public static class BattleDisplayUtil
     {
+        // 공용 흰색 스프라이트 — sprite 없는 Image는 raycast가 무시되는 버그 방지 (ResourceBadge 원형 테두리용)
+        private static Sprite _whiteSprite;
+        public static Sprite WhiteSprite => _whiteSprite ??= Sprite.Create(
+            Texture2D.whiteTexture,
+            new Rect(0f, 0f, 4f, 4f),
+            new Vector2(0.5f, 0.5f),
+            100f, 0u, SpriteMeshType.FullRect, Vector4.zero);
         /// <summary>
         /// 상태이상 타입 → 한국어 라벨
         /// </summary>
@@ -238,8 +246,9 @@ namespace TeamLog.UI.Battle
         }
 
         /// <summary>
-        /// 스킬 수치 요약 문자열 생성 (위력, 상태이상 등)
-        /// 공격 스킬은 캐릭터 ATK 포함하여 최종 위력 계산
+        /// 스킬 수치 요약 문자열 생성 (위력, 상태이상, 자원, BehaviorTag 등).
+        /// 공격 스킬은 캐릭터 ATK 포함하여 최종 위력 계산.
+        /// Phase CC/UNIFIED-P: 자원 비례 위력, 자원 획득/소모, BehaviorTag(조건부 보너스/특수 효과), ShieldFlags 표시.
         /// </summary>
         public static string BuildSkillDescription(SkillData skill, Character caster, string separator = " | ")
         {
@@ -261,7 +270,16 @@ namespace TeamLog.UI.Battle
                     SkillType.Purify => "수치",
                     _ => "수치"
                 };
-                parts.Add($"{label} {displayPower}");
+
+                // Phase CC: 자원 비례 위력 표시 (+Ember×3 등)
+                string powerSuffix = "";
+                if (skill.ResourcePowerPerStack > 0)
+                {
+                    ResourceType resType = InferResourceType(skill, caster);
+                    if (resType != ResourceType.None)
+                        powerSuffix = $"+{GetResourceInitial(resType)}×{skill.ResourcePowerPerStack}";
+                }
+                parts.Add($"{label} {displayPower}{powerSuffix}");
             }
 
             if (skill.StatusEffect != StatusEffectType.None)
@@ -272,7 +290,84 @@ namespace TeamLog.UI.Battle
                 parts.Add($"{effectName}{value}{duration}");
             }
 
+            // Phase CC: 자원 획득
+            if (skill.ResourceGainType != ResourceType.None && skill.ResourceGainAmount > 0)
+                parts.Add($"{GetResourceLabel(skill.ResourceGainType)} +{skill.ResourceGainAmount}");
+
+            // Phase CC: 자원 소모 (전량 소모 vs 고정)
+            if (skill.ConsumeAllResource && skill.ResourceCostType != ResourceType.None)
+                parts.Add($"{GetResourceLabel(skill.ResourceCostType)} 전량 소모");
+            else if (skill.ResourceCostType != ResourceType.None && skill.ResourceCostAmount > 0)
+                parts.Add($"{GetResourceLabel(skill.ResourceCostType)} {skill.ResourceCostAmount} 소모");
+
+            // Phase CC: ShieldFlags (Taranis Grounding Field)
+            if (skill.Type == SkillType.Shield && skill.ShieldFlags != ShieldFlag.None)
+            {
+                if ((skill.ShieldFlags & ShieldFlag.GivesChargeOnAbsorb) != 0)
+                    parts.Add("흡수 시 전하 부여");
+            }
+
+            // Phase ARCH/CC: BehaviorTag 요약 (조건부 보너스/특수 효과)
+            if (skill.Behaviors != null)
+            {
+                foreach (var tag in skill.Behaviors)
+                {
+                    string b = GetBehaviorLabel(tag);
+                    if (!string.IsNullOrEmpty(b))
+                        parts.Add(b);
+                }
+            }
+
             return string.Join(separator, parts);
+        }
+
+        /// <summary>자원 비례 위력 표시용 자원 종류 추론 — SkillData 우선, caster.Resource 차선.</summary>
+        private static ResourceType InferResourceType(SkillData skill, Character caster)
+        {
+            if (skill.ResourceGainType != ResourceType.None) return skill.ResourceGainType;
+            if (skill.ResourceCostType != ResourceType.None) return skill.ResourceCostType;
+            if (caster?.Resource != null) return caster.Resource.Resource;
+            return ResourceType.None;
+        }
+
+        /// <summary>
+        /// BehaviorTag 한국어 라벨 (UI 요약용). 주요 Behavior만 표시, 기타는 null (표시 생략).
+        /// rank가 의미 있는 경우 N으로 치환.
+        /// </summary>
+        public static string GetBehaviorLabel(TeamLog.Skill.BehaviorTag tag)
+        {
+            switch (tag.Keyword)
+            {
+                // Phase CC 핵심
+                case BehaviorKeyword.Berserk: return "HP≤50% 2배";
+                case BehaviorKeyword.Propagate: return "전파";
+                case BehaviorKeyword.TargetFreeze: return $"빙결 적 +{tag.Rank}";
+                case BehaviorKeyword.CleanseLowTarget: return "대상 HP≤50% 정화";
+                case BehaviorKeyword.ResourceThresholdShield: return $"자원 {tag.Rank}+ 강화";
+
+                // Phase BK/ARCH 핵심
+                case BehaviorKeyword.HeavyHit: return "2배 (코스트+1)";
+                case BehaviorKeyword.Pierce: return "방어/쉴드 무시";
+                case BehaviorKeyword.Execution: return $"HP {tag.Rank}↓ 즉사";
+                case BehaviorKeyword.Lifesteal: return "흡혈";
+                case BehaviorKeyword.Chain: return $"연쇄 {tag.Rank}";
+                case BehaviorKeyword.VenomTouch: return $"중독 {tag.Rank}스택";
+                case BehaviorKeyword.BurningTouch: return $"화상 {tag.Rank}스택";
+                case BehaviorKeyword.FreezeTouch: return $"빙결 {tag.Rank}스택";
+
+                // Phase ARCH-4 조건부
+                case BehaviorKeyword.FirstBlood: return $"풀피 적 +{tag.Rank}";
+                case BehaviorKeyword.Cull: return $"절반 이하 +{tag.Rank}";
+                case BehaviorKeyword.Desperation: return $"잃은 HP 비례 +";
+                case BehaviorKeyword.Wound: return $"잃은 HP 비례 -";
+                case BehaviorKeyword.GiantSlayer: return $"강적 +{tag.Rank}";
+                case BehaviorKeyword.Dominance: return $"적 HP<나 +{tag.Rank}";
+                case BehaviorKeyword.Bulwark: return $"쉴드 보유 +{tag.Rank}";
+                case BehaviorKeyword.AllIn: return $"AP 0 시 +{tag.Rank}";
+                case BehaviorKeyword.Bounty: return $"킬 시 회복";
+
+                default: return null; // PowerUp/Spread/Bounce/MultiHit 등은 별도 표기 또는 생략
+            }
         }
     }
 }

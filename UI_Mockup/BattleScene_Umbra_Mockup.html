@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>BattleScene UI Mockup — Umbra 개선안</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f0f1a;
+    color: #e0e0e0;
+    font-family: 'NanumGothic', 'MalgunGothic', monospace;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+  h1 { color: #ffd700; font-size: 18px; margin-bottom: 5px; }
+  h2 { color: #aaa; font-size: 14px; margin-bottom: 10px; }
+
+  /* 게임 화면 컨테이너 */
+  .game-screen {
+    width: 900px;
+    background: #1a1a2e;
+    border: 2px solid #2a2a4e;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  }
+
+  /* TopBar */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px;
+    background: #16213e;
+    border-radius: 5px;
+    margin-bottom: 15px;
+  }
+  .turn-info { font-size: 16px; color: #ffd700; }
+  .ap-display { display: flex; align-items: center; gap: 8px; }
+  .ap-pip {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid #555;
+  }
+  .ap-pip.filled { background: #4fc3f7; border-color: #4fc3f7; box-shadow: 0 0 8px #4fc3f7; }
+  .ap-pip.empty { background: #1a1a2e; }
+  .reroll-info { color: #ff9800; font-size: 14px; }
+
+  /* 캐릭터 슬롯 영역 */
+  .character-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  .char-slot {
+    background: #1e2a3e;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    position: relative;
+  }
+  .char-slot.selected {
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255,215,0,0.4);
+  }
+  .char-portrait {
+    width: 100%; height: 60px;
+    background: #2a3a5e;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #666;
+  }
+  .char-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .bar-container {
+    margin-bottom: 4px;
+  }
+  .bar-label {
+    font-size: 10px;
+    color: #888;
+    margin-bottom: 2px;
+  }
+  .bar {
+    height: 12px;
+    background: #0a0a1a;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+  .hp-fill { background: linear-gradient(90deg, #4caf50, #66bb6a); }
+  .shield-fill { background: linear-gradient(90deg, #8b4513, #a0522d); }
+  .bar-text {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    text-align: center;
+    font-size: 9px;
+    line-height: 12px;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+  }
+
+  /* ATK + 자원 영역 */
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-top: 1px solid #333;
+    margin-top: 4px;
+  }
+  .atk-value {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ff5252;
+  }
+  .resource-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .resource-ember { background: #e65100; color: #fff3e0; }
+  .resource-vengeance { background: #6a1b9a; color: #f3e5f5; }
+  .resource-frost { background: #00838f; color: #e0f7fa; }
+  .resource-shadows {
+    background: #1a1a2e;
+    color: #9e9e9e;
+    border: 1px solid #555;
+  }
+
+  /* 상태이상 아이콘 */
+  .status-icons {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .status-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #fff;
+  }
+  .status-poison { background: #8bc34a; }
+  .status-burn { background: #ff5722; }
+  .status-bleed { background: #b71c1c; }
+  .status-freeze { background: #4fc3f7; }
+  .status-stun { background: #ffd700; color: #000; }
+
+  /* 액션 슬롯 영역 */
+  .action-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .action-slot {
+    background: #1e2a3e;
+    border: 2px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-slot:hover { border-color: #666; }
+  .action-slot.selected {
+    border-color: #ffd700;
+    border-width: 3px;
+    box-shadow: 0 0 15px rgba(255,215,0,0.5);
+    transform: scale(1.03);
+  }
+  .action-slot.disabled {
+    opacity: 0.5;
+    filter: grayscale(0.7);
+  }
+  .skill-name {
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .ap-cost {
+    display: inline-block;
+    background: #16213e;
+    color: #4fc3f7;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 2px 10px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    border: 1px solid #4fc3f7;
+  }
+  .ap-cost.insufficient {
+    color: #666;
+    border-color: #444;
+  }
+  .skill-type-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    font-weight: bold;
+  }
+  .type-attack { background: #c62828; color: #fff; }
+  .type-heal { background: #2e7d32; color: #fff; }
+  .type-shield { background: #6a3d9a; color: #fff; }
+  .type-buff { background: #f9a825; color: #000; }
+  .type-debuff { background: #5e35b1; color: #fff; }
+  .skill-effect {
+    font-size: 10px;
+    color: #aaa;
+    line-height: 1.3;
+  }
+
+  /* 하단 버튼 */
+  .bottom-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+  }
+  .btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn-reroll { background: #ff9800; color: #fff; }
+  .btn-end { background: #4caf50; color: #fff; }
+
+  /* 개선점 주석 */
+  .annotation {
+    position: absolute;
+    background: #ffd700;
+    color: #000;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+  .annotation::after {
+    content: '';
+    position: absolute;
+    border: 5px solid transparent;
+  }
+
+  /* 비교 라벨 */
+  .label-improved {
+    color: #4caf50;
+    font-size: 12px;
+    margin-top: 5px;
+  }
+</style>
+</head>
+<body>
+
+<h1>BattleScene UI — Umbra 개선안 목업</h1>
+<h2>개선점: ① 선택 상태 시각화 ② ATK/자원 가시화 ③ 상태이상 아이콘 ④ 캐릭터 초상화 ⑤ 액션 슬롯 색상 일관성</h2>
+
+<div class="game-screen">
+
+  <!-- TopBar -->
+  <div class="topbar">
+    <div class="turn-info">Turn 2</div>
+    <div class="ap-display">
+      <span style="font-size:12px;color:#888;">AP</span>
+      <div class="ap-pip filled"></div>
+      <div class="ap-pip filled"></div>
+      <div class="ap-pip filled"></div>
+      <div class="ap-pip empty"></div>
+      <div class="ap-pip empty"></div>
+      <span style="font-size:13px;color:#4fc3f7;margin-left:5px;">3/5</span>
+    </div>
+    <div class="reroll-info">🔄 Reroll: 2</div>
+  </div>
+
+  <!-- 캐릭터 슬롯 (4개) -->
+  <div class="character-row">
+
+    <!-- 아셰 (Ember 자원, Burn 상태) -->
+    <div class="char-slot">
+      <div class="status-icons">
+        <div class="status-icon status-burn" title="화상">화</div>
+      </div>
+      <div class="char-portrait">🔥</div>
+      <div class="char-name">아셰</div>
+      <div class="bar-container">
+        <div class="bar-label">HP</div>
+        <div class="bar">
+          <div class="bar-fill hp-fill" style="width: 45%;"></div>
+          <div class="bar-text">45/100</div>
+        </div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-label">SHIELD</div>
+        <div class="bar">
+          <div class="bar-fill shield-fill" style="width: 20%;"></div>
+          <div class="bar-text">5</div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="atk-value">ATK 12</span>
+        <span class="resource-badge resource-ember">🔥 Ember 3/5</span>
+      </div>
+    </div>
+
+    <!-- 듀란 (Vengeance 자원, 정상) -->
+    <div class="char-slot">
+      <div class="char-portrait">⚔️</div>
+      <div class="char-name">듀란</div>
+      <div class="bar-container">
+        <div class="bar-label">HP</div>
+        <div class="bar">
+          <div class="bar-fill hp-fill" style="width: 90%;"></div>
+          <div class="bar-text">108/120</div>
+        </div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-label">SHIELD</div>
+        <div class="bar">
+          <div class="bar-fill shield-fill" style="width: 50%;"></div>
+          <div class="bar-text">15</div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="atk-value">ATK 8</span>
+        <span class="resource-badge resource-vengeance">⚡ Veng 12/20</span>
+      </div>
+    </div>
+
+    <!-- 움브라 (Shadows 자원, 선택됨, Poison 상태) -->
+    <div class="char-slot selected">
+      <div class="status-icons">
+        <div class="status-icon status-poison" title="독">독</div>
+      </div>
+      <div class="char-portrait">🗡️</div>
+      <div class="char-name">움브라</div>
+      <div class="bar-container">
+        <div class="bar-label">HP</div>
+        <div class="bar">
+          <div class="bar-fill hp-fill" style="width: 60%;"></div>
+          <div class="bar-text">45/75</div>
+        </div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-label">SHIELD</div>
+        <div class="bar">
+          <div class="bar-fill shield-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="atk-value">ATK 10</span>
+        <span class="resource-badge resource-shadows">🌑 Shadows 3/3</span>
+      </div>
+    </div>
+
+    <!-- 루미 (Frost 자원, 정상) -->
+    <div class="char-slot">
+      <div class="char-portrait">❄️</div>
+      <div class="char-name">루미</div>
+      <div class="bar-container">
+        <div class="bar-label">HP</div>
+        <div class="bar">
+          <div class="bar-fill hp-fill" style="width: 80%;"></div>
+          <div class="bar-text">60/75</div>
+        </div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-label">SHIELD</div>
+        <div class="bar">
+          <div class="bar-fill shield-fill" style="width: 40%;"></div>
+          <div class="bar-text">8</div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="atk-value">ATK 6</span>
+        <span class="resource-badge resource-frost">❄ Frost 1/3</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 액션 슬롯 (Umbra 스킬 4종, 기습 선택됨) -->
+  <div class="action-row">
+
+    <!-- 독 바르기 -->
+    <div class="action-slot">
+      <div class="skill-name">독 바르기</div>
+      <div class="ap-cost">AP 1</div>
+      <div><span class="skill-type-tag type-attack">공격</span></div>
+      <div class="skill-effect">Poison 2턴<br>단일 3</div>
+    </div>
+
+    <!-- 기습 (선택됨) -->
+    <div class="action-slot selected">
+      <div class="skill-name">기습</div>
+      <div class="ap-cost">AP 2</div>
+      <div><span class="skill-type-tag type-attack">공격</span></div>
+      <div class="skill-effect">단일 7<br>⭐ 디버프 시 2배 (14)</div>
+    </div>
+
+    <!-- 할퀴기 -->
+    <div class="action-slot">
+      <div class="skill-name">할퀴기</div>
+      <div class="ap-cost">AP 1</div>
+      <div><span class="skill-type-tag type-attack">공격</span></div>
+      <div class="skill-effect">Bleed 2턴<br>HP50%- 시 +도트</div>
+    </div>
+
+    <!-- 결정타 (Shadows 3 필요, 현재 충족) -->
+    <div class="action-slot">
+      <div class="skill-name">결정타</div>
+      <div class="ap-cost">AP 3</div>
+      <div><span class="skill-type-tag type-attack">공격</span></div>
+      <div class="skill-effect">단일 15<br>🌑 Shadows 3 필수<br>치명타 확정 30</div>
+    </div>
+
+  </div>
+
+  <!-- 하단 버튼 -->
+  <div class="bottom-bar">
+    <button class="btn btn-reroll">🔄 Reroll (2회)</button>
+    <button class="btn btn-end">턴 종료</button>
+  </div>
+
+</div>
+
+<!-- 개선점 설명 -->
+<div style="width:900px; background:#1a1a2e; padding:20px; border-radius:8px; border:1px solid #333;">
+  <h2 style="color:#ffd700; margin-bottom:15px;">📋 개선점 상세</h2>
+  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+    <tr style="border-bottom:1px solid #333;">
+      <td style="padding:8px; color:#4caf50; font-weight:bold; width:30px;">①</td>
+      <td style="padding:8px; color:#4caf50; font-weight:bold;">선택 상태 시각화</td>
+      <td style="padding:8px;">움브라 슬롯 + 기습 슬롯에 금색 테두리 + 발광 + 스케일 1.03. 미선택은 그대로.</td>
+    </tr>
+    <tr style="border-bottom:1px solid #333;">
+      <td style="padding:8px; color:#4fc3f7; font-weight:bold;">②</td>
+      <td style="padding:8px; color:#4fc3f7; font-weight:bold;">ATK + 자원 가시화</td>
+      <td style="padding:8px;">ATK 값을 구분선 아래 별도 행으로 크게 표시. 자원 배지(색상+스택/최대) 우측 배치.</td>
+    </tr>
+    <tr style="border-bottom:1px solid #333;">
+      <td style="padding:8px; color:#8bc34a; font-weight:bold;">③</td>
+      <td style="padding:8px; color:#8bc34a; font-weight:bold;">상태이상 아이콘</td>
+      <td style="padding:8px;">캐릭터 슬롯 우상단에 색상별 원형 아이콘 (독=녹색, 화상=주황, 출혈=빨강, 빙결=파랑, 기절=금색). 한국어 이니셜.</td>
+    </tr>
+    <tr style="border-bottom:1px solid #333;">
+      <td style="padding:8px; color:#ff9800; font-weight:bold;">④</td>
+      <td style="padding:8px; color:#ff9800; font-weight:bold;">캐릭터 초상화</td>
+      <td style="padding:8px;">이름 위에 초상화 영역 (이모지/스프라이트). 시각적 식별 강화.</td>
+    </tr>
+    <tr>
+      <td style="padding:8px; color:#e91e63; font-weight:bold;">⑤</td>
+      <td style="padding:8px; color:#e91e63; font-weight:bold;">액션 슬롯 색상 일관성</td>
+      <td style="padding:8px;">스킬 타입별 태그 색상 통일 (공격=빨강, 치유=초록, 쉴드=보라, 버프=노랑, 디버프=진보라). AP 비용 큰 숫자로.</td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

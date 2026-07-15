@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>BattleScene Full UI Mockup v3 — 개선안</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a14;
+    color: #e0e0e0;
+    font-family: 'NanumGothic', 'MalgunGothic', sans-serif;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  h1 { color: #ffd700; font-size: 18px; }
+  h2 { color: #888; font-size: 13px; }
+
+  .game-screen {
+    width: 1200px;
+    height: 750px;
+    background: #1a1a2e;
+    border: 2px solid #2a2a4e;
+    border-radius: 8px;
+    display: grid;
+    grid-template-rows: 40px 230px 1fr 240px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  }
+
+  /* ── TopBar ── */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background: linear-gradient(180deg, #16213e, #1a1a2e);
+    border-bottom: 1px solid #2a2a4e;
+  }
+  .tb-left { display: flex; align-items: center; gap: 10px; }
+  .turn-badge {
+    background: #e74c3c; color: #fff;
+    padding: 4px 14px; border-radius: 4px;
+    font-size: 14px; font-weight: bold;
+  }
+  .floor-info { font-size: 12px; color: #888; }
+  .tb-right { display: flex; align-items: center; gap: 6px; }
+  .toggle-btn {
+    background: #2a2a4e; border: 1px solid #444; color: #aaa;
+    padding: 4px 10px; border-radius: 4px;
+    font-size: 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .toggle-btn:hover { border-color: #666; color: #fff; }
+  .toggle-btn.active { color: #fff; }
+  .toggle-btn.log.active { background: #b39ddb; border-color: #b39ddb; }
+  .toggle-btn.party.active { background: #4caf50; border-color: #4caf50; }
+  .speed-btn {
+    background: #2a2a4e; border: 1px solid #555; color: #aaa;
+    padding: 4px 10px; border-radius: 4px;
+    font-size: 12px; cursor: pointer;
+  }
+  .speed-btn.active { background: #ff9800; color: #fff; border-color: #ff9800; }
+
+  /* ── 적 패널 영역 ── */
+  .enemy-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 20px;
+    background: rgba(231,76,60,0.05);
+    border-bottom: 1px solid #2a2a4e;
+  }
+  .enemy-panel {
+    width: 190px;
+    background: #1e2a3e;
+    border: 2px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+    position: relative;
+  }
+  .enemy-panel.elite { border-color: #ff9800; box-shadow: 0 0 8px rgba(255,152,0,0.2); }
+
+  /* 적 의도 (타겟팅 포함) */
+  .enemy-intent {
+    display: flex; align-items: center; gap: 4px;
+    margin-bottom: 6px; padding: 5px 8px;
+    background: #2a1a1a; border-radius: 4px;
+    border-left: 3px solid #e74c3c;
+  }
+  .intent-icon { font-size: 14px; }
+  .intent-action { font-size: 10px; color: #e74c3c; font-weight: bold; flex: 1; }
+  .intent-damage { font-size: 13px; color: #ff5252; font-weight: bold; }
+  .intent-target {
+    display: flex; align-items: center; gap: 4px;
+    margin-bottom: 6px; padding: 3px 8px;
+    background: rgba(231,76,60,0.15); border-radius: 3px;
+    border: 1px dashed #e74c3c;
+  }
+  .target-arrow { font-size: 12px; color: #e74c3c; }
+  .target-portrait {
+    width: 18px; height: 18px;
+    background: #2a3a5e; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .target-name { font-size: 10px; color: #ff8a80; font-weight: bold; }
+
+  /* ★ 초상화 영역 (미리 확보 — 점선 테두리) */
+  .portrait-area {
+    width: 100%; height: 60px;
+    background: #0d1525;
+    border: 2px dashed #3a4a6e;
+    border-radius: 5px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #3a4a6e;
+    position: relative;
+  }
+  .portrait-area::after {
+    content: '초상화';
+    position: absolute;
+    bottom: 2px; right: 4px;
+    font-size: 7px;
+    color: #3a4a6e;
+  }
+
+  .enemy-name { font-size: 13px; color: #fff; text-align: center; margin-bottom: 2px; font-weight: bold; }
+  .enemy-trait { font-size: 9px; color: #aaa; text-align: center; margin-bottom: 4px; font-style: italic; }
+  .bar-container { margin-bottom: 3px; }
+  .bar-label { font-size: 9px; color: #666; }
+  .bar {
+    height: 10px; background: #0a0a1a;
+    border-radius: 3px; overflow: hidden;
+    position: relative; display: flex;
+  }
+  .bar-fill { height: 100%; }
+  .hp-fill { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+  .shield-fill { background: linear-gradient(90deg, #8b4513, #a0522d); }
+  .bar-text {
+    position: absolute; top: 0; left: 0; right: 0;
+    text-align: center; font-size: 8px; line-height: 10px;
+    color: #fff; text-shadow: 1px 1px 1px #000;
+  }
+  .status-row {
+    position: absolute; top: 6px; right: 6px;
+    display: flex; gap: 3px;
+  }
+  .status-icon {
+    width: 16px; height: 16px; border-radius: 50%;
+    font-size: 8px; font-weight: bold; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .st-poison { background: #8bc34a; }
+  .st-burn { background: #ff5722; }
+  .st-freeze { background: #4fc3f7; }
+  .st-stun { background: #ffd700; color: #000; }
+
+  /* ── 중앙 전투 영역 ── */
+  .battle-field {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .combat-stage {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .floating-text {
+    position: absolute;
+    font-size: 24px; font-weight: bold;
+    text-shadow: 2px 2px 4px #000;
+    animation: float 2s ease-out infinite;
+  }
+  .ft-damage { color: #ff5252; top: 40%; left: 40%; }
+  .ft-heal { color: #4caf50; top: 50%; left: 50%; animation-delay: 0.5s; }
+  .ft-shield { color: #a0522d; top: 45%; left: 45%; animation-delay: 1s; }
+  @keyframes float {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-30px); }
+  }
+  .combat-hint { font-size: 11px; color: #333; }
+
+  .overlay-panel {
+    position: absolute;
+    background: rgba(22,33,62,0.95);
+    border: 1px solid #4fc3f7;
+    border-radius: 6px;
+    padding: 12px;
+    display: none;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .overlay-panel.show { display: block; }
+  .overlay-panel.log-panel { border-color: #b39ddb; }
+  .overlay-panel.party-panel { border-color: #4caf50; }
+  .overlay-title {
+    font-size: 12px; color: #888; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .overlay-close { background: none; border: none; color: #888; cursor: pointer; font-size: 14px; }
+
+  .pw-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #2a2a4e; }
+  .pw-label { font-size: 12px; color: #aaa; }
+  .pw-value { font-size: 14px; font-weight: bold; }
+  .pw-hp { color: #e74c3c; }
+  .pw-gold { color: #ffd700; }
+
+  .log-entry {
+    font-size: 10px; padding: 3px 6px;
+    border-radius: 2px; line-height: 1.4; margin-bottom: 2px;
+  }
+  .log-attack { color: #ff8a80; background: rgba(231,76,60,0.1); }
+  .log-heal { color: #81c784; background: rgba(76,175,80,0.1); }
+  .log-shield { color: #b39ddb; background: rgba(149,117,205,0.1); }
+  .log-buff { color: #fff59d; background: rgba(255,193,7,0.1); }
+  .log-system { color: #888; font-style: italic; }
+
+  /* ════════════════════════════════════════════
+     ★ 하단 영역: 5컬럼 그리드 (4 슬롯 + 우측 130px)
+     캐릭터 슬롯(행1)과 스킬 슬롯(행2)이 수직 정렬
+     ════════════════════════════════════════════ */
+  .bottom-area {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) 130px;
+    grid-template-rows: 95px 135px;
+    gap: 6px 8px;
+    padding: 8px 15px;
+    background: rgba(0,0,0,0.3);
+    border-top: 1px solid #2a2a4e;
+  }
+
+  /* 캐릭터 슬롯 (행 1, 열 1-4) */
+  .char-slot {
+    background: #1e2a3e;
+    border: 2px solid #333;
+    border-radius: 6px;
+    padding: 6px 8px;
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 8px;
+    align-items: center;
+    position: relative;
+  }
+  .char-slot.selected {
+    border-color: #ffd700;
+    box-shadow: 0 0 12px rgba(255,215,0,0.3);
+  }
+  .char-slot.targeted-by-enemy {
+    border-color: #e74c3c;
+    box-shadow: 0 0 8px rgba(231,76,60,0.2);
+  }
+
+  /* ★ 플레이어 초상화 영역 (50px, 점선 테두리) */
+  .char-portrait {
+    width: 50px; height: 50px;
+    background: #0d1525;
+    border: 2px dashed #3a4a6e;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #3a4a6e;
+    position: relative;
+  }
+  .char-portrait::after {
+    content: '초상화';
+    position: absolute;
+    bottom: -1px; right: 2px;
+    font-size: 6px;
+    color: #3a4a6e;
+  }
+
+  .char-info { display: flex; flex-direction: column; gap: 2px; }
+  .char-name { font-size: 12px; color: #fff; font-weight: bold; }
+  .char-bars { display: flex; flex-direction: column; gap: 2px; }
+  .mini-bar {
+    height: 7px; background: #0a0a1a;
+    border-radius: 2px; overflow: hidden;
+    position: relative;
+  }
+  .mini-hp { background: #4caf50; height: 100%; }
+  .mini-shield { background: #8b4513; height: 100%; }
+  .mini-bar-text { font-size: 8px; color: #fff; position: absolute; top: 0; left: 0; right: 0; text-align: center; line-height: 7px; }
+  .char-stats { display: flex; justify-content: space-between; align-items: center; }
+  .atk-mini { font-size: 11px; color: #ff5252; font-weight: bold; }
+  .resource-mini {
+    font-size: 9px; padding: 1px 6px;
+    border-radius: 8px; font-weight: bold;
+  }
+  .res-ember { background: #e65100; color: #fff3e0; }
+  .res-vengeance { background: #6a1b9a; color: #f3e5f5; }
+  .res-frost { background: #00838f; color: #e0f7fa; }
+  .res-shadows { background: #1a1a2e; color: #9e9e9e; border: 1px solid #555; }
+
+  /* AP 영역 (행 1, 열 5 — 캐릭터 슬롯 옆) */
+  .ap-area {
+    background: #16213e;
+    border: 1px solid #2a2a4e;
+    border-radius: 6px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
+  .ap-label { font-size: 11px; color: #4fc3f7; font-weight: bold; }
+  .ap-pips { display: flex; gap: 3px; }
+  .ap-pip {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid #333;
+  }
+  .ap-pip.filled { background: #4fc3f7; border-color: #4fc3f7; box-shadow: 0 0 4px #4fc3f7; }
+  .ap-pip.empty { background: #1a1a2e; }
+  .ap-text { font-size: 16px; color: #4fc3f7; font-weight: bold; }
+
+  /* 스킬 슬롯 (행 2, 열 1-4) */
+  .action-slot {
+    background: #1e2a3e;
+    border: 2px solid #444;
+    border-radius: 6px;
+    padding: 6px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .action-slot:hover { border-color: #666; }
+  .action-slot.selected {
+    border-color: #ffd700;
+    border-width: 3px;
+    box-shadow: 0 0 12px rgba(255,215,0,0.4);
+    transform: scale(1.02);
+  }
+  .action-slot.disabled { opacity: 0.5; filter: grayscale(0.7); }
+  .as-header { display: flex; justify-content: space-between; align-items: center; }
+  .as-caster { font-size: 9px; color: #888; }
+  .as-type {
+    font-size: 8px; padding: 1px 5px;
+    border-radius: 3px; font-weight: bold;
+  }
+  .t-attack { background: #c62828; color: #fff; }
+  .t-heal { background: #2e7d32; color: #fff; }
+  .t-shield { background: #6a3d9a; color: #fff; }
+  .t-buff { background: #f9a825; color: #000; }
+  .t-debuff { background: #5e35b1; color: #fff; }
+  .as-name { font-size: 12px; color: #fff; font-weight: bold; }
+  .as-effect { font-size: 9px; color: #aaa; line-height: 1.2; }
+  .as-ap {
+    display: inline-block;
+    font-size: 14px; font-weight: bold;
+    color: #4fc3f7; border: 1px solid #4fc3f7;
+    padding: 1px 8px; border-radius: 8px;
+  }
+  .as-ap.insufficient { color: #666; border-color: #444; }
+
+  /* 버튼 영역 (행 2, 열 5 — 스킬 슬롯 옆) */
+  .button-area {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+  }
+  .btn {
+    padding: 10px 8px;
+    border: none; border-radius: 5px;
+    font-size: 12px; font-weight: bold;
+    cursor: pointer; text-align: center;
+    line-height: 1.3;
+  }
+  .btn-reroll { background: #ff9800; color: #fff; }
+  .btn-end { background: #e74c3c; color: #fff; }
+</style>
+</head>
+<body>
+
+<h1>BattleScene 전체 UI 개선안 v3</h1>
+<h2>변경: ① 초상화 영역 확보 (점선 테두리) ② 캐릭터 슬롯 ↔ 스킬 슬롯 수직 정렬</h2>
+
+<div class="game-screen">
+
+  <!-- TopBar -->
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="turn-badge">Turn 2</div>
+      <span class="floor-info">F2 일반 · 층 2/4</span>
+    </div>
+    <div class="tb-right">
+      <button class="toggle-btn party" onclick="togglePanel('party')">📊 파티</button>
+      <button class="toggle-btn log" onclick="togglePanel('log')">📜 로그</button>
+      <button class="speed-btn active">1x</button>
+      <button class="speed-btn">2x</button>
+    </div>
+  </div>
+
+  <!-- 적 패널 영역 -->
+  <div class="enemy-area">
+
+    <div class="enemy-panel">
+      <div class="status-row"><div class="status-icon st-poison">독</div></div>
+      <div class="enemy-intent">
+        <span class="intent-icon">⚔️</span>
+        <span class="intent-action">공격</span>
+        <span class="intent-damage">6</span>
+      </div>
+      <div class="intent-target">
+        <span class="target-arrow">→</span>
+        <div class="target-portrait">🔥</div>
+        <span class="target-name">아셰</span>
+      </div>
+      <div class="portrait-area">👹</div>
+      <div class="enemy-name">고블린</div>
+      <div class="enemy-trait">교활함</div>
+      <div class="bar-container">
+        <div class="bar-label">HP 18/26</div>
+        <div class="bar"><div class="bar-fill hp-fill" style="width: 69%;"></div></div>
+      </div>
+    </div>
+
+    <div class="enemy-panel">
+      <div class="enemy-intent">
+        <span class="intent-icon">🐺</span>
+        <span class="intent-action">물기</span>
+        <span class="intent-damage">7</span>
+      </div>
+      <div class="intent-target">
+        <span class="target-arrow">→</span>
+        <div class="target-portrait">🗡️</div>
+        <span class="target-name">움브라</span>
+      </div>
+      <div class="portrait-area">🐺</div>
+      <div class="enemy-name">늑대</div>
+      <div class="enemy-trait">반격</div>
+      <div class="bar-container">
+        <div class="bar-label">HP 21/21</div>
+        <div class="bar"><div class="bar-fill hp-fill" style="width: 100%;"></div></div>
+      </div>
+    </div>
+
+    <div class="enemy-panel">
+      <div class="status-row"><div class="status-icon st-freeze">빙</div></div>
+      <div class="enemy-intent" style="border-left-color:#4fc3f7; background:#1a2a3a;">
+        <span class="intent-icon">❄️</span>
+        <span class="intent-action" style="color:#4fc3f7;">빙결됨</span>
+      </div>
+      <div class="intent-target" style="border-color:#4fc3f7; background:rgba(79,195,247,0.1);">
+        <span class="target-arrow" style="color:#4fc3f7;">⊘</span>
+        <span class="target-name" style="color:#4fc3f7;">행동 불가</span>
+      </div>
+      <div class="portrait-area">💀</div>
+      <div class="enemy-name">해골 전사</div>
+      <div class="enemy-trait">위상 이동</div>
+      <div class="bar-container">
+        <div class="bar-label">HP 35/35</div>
+        <div class="bar"><div class="bar-fill hp-fill" style="width: 100%;"></div></div>
+      </div>
+    </div>
+
+    <div class="enemy-panel elite">
+      <div class="enemy-intent">
+        <span class="intent-icon">🛡️</span>
+        <span class="intent-action">방패 강타</span>
+        <span class="intent-damage">8+기절</span>
+      </div>
+      <div class="intent-target">
+        <span class="target-arrow">→</span>
+        <div class="target-portrait">⚔️</div>
+        <span class="target-name">듀란 (도발)</span>
+      </div>
+      <div class="portrait-area">⚔️</div>
+      <div class="enemy-name">정예 기사</div>
+      <div class="enemy-trait" style="color:#ff9800;">견고함</div>
+      <div class="bar-container">
+        <div class="bar-label">HP 60/75 + SH 12</div>
+        <div class="bar">
+          <div class="bar-fill shield-fill" style="width: 16%;"></div>
+          <div class="bar-fill hp-fill" style="width: 80%;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 중앙 전투 영역 -->
+  <div class="battle-field">
+    <div class="combat-stage">
+      <div class="floating-text ft-damage">-14</div>
+      <div class="floating-text ft-heal">+12</div>
+      <div class="floating-text ft-shield">+10</div>
+      <div class="combat-hint">전투 연출 영역 (VFX / 플로팅 텍스트)</div>
+    </div>
+
+    <div class="overlay-panel party-panel" id="panel-party" style="left:20px; top:20px; width:220px;">
+      <div class="overlay-title">
+        <span>📊 파티 상태</span>
+        <button class="overlay-close" onclick="togglePanel('party')">✕</button>
+      </div>
+      <div class="pw-item"><span class="pw-label">총 HP</span><span class="pw-value pw-hp">288/370</span></div>
+      <div class="pw-item"><span class="pw-label">골드</span><span class="pw-value pw-gold">142G</span></div>
+      <div class="pw-item"><span class="pw-label">생존자</span><span class="pw-value" style="color:#4caf50;">4/4</span></div>
+      <div class="pw-item"><span class="pw-label">층</span><span class="pw-value" style="color:#aaa;">F2 일반</span></div>
+    </div>
+
+    <div class="overlay-panel log-panel" id="panel-log" style="right:20px; top:20px; width:280px;">
+      <div class="overlay-title">
+        <span>📜 전투 로그</span>
+        <button class="overlay-close" onclick="togglePanel('log')">✕</button>
+      </div>
+      <div class="log-entry log-system">— 턴 2 시작 —</div>
+      <div class="log-entry log-attack">아셰 → 고블린: 14 데미지</div>
+      <div class="log-entry log-attack">듀란 → 늑대: 8 데미지</div>
+      <div class="log-entry log-shield">듀란 쉴드 획득: 15</div>
+      <div class="log-entry log-heal">루미 → 아셰: +12 힐</div>
+      <div class="log-entry log-attack">고블린 → 아셰: 6 데미지</div>
+      <div class="log-entry log-buff">움브라 Shadows 2→3 (치명타 확정)</div>
+      <div class="log-entry log-system">적 턴 진행 중...</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       하단: 5컬럼 그리드 (캐릭터/스킬 수직 정렬)
+       행 1: [캐릭1][캐릭2][캐릭3][캐릭4][AP]
+       행 2: [스킬1][스킬2][스킬3][스킬4][버튼]
+       ════════════════════════════════════════════ -->
+  <div class="bottom-area">
+
+    <!-- 행 1: 캐릭터 슬롯 4개 -->
+    <div class="char-slot targeted-by-enemy">
+      <div class="status-row"><div class="status-icon st-burn">화</div></div>
+      <div class="char-portrait">🔥</div>
+      <div class="char-info">
+        <div class="char-name">아셰</div>
+        <div class="char-bars">
+          <div class="mini-bar"><div class="mini-hp" style="width:45%;"></div><div class="mini-bar-text">45/100</div></div>
+          <div class="mini-bar"><div class="mini-shield" style="width:20%;"></div></div>
+        </div>
+        <div class="char-stats"><span class="atk-mini">ATK 12</span><span class="resource-mini res-ember">🔥3/5</span></div>
+      </div>
+    </div>
+
+    <div class="char-slot targeted-by-enemy">
+      <div class="char-portrait">⚔️</div>
+      <div class="char-info">
+        <div class="char-name">듀란</div>
+        <div class="char-bars">
+          <div class="mini-bar"><div class="mini-hp" style="width:90%;"></div><div class="mini-bar-text">108/120</div></div>
+          <div class="mini-bar"><div class="mini-shield" style="width:50%;"></div></div>
+        </div>
+        <div class="char-stats"><span class="atk-mini">ATK 8</span><span class="resource-mini res-vengeance">⚡12/20</span></div>
+      </div>
+    </div>
+
+    <div class="char-slot selected">
+      <div class="char-portrait">🗡️</div>
+      <div class="char-info">
+        <div class="char-name">움브라</div>
+        <div class="char-bars">
+          <div class="mini-bar"><div class="mini-hp" style="width:60%;"></div><div class="mini-bar-text">45/75</div></div>
+          <div class="mini-bar"><div class="mini-shield" style="width:0%;"></div></div>
+        </div>
+        <div class="char-stats"><span class="atk-mini">ATK 10</span><span class="resource-mini res-shadows">🌑3/3</span></div>
+      </div>
+    </div>
+
+    <div class="char-slot">
+      <div class="char-portrait">❄️</div>
+      <div class="char-info">
+        <div class="char-name">루미</div>
+        <div class="char-bars">
+          <div class="mini-bar"><div class="mini-hp" style="width:80%;"></div><div class="mini-bar-text">60/75</div></div>
+          <div class="mini-bar"><div class="mini-shield" style="width:40%;"></div></div>
+        </div>
+        <div class="char-stats"><span class="atk-mini">ATK 6</span><span class="resource-mini res-frost">❄1/3</span></div>
+      </div>
+    </div>
+
+    <!-- 행 1 열 5: AP 영역 -->
+    <div class="ap-area">
+      <span class="ap-label">AP</span>
+      <div class="ap-pips">
+        <div class="ap-pip filled"></div>
+        <div class="ap-pip filled"></div>
+        <div class="ap-pip filled"></div>
+        <div class="ap-pip empty"></div>
+        <div class="ap-pip empty"></div>
+      </div>
+      <span class="ap-text">3/5</span>
+    </div>
+
+    <!-- 행 2: 스킬 슬롯 4개 — 각 캐릭터별 1개씩 랜덤 드로우 (캐릭터와 같은 컬럼) -->
+
+    <!-- 슬롯 1: 아셰의 스킬 (랜덤 1개) -->
+    <div class="action-slot">
+      <div class="as-header"><span class="as-caster">🔥 아셰</span><span class="as-type t-attack">공격</span></div>
+      <div class="as-name">잿빛 응축</div>
+      <div class="as-effect">단일 5 + Burn / Ember +2</div>
+      <div><span class="as-ap">AP 1</span></div>
+    </div>
+
+    <!-- 슬롯 2: 듀란의 스킬 (랜덤 1개) -->
+    <div class="action-slot">
+      <div class="as-header"><span class="as-caster">⚔️ 듀란</span><span class="as-type t-shield">쉴드</span></div>
+      <div class="as-name">방패벽</div>
+      <div class="as-effect">아군 쉴드 10 / Vengeance 5+ 시 +5</div>
+      <div><span class="as-ap">AP 1</span></div>
+    </div>
+
+    <!-- 슬롯 3: 움브라의 스킬 (랜덤 1개) — 선택됨 -->
+    <div class="action-slot selected">
+      <div class="as-header"><span class="as-caster">🗡️ 움브라</span><span class="as-type t-attack">공격</span></div>
+      <div class="as-name">기습</div>
+      <div class="as-effect">⭐ 디버프 시 2배 (14)</div>
+      <div><span class="as-ap">AP 2</span></div>
+    </div>
+
+    <!-- 슬롯 4: 루미의 스킬 (랜덤 1개) -->
+    <div class="action-slot">
+      <div class="as-header"><span class="as-caster">❄️ 루미</span><span class="as-type t-attack">공격</span></div>
+      <div class="as-name">서리 화살</div>
+      <div class="as-effect">단일 5 + Freeze 1 / Frost +1</div>
+      <div><span class="as-ap">AP 1</span></div>
+    </div>
+
+    <!-- 행 2 열 5: 버튼 영역 -->
+    <div class="button-area">
+      <button class="btn btn-reroll">🔄 리롤<br>2/2</button>
+      <button class="btn btn-end">턴 종료<br>[T]</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- 변경사항 설명 -->
+<div style="width:1200px; background:#1a1a2e; padding:20px; border-radius:8px; border:1px solid #333;">
+  <h2 style="color:#ffd700; margin-bottom:15px;">📋 v3 변경사항 (2가지)</h2>
+  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+    <tr style="border-bottom:1px solid #333;">
+      <td style="padding:8px; color:#4caf50; font-weight:bold; width:30px;">①</td>
+      <td style="padding:8px; color:#4caf50; font-weight:bold; width:200px;">초상화 영역 미리 확보</td>
+      <td style="padding:8px;">
+        적 패널(60px) + 플레이어 슬롯(50px)에 <b>점선 테두리</b>로 초상화 영역 명시.<br>
+        "초상화" 라벨 표시 → 나중에 Sprite 에셋 교체 예정임을 시각적으로 명확히.<br>
+        배경색 <code>#0d1525</code>로 일반 슬롯 배경과 구분.
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:8px; color:#4fc3f7; font-weight:bold;">②</td>
+      <td style="padding:8px; color:#4fc3f7; font-weight:bold;">캐릭터↔스킬 슬롯 수직 정렬</td>
+      <td style="padding:8px;">
+        하단을 <b>5컬럼 그리드 (4 슬롯 + 우측 130px)</b>로 통일.<br>
+        행 1: [캐릭1][캐릭2][캐릭3][캐릭4][AP 영역]<br>
+        행 2: [스킬1][스킬2][스킬3][스킬4][리롤/턴종료]<br>
+        캐릭터 슬롯과 스킬 슬롯이 <b>같은 컬럼 너비</b>로 수직 정렬 → 깔끔한 시각적 대응.
+      </td>
+    </tr>
+  </table>
+</div>
+
+<script>
+  function togglePanel(name) {
+    const panel = document.getElementById('panel-' + name);
+    const btn = document.querySelector('.toggle-btn.' + name);
+    if (panel.classList.contains('show')) {
+      panel.classList.remove('show');
+      btn.classList.remove('active');
+    } else {
+      panel.classList.add('show');
+      btn.classList.add('active');
+    }
+  }
+</script>
+
+</body>
+</html>

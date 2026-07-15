@@ -70,6 +70,8 @@ namespace TeamLog.UI.Battle
         private void CreatePlayerPanels()
         {
             ClearPanels(_playerPanels);
+
+            // APArea는 RightColumn에 있으므로 PlayerStrip 정리 시 보호 불필요
             UIAnimationHelper.ClearContainerChildren(_playerPanelContainer);
 
             for (int i = 0; i < _playerParty.Count && i < _maxPlayerPanels; i++)
@@ -219,6 +221,9 @@ namespace TeamLog.UI.Battle
 
         private void OnTurnStarted(int turnNumber)
         {
+            if (_topBar != null)
+                _topBar.SetTurn(turnNumber);
+            ClearAllPlayerTargeting();
             AddLog($"--- 턴 {turnNumber} 시작 ---");
         }
 
@@ -293,7 +298,27 @@ namespace TeamLog.UI.Battle
                 panel.SetTargetMode(false);
 
             foreach (var panel in _playerPanels)
+            {
                 panel.SetSelected(false);
+                panel.SetTargetedByEnemy(false);
+            }
+        }
+
+        /// <summary>특정 플레이어가 적에게 타겟팅된 것을 시각적으로 표시.</summary>
+        public void SetPlayerTargetedByEnemy(Character target, bool targeted)
+        {
+            if (_playerParty == null || _playerPanels == null) return;
+            int idx = _playerParty.IndexOf(target);
+            if (idx >= 0 && idx < _playerPanels.Count)
+                _playerPanels[idx].SetTargetedByEnemy(targeted);
+        }
+
+        /// <summary>모든 플레이어의 적 타겟팅 표시 클리어 — 매 턴 시작 시 호출.</summary>
+        public void ClearAllPlayerTargeting()
+        {
+            if (_playerPanels == null) return;
+            foreach (var panel in _playerPanels)
+                panel.SetTargetedByEnemy(false);
         }
 
         public void SetEnemyIntent(int enemyIndex, EnemyIntent intent)

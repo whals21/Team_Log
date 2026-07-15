@@ -53,6 +53,9 @@ namespace TeamLog.Characters
         [Tooltip("자원 전량 소모 여부 (Phase CC). true면 ResourceCostAmount 무시하고 보유 스택 전부 소모. Revenge Strike용.")]
         [SerializeField] private bool _consumeAllResource;
 
+        [Tooltip("스킬 사용에 필요한 최소 자원 스택 (Phase CC-2A — Umbra Eviscerate용). 0이면 비활성. Eviscerate=3 (Shadows 최대치).")]
+        [SerializeField] private int _minResourceRequired;
+
         [Header("쉴드 속성 (Phase CC P1 — Shield 타입 전용)")]
         [Tooltip("GivesChargeOnAbsorb: 쉴드 흡수 시 공격자에게 Charge 부여 (Taranis Grounding Field).")]
         [SerializeField] private ShieldFlag _shieldFlags = ShieldFlag.None;
@@ -78,6 +81,7 @@ namespace TeamLog.Characters
         public int ResourceCostAmount => _resourceCostAmount;
         public int ResourcePowerPerStack => _resourcePowerPerStack;
         public bool ConsumeAllResource => _consumeAllResource;
+        public int MinResourceRequired => _minResourceRequired;
 
         // Phase CC P1: 쉴드 속성 (Shield 타입 전용)
         public ShieldFlag ShieldFlags => _shieldFlags;

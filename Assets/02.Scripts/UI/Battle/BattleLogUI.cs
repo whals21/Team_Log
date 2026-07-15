@@ -67,9 +67,16 @@ namespace TeamLog.UI.Battle
 
             _logText.text = string.Join("\n", lines);
 
-            // 자동 스크롤 (다음 프레임에 실행)
-            if (_scrollRect != null)
+            // 자동 스크롤 — 오브젝트가 활성일 때만 코루틴 시작 (토글 오버레이 비활성 대응)
+            if (_scrollRect != null && isActiveAndEnabled)
                 StartCoroutine(ScrollToBottom());
+        }
+
+        private void OnEnable()
+        {
+            // 오버레이가 활성화될 때 최신 로그가 보이도록 스크롤을 맨 아래로 이동
+            if (_scrollRect != null)
+                _scrollRect.verticalNormalizedPosition = 0f;
         }
 
         private System.Collections.IEnumerator ScrollToBottom()

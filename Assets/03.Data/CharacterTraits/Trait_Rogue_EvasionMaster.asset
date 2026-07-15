@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: Trait_Rogue_EvasionMaster
   m_EditorClassIdentifier: 
   _traitId: rogue_evasion_master
-  _displayName: "\uD68C\uD53C\uC758 \uB300\uAC00"
-  _description: "\uBC1B\uB294 \uD53C\uD574 -2 (\uC601\uAD6C)"
+  _displayName: "\uADF8\uB9BC\uC790 \uBCF4\uD638"
+  _description: "Shadows 1+\uC77C \uB54C \uBC1B\uB294 \uD53C\uD574 -3 (Shadows \uC720\uC9C0
+    \uC911 \uC0DD\uC874)"
   _targetClass: 3
   _keywords:
   - Type: 14
-    Value: 2
+    Value: 3
     Trigger: 0
     ConditionParam: 0
   _isDefault: 0

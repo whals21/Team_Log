@@ -25,6 +25,7 @@ namespace TeamLog.UI.Battle
         [SerializeField] private Image _hpFillImage;
         [SerializeField] private Image _shieldFillImage;
         [SerializeField] private GameObject _selectionHighlight;
+        [SerializeField] private GameObject _targetedHighlight;
         [SerializeField] private Button _panelButton;
 
         [Header("HP Colors")]
@@ -70,6 +71,7 @@ namespace TeamLog.UI.Battle
             if (_statusEffectContainer == null) _statusEffectContainer = transform.Find("RightSection/StatusContainer");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
             if (_selectionHighlight == null) _selectionHighlight = transform.Find("SelectionHighlight")?.gameObject;
+            if (_targetedHighlight == null) _targetedHighlight = transform.Find("TargetedHighlight")?.gameObject;
 
             _layoutElement = GetComponent<LayoutElement>();
 
@@ -99,31 +101,56 @@ namespace TeamLog.UI.Battle
             if (_panelTooltip == null)
                 _panelTooltip = gameObject.AddComponent<TooltipTarget>();
 
-            // Phase CC: 자원 배지(원형)가 패널 좌상단(Avatar 영역)을 차지.
-            // 캐릭터 이름은 NameRow(HPBar 바로 위 행)에서 전체 너비를 사용.
-            // Stats(ATK/DEF)는 NameRow 우측에 작게 배치 — 이름과 공존.
+            // Phase CC UI 개선: 카드 높이 확장 (64 → 100) — HPBar 아래에 StatsRow/ResourceRow 배치
+            if (_layoutElement != null)
+            {
+                _layoutElement.preferredHeight = 100f;
+                _layoutElement.minHeight = 100f;
+            }
+
+            // Name이 NameRow 전체를 차지 (기존 NameRow 구조 유지, Name만 확장)
             if (_nameText != null)
             {
                 var nameRect = _nameText.rectTransform;
                 nameRect.anchorMin = new Vector2(0f, 0f);
                 nameRect.anchorMax = new Vector2(1f, 1f);
                 nameRect.pivot = new Vector2(0f, 0.5f);
-                nameRect.anchoredPosition = new Vector2(2f, -1f);
-                nameRect.sizeDelta = new Vector2(-52f, -2f); // 우측 50px은 Stats 영역
+                nameRect.anchoredPosition = new Vector2(2f, 0f);
+                nameRect.sizeDelta = new Vector2(-4f, 0f); // 전체 너비
                 nameRect.SetAsLastSibling();
                 _nameText.alignment = TextAlignmentOptions.Left;
             }
-            if (_statText != null)
+
+            // Stats(ATK/DEF)를 NameRow에서 분리 → RightSection 직접 자식, HPBar 아래로 이동
+            Transform rightSection = _statText != null ? _statText.transform.parent.parent : null;
+            if (rightSection == null && _hpFillImage != null)
+                rightSection = _hpFillImage.transform.parent.parent;
+
+            if (_statText != null && rightSection != null)
             {
+                // 부모 변경: NameRow → RightSection
+                _statText.transform.SetParent(rightSection, false);
                 var statRect = _statText.rectTransform;
-                statRect.anchorMin = new Vector2(1f, 0.5f);
-                statRect.anchorMax = new Vector2(1f, 0.5f);
-                statRect.pivot = new Vector2(1f, 0.5f);
-                statRect.anchoredPosition = new Vector2(-2f, 0f);
-                statRect.sizeDelta = new Vector2(48f, 16f);
+                statRect.anchorMin = new Vector2(0f, 1f);
+                statRect.anchorMax = new Vector2(1f, 1f);
+                statRect.pivot = new Vector2(0.5f, 1f);
+                statRect.anchoredPosition = new Vector2(0f, -46f); // HPBar(22~42) 바로 아래
+                statRect.sizeDelta = new Vector2(-4f, 16f);
                 statRect.SetAsLastSibling();
-                _statText.alignment = TextAlignmentOptions.Right;
-                if (_statText.fontSize > 12f) _statText.fontSize = 12f;
+                _statText.alignment = TextAlignmentOptions.Center;
+                if (_statText.fontSize > 11f) _statText.fontSize = 11f;
+            }
+
+            // ResourceRow 컨테이너 생성 — HPBar 아래(하단 64~96px)에 자원 배지 배치
+            if (rightSection != null && rightSection.Find("ResourceRow") == null)
+            {
+                var rr = new GameObject("ResourceRow", typeof(RectTransform)).GetComponent<RectTransform>();
+                rr.SetParent(rightSection, false);
+                rr.anchorMin = new Vector2(0f, 1f);
+                rr.anchorMax = new Vector2(1f, 1f);
+                rr.pivot = new Vector2(0.5f, 1f);
+                rr.anchoredPosition = new Vector2(0f, -64f); // StatsRow 아래
+                rr.sizeDelta = new Vector2(-4f, 30f);
             }
         }
 
@@ -254,16 +281,21 @@ namespace TeamLog.UI.Battle
         {
             base.UpdateStats(atk, def);
 
-            // Phase CC: 자원 배지 — 캐릭터 초상화 옆에 큰 원형 (StS/Hearthstone 스타일).
+            // Phase CC: 자원 배지 — HPBar 아래 ResourceRow에 배치 (초상화 옆 → 하단으로 개선)
             // 자원 변화 시 OnStacksChanged 이벤트로 자동 갱신 + '+1 잿빛' 플로팅 텍스트.
             if (_character?.Resource != null)
             {
                 if (_resourceBadge == null)
                 {
-                    // 초상화 부모(LeftSection/Avatar 컨테이너)에 배치 — 초상화 옆 위계
-                    Transform badgeParent = _avatarBgImage != null
-                        ? _avatarBgImage.transform.parent
-                        : (_statusEffectContainer != null ? _statusEffectContainer.parent : transform);
+                    // ResourceRow 컨테이너(Awake에서 생성)에 배치 — HPBar 아래
+                    Transform badgeParent = transform.Find("RightSection/ResourceRow");
+                    if (badgeParent == null)
+                    {
+                        // 폴백: 기존 위치 (초상화 부모)
+                        badgeParent = _avatarBgImage != null
+                            ? _avatarBgImage.transform.parent
+                            : (_statusEffectContainer != null ? _statusEffectContainer.parent : transform);
+                    }
                     _resourceBadge = ResourceBadge.Create(badgeParent, _character.Resource);
                     // 자원 변화 이벤트 구독 — UI 자동 갱신 + 플로팅 텍스트
                     _character.Resource.OnStacksChanged += OnResourceStacksChanged;
@@ -380,12 +412,19 @@ namespace TeamLog.UI.Battle
                 shadow.effectDistance = selected ? new Vector2(4, -4) : new Vector2(2, -2);
         }
 
+        /// <summary>적에게 타겟팅된 플레이어 표시 — 붉은 테두리.</summary>
+        public void SetTargetedByEnemy(bool targeted)
+        {
+            if (_targetedHighlight != null)
+                _targetedHighlight.SetActive(targeted);
+        }
+
         public override void SetDead(bool isDead)
         {
             _isDead = isDead;
 
             if (_layoutElement != null)
-                _layoutElement.preferredHeight = isDead ? 40f : 64f;
+                _layoutElement.preferredHeight = isDead ? 40f : 100f;
 
             if (isDead)
             {

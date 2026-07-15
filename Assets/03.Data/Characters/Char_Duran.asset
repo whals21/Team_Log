@@ -29,3 +29,5 @@ MonoBehaviour:
   _isDefault: 1
   _unlockCondition: 
   _resourceType: 2
+  _baseCritChance: 0
+  _baseCritDamageMul: 1.5

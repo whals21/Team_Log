@@ -24,7 +24,7 @@ MonoBehaviour:
   _effectDuration: 0
   _effectValue: 0
   _behaviors:
-  - Keyword: 49
+  - Keyword: 50
     Rank: 5
   _resourceGainType: 0
   _resourceGainAmount: 0
@@ -32,4 +32,5 @@ MonoBehaviour:
   _resourceCostAmount: 0
   _resourcePowerPerStack: 0
   _consumeAllResource: 0
+  _minResourceRequired: 0
   _shieldFlags: 0

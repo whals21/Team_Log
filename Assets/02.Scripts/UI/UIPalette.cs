@@ -37,7 +37,7 @@ namespace TeamLog.UI
         [Header("AP / Reroll")]
         public Color APNormal = new Color(0.96f, 0.82f, 0.25f);
         public Color APShortage = new Color(0.85f, 0.2f, 0.2f);
-        public Color RerollNormal = new Color(0.72f, 0.45f, 0.2f);
+        public Color RerollNormal = Color.white;
         public Color RerollEmpty = new Color(0.5f, 0.5f, 0.5f, 0.5f);
 
         [Header("Skill Type Colors")]

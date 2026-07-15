@@ -28,3 +28,5 @@ MonoBehaviour:
   _isDefault: 0
   _unlockCondition: "\uCD1D \uC2B9\uB9AC 3\uD68C \uB2EC\uC131"
   _resourceType: 0
+  _baseCritChance: 0
+  _baseCritDamageMul: 1.5

@@ -142,9 +142,12 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_ascensionLabel", ascensionLabel);
 
             // Phase 8F: All Characters 동적 바인딩 (TitleSceneSetup._allCharacters)
+            // Phase CC-2A: Char_Rogue 제거, Umbra가 Rogue 슬롯 계승
             string[] titleCharNames = {
-                "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Rogue",
-                "Char_Archer", "Char_Necromancer", "Char_Alchemist", "Char_Bard"
+                "Char_Warrior", "Char_Mage", "Char_Healer",
+                "Char_Archer", "Char_Necromancer", "Char_Alchemist", "Char_Bard",
+                "Char_Ashe", "Char_Duran", "Char_Lumi", "Char_Sibyl", "Char_Taranis",
+                "Char_Umbra"
             };
             var titleCharAssets = LoadAssetsByNames<CharacterData>(CHAR_DIR, titleCharNames);
             var titleCharProp = setupSer.FindProperty("_allCharacters");
@@ -312,7 +315,7 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_testHealerData",
                 AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Healer.asset"));
             WireProperty(setupSer, "_testRogueData",
-                AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Rogue.asset"));
+                AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Umbra.asset"));
 
             // 스테이지 테마 후보 — StageDesign.md 기준 4스테이지 × 3테마 분화 (Phase 7D)
             var themeCandidatesProp = setupSer.FindProperty("_stageThemeCandidates");
@@ -371,10 +374,12 @@ namespace TeamLog.Editor
             if (allCharProp != null)
             {
                 string[] charNames = {
-                    "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Rogue",
+                    "Char_Warrior", "Char_Mage", "Char_Healer",
                     "Char_Archer", "Char_Necromancer", "Char_Alchemist", "Char_Bard",
                     // Phase CC 신규 5종
-                    "Char_Ashe", "Char_Duran", "Char_Lumi", "Char_Sibyl", "Char_Taranis"
+                    "Char_Ashe", "Char_Duran", "Char_Lumi", "Char_Sibyl", "Char_Taranis",
+                    // Phase CC-2A: Umbra (Rogue 슬롯 계승 — 구 Char_Rogue 제거)
+                    "Char_Umbra"
                 };
                 var charAssets = LoadAssetsByNames<CharacterData>(CHAR_DIR, charNames);
                 allCharProp.arraySize = charAssets.Count;

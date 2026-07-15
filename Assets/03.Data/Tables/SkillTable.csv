@@ -11,10 +11,6 @@ Healer_Heal,치유,아군 한 명의 체력을 회복합니다.,Heal,SingleAlly,
 Healer_Barrier,보호막,아군 한 명에게 쉴드를 부여합니다.,Shield,SingleAlly,8,1,25,None,0,0
 Healer_Purify,정화,아군의 약화 효과를 제거합니다.,Purify,SingleAlly,0,1,25,None,0,0
 Healer_Blessing,축복,아군의 공격력을 증가시킵니다.,Buff,SingleAlly,2,2,25,AttackUp,2,2
-Rogue_Backstab,급소 공격,적에게 치명타 데미지를 입힙니다.,Attack,SingleEnemy,7,2,25,None,0,0
-Rogue_PoisonBlade,독 바르기,적에게 독 효과를 부여합니다.,Debuff,SingleEnemy,3,1,25,Poison,3,2
-Rogue_Weaken,약화,적의 방어력을 감소시킵니다.,Debuff,SingleEnemy,0,1,25,DefenseDown,2,2
-Rogue_DoubleStrike,이중 타격,적에게 2번 공격합니다.,Attack,SingleEnemy,3,1,25,None,0,0
 Slime_Tackle,몸통박치기,기본 공격입니다.,Attack,SingleEnemy,4,0,25,None,0,0
 Slime_AcidSpit,산성 침,독이 섞인 공격입니다.,Attack,SingleEnemy,2,0,25,Poison,2,2
 Slime_Split,분열 준비,쉴드를 얻습니다.,Shield,Self,6,0,25,None,0,0

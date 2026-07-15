@@ -37,6 +37,12 @@ namespace TeamLog.Characters
         [Tooltip("캐릭터 고유 자원. None이면 자원 없는 기존 캐릭터. Ashe=Ember, Duran=Vengeance 등.")]
         [SerializeField] private ResourceType _resourceType = ResourceType.None;
 
+        [Header("치명타 (Phase CC-2A — Umbra용 기반)")]
+        [Tooltip("치명타 확률 (0~1). 기본 0. Umbra는 ShadowsResourceComponent가 런타임 갱신.")]
+        [SerializeField] private float _baseCritChance = 0f;
+        [Tooltip("치명타 피해 배율. 기본 1.5배. Umbra는 Shadows 3일 때 2.0배 적용.")]
+        [SerializeField] private float _baseCritDamageMul = 1.5f;
+
         #region Properties
         public string CharacterName => _characterName;
         public CharacterClass Class => _characterClass;
@@ -50,6 +56,8 @@ namespace TeamLog.Characters
         public bool IsDefault => _isDefault;
         public string UnlockCondition => _unlockCondition;
         public ResourceType ResourceType => _resourceType;
+        public float BaseCritChance => _baseCritChance;
+        public float BaseCritDamageMul => _baseCritDamageMul;
         #endregion
     }
 

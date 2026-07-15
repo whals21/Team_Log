@@ -55,6 +55,9 @@ namespace TeamLog.Skill.Behaviors
                 Register(new Implementations.CleanseLowTargetBehavior());        // Phoenix Renewal용 — Heal에 정화
                 Register(new Implementations.ResourceThresholdShieldBehavior()); // Shield Wall용 — Shield에 임계값 가산
 
+                // ── Phase CC-2A: Umbra 리워크 ──
+                Register(new Implementations.StrongVsDebuffBehavior());          // Umbra Backstab — 도트 디버프 시 위력 2배
+
                 // ── Phase ARCH-4 보류 (상태 추적/TurnManager 수정 필요) ──
                 // FollowUp(5) — hitsTakenThisTurn 인프라 필요
                 // Fatigue(8)/Momentum(9) — usesThisBattle 추적 필요

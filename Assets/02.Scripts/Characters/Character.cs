@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace TeamLog.Characters
 {
@@ -21,6 +22,11 @@ namespace TeamLog.Characters
 
         // Phase CC: 캐릭터 고유 자원 (Ashe=Ember, Duran=Vengeance 등). null이면 자원 없는 캐릭터.
         public CharacterResourceComponent Resource { get; private set; }
+
+        // Phase CC-2A: 치명타 시스템 (Umbra Shadows용 기반). 모든 캐릭터 기본 0%/1.5배.
+        // CharacterResourceComponent가 런타임에 동적 갱신 가능 (Umbra의 ShadowsResourceComponent).
+        public float CritChance { get; set; }
+        public float CritDamageMul { get; set; }
 
         /// <summary>Phase CC: 자원 컴포넌트 장착 (캐릭터 생성 시 또는 런 시작 시).</summary>
         public void SetResource(CharacterResourceComponent resource)
@@ -73,6 +79,7 @@ namespace TeamLog.Characters
                 case ResourceType.Vengeance: return new VengeanceResourceComponent();
                 case ResourceType.Frost: return new FrostResourceComponent();
                 case ResourceType.Prophecy: return new ProphecyResourceComponent();
+                case ResourceType.Shadows: return new ShadowsResourceComponent(); // Phase CC-2A Umbra
                 // Charge는 각 캐릭터 Phase에서 추가 (현재 None 처리)
                 default: return null;
             }
@@ -91,6 +98,9 @@ namespace TeamLog.Characters
             Health.Initialize(_data.BaseHP);
             Stats.Initialize(_data.BaseATK, _data.BaseDEF);
             SkillInventory.Initialize(_data.Skills);
+            // Phase CC-2A: 치명타 기본값 초기화
+            CritChance = _data.BaseCritChance;
+            CritDamageMul = _data.BaseCritDamageMul;
         }
 
         /// <summary>

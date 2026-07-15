@@ -12,6 +12,7 @@ namespace TeamLog.Characters
         Frost,        // Lumi (Cryomancer) — 냉기 축적
         Prophecy,     // Sibyl (Oracle) — 예언(지연 발동)
         Charge,       // Taranis (Stormcaller) — 전하 네트워크
+        Shadows,      // Umbra (Rogue) — 그림자 (파티 보호형 치명타 자원) — Phase CC-2A
     }
 
     /// <summary>
@@ -37,10 +38,19 @@ namespace TeamLog.Characters
         public abstract int MaxStacks { get; }
 
         /// <summary>
-        /// ★ 위험 임계값 — 이 값 이상 시 UI 경고(빨강 글로우/깜빡임).
-        /// 기본: MaxStacks - 1 (자원별 override 가능). Ember 4/5, Vengeance 19/20 등.
+        /// ★ Phase CC-2A: 자원 최대치 보너스 — 특성/유물 등 외부 요소로 MaxStacks 증가.
+        /// 기본 0. CharacterTraitHandler 등에서 설정. "그림자 심화" 특성 = Shadows MaxStacksBonus 1.
         /// </summary>
-        public virtual int WarningThreshold => System.Math.Max(1, MaxStacks - 1);
+        public int MaxStacksBonus { get; set; }
+
+        /// <summary>실제 최대 스택 (기본 MaxStacks + 보너스).</summary>
+        public int EffectiveMaxStacks => MaxStacks + MaxStacksBonus;
+
+        /// <summary>
+        /// ★ 위험 임계값 — 이 값 이상 시 UI 경고(빨강 글로우/깜빡임).
+        /// 기본: EffectiveMaxStacks - 1 (자원별 override 가능). Ember 4/5, Vengeance 19/20 등.
+        /// </summary>
+        public virtual int WarningThreshold => System.Math.Max(1, EffectiveMaxStacks - 1);
 
         /// <summary>★ 스택 변화 이벤트 — 양수=획득, 음수=소모. UI 갱신/플로팅 텍스트용.</summary>
         public event System.Action<int> OnStacksChanged;
@@ -49,7 +59,7 @@ namespace TeamLog.Characters
         protected void ClampStacks()
         {
             if (CurrentStacks < 0) CurrentStacks = 0;
-            if (CurrentStacks > MaxStacks) CurrentStacks = MaxStacks;
+            if (CurrentStacks > EffectiveMaxStacks) CurrentStacks = EffectiveMaxStacks;
         }
 
         /// <summary>스택 추가 (Clamp 적용).</summary>

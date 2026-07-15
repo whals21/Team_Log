@@ -19,6 +19,7 @@ namespace TeamLog.UI.Battle
         [SerializeField] private TextMeshProUGUI _skillNameText;
         [SerializeField] private TextMeshProUGUI _costText;
         [SerializeField] private TextMeshProUGUI _casterNameText;
+        [SerializeField] private TextMeshProUGUI _effectText;
         [SerializeField] private GameObject _selectionBorder;
         [SerializeField] private GameObject _executionOrderBadge;
         [SerializeField] private TextMeshProUGUI _executionOrderText;
@@ -32,6 +33,10 @@ namespace TeamLog.UI.Battle
 
         [Header("Reroll")]
         [SerializeField] private Button _rerollButton;
+
+        [Header("Skill Type Tag")]
+        [SerializeField] private Image _typeTagImage;
+        [SerializeField] private TextMeshProUGUI _typeTagText;
 
         private int _slotIndex;
         private SkillData _skill;
@@ -125,6 +130,57 @@ namespace TeamLog.UI.Battle
                 var skillColor = GetSkillColor(skill);
                 _bgImage.color = new Color(skillColor.r * 0.25f, skillColor.g * 0.25f, skillColor.b * 0.25f, 0.9f);
             }
+
+            // 스킬 타입 태그 업데이트
+            UpdateTypeTag(skill);
+
+            // 효과 설명 갱신 (BuildSkillDescription)
+            if (_effectText != null)
+            {
+                string desc = skill != null ? BattleDisplayUtil.BuildSkillDescription(skill, caster) : "";
+                _effectText.text = desc;
+                _effectText.gameObject.SetActive(!string.IsNullOrEmpty(desc));
+            }
+        }
+
+        /// <summary>스킬 타입에 따른 태그 색상/라벨 업데이트.</summary>
+        private void UpdateTypeTag(SkillData skill)
+        {
+            if (_typeTagImage != null)
+                _typeTagImage.color = GetSkillTypeColor(skill);
+            if (_typeTagText != null)
+                _typeTagText.text = GetSkillTypeLabel(skill);
+        }
+
+        private static Color GetSkillTypeColor(SkillData skill)
+        {
+            if (skill == null) return new Color(0.3f, 0.3f, 0.3f, 0.9f);
+            var palette = UIPalette.Default;
+            return skill.Type switch
+            {
+                SkillType.Attack => new Color(0.78f, 0.16f, 0.16f, 0.95f),
+                SkillType.Heal => new Color(0.18f, 0.49f, 0.20f, 0.95f),
+                SkillType.Shield => new Color(0.42f, 0.24f, 0.60f, 0.95f),
+                SkillType.Buff => new Color(0.85f, 0.66f, 0.14f, 0.95f),
+                SkillType.Debuff => new Color(0.37f, 0.21f, 0.69f, 0.95f),
+                SkillType.Purify => new Color(0.18f, 0.55f, 0.62f, 0.95f),
+                _ => new Color(0.3f, 0.3f, 0.3f, 0.9f)
+            };
+        }
+
+        private static string GetSkillTypeLabel(SkillData skill)
+        {
+            if (skill == null) return "";
+            return skill.Type switch
+            {
+                SkillType.Attack => "공격",
+                SkillType.Heal => "치유",
+                SkillType.Shield => "쉴드",
+                SkillType.Buff => "강화",
+                SkillType.Debuff => "약화",
+                SkillType.Purify => "정화",
+                _ => ""
+            };
         }
 
         public void Clear()
@@ -145,6 +201,12 @@ namespace TeamLog.UI.Battle
             if (_casterNameText != null)
                 _casterNameText.text = "";
 
+            if (_effectText != null)
+            {
+                _effectText.text = "";
+                _effectText.gameObject.SetActive(false);
+            }
+
             if (_skillIcon != null)
             {
                 _skillIcon.sprite = null;
@@ -153,6 +215,11 @@ namespace TeamLog.UI.Battle
 
             if (_bgImage != null)
                 _bgImage.color = _originalBgColor;
+
+            if (_typeTagImage != null)
+                _typeTagImage.color = new Color(0.3f, 0.3f, 0.3f, 0.9f);
+            if (_typeTagText != null)
+                _typeTagText.text = "";
 
             SetSelected(false);
         }

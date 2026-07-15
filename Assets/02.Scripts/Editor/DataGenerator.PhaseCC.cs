@@ -163,7 +163,43 @@ namespace TeamLog.Editor
                 85, 0, 0, new[] { "Taranis_Wire", "Taranis_Branch", "Taranis_GroundingField", "Taranis_Thunderstorm" },
                 EnemyTrait.None, true, "", ResourceType.None);
 
-            Debug.Log("[DataGenerator] Phase CC 캐릭터 5종 생성 완료 (Ashe/Duran/Lumi/Sibyl/Taranis)");
+            // ════════════════════════════════════════════
+            // Umbra (Rogue) — Shadows 그림자 자원 스킬 4종 (Phase CC-2A)
+            // ════════════════════════════════════════════
+            // 기획: ReworkDrafts/02_Rogue.md
+            // 핵심: 안 맞을수록 치명타 강화. Eviscerate는 Shadows 3 필수 + 사용 후 -1.
+
+            // 1. Poison Blade — 단일 3 + Poison 2턴, AP 1 (셋업). 항상 안전 사용.
+            CreatePhaseCCSkill("Umbra_PoisonBlade", "독 바르기", SkillType.Attack, TargetType.SingleEnemy,
+                power: 3, cost: 1, statusEffect: StatusEffectType.Poison, effectDuration: 2, effectValue: 2);
+
+            // 2. Backstab — 단일 7, AP 2. 디버프 적 2배 (StrongVsDebuff BehaviorTag).
+            // 대상이 Poison/Burn/Bleed/Freeze/Stun 중 하나라도 있으면 위력 ×2 (7 → 14).
+            CreatePhaseCCSkill("Umbra_Backstab", "기습 찌르기", SkillType.Attack, TargetType.SingleEnemy,
+                power: 7, cost: 2,
+                behaviors: new BehaviorTag(BehaviorKeyword.StrongVsDebuff, 0));
+
+            // 3. Rupture — 단일 4 + Bleed 2턴, AP 1. HP 50%- 적 도트 +2턴 (Cull).
+            CreatePhaseCCSkill("Umbra_Rupture", "할퀴기", SkillType.Attack, TargetType.SingleEnemy,
+                power: 4, cost: 1, statusEffect: StatusEffectType.Bleed, effectDuration: 2, effectValue: 3,
+                behaviors: new BehaviorTag(BehaviorKeyword.Cull, 0)); // HP 50%- 적 보너스
+
+            // 4. Eviscerate — 단일 15, AP 3. Shadows 3 필수 + 사용 후 -1 (3→2).
+            // minResourceRequired=3 (Shadows 최대치에서만 사용 가능).
+            // costAmount=1 (사용 후 1 소모 — 매 턴 연속 Eviscerate 허용, 파티 보호 시).
+            CreatePhaseCCSkill("Umbra_Eviscerate", "결정타", SkillType.Attack, TargetType.SingleEnemy,
+                power: 15, cost: 3,
+                costType: ResourceType.Shadows, costAmount: 1,
+                minResourceRequired: 3); // Shadows 3 필수, 사용 후 -1
+
+            // Umbra — Rogue (Shadows 그림자).
+            // 안 맞을수록 치명타 강화. 파티 보호(도발/쉴드/일점사) 시너지 핵심.
+            CreatePhaseCCCharacter("Char_Umbra", "움브라", CharacterClass.Rogue,
+                "그림자 암살자. 안 맞을수록 치명타가 강해진다 — 동료가 그녀의 그림자를 지켜줄 때, 완벽한 암살이 완성된다",
+                75, 0, 0, new[] { "Umbra_PoisonBlade", "Umbra_Backstab", "Umbra_Rupture", "Umbra_Eviscerate" },
+                EnemyTrait.None, true, "", ResourceType.Shadows);
+
+            Debug.Log("[DataGenerator] Phase CC 캐릭터 6종 생성 완료 (Ashe/Duran/Lumi/Sibyl/Taranis/Umbra)");
         }
 
         /// <summary>Phase CC 캐릭터 생성 헬퍼 — ResourceType 포함.</summary>
@@ -205,6 +241,7 @@ namespace TeamLog.Editor
             ResourceType costType = ResourceType.None, int costAmount = 0,
             int resourcePowerPerStack = 0, bool consumeAllResource = false,
             ShieldFlag shieldFlags = ShieldFlag.None,
+            int minResourceRequired = 0,
             params BehaviorTag[] behaviors)
         {
             var path = $"{SKILL_PATH}/{fileName}.asset";
@@ -226,6 +263,7 @@ namespace TeamLog.Editor
             SetPrivateField(skill, "_resourcePowerPerStack", resourcePowerPerStack);
             SetPrivateField(skill, "_consumeAllResource", consumeAllResource);
             SetPrivateField(skill, "_shieldFlags", shieldFlags);
+            SetPrivateField(skill, "_minResourceRequired", minResourceRequired);
             SetPrivateField(skill, "_behaviors", behaviors ?? new BehaviorTag[0]);
 
             EditorUtility.SetDirty(skill);

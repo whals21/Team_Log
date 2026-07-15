@@ -51,6 +51,11 @@ namespace TeamLog.UI.Battle
         [SerializeField] private TextMeshProUGUI _intentValueText;
         [SerializeField] private TextMeshProUGUI _intentText;
 
+        [Header("Target Box (의도 타겟팅 정보)")]
+        [SerializeField] private GameObject _targetBox;
+        [SerializeField] private Image _targetPortrait;
+        [SerializeField] private TextMeshProUGUI _targetNameText;
+
         [Header("Selection")]
         [SerializeField] private GameObject _targetIndicator;
 
@@ -89,6 +94,9 @@ namespace TeamLog.UI.Battle
             if (_intentIcon == null) _intentIcon = FindComponent<Image>("IntentSlot/IntentIcon");
             if (_intentValueText == null) _intentValueText = FindComponent<TextMeshProUGUI>("IntentSlot/IntentValue");
             if (_intentText == null) _intentText = FindComponent<TextMeshProUGUI>("IntentSlot/IntentText");
+            if (_targetBox == null) _targetBox = transform.Find("TargetBox")?.gameObject;
+            if (_targetPortrait == null) _targetPortrait = FindComponent<Image>("TargetBox/Portrait");
+            if (_targetNameText == null) _targetNameText = FindComponent<TextMeshProUGUI>("TargetBox/Name");
             if (_panelButton == null) _panelButton = GetComponent<Button>();
 
             // 색상 토큰을 UIPalette에서 초기화
@@ -325,9 +333,35 @@ namespace TeamLog.UI.Battle
                 if (tooltip != null) tooltip.SetContent("", "", "");
             }
 
+            // 타겟 박스 업데이트 — 공격 의도일 때만 타겟 표시
+            UpdateTargetBox(intent);
+
             // Info 텍스트에도 표시 (특성 클릭 시 교체됨)
             if (hasIntent)
                 SetInfoText(BuildIntentDisplay(intent));
+        }
+
+        /// <summary>적 의도의 타겟 정보를 TargetBox에 표시. 공격 의도일 때만 활성화.</summary>
+        private void UpdateTargetBox(EnemyIntent intent)
+        {
+            if (_targetBox == null) return;
+
+            bool hasTarget = intent != null
+                && intent.Type == EnemyIntentType.Attack
+                && intent.Targets != null
+                && intent.Targets.Count > 0;
+
+            _targetBox.SetActive(hasTarget);
+
+            if (!hasTarget) return;
+
+            var target = intent.Targets[0];
+            if (_targetNameText != null)
+                _targetNameText.text = target?.Name ?? "?";
+
+            // 타겟팅된 플레이어 패널에 붉은 테두리 표시
+            if (_uiManager != null && target != null)
+                _uiManager.SetPlayerTargetedByEnemy(target, true);
         }
 
         /// <summary>

@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: Trait_Rogue_AssassinInstinct
   m_EditorClassIdentifier: 
   _traitId: rogue_assassin_instinct
-  _displayName: "\uC554\uC0B4\uC790 \uBCF8\uB2A5"
-  _description: "\uCD94\uAC00 \uACE0\uC815 \uB370\uBBF8\uC9C0 +2"
+  _displayName: "\uADF8\uB9BC\uC790 \uC2EC\uD654"
+  _description: "Shadows \uCD5C\uB300\uCE58 +1 (3\u21924). Shadows 4 = \uCE58\uBA85\uD0C0
+    \uD53C\uD574 3.5\uBC30"
   _targetClass: 3
   _keywords:
-  - Type: 13
-    Value: 2
+  - Type: 24
+    Value: 1
     Trigger: 0
     ConditionParam: 0
   _isDefault: 1

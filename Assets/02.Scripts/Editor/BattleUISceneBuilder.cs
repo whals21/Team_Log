@@ -27,6 +27,13 @@ namespace TeamLog.Editor
         private static readonly Color TextDim = new Color(0.82f, 0.82f, 0.87f);
         private static readonly Color ShieldBrown = new Color(0.72f, 0.45f, 0.2f);
 
+        // ── 남색 톤 패널 색상 (목업 #1e2a3e 계열 통일) ──
+        private static readonly Color PanelBgNavy = new Color(0.12f, 0.16f, 0.24f, 0.95f);   // #1e2a3e
+        private static readonly Color TopBarBgNavy = new Color(0.09f, 0.13f, 0.24f, 0.95f);  // #16213e
+        private static readonly Color BottomBarBgNavy = new Color(0.08f, 0.08f, 0.14f, 0.95f);
+        private static readonly Color SlotBgNavy = new Color(0.12f, 0.16f, 0.24f, 0.95f);    // #1e2a3e
+        private static readonly Color DividerNavy = new Color(0.16f, 0.16f, 0.30f, 0.80f);   // #2a2a4e
+
         // ── GUI 에셋 스프라이트 경로 ──
         private const string SPRITE_BASE = "Assets/Layer Lab/GUI Pro-CasualGame/ResourcesData/Sprites/Components";
         private const string SPRITE_TOPBAR = SPRITE_BASE + "/Frame/PanelFrame03_Topbar.png";
@@ -222,12 +229,14 @@ namespace TeamLog.Editor
             var content = NewRect("ContentArea", root);
             content.anchorMin = Vector2.zero;
             content.anchorMax = Vector2.one;
-            content.offsetMin = new Vector2(0, 166);
-            content.offsetMax = new Vector2(0, -44);
+            content.offsetMin = new Vector2(0, 284);
+            content.offsetMax = new Vector2(0, -46);
 
             CreateCenterArea(content);
-            // 전투로그 UI 제거 — CreateRightSidebar(content);
-            CreatePlayerStrip(root);
+
+            // 파티 상태 / 배틀로그 토글 오버레이 (Step 4)
+            CreatePartyStatusOverlay(root);
+            CreateBattleLogOverlay(root);
 
             CreateCharacterPopup(root);
             CreateBattleEndOverlay(root);

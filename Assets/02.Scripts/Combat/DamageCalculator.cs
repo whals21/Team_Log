@@ -1,6 +1,7 @@
 using TeamLog.Characters;
 using TeamLog.Map;
 using TeamLog.Skill;
+using UnityEngine;
 
 using Character = TeamLog.Characters.Character;
 using StatType = TeamLog.Characters.StatType;
@@ -17,6 +18,11 @@ namespace TeamLog.Combat
         /// 회피 발생 시 이벤트 (FloatingText "MISS" 표시용)
         /// </summary>
         public static event System.Action<Character> OnAttackMissed;
+
+        /// <summary>
+        /// Phase CC-2A: 치명타 발생 이벤트 — (target, finalDamage). VFX/플로팅 텍스트용.
+        /// </summary>
+        public static event System.Action<Character, int> OnCriticalHit;
 
         /// <summary>
         /// 중앙화된 데미지 계산 공식
@@ -43,8 +49,9 @@ namespace TeamLog.Combat
             }
 
             // Phase 8C: 장착 특성 — 공격자 PowerAdd/BonusOutgoingDamage + 대상 DamageReduction
+            // Phase CC-2A: GetBonusOutgoingDamage에 target 전달 — 도트 디버프 적 추가 위력 (Umbra "약점 포착")
             if (attacker.PlayerTraitHandler != null && attacker.PlayerTraitHandler.HasTrait)
-                damage += attacker.PlayerTraitHandler.GetBonusOutgoingDamage();
+                damage += attacker.PlayerTraitHandler.GetBonusOutgoingDamage(target);
             if (target.PlayerTraitHandler != null && target.PlayerTraitHandler.HasTrait)
                 defense += target.PlayerTraitHandler.GetDamageReduction();
 
@@ -58,6 +65,14 @@ namespace TeamLog.Combat
             {
                 OnAttackMissed?.Invoke(target);
                 return;
+            }
+
+            // Phase CC-2A: 치명타 판정 (Umbra Shadows용 기반).
+            // CritChance가 0이면 스킵 — 기존 캐릭터 영향 0.
+            if (attacker.CritChance > 0f && Random.value < attacker.CritChance)
+            {
+                calculatedDamage = Mathf.RoundToInt(calculatedDamage * attacker.CritDamageMul);
+                OnCriticalHit?.Invoke(target, calculatedDamage);
             }
 
             target.Health.TakeDamage(calculatedDamage, attacker);
@@ -106,6 +121,7 @@ namespace TeamLog.Combat
         public static void ClearEvents()
         {
             OnAttackMissed = null;
+            OnCriticalHit = null;
         }
     }
 }

@@ -83,6 +83,9 @@ namespace TeamLog.Skill
         Propagate,       // Taranis 전용 — 메인 타겟 이외의 다른 적 N명에게 Charge 부여 (rank = 전파 대상 수)
         TargetFreeze,    // Lumi 등 — 대상이 Freeze 상태 시 +rank 위력 (PowerModify)
 
+        // ── Phase CC-2A: Umbra 리워크 ──
+        StrongVsDebuff,  // Umbra Backstab — 대상 도트 디버프(Poison/Burn/Bleed/Freeze/Stun) 시 위력 ×2 (PowerModify)
+
         // ── 통합 파이프라인 검증용 (2026-07-02) — Pipeline 수정 0줄로 추가 가능한지 증명 ──
         CleanseLowTarget,         // Phoenix Renewal용 — 대상 HP 50%- 시 Burn/Poison 정화 (PostApply)
         ResourceThresholdShield,  // Duran Shield Wall용 — 자원 ≥ rank 시 쉴드 +N (ApplyMain)

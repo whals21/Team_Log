@@ -13,7 +13,11 @@ namespace TeamLog.UI.Battle
     {
         [Header("AP Display")]
         [SerializeField] private TextMeshProUGUI _apText;
-        [SerializeField] private Image _apFillImage;
+        [SerializeField] private Image[] _apPips;
+
+        [Header("Turn / Floor Info")]
+        [SerializeField] private TextMeshProUGUI _turnText;
+        [SerializeField] private TextMeshProUGUI _floorInfoText;
 
         [Header("Speed Toggle")]
         [SerializeField] private Button _speedToggleButton;
@@ -29,14 +33,23 @@ namespace TeamLog.UI.Battle
             if (_speedToggleButton != null)
                 _speedToggleButton.onClick.AddListener(OnSpeedToggleClicked);
 
-            // APFill이 명시적으로 연결되지 않은 경우 BottomBar에서 검색
-            if (_apFillImage == null)
+            // AP 파이프 자동 검색 (BottomBar/RightColumn/APArea/PipRow/Pip1~5)
+            if (_apPips == null || _apPips.Length == 0)
             {
                 var bottomBar = transform.parent?.Find("BottomBar");
                 if (bottomBar != null)
                 {
-                    var fill = bottomBar.Find("APBar/APFill");
-                    if (fill != null) _apFillImage = fill.GetComponent<Image>();
+                    var pipRow = bottomBar.Find("RightColumn/APArea/PipRow");
+                    if (pipRow != null)
+                    {
+                        var pips = new System.Collections.Generic.List<Image>();
+                        for (int i = 1; i <= 5; i++)
+                        {
+                            var pip = pipRow.Find($"Pip{i}");
+                            if (pip != null) pips.Add(pip.GetComponent<Image>());
+                        }
+                        _apPips = pips.ToArray();
+                    }
                 }
             }
         }
@@ -67,15 +80,35 @@ namespace TeamLog.UI.Battle
 
         public void SetAP(int current, int max)
         {
-            if (_apText == null) return;
-            _apText.text = $"AP {current}/{max}";
-            _apText.color = current == 0 ? APShortageColor : APNormalColor;
-
-            if (_apFillImage != null)
+            if (_apText != null)
             {
-                float ratio = max > 0 ? (float)current / max : 0f;
-                _apFillImage.rectTransform.anchorMax = new Vector2(ratio, 1f);
+                _apText.text = $"AP {current}/{max}";
+                _apText.color = current == 0 ? APShortageColor : APNormalColor;
             }
+
+            // 파이프 색상 업데이트 — 활성 AP 수만큼 파란색, 나머지는 어둡게
+            if (_apPips != null)
+            {
+                Color activeColor = current > 0 ? APNormalColor : APShortageColor;
+                Color inactiveColor = new Color(0.15f, 0.15f, 0.2f, 0.8f);
+                for (int i = 0; i < _apPips.Length; i++)
+                {
+                    if (_apPips[i] != null)
+                        _apPips[i].color = i < current ? activeColor : inactiveColor;
+                }
+            }
+        }
+
+        public void SetTurn(int turnNumber)
+        {
+            if (_turnText != null)
+                _turnText.text = $"Turn {turnNumber}";
+        }
+
+        public void SetFloorInfo(string info)
+        {
+            if (_floorInfoText != null)
+                _floorInfoText.text = info ?? "";
         }
 
         private void OnDestroy()

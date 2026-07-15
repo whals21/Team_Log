@@ -74,21 +74,24 @@ namespace TeamLog.Editor
                 CharacterClass.Healer, isDefault: false, unlockCost: 60, soulCost: 1,
                 keywords: new[] { Kw(KeywordType.ShieldPerTurn, 2, KeywordTrigger.OnHealApplied) });
 
-            // 도적 (Rogue)
-            CreateTrait("Trait_Rogue_AssassinInstinct", "rogue_assassin_instinct", "암살자 본능",
-                "추가 고정 데미지 +2",
+            // 도적 (Rogue) — Phase CC-2A Umbra 리워크
+            // 기획: ReworkDrafts/02_Rogue.md
+            // NOTE: ShadowsMaxUp / StrongVsDebuff 키워드는 후속 작업에서 추가 예정.
+            //       일단 텍스트는 리워크안으로 갱신하고, 키워드 효과는 기존 유지 (일부만 작동).
+            CreateTrait("Trait_Rogue_AssassinInstinct", "rogue_assassin_instinct", "그림자 심화",
+                "Shadows 최대치 +1 (3→4). Shadows 4 = 치명타 피해 3.5배",
                 CharacterClass.Rogue, isDefault: true, unlockCost: 0, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.BonusOutgoingDamage, 2) });
+                keywords: new[] { Kw(KeywordType.ShadowsMaxUp, 1) }); // Shadows MaxStacksBonus=1
 
-            CreateTrait("Trait_Rogue_PoisonMaster", "rogue_poison_master", "독 마스터",
-                "상태이상 지속시간 +1턴",
+            CreateTrait("Trait_Rogue_PoisonMaster", "rogue_poison_master", "약점 포착",
+                "도트 디버프 적에게 위력 +3 (Backstab 조건 강화)",
                 CharacterClass.Rogue, isDefault: false, unlockCost: 30, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.DurationAdd, 1) });
+                keywords: new[] { Kw(KeywordType.PowerAddVsDebuff, 3) }); // 도트 적 +3 위력
 
-            CreateTrait("Trait_Rogue_EvasionMaster", "rogue_evasion_master", "회피의 대가",
-                "받는 피해 -2 (영구)",
+            CreateTrait("Trait_Rogue_EvasionMaster", "rogue_evasion_master", "그림자 보호",
+                "Shadows 1+일 때 받는 피해 -3 (Shadows 유지 중 생존)",
                 CharacterClass.Rogue, isDefault: false, unlockCost: 60, soulCost: 1,
-                keywords: new[] { Kw(KeywordType.DamageReduction, 2) });
+                keywords: new[] { Kw(KeywordType.DamageReduction, 3) }); // 받는 피해 -3 (기존 2→3)
 
             // 궁수 (Archer)
             CreateTrait("Trait_Archer_Marksman", "archer_marksman", "명사수",

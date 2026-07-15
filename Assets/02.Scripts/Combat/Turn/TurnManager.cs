@@ -193,6 +193,17 @@ namespace TeamLog.Combat.Turn
                 return false;
             }
 
+            // Phase CC-2A: 자원 최소치 검사 (Umbra Eviscerate — Shadows 3 필수 등)
+            // MinResourceRequired > 0이면 현재 스택이 이 값 이상이어야 사용 가능.
+            if (caster.Resource != null
+                && skill.ResourceCostType != ResourceType.None
+                && skill.ResourceCostType == caster.Resource.Resource
+                && skill.MinResourceRequired > 0
+                && caster.Resource.CurrentStacks < skill.MinResourceRequired)
+            {
+                return false;
+            }
+
             _context.SpendAP(effectiveCost);
 
             // Phase CC: Prophecy — Sibyl 스킬은 1턴 뒤 발동 예약 (즉시 실행 안 함)

@@ -28,3 +28,5 @@ MonoBehaviour:
   _isDefault: 0
   _unlockCondition: "2\uCE35 \uBCF4\uC2A4 \uD074\uB9AC\uC5B4"
   _resourceType: 0
+  _baseCritChance: 0
+  _baseCritDamageMul: 1.5

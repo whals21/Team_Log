@@ -52,6 +52,10 @@ namespace TeamLog.Skill
 
         // ── 경제 ──
         BonusGold,                  // 골드 획득 시 추가 골드
+
+        // ── Phase CC-2A: Umbra 특성 전용 ──
+        ShadowsMaxUp,               // 자원 최대치 증가 (value = 보너스 양). "그림자 심화" 특성.
+        PowerAddVsDebuff,           // 도트 디버프 적 대상 위력 가산 (value = +N). "약점 포착" 특성.
     }
 
     /// <summary>

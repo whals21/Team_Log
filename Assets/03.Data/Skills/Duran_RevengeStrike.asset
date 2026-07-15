@@ -30,4 +30,5 @@ MonoBehaviour:
   _resourceCostAmount: 0
   _resourcePowerPerStack: 1
   _consumeAllResource: 1
+  _minResourceRequired: 0
   _shieldFlags: 0

@@ -533,11 +533,11 @@ namespace TeamLog.EditorDebug
         private void PopulateDefaultTemplates()
         {
             // ── 파티 템플릿 (4 슬롯) ──
-            AddPartyTemplate("균형 파티", "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Rogue");
-            AddPartyTemplate("물리 특화", "Char_Warrior", "Char_Rogue", "Char_Archer", "Char_Bard");
+            AddPartyTemplate("균형 파티", "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Umbra");
+            AddPartyTemplate("물리 특화", "Char_Warrior", "Char_Umbra", "Char_Archer", "Char_Bard");
             AddPartyTemplate("마법 폭격", "Char_Mage", "Char_Necromancer", "Char_Alchemist", "Char_Healer");
             AddPartyTemplate("생존 극대화", "Char_Warrior", "Char_Healer", "Char_Alchemist", "Char_Bard");
-            AddPartyTemplate("크리 어쌔신", "Char_Rogue", "Char_Archer", "Char_Bard", "Char_Necromancer");
+            AddPartyTemplate("그림자 암살", "Char_Umbra", "Char_Archer", "Char_Bard", "Char_Necromancer");
 
             // ── 유물 템플릿 (6 슬롯) ──
             AddRelicTemplate("화력 증강",

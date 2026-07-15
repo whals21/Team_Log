@@ -47,55 +47,67 @@ namespace TeamLog.Editor
             {
                 SetupActionBar(bottomBar);
 
-                // TopBarUI가 BottomBar의 AP/속도/턴종료 요소를 참조하도록 와이어링
+                // TopBarUI가 AP/속도 요소를 참조하도록 와이어링
+                // AP는 BottomBar/PlayerStrip/APArea에, 속도는 TopBar에 위치
                 var topBarUI = topBar?.GetComponent<TopBarUI>();
                 if (topBarUI != null)
                 {
                     var topBarSer = new SerializedObject(topBarUI);
 
-                    var apText = bottomBar.Find("APText");
+                    var apText = bottomBar.Find("RightColumn/APArea/APText");
                     if (apText != null)
                     {
                         var apTextProp = topBarSer.FindProperty("_apText");
                         if (apTextProp != null) apTextProp.objectReferenceValue = apText.GetComponent<TMPro.TextMeshProUGUI>();
                     }
 
-                    var apFill = bottomBar.Find("APBar/APFill");
-                    if (apFill != null)
-                    {
-                        var apFillProp = topBarSer.FindProperty("_apFillImage");
-                        if (apFillProp != null) apFillProp.objectReferenceValue = apFill.GetComponent<Image>();
-                    }
-
-                    var speedBtn = bottomBar.Find("SpeedButton");
+                    // 속도 버튼은 TopBar에 위치
+                    var speedBtn = topBar?.Find("SpeedButton");
                     if (speedBtn != null)
                     {
                         var speedBtnProp = topBarSer.FindProperty("_speedToggleButton");
                         if (speedBtnProp != null) speedBtnProp.objectReferenceValue = speedBtn.GetComponent<Button>();
                     }
 
-                    var speedLabel = bottomBar.Find("SpeedButton/SpeedLabel");
+                    var speedLabel = topBar?.Find("SpeedButton/SpeedLabel");
                     if (speedLabel != null)
                     {
                         var speedLabelProp = topBarSer.FindProperty("_speedLabel");
                         if (speedLabelProp != null) speedLabelProp.objectReferenceValue = speedLabel.GetComponent<TMPro.TextMeshProUGUI>();
                     }
 
+                    // Turn 배지 / 층 정보 텍스트 와이어링
+                    var turnBadge = topBar?.Find("TurnBadge/T");
+                    if (turnBadge != null)
+                    {
+                        var turnProp = topBarSer.FindProperty("_turnText");
+                        if (turnProp != null) turnProp.objectReferenceValue = turnBadge.GetComponent<TMPro.TextMeshProUGUI>();
+                    }
+
+                    var floorInfo = topBar?.Find("FloorInfo");
+                    if (floorInfo != null)
+                    {
+                        var floorProp = topBarSer.FindProperty("_floorInfoText");
+                        if (floorProp != null) floorProp.objectReferenceValue = floorInfo.GetComponent<TMPro.TextMeshProUGUI>();
+                    }
+
                     topBarSer.ApplyModifiedProperties();
                 }
             }
 
-            // 4) PlayerStrip 카드에 PlayerSidebarPanel 추가 (Divider 제외)
-            var playerStrip = root.transform.Find("PlayerStrip");
+            // 4) PlayerStrip 카드에 PlayerSidebarPanel 추가 — BottomBar/LeftContent/PlayerStrip 내부
+            var playerStrip = root.transform.Find("BottomBar/LeftContent/PlayerStrip");
             if (playerStrip != null)
             {
                 foreach (Transform child in playerStrip)
                 {
-                    if (child.name == "Divider") continue;
                     if (child.GetComponent<PlayerSidebarPanel>() == null)
                         child.gameObject.AddComponent<PlayerSidebarPanel>();
                 }
             }
+
+            // 4b) 토글 버튼 ↔ 오버레이 패널 연결
+            WireToggleButtons(root.transform);
 
             // 5) CenterArea 패널에 EnemyDetailPanel 추가
             var centerArea = root.transform.Find("ContentArea/CenterArea");
@@ -125,7 +137,7 @@ namespace TeamLog.Editor
             var warriorData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Warrior.asset");
             var mageData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Mage.asset");
             var healerData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Healer.asset");
-            var rogueData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Rogue.asset");
+            var rogueData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Umbra.asset");
 
             SetPrivateField(sceneSetup, "_testWarriorData", warriorData);
             SetPrivateField(sceneSetup, "_testMageData", mageData);
@@ -165,6 +177,14 @@ namespace TeamLog.Editor
             if (relicBar != null)
                 SetPrivateField(sceneSetup, "_relicBarUI", relicBar.GetComponent<BattleRelicBarUI>());
 
+            // BattleLogUI 연결 — 토글 오버레이 (BattleLogOverlay)
+            var logOverlay = root.transform.Find("BattleLogOverlay");
+            if (logOverlay != null)
+            {
+                var logUI = logOverlay.GetComponent<BattleLogUI>();
+                SetPrivateField(uiManager, "_battleLog", logUI);
+            }
+
             var slimeData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Enemy_Slime.asset");
             var goblinData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Enemy_Goblin.asset");
             SetPrivateField(sceneSetup, "_testEnemyData", new CharacterData[] { goblinData, goblinData });
@@ -193,33 +213,13 @@ namespace TeamLog.Editor
             if (actionBar == null)
                 actionBar = bottomBar.gameObject.AddComponent<ActionBarUI>();
 
-            // 액션 슬롯 컨테이너
-            var slotContainer = bottomBar.Find("ActionSlotContainer");
-            if (slotContainer == null)
-            {
-                var container = NewRect("ActionSlotContainer", bottomBar as RectTransform);
-                container.anchorMin = new Vector2(0, 0);
-                container.anchorMax = new Vector2(1, 1);
-                container.offsetMin = Vector2.zero;
-                container.offsetMax = Vector2.zero;
-
-                var hlg = container.gameObject.AddComponent<HorizontalLayoutGroup>();
-                hlg.spacing = 8;
-                hlg.padding = new RectOffset(8, 8, 10, 10);
-                hlg.childAlignment = TextAnchor.MiddleCenter;
-                hlg.childControlWidth = false;
-                hlg.childControlHeight = false;
-                hlg.childForceExpandWidth = false;
-                hlg.childForceExpandHeight = false;
-            }
-
+            // ActionSlotContainer는 CreateBottomBar에서 SkillRow 내부에 이미 생성됨
             CreateActionSlotPrefab();
         }
 
         private static void CreateActionSlotPrefab()
         {
             const string prefabPath = "Assets/03.Data/Prefabs/ActionSlotUI.prefab";
-            // 기존 프리팹 삭제 (리롤 버튼 추가로 구조 변경)
             AssetDatabase.DeleteAsset(prefabPath);
 
             if (!AssetDatabase.IsValidFolder("Assets/03.Data/Prefabs"))
@@ -227,81 +227,107 @@ namespace TeamLog.Editor
 
             var go = new GameObject("ActionSlotUI");
             var rect = go.AddComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(240, 80);
+            rect.sizeDelta = new Vector2(240, 110);
 
             var layoutEl = go.AddComponent<LayoutElement>();
-            layoutEl.preferredWidth = 240;
-            layoutEl.preferredHeight = 80;
-            layoutEl.minWidth = 240;
-            layoutEl.minHeight = 80;
+            layoutEl.minWidth = 120;
+            layoutEl.flexibleWidth = 1;
+            layoutEl.preferredHeight = 110;
+            layoutEl.minHeight = 100;
 
-            go.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.18f, 0.9f);
-            go.AddComponent<Outline>().effectColor = BorderRed;
+            // 배경 — 남색 + 라운드 코너
+            var bg = go.AddComponent<Image>();
+            var bgSprite = LoadSprite(SPRITE_SOLID_FRAME);
+            if (bgSprite != null) { bg.sprite = bgSprite; bg.type = Image.Type.Sliced; }
+            bg.color = SlotBgNavy;
+            var bgOutline = go.AddComponent<Outline>();
+            bgOutline.effectColor = new Color(0.27f, 0.27f, 0.27f, 0.80f);
+            bgOutline.effectDistance = new Vector2(1, -1);
             go.AddComponent<Button>();
 
-            // 스킬 아이콘
+            // ★ VLG 없음 — 명시적 앵커 배치 (레이아웃 충돌 원천 차단)
+
+            // ── Header: CasterName (좌) + TypeTag (우) — top=2, h=14 ──
+            var header = NewRect("Header", rect);
+            AnchorTopFill(header, 2, 14);
+            // CasterName: 좌측 절반
+            var casterT = NewRect("CasterNameText", header);
+            casterT.anchorMin = new Vector2(0, 0); casterT.anchorMax = new Vector2(0.5f, 1);
+            casterT.offsetMin = new Vector2(4, 0); casterT.offsetMax = new Vector2(-2, 0);
+            var casterTmp = casterT.gameObject.AddComponent<TextMeshProUGUI>();
+            casterTmp.font = GetOrCreateKoreanFont(); casterTmp.text = "";
+            casterTmp.fontSize = 10; casterTmp.alignment = TextAlignmentOptions.Left;
+            casterTmp.color = TextDim; casterTmp.raycastTarget = false;
+            casterTmp.enableWordWrapping = false; casterTmp.overflowMode = TextOverflowModes.Ellipsis;
+            // TypeTag: 우측 고정 36x12
+            var typeTag = NewRect("TypeTag", header);
+            typeTag.anchorMin = new Vector2(1, 0.5f); typeTag.anchorMax = new Vector2(1, 0.5f);
+            typeTag.pivot = new Vector2(1, 0.5f); typeTag.anchoredPosition = new Vector2(-4, 0);
+            typeTag.sizeDelta = new Vector2(36, 12);
+            var typeTagImg = typeTag.gameObject.AddComponent<Image>();
+            typeTagImg.color = new Color(0.3f, 0.3f, 0.3f, 0.9f);
+            var typeTagText = NewRect("T", typeTag);
+            SetFillParent(typeTagText);
+            var typeTagTmp = typeTagText.gameObject.AddComponent<TextMeshProUGUI>();
+            typeTagTmp.font = GetOrCreateKoreanFont(); typeTagTmp.text = "";
+            typeTagTmp.fontSize = 8; typeTagTmp.fontStyle = FontStyles.Bold;
+            typeTagTmp.alignment = TextAlignmentOptions.Center; typeTagTmp.color = TextWhite;
+            typeTagTmp.raycastTarget = false;
+
+            // ── SkillIcon — top=18, 38x38 중앙 ──
             var icon = NewRect("SkillIcon", rect);
-            icon.anchorMin = new Vector2(0, 0.5f);
-            icon.anchorMax = new Vector2(0, 0.5f);
-            icon.pivot = new Vector2(0, 0.5f);
-            icon.anchoredPosition = new Vector2(4, 0);
-            icon.sizeDelta = new Vector2(60, 60);
+            AnchorTopCentered(icon, 18, 38, 38);
             var iconImg = icon.gameObject.AddComponent<Image>();
-            iconImg.color = AccentRed;
-            // 기본 아이콘 스프라이트 (Attack)
+            iconImg.color = AccentRed; iconImg.preserveAspect = true;
             var defaultIcon = AssetDatabase.LoadAssetAtPath<Sprite>(ICON_ATTACK);
-            if (defaultIcon != null)
-                iconImg.sprite = defaultIcon;
+            if (defaultIcon != null) iconImg.sprite = defaultIcon;
 
-            // 스킬명
+            // ── SkillNameText — top=60, h=16 ──
             var nameT = NewRect("SkillNameText", rect);
-            nameT.anchorMin = new Vector2(0, 0.5f);
-            nameT.anchorMax = new Vector2(1, 1);
-            nameT.offsetMin = new Vector2(68, -4);
-            nameT.offsetMax = new Vector2(-32, -4);
-            AddText(nameT, "---", 16, FontStyles.Bold, TextAlignmentOptions.Left, TextWhite);
+            AnchorTopFill(nameT, 60, 16);
+            var nameTmp = nameT.gameObject.AddComponent<TextMeshProUGUI>();
+            nameTmp.font = GetOrCreateKoreanFont(); nameTmp.text = "---";
+            nameTmp.fontSize = 13; nameTmp.fontStyle = FontStyles.Bold;
+            nameTmp.alignment = TextAlignmentOptions.Center; nameTmp.color = TextWhite;
+            nameTmp.raycastTarget = false; nameTmp.enableWordWrapping = false;
+            nameTmp.overflowMode = TextOverflowModes.Ellipsis;
 
-            // 비용 뱃지
+            // ── EffectText — top=78, h=18 ──
+            var effectT = NewRect("EffectText", rect);
+            AnchorTopFill(effectT, 78, 18);
+            var effectTmp = effectT.gameObject.AddComponent<TextMeshProUGUI>();
+            effectTmp.font = GetOrCreateKoreanFont(); effectTmp.text = "";
+            effectTmp.fontSize = 8; effectTmp.alignment = TextAlignmentOptions.Center;
+            effectTmp.color = TextDim; effectTmp.raycastTarget = false;
+            effectTmp.enableWordWrapping = true; effectTmp.overflowMode = TextOverflowModes.Ellipsis;
+
+            // ── CostBadge — bottom=2, 26x18 중앙 ──
             var costBadge = NewRect("CostBadge", rect);
-            costBadge.anchorMin = new Vector2(1, 1);
-            costBadge.anchorMax = new Vector2(1, 1);
-            costBadge.pivot = new Vector2(1, 1);
-            costBadge.anchoredPosition = new Vector2(-4, -4);
-            costBadge.sizeDelta = new Vector2(28, 28);
+            AnchorBottomCentered(costBadge, 2, 26, 18);
             costBadge.gameObject.AddComponent<Image>().color = new Color(0.2f, 0.4f, 0.8f, 0.9f);
-
             var costT = NewRect("CostText", costBadge);
             SetFillParent(costT);
-            AddText(costT, "0", 14, FontStyles.Bold, TextAlignmentOptions.Center, Color.black);
+            var costTmp = AddText(costT, "0", 12, FontStyles.Bold, TextAlignmentOptions.Center, Color.black);
 
-            // 시전자명
-            var casterT = NewRect("CasterNameText", rect);
-            casterT.anchorMin = new Vector2(0, 0);
-            casterT.anchorMax = new Vector2(1, 0.5f);
-            casterT.offsetMin = new Vector2(68, 4);
-            casterT.offsetMax = new Vector2(-8, 4);
-            AddText(casterT, "", 12, FontStyles.Normal, TextAlignmentOptions.Left, TextDim);
+            // ── 오버레이 (VLG가 없으므로 ignoreLayout 불필요 — 앵커만으로 배치) ──
 
             // 선택 테두리
             var selBorder = NewRect("SelectionBorder", rect);
             SetFillParent(selBorder);
             selBorder.gameObject.AddComponent<Image>().color = Color.clear;
             var selOutline = selBorder.gameObject.AddComponent<Outline>();
-            selOutline.effectColor = AccentYellow;
-            selOutline.effectDistance = new Vector2(3, -3);
+            selOutline.effectColor = AccentYellow; selOutline.effectDistance = new Vector2(3, -3);
             selBorder.gameObject.SetActive(false);
 
-            // 실행 순서 뱃지 (확대)
+            // 실행 순서 뱃지
             var orderBadge = NewRect("ExecutionOrderBadge", rect);
-            orderBadge.anchorMin = new Vector2(1, 1);
-            orderBadge.anchorMax = new Vector2(1, 1);
-            orderBadge.pivot = new Vector2(1, 1);
-            orderBadge.anchoredPosition = new Vector2(-2, -32);
-            orderBadge.sizeDelta = new Vector2(30, 30);
+            orderBadge.anchorMin = new Vector2(1, 1); orderBadge.anchorMax = new Vector2(1, 1);
+            orderBadge.pivot = new Vector2(1, 1); orderBadge.anchoredPosition = new Vector2(-2, -2);
+            orderBadge.sizeDelta = new Vector2(28, 28);
             orderBadge.gameObject.AddComponent<Image>().color = AccentYellow;
             var orderText = NewRect("OrderText", orderBadge);
             SetFillParent(orderText);
-            AddText(orderText, "1", 16, FontStyles.Bold, TextAlignmentOptions.Center, Color.black);
+            AddText(orderText, "1", 15, FontStyles.Bold, TextAlignmentOptions.Center, Color.black);
             orderBadge.gameObject.SetActive(false);
 
             // 할당 오버레이
@@ -310,7 +336,7 @@ namespace TeamLog.Editor
             assigned.gameObject.AddComponent<Image>().color = new Color(0.2f, 0.8f, 0.4f, 0.15f);
             assigned.gameObject.SetActive(false);
 
-            // AP 부족 테두리 오버레이
+            // AP 부족 테두리
             var apShortageBorder = NewRect("APShortageBorder", rect);
             SetFillParent(apShortageBorder);
             var apBorderImg = apShortageBorder.gameObject.AddComponent<Image>();
@@ -320,39 +346,38 @@ namespace TeamLog.Editor
             apOutline.effectDistance = new Vector2(2, -2);
             apShortageBorder.gameObject.SetActive(false);
 
-            // 리롤 버튼 (우측 하단 작은 버튼)
+            // 리롤 버튼
             var rerollBtn = NewRect("RerollBtn", rect);
-            rerollBtn.anchorMin = new Vector2(1, 0);
-            rerollBtn.anchorMax = new Vector2(1, 0);
-            rerollBtn.pivot = new Vector2(1, 0);
-            rerollBtn.anchoredPosition = new Vector2(-2, 2);
-            rerollBtn.sizeDelta = new Vector2(24, 24);
+            rerollBtn.anchorMin = new Vector2(1, 0); rerollBtn.anchorMax = new Vector2(1, 0);
+            rerollBtn.pivot = new Vector2(1, 0); rerollBtn.anchoredPosition = new Vector2(-2, 2);
+            rerollBtn.sizeDelta = new Vector2(22, 22);
             var rerollBtnComp = rerollBtn.gameObject.AddComponent<Button>();
             var rerollImg = rerollBtn.gameObject.AddComponent<Image>();
-            rerollImg.color = ShieldBrown;
-            rerollBtnComp.targetGraphic = rerollImg;
+            rerollImg.color = ShieldBrown; rerollBtnComp.targetGraphic = rerollImg;
             var rerollTxt = NewRect("T", rerollBtn);
             SetFillParent(rerollTxt);
-            AddText(rerollTxt, "R", 14, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
+            AddText(rerollTxt, "R", 12, FontStyles.Bold, TextAlignmentOptions.Center, TextWhite);
             rerollBtn.gameObject.SetActive(false);
 
             // ActionSlotUI 컴포넌트 자동 와이어링
             var slotUI = go.AddComponent<ActionSlotUI>();
-            SetPrivateField(slotUI, "_skillIcon", icon.gameObject.GetComponent<Image>());
-            SetPrivateField(slotUI, "_skillNameText", nameT.gameObject.GetComponent<TMPro.TextMeshProUGUI>());
-            SetPrivateField(slotUI, "_costText", costT.gameObject.GetComponent<TMPro.TextMeshProUGUI>());
-            SetPrivateField(slotUI, "_casterNameText", casterT.gameObject.GetComponent<TMPro.TextMeshProUGUI>());
+            SetPrivateField(slotUI, "_skillIcon", iconImg);
+            SetPrivateField(slotUI, "_skillNameText", nameTmp);
+            SetPrivateField(slotUI, "_costText", costTmp);
+            SetPrivateField(slotUI, "_casterNameText", casterTmp);
+            SetPrivateField(slotUI, "_effectText", effectTmp);
             SetPrivateField(slotUI, "_selectionBorder", selBorder.gameObject);
             SetPrivateField(slotUI, "_executionOrderBadge", orderBadge.gameObject);
-            SetPrivateField(slotUI, "_executionOrderText", orderText.gameObject.GetComponent<TMPro.TextMeshProUGUI>());
+            SetPrivateField(slotUI, "_executionOrderText", orderText.gameObject.GetComponent<TextMeshProUGUI>());
             SetPrivateField(slotUI, "_assignedOverlay", assigned.gameObject);
             SetPrivateField(slotUI, "_button", go.GetComponent<Button>());
-            SetPrivateField(slotUI, "_rerollButton", rerollBtn.gameObject.GetComponent<Button>());
+            SetPrivateField(slotUI, "_rerollButton", rerollBtnComp);
             SetPrivateField(slotUI, "_apShortageBorder", apShortageBorder.gameObject);
+            SetPrivateField(slotUI, "_typeTagImage", typeTagImg);
+            SetPrivateField(slotUI, "_typeTagText", typeTagTmp);
 
             var prefab = PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
             Object.DestroyImmediate(go);
-
             Debug.Log("[Setup] ActionSlotUI prefab created at " + prefabPath);
         }
 
@@ -369,23 +394,16 @@ namespace TeamLog.Editor
             if (topBar != null)
                 SetPrivateField(uiManager, "_topBar", topBar.GetComponent<TopBarUI>() ?? topBar.gameObject.AddComponent<TopBarUI>());
 
-            // Player panel container — PlayerStrip
-            var playerStrip = root.Find("PlayerStrip");
+            // Player panel container — BottomBar/LeftContent/PlayerStrip
+            var playerStrip = root.Find("BottomBar/LeftContent/PlayerStrip");
             if (playerStrip != null)
                 SetPrivateField(uiManager, "_playerPanelContainer", playerStrip);
 
-            // Player panel prefab — skip Divider
+            // Player panel prefab — 첫 번째 자식 사용
             Transform firstPanel = null;
-            if (playerStrip != null)
+            if (playerStrip != null && playerStrip.childCount > 0)
             {
-                for (int i = 0; i < playerStrip.childCount; i++)
-                {
-                    if (playerStrip.GetChild(i).name != "Divider")
-                    {
-                        firstPanel = playerStrip.GetChild(i);
-                        break;
-                    }
-                }
+                firstPanel = playerStrip.GetChild(0);
             }
             if (firstPanel != null)
             {
@@ -437,18 +455,20 @@ namespace TeamLog.Editor
         {
             var bottomBar = actionBar.transform;
 
-            var slotContainer = bottomBar.Find("ActionSlotContainer");
+            // ActionSlotContainer는 BottomBar/LeftContent/SkillRow 내부에 위치
+            var slotContainer = bottomBar.Find("LeftContent/SkillRow/ActionSlotContainer");
             SetPrivateField(actionBar, "_actionMenuContainer", slotContainer);
 
             var slotPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/03.Data/Prefabs/ActionSlotUI.prefab");
             if (slotPrefab != null)
                 SetPrivateField(actionBar, "_actionSlotPrefab", slotPrefab.GetComponent<ActionSlotUI>());
 
-            var endTurnBtn = actionBar.transform.root.Find("BattleUIRoot/BottomBar/EndTurnButton");
+            // EndTurnButton은 BottomBar/RightColumn/ButtonArea 내부에 위치
+            var endTurnBtn = actionBar.transform.root.Find("BattleUIRoot/BottomBar/RightColumn/ButtonArea/EndTurnButton");
             SetPrivateField(actionBar, "_endTurnButton", endTurnBtn?.GetComponent<Button>());
 
-            // 리롤 텍스트 (BottomBar 내)
-            var rerollText = bottomBar.Find("RerollText");
+            // 리롤 텍스트는 RerollButton 내부 T 요소 (별도 RerollText 제거, 중복 해소)
+            var rerollText = bottomBar.Find("RightColumn/ButtonArea/RerollButton/T");
             SetPrivateField(actionBar, "_rerollText", rerollText?.GetComponent<TMPro.TextMeshProUGUI>());
 
             EditorUtility.SetDirty(actionBar);
@@ -462,8 +482,12 @@ namespace TeamLog.Editor
         {
             if (playerStrip != null)
             {
+                // PlayerStrip 내부의 정적 카드 전부 제거 (APArea는 RightColumn에 있으므로 제외 불필요)
                 for (int i = playerStrip.childCount - 1; i >= 0; i--)
-                    Object.DestroyImmediate(playerStrip.GetChild(i).gameObject);
+                {
+                    var child = playerStrip.GetChild(i);
+                    Object.DestroyImmediate(child.gameObject);
+                }
                 Debug.Log("[Setup] PlayerStrip static panels removed");
             }
 
@@ -472,6 +496,30 @@ namespace TeamLog.Editor
                 for (int i = centerArea.childCount - 1; i >= 0; i--)
                     Object.DestroyImmediate(centerArea.GetChild(i).gameObject);
                 Debug.Log("[Setup] CenterArea static panels removed");
+            }
+        }
+
+        /// <summary>
+        /// TopBar 토글 버튼(Party/Log)과 오버레이 패널을 연결.
+        /// </summary>
+        private static void WireToggleButtons(Transform root)
+        {
+            // 파티 토글 ↔ PartyStatusOverlay
+            var partyToggle = root.Find("TopBar/PartyToggleButton");
+            var partyOverlay = root.Find("PartyStatusOverlay");
+            if (partyToggle != null && partyOverlay != null)
+            {
+                var toggle = partyToggle.GetComponent<UIToggleButton>();
+                if (toggle != null) toggle.SetTarget(partyOverlay.gameObject);
+            }
+
+            // 로그 토글 ↔ BattleLogOverlay
+            var logToggle = root.Find("TopBar/LogToggleButton");
+            var logOverlay = root.Find("BattleLogOverlay");
+            if (logToggle != null && logOverlay != null)
+            {
+                var toggle = logToggle.GetComponent<UIToggleButton>();
+                if (toggle != null) toggle.SetTarget(logOverlay.gameObject);
             }
         }
 

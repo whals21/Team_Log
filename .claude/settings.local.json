@@ -54,7 +54,10 @@
       "Bash(read f:*)",
       "Bash(/c/Unity/Hub/Editor/6000.0.43f1/Editor/Unity.exe:*)",
       "mcp__mcp-unity__delete_gameobject",
-      "Bash(\"/c/Unity/Projects/Team_Log/Assets/09.Docs/WorkLog/2026-06-19.md\":*)"
+      "Bash(\"/c/Unity/Projects/Team_Log/Assets/09.Docs/WorkLog/2026-06-19.md\":*)",
+      "Bash(start:*)",
+      "mcp__zai-mcp-server__ui_diff_check",
+      "Bash(\"C:/Unity/Projects/Team_Log/Assets/09.Docs/WorkLog/2026-07-15.md\":*)"
     ]
   },
   "enableAllProjectMcpServers": true,

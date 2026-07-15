@@ -435,5 +435,143 @@ namespace TeamLog.Editor
             tooltip.gameObject.AddComponent<TooltipUI>();
             tooltip.gameObject.SetActive(false);
         }
+
+        // ══════════════════════════════════════════════════════════
+        //  Party Status Overlay (토글 오버레이 — 좌측 상단)
+        // ══════════════════════════════════════════════════════════
+
+        private static void CreatePartyStatusOverlay(RectTransform parent)
+        {
+            var overlay = NewRect("PartyStatusOverlay", parent);
+            overlay.anchorMin = new Vector2(0, 0.4f);
+            overlay.anchorMax = new Vector2(0.22f, 1f);
+            overlay.offsetMin = new Vector2(12, 12);
+            overlay.offsetMax = new Vector2(-4, -56);
+            overlay.gameObject.SetActive(false);
+
+            var bg = overlay.gameObject.AddComponent<Image>();
+            bg.color = PanelBgNavy;
+            var ol = overlay.gameObject.AddComponent<Outline>();
+            ol.effectColor = new Color(0.15f, 0.6f, 0.25f, 0.8f);
+            ol.effectDistance = new Vector2(2, -2);
+            overlay.gameObject.AddComponent<CanvasGroup>();
+
+            var vlg = overlay.gameObject.AddComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(12, 12, 10, 10);
+            vlg.spacing = 6;
+            vlg.childAlignment = TextAnchor.UpperLeft;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // 타이틀
+            var title = NewRect("Title", overlay);
+            SetFixedHeight(title, 24);
+            AddText(title, "파티 상태", 14, FontStyles.Bold, TextAlignmentOptions.Left, AccentYellow);
+
+            // HP
+            var hpRect = NewRect("HPText", overlay);
+            SetFixedHeight(hpRect, 22);
+            AddText(hpRect, "HP 288/370", 14, FontStyles.Bold, TextAlignmentOptions.Left, AccentRed);
+
+            // 골드
+            var goldRect = NewRect("GoldText", overlay);
+            SetFixedHeight(goldRect, 22);
+            AddText(goldRect, "골드 142G", 14, FontStyles.Bold, TextAlignmentOptions.Left, AccentYellow);
+
+            // 층
+            var floorRect = NewRect("FloorText", overlay);
+            SetFixedHeight(floorRect, 22);
+            AddText(floorRect, "F1 일반", 13, FontStyles.Normal, TextAlignmentOptions.Left, TextDim);
+
+            // PartyStatusWidget 컴포넌트
+            var widget = overlay.gameObject.AddComponent<PartyStatusWidget>();
+            var ser = new SerializedObject(widget);
+            var hpProp = ser.FindProperty("_hpText");
+            if (hpProp != null) hpProp.objectReferenceValue = hpRect.GetComponent<TextMeshProUGUI>();
+            var goldProp = ser.FindProperty("_goldText");
+            if (goldProp != null) goldProp.objectReferenceValue = goldRect.GetComponent<TextMeshProUGUI>();
+            var floorProp = ser.FindProperty("_floorText");
+            if (floorProp != null) floorProp.objectReferenceValue = floorRect.GetComponent<TextMeshProUGUI>();
+            ser.ApplyModifiedProperties();
+        }
+
+        // ══════════════════════════════════════════════════════════
+        //  Battle Log Overlay (토글 오버레이 — 우측 상단)
+        // ══════════════════════════════════════════════════════════
+
+        private static void CreateBattleLogOverlay(RectTransform parent)
+        {
+            var overlay = NewRect("BattleLogOverlay", parent);
+            overlay.anchorMin = new Vector2(0.78f, 0.4f);
+            overlay.anchorMax = new Vector2(1f, 1f);
+            overlay.offsetMin = new Vector2(4, 12);
+            overlay.offsetMax = new Vector2(-12, -56);
+            overlay.gameObject.SetActive(false);
+
+            var bg = overlay.gameObject.AddComponent<Image>();
+            bg.color = PanelBgNavy;
+            var ol = overlay.gameObject.AddComponent<Outline>();
+            ol.effectColor = new Color(0.5f, 0.4f, 0.7f, 0.8f);
+            ol.effectDistance = new Vector2(2, -2);
+            overlay.gameObject.AddComponent<CanvasGroup>();
+
+            var vlg = overlay.gameObject.AddComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(10, 10, 8, 8);
+            vlg.spacing = 4;
+            vlg.childAlignment = TextAnchor.UpperLeft;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // 타이틀
+            var title = NewRect("Title", overlay);
+            SetFixedHeight(title, 22);
+            AddText(title, "전투 로그", 13, FontStyles.Bold, TextAlignmentOptions.Left, new Color(0.7f, 0.6f, 0.85f));
+
+            // Viewport + LogText (ScrollRect)
+            var viewport = NewRect("Viewport", overlay);
+            var vpLe = viewport.gameObject.AddComponent<LayoutElement>();
+            vpLe.flexibleHeight = 1;
+            viewport.gameObject.AddComponent<RectMask2D>();
+
+            var log = NewRect("LogText", viewport);
+            log.anchorMin = new Vector2(0, 1);
+            log.anchorMax = new Vector2(1, 1);
+            log.pivot = new Vector2(0.5f, 1);
+            log.sizeDelta = new Vector2(0, 0);
+            var lt = log.gameObject.AddComponent<TextMeshProUGUI>();
+            lt.font = GetOrCreateKoreanFont();
+            lt.text = "";
+            lt.fontSize = 12;
+            lt.alignment = TextAlignmentOptions.TopLeft;
+            lt.color = TextDim;
+            lt.enableWordWrapping = true;
+            lt.overflowMode = TextOverflowModes.Overflow;
+            lt.raycastTarget = false;
+
+            var csf = log.gameObject.AddComponent<ContentSizeFitter>();
+            csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var scrollRect = overlay.gameObject.AddComponent<ScrollRect>();
+            scrollRect.content = log;
+            scrollRect.viewport = viewport;
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.scrollSensitivity = 20;
+
+            // BattleLogUI 컴포넌트
+            var logUI = overlay.gameObject.AddComponent<BattleLogUI>();
+            var ser = new SerializedObject(logUI);
+            var logTextProp = ser.FindProperty("_logText");
+            if (logTextProp != null) logTextProp.objectReferenceValue = lt;
+            var scrollProp = ser.FindProperty("_scrollRect");
+            if (scrollProp != null) scrollProp.objectReferenceValue = scrollRect;
+            ser.ApplyModifiedProperties();
+        }
     }
 }

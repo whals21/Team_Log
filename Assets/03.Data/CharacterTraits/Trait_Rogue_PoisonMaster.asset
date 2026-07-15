@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: Trait_Rogue_PoisonMaster
   m_EditorClassIdentifier: 
   _traitId: rogue_poison_master
-  _displayName: "\uB3C5 \uB9C8\uC2A4\uD130"
-  _description: "\uC0C1\uD0DC\uC774\uC0C1 \uC9C0\uC18D\uC2DC\uAC04 +1\uD134"
+  _displayName: "\uC57D\uC810 \uD3EC\uCC29"
+  _description: "\uB3C4\uD2B8 \uB514\uBC84\uD504 \uC801\uC5D0\uAC8C \uC704\uB825
+    +3 (Backstab \uC870\uAC74 \uAC15\uD654)"
   _targetClass: 3
   _keywords:
-  - Type: 9
-    Value: 1
+  - Type: 25
+    Value: 3
     Trigger: 0
     ConditionParam: 0
   _isDefault: 0

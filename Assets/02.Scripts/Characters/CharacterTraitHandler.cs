@@ -40,6 +40,26 @@ namespace TeamLog.Characters
         public void EquipTrait(CharacterTraitData trait)
         {
             _trait = trait;
+            ApplyPassiveEffects(); // Phase CC-2A: Passive 키워드 즉시 적용 (ShadowsMaxUp 등)
+        }
+
+        /// <summary>
+        /// Phase CC-2A: Passive 키워드 즉시 적용. EquipTrait 시 호출.
+        /// ShadowsMaxUp 등 "장착 즉시 영구 적용" 키워드 처리.
+        /// </summary>
+        private void ApplyPassiveEffects()
+        {
+            if (_trait == null || _trait.Keywords == null || _owner == null) return;
+
+            foreach (var kw in _trait.Keywords)
+            {
+                if (kw.Trigger != KeywordTrigger.Passive) continue;
+
+                if (kw.Type == KeywordType.ShadowsMaxUp && _owner.Resource != null)
+                {
+                    _owner.Resource.MaxStacksBonus = (int)kw.Value;
+                }
+            }
         }
 
         public void SubscribeEvents()
@@ -97,12 +117,18 @@ namespace TeamLog.Characters
             return result;
         }
 
-        /// <summary>장착 특성의 추가 고정 데미지 (BonusOutgoingDamage + PowerAdd + StackingPowerOnKill 누적)</summary>
-        public int GetBonusOutgoingDamage()
+        /// <summary>장착 특성의 추가 고정 데미지 (BonusOutgoingDamage + PowerAdd + StackingPowerOnKill 누적).</summary>
+        /// <param name="target">Phase CC-2A: 대상이 도트 디버프 상태일 경우 PowerAddVsDebuff 추가 가산. null이면 스킵.</param>
+        public int GetBonusOutgoingDamage(Character target = null)
         {
             int bonus = QueryKeywordSum(KeywordType.BonusOutgoingDamage);
             bonus += QueryKeywordSum(KeywordType.PowerAdd);
             bonus += GetStackingPowerValue() * _killStackCount;
+
+            // Phase CC-2A: 도트 디버프 적 대상 추가 위력 (Umbra "약점 포착" 특성)
+            if (target != null && HasDotDebuff(target))
+                bonus += QueryKeywordSum(KeywordType.PowerAddVsDebuff);
+
             return bonus;
         }
 
@@ -133,6 +159,25 @@ namespace TeamLog.Characters
         }
 
         public int PeekNextAttackBonus() => _nextAttackBonusDamage;
+
+        /// <summary>
+        /// Phase CC-2A: 대상이 도트/행동봉쇄 디버프 상태인지 확인.
+        /// StrongVsDebuffBehavior.HasDotDebuff와 동일 로직 — 특성 시스템에서 재사용.
+        /// </summary>
+        private static bool HasDotDebuff(Character target)
+        {
+            if (target?.StatusEffects == null) return false;
+            foreach (var effect in target.StatusEffects.GetAllEffects())
+            {
+                if (effect.Type == StatusEffectType.Poison ||
+                    effect.Type == StatusEffectType.Burn ||
+                    effect.Type == StatusEffectType.Bleed ||
+                    effect.Type == StatusEffectType.Freeze ||
+                    effect.Type == StatusEffectType.Stun)
+                    return true;
+            }
+            return false;
+        }
 
         public int ConsumeNextAttackBonus()
         {

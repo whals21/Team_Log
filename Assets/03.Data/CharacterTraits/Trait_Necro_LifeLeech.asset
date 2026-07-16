@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: necro_life_leech
   _displayName: "\uC0DD\uBA85\uB825 \uD761\uC218"
-  _description: "\uC900 \uB370\uBBF8\uC9C0\uC758 15% \uD68C\uBCF5"
+  _description: "Soul Link \uD68C\uBCF5 \uBE44\uC728 50% \u2192 75% (\uAC15\uD654
+    \uD761\uD608)"
   _targetClass: 5
   _keywords:
-  - Type: 17
-    Value: 0.15
+  - Type: 37
+    Value: 0.75
     Trigger: 0
     ConditionParam: 0
   _isDefault: 1

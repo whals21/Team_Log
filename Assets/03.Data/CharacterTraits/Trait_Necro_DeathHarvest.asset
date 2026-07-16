@@ -14,12 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: necro_death_harvest
   _displayName: "\uC8FD\uC74C\uC758 \uC218\uD655"
-  _description: "\uC801 \uCC98\uCE58\uB2F9 \uACF5\uACA9\uB825 +1 \uB204\uC801"
+  _description: "\uC801 \uCC98\uCE58 \uC2DC \uC2DC\uCCB4 \uC2A4\uD0AC \uAD50\uCCB4
+    + \uC601\uAD6C \uAC15\uD654 +2 (\uC2DC\uCCB4 \uC2A4\uB178\uC6B0\uBCFC)"
   _targetClass: 5
   _keywords:
-  - Type: 18
-    Value: 1
-    Trigger: 6
+  - Type: 39
+    Value: 2
+    Trigger: 0
     ConditionParam: 0
   _isDefault: 0
   _unlockCost: 60

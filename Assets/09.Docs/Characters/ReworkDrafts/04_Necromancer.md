@@ -1,152 +1,303 @@
-# [DRAFT] TBD, the Necromancer — "진짜 소환 + 영혼 수확"
+# [DRAFT → 확정 예정] Mortis, the Necromancer — "시체의 스승"
 
-> **상태**: 🔴 초안 (결정 대기)
+> **상태**: 🟢 확정 (2026-07-17 Corpse 컨셉 + 핵심 결정 완료 — 코드 구현 대기, 별도 Phase CC-2F)
 > **슬롯**: Necromancer (기존 Char_Necromancer 리워크)
 > **상위 문서**: [INDEX.md](INDEX.md), [CharacterConceptReview.md 5.9](../../CharacterConceptReview.md)
 > **기존 특성 파일**: `Trait_Necro_LifeLeech/CursePrice/DeathHarvest.asset`
+
+### 2026-07-17 확정 사항 (사용자 제안 + 결정)
+- **이름**: Mortis (라틴 "죽음")
+- **자원**: 없음 (시체 자체가 메카닉)
+- **시체**: 1체. HP 없음 (적의 대상 안 됨). Necromancer 사망 시 동반 사망
+- **시체 행동**: 매 턴 플레이어 종료 후 4개 스킬 중 무작위 1개 자동 시전
+- **스킬 교체**: 적 처치 시 Discover UI (Alchemist 재사용)로 스킬 선택 → 시체 슬롯 1개 교체
+- **리셋**: 전투 종료 시 시체 사라지고 다음 전투에서 기본 4스킬로 재소환
 
 ---
 
 ## 1. 정체성 (한 문장)
 
-> **"죽음을 자원으로 삼아 언데드를 부리는 흑마법사. 적이 죽을수록 강해진다."**
+> **"전투마다 시체를 일으켜 세운다 — 그리고 쓰러뜨린 적의 기술을 시체에게 먹여 성장시킨다. 죽음은 끝이 아니라, 새로운 시작이다."**
 
-## 2. 이름 후보
+## 2. 이름
 
-| # | 이름 | 어원/뉘앙스 | 장단점 |
-|---|------|-----------|--------|
-| **A** | **Mortis** | 라틴 "죽음" (rigor mortis) | 직관+강렬, Necro 정체성 1:1 |
-| B | Lilith | 유대 전설 아담 첫 아내 | 서사 강함, 다소 진부 |
-| C | Vex | "괴롭히다" | 짧으나 의미 약함 |
-| D | Morrigan | 켈트 죽음 여신 | 강렬, 발음 어려움 |
-| E | Thane | "귀족/시종" | 부적합 |
-
-**추천**: `Mortis` (A) — Necromancer 정체성과 1:1 대응. "죽음 그 자체"
+**Mortis** (라틴 "죽음", rigor mortis) — Necromancer 정체성과 1:1 대응. "죽음 그 자체"
 
 ## 3. 역할군
 
-- **주 역할군**: 도트+처치 딜러 (Curse → Decay → Soul Harvest 루프)
-- **부 역할군**: 소환 탱커 (미니언으로 적 공격 대신 맞음)
+- **주 역할군**: 간접 딜러 (시체가 매 턴 자동 딜)
+- **부 역할군**: 적 약화 (Curse로 시체 처치 유도) + 시체 강화 (버퍼)
 
 ## 4. 강점 / 약점
 
 | 강점 | 약점 |
 |------|------|
-| 도트로 적 약화 → 처치 시 자원 회수 | 빈사 적(HP 10%-)에게 약함 (과잉 딜 낭비) |
-| 미니언 소환으로 추가 탱킹 | 소환 인프라 복잡 (구현 난이도 高) |
-| Soul 자원 스노우볼 | 초반(영혼 0) 평범 |
+| 매 턴 자동 딜 (시체가 플레이어 개입 없이 행동) | **시체 스킬이 랜덤** — 원하는 효과 안 나올 수 있음 |
+| 적 처치로 시체 강화 (동적 성장) | Necromancer 본인 딜은 약함 (시체에 의존) |
+| Curse로 적 약화 → 시체가 쉽게 처치 | **Necromancer 사망 = 시체도 사망** (CC-0 부활 시 시체 리셋) |
+| Soul Link로 시체 딜 → Necromancer 회복 | 시체 강화에 AP 소모 (본인 스킬 부담) |
 
-**DesignPillars 약점 유형**: **자원 효율** (빈사 적 약함)
+**DesignPillars 약점 유형**: **간접 딜러** (본인 딜 약함, 시체 의존)
 
-## 5. 고유 메카닉: Soul + 미니언 시스템
+## 5. 고유 메카닉: Summoned Corpse (동적 스킬 풀)
 
+### 시체 구조
+- **별도 엔티티가 아님** — Necromancer 캐릭터에 종속된 데이터 컨테이너
+- `CorpseSkillSlots[4]` — 시체가 사용 가능한 4개 스킬 슬롯
+- 매 턴 플레이어 종료 후, **무작위 1개 슬롯의 스킬 자동 시전**
+- 시체는 HP/StatusEffects 없음 (적의 대상이 안 됨)
+- Necromancer 사망 시 시체도 자동 사망 (비활성화)
+
+### 매 전투 흐름
 ```
-[도트 디버프로 적 처치] → Soul +1 (최대 3)
-[Soul 1+ 보유 시] → Raise Dead 패시브 액션 가능 (미니언 소환)
-[미니언] → HP 15, 1턴 지속, 다음 적 턴 한 대 대신 맞음 (대신 사망)
-[미니언 사망] → Soul +1 (죽음의 수확 특성 시)
-[영혼 소모] → Soul Harvest 위력 가산
+[전투 시작]
+  ↓
+[자동 시체 소환] — CorpseSkillSlots = 기본 4스킬로 초기화
+  ↓
+[매 턴 플레이어 종료 후]
+  ↓
+[시체가 4개 슬롯 중 무작위 1개 자동 시전]
+  ↓
+[적 처치 이벤트 발생 시]
+  ↓
+[Discover Modal 팝업 (Alchemist UI 재사용)]
+  - 방금 처치한 적의 스킬 4개 표시
+  - 플레이어가 1개 선택
+  - 시체 슬롯 4개 중 교체할 슬롯 선택 (또는 자동)
+  ↓
+[전투 반복... 적이 강할수록 시체 스킬도 강해짐]
+  ↓
+[전투 종료]
+  ↓
+[시체 사라지고 다음 전투에서 기본 4스킬로 리셋]
 ```
 
-**핵심 루프**: Curse → Decay(도트) → 적 약화 → Life Drain 흡혈 → Soul Harvest 처치 → Soul 획득 → 미니언 소환 → 탱킹 보조. "서서히 약화시키며 자원 회수" 사이클.
+### 시체의 4개 기본 스킬 (전투 시작 시)
+| 슬롯 | 기본 스킬 | 효과 |
+|------|---------|------|
+| 1 | **Scratch** | 단일 4 기본 공격 |
+| 2 | **Poison Bite** | 단일 3 + Poison 2턴 |
+| 3 | **Bone Toss** | 단일 4 + Bleed 2턴 |
+| 4 | **Stun Strike** | 단일 2 + Stun 1턴 (저확률) |
 
-## 6. 스킬 4종 (4개 다른 조건)
+### 스킬 교체 예시 (Soul Echo)
+```
+전투 1 시작: 시체 = Scratch / Poison Bite / Bone Toss / Stun Strike
+  ↓ Goblin 처치 → Discover Modal: Goblin_Scratch / Bite / Steal / Hide 중 1개 선택
+  ↓ Goblin_Bite 선택 → 시체 슬롯 2 (Poison Bite)와 교체
+전투 1 진행: 시체 = Scratch / Goblin_Bite / Bone Toss / Stun Strike
+  ↓ Slime 처치 → Slime_AcidSpit 등 선택 → 슬롯 1 교체
+전투 1 종료: 시체 = Slime_AcidSpit / Goblin_Bite / Bone Toss / Stun Strike
 
-| 스킬 | AP | 기본 효과 | 조건 | 조건 충족 보너스 |
-|-----|----|---------|------|----------------|
-| **Curse of Frailty** | 1 | 단일 AtkDown (2턴) | (셋업 — 조건 없음) | Curse 부여 |
-| **Decay** | 1 | 단일 4 + Poison 3턴 | (셋업-소비 — Curse 선행 권장) | 도트 부여 |
-| **Life Drain** | 2 | 단일 10 + 흡혈 50% | 대상 디버프 상태 | 흡혈량 2배 (100%) |
-| **Soul Harvest** | 3 | 단일 12 + 영혼 비례 | 적 처치 시 | AP 2 환급 + Soul +1 |
+전투 2 시작: 다시 기본 4스킬로 리셋
+```
 
-> **Raise Dead**: 별도 스킬이 아닌 **Soul 1 소비 패시브 액션**으로 변경. 스킬 슬롯 4개 유지.
+### 자원 없음 (시체 자체가 메카닉)
+- 명시적 자원 대신 **"시체의 현재 스킬 풀"** 자체가 자원
+- UI: 시체 스킬 4개 패널 표시 (ResourceBadge 대신)
+- 강화 상태 (Empower Stack)는 별도 추적 — Necromancer 본인의 버프 형태
+
+### 기존 11종 자원과의 차별화 ⭐
+| 자원 | 본질 |
+|------|------|
+| Ember/Vengeance/Shadows/Combo | 개인 행동 |
+| Prophecy/Charge/Frost | 시간/공간/자원 축 |
+| Mercy/Melody | 파티 중심 |
+| Alchemist | 발견 (선택 기반) |
+| **Necromancer** | **"동적 스킬 풀 + 자동 전투" (적 처치로 시체 성장)** ⭐ |
+
+→ 완전히 새로운 축. **"시체의 스킬 풀"** 자체가 자원
+
+## 6. Necromancer 본인 스킬 4종 (시체 강화 마법)
+
+| 스킬 | AP | 효과 | 조건 |
+|------|----|------|------|
+| **Empower Undead** (강령술 강화) | 1 | 시체 다음 스킬 위력 +5 (1회 버프) | 셋업 |
+| **Soul Link** (영혼 결속) | 2 | 2턴 동안 시체가 준 데미지 50%를 Necromancer HP 회복 | 자원 효율 |
+| **Curse of Weakness** (약화 저주) | 2 | 단일 적 ATK-3 + DEF-3 (2턴) → 시체 처치 유도 | 대상 상태 |
+| **Mass Empower** (대량 강화) | 3 | 시체 4스킬 전부 위력 +3 (이번 전투 영구) | 자원 임계 |
 
 ### 조건 다양성 검증 (4.5 원칙 2)
-- Curse of Frailty → 셋업 (조건 없음)
-- Decay → 셋업-소비 (Curse 선행 권장, 강제 아님)
-- Life Drain → **대상 상태** (디버프)
-- Soul Harvest → **이벤트** (적 처치)
+- Empower Undead → 셋업 (조건 없음)
+- Soul Link → 자원 효율 (지속 효과)
+- Curse of Weakness → 대상 상태 (적 약화)
+- Mass Empower → 자원 임계 (AP 3 고비용)
 
-→ 4개 모두 다른 조건. ✅
+→ 4개 모두 다른 목적. 매 턴 다른 퍼즐. ✅
 
 ### 기존 스킬 매핑
 | 기존 | 신규 | 변경 |
 |------|------|------|
-| Necro_Curse (AtkDown, AP1) | Curse of Frailty | 유지, 이름만 변경 |
-| Necro_Decay (4, AP1, Poison) | Decay | 유지 |
-| Necro_LifeDrain (10, AP2) | Life Drain | 디버프 조건부 흡혈 2배 추가 |
-| Necro_RaiseDead (광역 7, AP3) | Soul Harvest | 광역 공격 → 단일 처치 + 자원 회수 |
+| Necro_LifeDrain (10, AP2) | Soul Link | 흡혈 → 시체 딜의 50% 회복 (간접 흡혈) |
+| Necro_Curse (AtkDown, AP1) | Curse of Weakness | AtkDown → AtkDown+DefDown 이중 약화 |
+| Necro_Decay (4+Poison, AP1) | Empower Undead | 도트 → 시체 강화 (역할 정규화) |
+| Necro_RaiseDead (광역 7, AP3) | Mass Empower | 광역 공격 → 시체 대량 강화 |
 
-> Raise Dead(광역) → Soul Harvest(단일 처치). 소환은 패시브로 이관.
+## 7. BehaviorTag / 시스템 설계
 
-## 7. BehaviorTag 활용
+### 신규 인프라 필요
+1. **CorpseComponent** (`Characters/Components/`)
+   - `SkillData[] CorpseSkillSlots` (4 슬롯)
+   - `bool IsActive` — Necromancer 생존 시 true
+   - `int EmpowerBonus` — 강화 위력 가산 (일시적/영구)
+   - 매 턴 종료 후 무작위 슬롯 스킬 시전 메서드
+2. **CorpseSkillExecutor** (서비스)
+   - 시체 자동 행동 — TurnManager가 매 턴 종료 후 호출
+   - SkillExecutor.ExecuteSkillInternal 재사용 (시체가 caster)
+3. **DiscoverModalUI 재사용** (Alchemist와 공유)
+   - 적 처치 시: 처치한 적의 스킬 4개 표시 → 플레이어 1개 선택
+   - 시체 슬롯 4개 중 어느 것 교체할지 선택 (또는 자동)
+4. **SkillData 확장**
+   - `isCorpseSkill: bool` 플래그 (시체 기본 스킬 식별)
+   - `sourceEnemyId: string` (어떤 적에게서 빼앗은 스킬인지 추적)
+5. **TurnManager 확장**
+   - 매 턴 종료 후 `CorpseComponent.ExecuteRandomSkill()` 호출
+   - Necromancer 사망 감지 → 시체 비활성화
 
-| BehaviorTag | 적용 스킬 | 효과 | 백로그 번호 |
-|------------|----------|------|-----------|
-| `Bounty` | Soul Harvest | 킬 시 AP 2 환급 + Soul +1 | 컨셉 21 (구현 필요) |
-| `Wound` | Life Drain | 다칠수록 약화 (의도적 약점) | 컨셉 12 (이미 구현됨) |
-| `Lifesteal` | Life Drain | 흡혈 (기존 24종) | 이미 구현됨 |
-| `GiantSlayer` (후보) | Soul Harvest | 적 MaxHP 100+ 보너스 | 컨셉 15 (이미 구현됨) |
+### 기존 BehaviorTag 활용
+- Lifesteal Behavior (Soul Link 회복 처리)
+- 각 시체 스킬은 기존 SkillData 구조 그대로 (Scratch=Attack, Poison Bite=Attack+Poison 등)
 
 ## 8. 장착 특성 3종 리워크
 
 | 특성 | 기존 효과 | 리워크 효과 | 해금 |
 |------|---------|------------|------|
-| **생명력 흡수** (기본) | 준 데미지 15% 회복 | **영혼 1개당 흡혈 +5%** (영혼 스케일, 최대 30%) | 기본 |
-| **저주의 대가** | 버프/디버프 ×1.3 | **Curse 2스택 적 AtkDown+DefDown 동시** (이중 저주) | 30 조각 |
-| **죽음의 수확** | 킬당 ATK +1 누적 | **미니언 사망 시 Soul +1** (소환-희생 루프 강화) | 60 조각 + 1 영혼 |
+| **생명력 흡수** (기본) | 준 데미지 15% 회복 | **Soul Link 회복 50% → 75%** (강화 흡혈) | 기본 |
+| **저주의 대가** | 버프/디버프 ×1.3 | **Curse of Weakness 적이 받는 추가 데미지 +3** (시체 처치 가속) | 30 조각 |
+| **죽음의 수확** | 킬당 ATK +1 누적 | **적 처치 시 시체 스킬 교체 + 영구 강화 +2** (시체 스노우볼) | 60 조각 + 1 영혼 |
 
-## 9. 밸런스 시나리오 (엘리트전 예시)
+### 특성 키워드 매핑 (신규)
+| 특성 | KeywordType | Trigger | Value |
+|------|------------|---------|-------|
+| 생명력 흡수 | **`SoulLinkMul`** (신규) | Passive | 0.75 (회복 배율) |
+| 저주의 대가 | **`CurseExtraDamage`** (신규) | Passive | 3 (추가 데미지) |
+| 죽음의 수확 | **`CorpseKillEmpower`** (신규) | Passive | 2 (처치 시 강화 +) |
+
+## 9. 밸런스 시나리오 (다수전 5턴 — Mortis + 시체)
 
 ```
-턴 1: Curse of Frailty → 적 AtkDown. 영혼 0
-턴 2: Decay → 4 데미지 + Poison 3턴. 영혼 0
-턴 3: Life Drain (디버프 적) → 10 데미지 + 흡혈 10 (2배). 영혼 0
-턴 4: Life Drain → 10 + 흡혈 10. 적 HP 20% 도달
-턴 5: Soul Harvest → 12 데미지 + 킬 → AP 2 환급 + Soul 1
-턴 6: Raise Dead (Soul 1 소비) → 미니언 소환. 적 공격 미니언 대신 맞음
-턴 7: 미니언 사망 → Soul +1 (특성). 다시 소환 가능
+전투 시작: 시체 소환 (Scratch/Poison Bite/Bone Toss/Stun Strike)
+턴 1: Empower Undead → 시체 다음 스킬 위력 +5
+       플레이어 종료 → 시체 무작위 스킬 (Poison Bite +5 = 위력 8) → 적 A에게 8 데미지 + Poison
+턴 2: Curse of Weakness (적 A) → ATK-3, DEF-3
+       시체 Bone Toss → 적 A에게 4 + Bleed (DEF-3로 인해 추가 데미지)
+       → 적 A 사망 → Discover Modal: Goblin_Scratch/Bite/Steal/Hide → Goblin_Bite 선택
+       → 시체 슬롯 2 (Poison Bite)를 Goblin_Bite로 교체
+턴 3: Soul Link → 시체 딜 50% 회복 설정
+       시체 Goblin_Bite → 적 B에게 강한 데미지 → Mortis 회복
+턴 4: Mass Empower → 시체 4스킬 전부 위력 +3 (이번 전투 영구)
+       시체 Scratch (위력 4+3=7) → 적 B 처치 → 또 스킬 교체
+턴 5: 시체 강화 스킬들로 적 잔당 정리
 ```
+
+**비교 — Necromancer 단독 딜 vs 시체 포함**:
+```
+Necromancer 본인 딜: Empower/Curse/Soul Link/Mass Empower (딜 0)
+시체 자동 딜: 매 턴 4-8 데미지 × 5턴 = 20-40
+시체 스노우볼: 적 처치로 강한 스킬 획득 → 후반 폭발
+```
+
+→ Necromancer는 "간접 딜러" — 본인은 버프만, 시체가 실제 딜
 
 ## 10. 파티 시너지
 
 | 조합 | 시너지 | 핵심 |
 |------|-------|------|
-| **Necro + Alchemist** | ★★★ | 이중 도트 (Poison). Soul Harvest + Alch Mega Bomb 연쇄 |
-| **Necro + Rogue** | ★★★ | Rogue 도트 적 → Necro Life Drain 2배 흡혈. 콤보+영혼 루프 |
-| **Necro + Ashe** | ★★ | Ashe Burn + Necro Poison = 다중 도트. Soul Harvest 가속 |
-| **Necro + Lumi** | ★★ | Freeze로 적 묶기 → Necro 도트 누적 시간 확보 |
-| **Necro + Healer** | ★★ | 미니언 + Healer Holy Shield 조합. 파티 탱킹 극대화 |
+| **Mortis + Cael (Alchemist)** | ★★★ | Cael이 Discover UI 인프라 공유. UI 작업 중복 제거 |
+| **Mortis + Ashe** | ★★★ | Ashe Burn + 시체 Poison = 다중 도트. Soul Link로 Ashe 자해 회복 |
+| **Mortis + Umbra** | ★★ | Umbra 도트 + 시체 도트 → 적 약화 극대화 |
+| **Mortis + Lumi** | ★★ | Lumi Freeze로 적 묶기 → 시체가 안전하게 도트 부여 |
+| **Mortis + Elara** | ★★ | Elara Mercy 자동 힐 + 시체 자동 딜 = 완전 자동화 파티 |
+| **Mortis + Calliope** | ★★ | Calliope Anthem ATK+ → 시체 딜 강화 |
 
-## 11. 🔴 결정 대기 항목
+## 11. ✅ 결정 항목 (2026-07-17 확정)
 
-- [ ] **이름 확정** (Mortis 추천)
-- [ ] **미니언 시스템 구현 범위** (풀 버전 vs 단순화된 "대신 맞기" 버프)
-- [ ] **Soul 자원 캡** (3 vs 5) — 캡이 높으면 스노우볼, 낮으면 평범
-- [ ] **Soul Harvest 영혼 비례 위력** (영혼×N, N값)
-- [ ] **Life Drain 흡혈 2배 조건** (디버프 여부) — 기본이 50%인데 2배면 100%
-- [ ] **미니언 HP/공격력** (15 / 0 vs 조정) — 공격 못하면 단순 탱크
-- [ ] **미니언 지속 시간** (1턴 vs 2턴) — 1턴이면 매 턴 소환 필요
-- [ ] **Raise Dead 패시브 액션 UX** — 버튼 클릭 vs 자동 발동
-- [ ] **Wound를 Life Drain에 적용** 여부 (의도적 약점 부여)
-- [ ] **기존 RaiseDead(광역 7) 폐지** 영향 — 세이브 호환
+- [x] **이름**: Mortis (라틴 "죽음")
+- [x] **자원**: 없음 (시체 자체가 메카닉)
+- [x] **시체 수**: 1체
+- [x] **시체 HP**: 없음 (적의 대상 안 됨)
+- [x] **시체 사망**: Necromancer 사망 시 동반 사망
+- [x] **시체 행동**: 매 턴 플레이어 종료 후, 4스킬 중 무작위 1개 자동 시전
+- [x] **스킬 교체**: 적 처치 시 Discover UI (Alchemist 재사용)로 선택
+- [x] **리셋**: 전투 종료 시 시체 사라지고 다음 전투 기본 4스킬로 재소환
+- [x] **Necromancer 스킬 4종**: Empower / Soul Link / Curse / Mass Empower (시체 강화)
+- [x] **시체 기본 스킬 4종**: Scratch / Poison Bite / Bone Toss / Stun Strike
 
 ## 12. 리스크와 검증
 
 | 리스크 | 완화 |
-|-------|------|
-| 미니언 소환 시스템 인프라 복잡 (별도 클래스) | CC-2C를 마지막으로 배치. "대신 맞기" 버프로 단순화 옵션 |
-| Soul 3 캡 + 미니언 사망 Soul = 무한 소환 루프 | 미니언 사망 Soul 획득은 특성(60 조각)만. 기본은 미획득 |
-| Life Drain 흡혈 100% = 사기적 생존 | 디버프 조건 강제. 디버프 없는 적에겐 50% |
-| Soul Harvest AP 2 환급 = 연쇄 킬 | 킬 실패 시 보너스 0. 단일 처치에만 가치 |
-| 빈사 적(HP 5%)에게 Soul Harvest 낭비 | Cull(Rupture)과 달리 임계값 처치가 아닌 "킬 이벤트" — 빈사 적에게도 가치 |
-| 도트 디버프 없는 파티(Ashe/Rogue/Alch 없음)에서 디버프 조건 충족 어려움 | Curse of Frailty로 자체 디버프 부여 가능 |
+|-------|-------|
+| 시체 자동 행동이 매 턴 전투 흐름 느림 | 빠른 애니메이션 + 2x 속도 모드 지원 |
+| 시체 스킬이 랜덤이라 전략 어려움 | Empower/Mass Empower로 강화. 교체로 커스터마이징 |
+| Discover UI 두 번 (Alch + Necro) 인프라 공유 필요 | Phase CC-2E-1 인프라 먼저 구축 → Necromancer는 재사용 |
+| 시체 너무 강하면 매 턴 무료 딜 사기 | Necromancer 본인 딜 0으로 밸런스. AP는 강화 스킬에 사용 |
+| 시체가 처치 못 하면 스킬 교체 안 됨 | Curse of Weakness로 적 약화 유도. 기본 4스킬로도 충분 |
+| 보스전 단일 적에서 스킬 교체 1회로 끝 | 다수전 강점 명확화. 보스전은 기본 4스킬 + Mass Empower로 |
+| CC-0 부활 시 시체 리셋 = 페널티 | 부활 후 Raise Corpse 패시브로 자동 재소환 (기본 4스킬). 영구 강화는 손실 |
+| Necromancer 사망 시 시체도 사망 → 부활 시 다시 기본 | CC-0 부활 페널티와 일관. 의도적 약점 |
 
-## 13. 구현 메모
+## 13. 구현 메모 (코드 구현 시 — 별도 Phase CC-2F)
 
-- `CharacterResourceComponent` 서브클래스: `SoulResourceComponent`
-- `OnCharacterDied` 이벤트 훅에서 도트 데미지로 인한 킬 시 Soul +1
-- 미니언 시스템: `MinionCharacter` 신규 클래스 (Character 서브클래스) — 가장 복잡
-  - 또는 "대신 맞기" 상태이상(ForcedTarget+ShieldPrep 변형)으로 단순화 가능
-- BehaviorTag: Bounty 구현 (Rogue와 공유, 15줄)
-- Soul 자원 비례: ResourcePowerPerStack 필드 활용 (Ashe와 동일 패턴)
+### ★ 구현 복잡도: Alchemist(CC-2E) 이후 진행 권장 (Discover UI 인프라 공유)
+
+### 신규 인프라 필요
+1. **CorpseComponent** (`Characters/Components/`)
+   - `SkillData[] CorpseSkillSlots` (4 슬롯, 기본 스킬로 초기화)
+   - `bool IsActive` — Necromancer 생존 시 true, 사망 시 false
+   - `int EmpowerBonusNext` (다음 스킬 위력 가산)
+   - `int MassEmpowerBonus` (영구 가산)
+   - 매 턴 ExecuteRandomSkill(corpse, enemies) 호출
+2. **TurnManager 확장**
+   - 매 턴 플레이어 종료 후 시체 자동 행동 호출
+   - Necromancer 사망 감지 → CorpseComponent.IsActive = false
+3. **CombatEventBus.OnKill 확장** — 적 처치 시 Discover Modal 호출
+4. **DiscoverModalUI 재사용** (CC-2E에서 구축)
+   - 적 스킬 4개 표시 → 선택 → 시체 슬롯 교체 (슬롯 선택 모달 추가)
+5. **SkillData 확장**
+   - `isCorpseSkill: bool` / `sourceEnemyId: string`
+6. **Character.CreateResource** — Necromancer은 자원 없음 (Resource=null). 대신 `InitializeCorpse()` 호출
+7. **KeywordType 3종 신규**: SoulLinkMul / CurseExtraDamage / CorpseKillEmpower
+
+### 기존 코드 수정
+- `DataGenerator.PhaseCC.cs` — Mortis 스킬 4종 + Char_Necromancer 재생성. **시체 기본 스킬 4종 .asset 별도 생성**
+- `DataGenerator.Traits.cs` — Necromancer 특성 3종 리워크
+- `BattleDisplayUtil.cs` — 시체 스킬 패널 표시 (UI 별도)
+- CSV: Char_Necromancer 행 + Necro_* 4행 제거
+
+### 구현 난이도 추정
+- CorpseComponent + 자동 행동: 중상 (~120줄)
+- TurnManager 시체 턴 통합: 중 (~50줄)
+- Discover Modal 스킬 교체 (Alchemist UI 재사용 + 슬롯 선택): 중 (~80줄)
+- 시체 스킬 4종 .asset: 낮음
+- 특성 키워드 3종: 낮음 (~30줄)
+- DataGenerator/UI: 낮음 (~50줄)
+- **총합**: 약 330줄 + 8 스킬 .asset (본인 4 + 시체 4)
+- Alchemist(CC-2E) 인프라 선구축 시 복잡도 감소
+
+### 별도 Phase 진행 권장
+- **Phase CC-2F-1**: 인프라 (CorpseComponent + TurnManager 통합)
+- **Phase CC-2F-2**: Mortis 스킬 4종 + 시체 기본 스킬 4종 + 특성 3종
+- **Phase CC-2F-3**: Discover Modal 스킬 교체 (CC-2E-1 이후)
+- **Phase CC-2F-4**: 테스트 + Play 모드 검증
+
+### 권장 진행 순서
+1. **CC-2E (Alchemist)** — Discover UI 인프라 구축
+2. **CC-2F (Necromancer)** — CC-2E의 Discover UI 재사용
+
+### 테스트 계획 (PhaseCC2FTests.cs 신규)
+1. CorpseComponent: 기본 4스킬 초기화, 자동 행동
+2. 시체 자동 시전: 매 턴 종료 후 무작위 스킬
+3. Necromancer 사망 → 시체 비활성화
+4. 적 처치 → Discover Modal → 스킬 교체
+5. Empower Undead: 다음 스킬 위력 +
+6. Mass Empower: 영구 가산
+7. Soul Link: 시체 딜 → Necromancer 회복
+
+---
+
+## 변경 이력
+
+| 날짜 | 변경 |
+|------|------|
+| 2026-07-14 | 최초 작성 (Soul + 미니언 시스템 컨셉, 🔴 초안) |
+| 2026-07-17 | **Summoned Corpse (동적 스킬 풀) 컨셉으로 전면 재작성** (사용자 제안). 시체 HP 없음 + Necromancer 사망 시 동반 사망. Discover UI로 스킬 교체. 🟢 확정. 단 구현은 별도 Phase CC-2F 권장 (CC-2E 인프라 공유) |

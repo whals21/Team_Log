@@ -86,6 +86,21 @@ namespace TeamLog.Skill
         // ── Phase CC-2A: Umbra 리워크 ──
         StrongVsDebuff,  // Umbra Backstab — 대상 도트 디버프(Poison/Burn/Bleed/Freeze/Stun) 시 위력 ×2 (PowerModify)
 
+        // ── Phase CC-2B: Aster 리워크 ──
+        ComboMultiHit,   // Aster Multi-Shot — caster의 Combo 스택수만큼 추가 타격 (1 소모당 +1). ApplyMain Phase.
+        ComboFinisher,   // Aster Execute Shot — 킬 시 caster.Resource.AddStacks(3) (Combo 복구). OnKill Phase.
+
+        // ── Phase CC-2C: Elara 리워크 ──
+        MercyAccumulate, // Elara Mend Wounds/Sanctuary — 시전자 Mercy +N (힐량 기반). PostApply Phase.
+        MercyConsume,    // Elara Blessing of Mercy/Sanctuary — Mercy N 소모, 부족 시 스킬 실패. PowerModify Phase.
+        BondLinkBoost,   // Elara Bond Link — 대상에게 BondBoost 상태 부여 (자동 힐 3→6). ApplyMain Phase.
+
+        // ── Phase CC-2D: Calliope 리워크 ──
+        MelodyHealing,     // Calliope Mending Song — CurrentMelody=Healing 설정. ApplyMain Phase.
+        MelodyValor,       // Calliope Anthem of Valor — CurrentMelody=Valor 설정. ApplyMain Phase.
+        MelodyDissonance,  // Calliope Dissonant Chord — CurrentMelody=Dissonance 설정. ApplyMain Phase.
+        MelodyInspiration, // Calliope Inspiring Refrain — CurrentMelody=Inspiration 설정. ApplyMain Phase.
+
         // ── 통합 파이프라인 검증용 (2026-07-02) — Pipeline 수정 0줄로 추가 가능한지 증명 ──
         CleanseLowTarget,         // Phoenix Renewal용 — 대상 HP 50%- 시 Burn/Poison 정화 (PostApply)
         ResourceThresholdShield,  // Duran Shield Wall용 — 자원 ≥ rank 시 쉴드 +N (ApplyMain)

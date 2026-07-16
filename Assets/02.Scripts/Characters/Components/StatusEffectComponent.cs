@@ -117,6 +117,8 @@ namespace TeamLog.Characters
         ForcedTarget,   // Duran — 단일 적이 지정 캐릭터만 공격 강제 (effectValue = 타겟 ID)
         Prophecy,       // Sibyl — 1턴 뒤 발동 예약 (value = 예약된 스킬 효과 식별자)
         Charge,         // Taranis — 전하 상태 (stacks = 전하 스택 수, 매 턴 연쇄)
+        Mark,           // Aster — 사냥표식 (Archer 본인이 Mark 적 공격 시 +위력, Phase CC-2B)
+        BondBoost,      // Elara — Bond Link 강화 대상 (매 턴 자동 힐 3→6, Phase CC-2C)
     }
 
     public class ActiveEffect

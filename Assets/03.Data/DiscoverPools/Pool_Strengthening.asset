@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a910996bfd59a164a9ab3170d1ed01f5, type: 3}
+  m_Name: Pool_Strengthening
+  m_EditorClassIdentifier: 
+  _poolName: "\uAC15\uD654 \uBB3C\uC57D \uD480"
+  _category: 2
+  _description: "\uBC84\uD504 \uC601\uC5ED \u2014 \uD604\uC7AC \uBD80\uC871\uD55C
+    \uC2A4\uD0EF \uBCF4\uCDA9"
+  _entries:
+  - Skill: {fileID: 11400000, guid: b1b422e43b9cebd4583f37f76c1c3d12, type: 2}
+    Weight: 25
+  - Skill: {fileID: 11400000, guid: d3d078c8bb98ae9469a14c08179f10fb, type: 2}
+    Weight: 20
+  - Skill: {fileID: 11400000, guid: ed2ee848abeaaa24b886aeacc669845a, type: 2}
+    Weight: 20
+  - Skill: {fileID: 11400000, guid: 05d20c360ed9bf246bebcef4675c8133, type: 2}
+    Weight: 15
+  - Skill: {fileID: 11400000, guid: a41ae06f8c5c316449e2f644f3756273, type: 2}
+    Weight: 10
+  - Skill: {fileID: 11400000, guid: ef45b38775f7e634f9e43e3085c45a4a, type: 2}
+    Weight: 10

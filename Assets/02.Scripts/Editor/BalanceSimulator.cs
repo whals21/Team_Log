@@ -53,8 +53,9 @@ namespace TeamLog.Editor
         private static List<EventData> _eventPool;
         private static Dictionary<CharacterClass, CharacterTraitData> _defaultTraits;
 
-        // 기본 파티 클래스 — Char_Warrior, Char_Mage, Char_Healer, Char_Umbra (Phase CC-2A: Rogue→Umbra)
-        private static readonly string[] DefaultPartyIds = { "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Umbra" };
+        // 기본 파티 — Phase CC-2A 가비지 컬렉션 이후 신규 캐릭터 기반
+        // (Warrior→Duran, Mage→Ashe 분할 대체, Umbra는 Rogue 슬롯 계승)
+        private static readonly string[] DefaultPartyIds = { "Char_Duran", "Char_Ashe", "Char_Healer", "Char_Umbra" };
 
         // 층별 대표 보스 에셋 파일명 — Phase B: 보스 12종 교체.
         // 각 층마다 3종 후보 중 시뮬레이터는 가장 강한 대표 보스 1종 사용.

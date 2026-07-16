@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: healer_pure_heal
   _displayName: "\uC21C\uC218 \uCE58\uC720"
-  _description: "\uC801 \uCC98\uCE58 \uC2DC HP +3 \uD68C\uBCF5"
+  _description: "Mend Wounds \uC815\uD654 \uC2DC Mercy +3 \uCD94\uAC00 \uCD95\uC804"
   _targetClass: 2
   _keywords:
-  - Type: 16
+  - Type: 29
     Value: 3
-    Trigger: 6
+    Trigger: 0
     ConditionParam: 0
   _isDefault: 0
   _unlockCost: 30

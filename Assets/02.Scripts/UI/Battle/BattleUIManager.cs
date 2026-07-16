@@ -38,11 +38,16 @@ namespace TeamLog.UI.Battle
         [Header("Character Popup")]
         [SerializeField] private CharacterPopupUI _characterPopup;
 
+        [Header("Discover Modal (Phase CC-2E — Cael)")]
+        [SerializeField] private DiscoverModalUI _discoverModal;
+
         private TurnManager _turnManager;
         private List<PlayerSidebarPanel> _playerPanels = new List<PlayerSidebarPanel>();
         private List<EnemyDetailPanel> _enemyPanels = new List<EnemyDetailPanel>();
         private List<Character> _playerParty;
         private List<Character> _enemies;
+        // Phase CC-2F: Necromancer별 시체 슬롯 패널 (Mortis 패널 위쪽에 배치)
+        private readonly Dictionary<Character, CorpseSlotPanel> _corpsePanels = new();
 
         public void Initialize(TurnManager turnManager, List<Character> playerParty, List<Character> enemies,
             BattleSceneSetup battleSetup = null)
@@ -55,6 +60,10 @@ namespace TeamLog.UI.Battle
             _turnManager.OnTurnStarted += OnTurnStarted;
             _turnManager.OnAPChanged += OnAPChanged;
 
+            // Phase CC-2F: 시체 자동 행동/스킬 교체 알림 구독
+            _turnManager.OnCorpseAction += OnCorpseActionPerformed;
+            _turnManager.OnCorpseSkillSwapped += OnCorpseSkillSwappedPerformed;
+
             CreatePlayerPanels();
             CreateEnemyPanels();
 
@@ -65,11 +74,59 @@ namespace TeamLog.UI.Battle
             AddLog("전투가 시작되었습니다.");
         }
 
+        // ── Phase CC-2F: 시체 UI 피드백 ──
+
+        private void OnCorpseActionPerformed(Character necromancer, int slotIdx, TeamLog.Characters.SkillData skill,
+            Character target, int damageDealt, int soulLinkHeal)
+        {
+            if (skill == null) return;
+            string targetName = target != null ? target.Name : "?";
+            AddLog($"💀 [{necromancer.Name}의 시체] {skill.SkillName} → {targetName}" +
+                (damageDealt > 0 ? $" ({damageDealt} 데미지)" : "") +
+                (soulLinkHeal > 0 ? $" +{soulLinkHeal} 회복(영혼결속)" : ""),
+                LogEntryType.Damage);
+
+            // 시체 행동 시각 효과 — Necromancer 패널의 시체 슬롯 하이라이트
+            FlashPanelForCharacter(necromancer);
+            HighlightCorpseSlot(necromancer, slotIdx);
+        }
+
+        private void OnCorpseSkillSwappedPerformed(Character necromancer, int slotIdx,
+            TeamLog.Characters.SkillData oldSkill, TeamLog.Characters.SkillData newSkill)
+        {
+            if (newSkill == null) return;
+            AddLog($"💀 [{necromancer.Name}의 시체] 슬롯 {slotIdx + 1}: " +
+                $"{(oldSkill != null ? oldSkill.SkillName : "?")} → {newSkill.SkillName} 습득",
+                LogEntryType.System);
+            FlashPanelForCharacter(necromancer);
+            RefreshCorpsePanel(necromancer);
+        }
+
+        /// <summary>Necromancer 시체 슬롯 패널 갱신.</summary>
+        private void RefreshCorpsePanel(Character necromancer)
+        {
+            if (_corpsePanels.TryGetValue(necromancer, out var panel) && panel != null)
+                panel.Refresh();
+        }
+
+        /// <summary>Necromancer 시체 슬롯 패널의 지정 슬롯을 잠깐 강조.</summary>
+        private void HighlightCorpseSlot(Character necromancer, int slotIdx)
+        {
+            if (_corpsePanels.TryGetValue(necromancer, out var panel) && panel != null)
+                panel.HighlightSlot(slotIdx);
+        }
+
         #region Panel Creation
 
         private void CreatePlayerPanels()
         {
             ClearPanels(_playerPanels);
+            // Phase CC-2F: 기존 시체 패널 모두 제거
+            foreach (var kvp in _corpsePanels)
+            {
+                if (kvp.Value != null) Destroy(kvp.Value.gameObject);
+            }
+            _corpsePanels.Clear();
 
             // APArea는 RightColumn에 있으므로 PlayerStrip 정리 시 보호 불필요
             UIAnimationHelper.ClearContainerChildren(_playerPanelContainer);
@@ -86,7 +143,60 @@ namespace TeamLog.UI.Battle
                 panel.UpdateHP(character.Health.CurrentHP, character.Health.MaxHP);
                 panel.OnPanelClicked += OnPlayerPanelClicked;
                 _playerPanels.Add(panel);
+
+                // Phase CC-2F: Necromancer — 시체 패널을 Mortis 패널 위쪽에 별도 배치
+                if (character.Corpse != null)
+                {
+                    CreateCorpseSlotPanelForNecromancer(character, panel);
+                }
             }
+        }
+
+        /// <summary>
+        /// Phase CC-2F: Mortis 패널을 VBox로 감싸고 그 위쪽에 시체 슬롯 패널 배치.
+        /// 구조: PlayerStrip > NecromancerSlot(VBox) > [CorpseSlotPanel, MortisPanel]
+        /// </summary>
+        private void CreateCorpseSlotPanelForNecromancer(Character necromancer, PlayerSidebarPanel mortisPanel)
+        {
+            // Mortis 패널의 너비 추정 (LayoutElement 우선, 없으면 180)
+            float panelWidth = 180f;
+            var le = mortisPanel.GetComponent<LayoutElement>();
+            if (le != null && le.preferredWidth > 0) panelWidth = le.preferredWidth;
+
+            // VBox 부모 생성 — PlayerStrip 자식으로, Mortis 패널 sibling index 차지
+            var vboxGO = new GameObject($"NecromancerSlot_{necromancer.Name}",
+                typeof(RectTransform), typeof(VerticalLayoutGroup));
+            var vboxRect = vboxGO.GetComponent<RectTransform>();
+            vboxRect.SetParent(_playerPanelContainer, false);
+
+            // Mortis 패널이 이미 _playerPanelContainer 자식으로 들어간 상태에서
+            // sibling index를 Mortis 자리로 설정
+            int mortisSibling = mortisPanel.transform.GetSiblingIndex();
+            vboxRect.SetSiblingIndex(mortisSibling);
+
+            // VBox 설정 — 자식들을 위에서부터 세로 배치
+            var vlg = vboxGO.GetComponent<VerticalLayoutGroup>();
+            vlg.spacing = 4;
+            vlg.padding = new RectOffset(0, 0, 0, 0);
+            vlg.childAlignment = TextAnchor.LowerCenter;
+            vlg.childControlWidth = false;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = false;
+            vlg.childForceExpandHeight = false;
+
+            // VBox LayoutElement — Mortis 패널과 동일 너비
+            var vboxLe = vboxGO.AddComponent<LayoutElement>();
+            vboxLe.preferredWidth = panelWidth;
+            vboxLe.flexibleWidth = le != null ? le.flexibleWidth : 0;
+
+            // Mortis 패널을 VBox 자식으로 이동 (아래쪽)
+            mortisPanel.transform.SetParent(vboxRect, false);
+
+            // 시체 슬롯 패널 생성 (VBox 자식, Mortis 위쪽)
+            var corpsePanel = CorpseSlotPanel.Create(vboxRect, necromancer, panelWidth);
+            corpsePanel.transform.SetAsFirstSibling(); // 첫째 = 위쪽
+
+            _corpsePanels[necromancer] = corpsePanel;
         }
 
         private const int ENEMIES_PER_ROW = 5;
@@ -272,6 +382,26 @@ namespace TeamLog.UI.Battle
 
         public CharacterPopupUI CharacterPopup => _characterPopup;
 
+        /// <summary>
+        /// 발견 모달 — PlayerActionController가 Cael 발견 스킬 시전 시 사용.
+        /// 인스펙터 연결 누락 시 자동으로 자식에서 탐색 (Phase CC-2E 안전장치).
+        /// </summary>
+        public DiscoverModalUI DiscoverModal
+        {
+            get
+            {
+                if (_discoverModal != null) return _discoverModal;
+                // 인스펙터 할당 누락 — 자식 중 "DiscoverModal" 이름 GameObject에서 자동 탐색
+                var child = transform.Find("DiscoverModal");
+                if (child != null)
+                    _discoverModal = child.GetComponent<DiscoverModalUI>();
+                // 더 깊은 자식도 탐색 (구조 유연성)
+                if (_discoverModal == null)
+                    _discoverModal = GetComponentInChildren<DiscoverModalUI>(true);
+                return _discoverModal;
+            }
+        }
+
         public void HighlightEnemyPanels(bool highlight)
         {
             foreach (var panel in _enemyPanels)
@@ -420,6 +550,8 @@ namespace TeamLog.UI.Battle
                 _turnManager.OnPhaseChanged -= OnPhaseChanged;
                 _turnManager.OnTurnStarted -= OnTurnStarted;
                 _turnManager.OnAPChanged -= OnAPChanged;
+                _turnManager.OnCorpseAction -= OnCorpseActionPerformed;
+                _turnManager.OnCorpseSkillSwapped -= OnCorpseSkillSwappedPerformed;
             }
         }
     }

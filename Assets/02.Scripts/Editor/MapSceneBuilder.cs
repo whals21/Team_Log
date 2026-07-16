@@ -142,9 +142,9 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_ascensionLabel", ascensionLabel);
 
             // Phase 8F: All Characters 동적 바인딩 (TitleSceneSetup._allCharacters)
-            // Phase CC-2A: Char_Rogue 제거, Umbra가 Rogue 슬롯 계승
+            // Phase CC-2A 가비지 컬렉션: Char_Warrior/Char_Mage 제거 (Duran/Ashe/Lumi가 대체)
             string[] titleCharNames = {
-                "Char_Warrior", "Char_Mage", "Char_Healer",
+                "Char_Healer",
                 "Char_Archer", "Char_Necromancer", "Char_Alchemist", "Char_Bard",
                 "Char_Ashe", "Char_Duran", "Char_Lumi", "Char_Sibyl", "Char_Taranis",
                 "Char_Umbra"
@@ -307,11 +307,11 @@ namespace TeamLog.Editor
             WireProperty(setupSer, "_deckButton", deckBtn.GetComponent<Button>());
             WireProperty(setupSer, "_tutorialUI", tutorialOverlay.GetComponent<TutorialUI>());
 
-            // CharacterData
+            // CharacterData (Phase CC-2A GC: Warrior→Duran, Mage→Ashe 대체)
             WireProperty(setupSer, "_testWarriorData",
-                AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Warrior.asset"));
+                AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Duran.asset"));
             WireProperty(setupSer, "_testMageData",
-                AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Mage.asset"));
+                AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Ashe.asset"));
             WireProperty(setupSer, "_testHealerData",
                 AssetDatabase.LoadAssetAtPath<CharacterData>($"{CHAR_DIR}/Char_Healer.asset"));
             WireProperty(setupSer, "_testRogueData",
@@ -374,7 +374,7 @@ namespace TeamLog.Editor
             if (allCharProp != null)
             {
                 string[] charNames = {
-                    "Char_Warrior", "Char_Mage", "Char_Healer",
+                    "Char_Healer",
                     "Char_Archer", "Char_Necromancer", "Char_Alchemist", "Char_Bard",
                     // Phase CC 신규 5종
                     "Char_Ashe", "Char_Duran", "Char_Lumi", "Char_Sibyl", "Char_Taranis",

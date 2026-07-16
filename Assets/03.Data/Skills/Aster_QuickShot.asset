@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 359ccd898c414ec499c7b83b44f63fdd, type: 3}
+  m_Name: Aster_QuickShot
+  m_EditorClassIdentifier: 
+  _skillName: "\uBE60\uB978 \uC0AC\uACA9"
+  _description: 
+  _skillType: 0
+  _targetType: 0
+  _power: 4
+  _cost: 1
+  _weight: 50
+  _icon: {fileID: 0}
+  _statusEffect: 0
+  _effectDuration: 0
+  _effectValue: 0
+  _behaviors: []
+  _resourceGainType: 0
+  _resourceGainAmount: 0
+  _resourceCostType: 0
+  _resourceCostAmount: 0
+  _resourcePowerPerStack: 0
+  _consumeAllResource: 0
+  _minResourceRequired: 0
+  _shieldFlags: 0
+  _isDiscover: 0
+  _discoverPool: {fileID: 0}
+  _isCorpseSkill: 0
+  _sourceEnemyId: 
+  _corpseAction: 0
+  _corpseActionValue: 0

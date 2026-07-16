@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: healer_divine_shield
   _displayName: "\uC2E0\uC131 \uBC29\uD328"
-  _description: "\uD790 \uC801\uC6A9 \uC2DC \uC274\uB4DC +2 \uD68D\uB4DD"
+  _description: "Mercy \uBC84\uC2A4\uD2B8 \uB300\uC0C1 +1 (1\uBA85 \u2192 2\uBA85)"
   _targetClass: 2
   _keywords:
-  - Type: 11
+  - Type: 30
     Value: 2
-    Trigger: 7
+    Trigger: 0
     ConditionParam: 0
   _isDefault: 0
   _unlockCost: 60

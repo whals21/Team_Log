@@ -23,6 +23,9 @@ namespace TeamLog.Characters
         // Phase CC: 캐릭터 고유 자원 (Ashe=Ember, Duran=Vengeance 등). null이면 자원 없는 캐릭터.
         public CharacterResourceComponent Resource { get; private set; }
 
+        // Phase CC-2F: Mortis(Necromancer) 시체 컴포넌트. null이면 시체 없는 캐릭터.
+        public CorpseComponent Corpse { get; private set; }
+
         // Phase CC-2A: 치명타 시스템 (Umbra Shadows용 기반). 모든 캐릭터 기본 0%/1.5배.
         // CharacterResourceComponent가 런타임에 동적 갱신 가능 (Umbra의 ShadowsResourceComponent).
         public float CritChance { get; set; }
@@ -68,6 +71,30 @@ namespace TeamLog.Characters
 
             // Phase CC: CharacterData.ResourceType에 따라 고유 자원 컴포넌트 인스턴스화
             Resource = CreateResource(data.ResourceType);
+            // Phase CC-2C: Owner 설정 (MercyResourceComponent 등이 OnTurnStart 없이도 Owner 접근)
+            Resource?.InitializeOwner(this);
+
+            // Phase CC-2F: Necromancer 시체 컴포넌트 초기화 (corpseBaseSkills가 있으면)
+            InitializeCorpseFromData(data);
+        }
+
+        /// <summary>Phase CC-2F: CharacterData의 corpseBaseSkills가 있으면 시체 컴포넌트 생성.</summary>
+        private void InitializeCorpseFromData(CharacterData data)
+        {
+            var corpseSkills = data.CorpseBaseSkills;
+            if (corpseSkills == null || corpseSkills.Count < CorpseComponent.CORPSE_SLOT_COUNT) return;
+
+            var skills = new SkillData[CorpseComponent.CORPSE_SLOT_COUNT];
+            for (int i = 0; i < CorpseComponent.CORPSE_SLOT_COUNT && i < corpseSkills.Count; i++)
+                skills[i] = corpseSkills[i];
+            Corpse = new CorpseComponent(this, skills);
+
+            // Necromancer 사망 시 시체 자동 비활성화 (기획: "Necromancer 사망 = 시체도 사망")
+            Health.OnDeath += () =>
+            {
+                if (Corpse != null && Corpse.IsActive)
+                    Corpse.Deactivate();
+            };
         }
 
         /// <summary>Phase CC: 자원 종류에 따른 컴포넌트 생성. 각 캐릭터 Phase에서 케이스 추가.</summary>
@@ -80,6 +107,9 @@ namespace TeamLog.Characters
                 case ResourceType.Frost: return new FrostResourceComponent();
                 case ResourceType.Prophecy: return new ProphecyResourceComponent();
                 case ResourceType.Shadows: return new ShadowsResourceComponent(); // Phase CC-2A Umbra
+                case ResourceType.Combo: return new ComboResourceComponent(); // Phase CC-2B Aster
+                case ResourceType.Mercy: return new MercyResourceComponent(); // Phase CC-2C Elara
+                case ResourceType.Melody: return new MelodyResourceComponent(); // Phase CC-2D Calliope
                 // Charge는 각 캐릭터 Phase에서 추가 (현재 None 처리)
                 default: return null;
             }

@@ -1,11 +1,6 @@
 id,displayName,class,description,hp,atk,def,skills,trait,isDefault,unlockCondition
-Char_Warrior,전사,근접 전투 전문가. 높은 체력과 쉴드 생성 능력을 가집니다.,Warrior,120,0,0,Warrior_Strike;Warrior_Shield;Warrior_Taunt;Warrior_Rage,Sturdy,1,
-Char_Mage,마법사,원소 마법의 달인. 강력한 마법 공격을 사용합니다.,Mage,70,0,0,Mage_Fireball;Mage_IceSpear;Mage_MagicShield;Mage_Meteor,ArcaneFury,1,
-Char_Healer,힐러,치유와 보조 마법의 전문가. 파티의 생존을 돕습니다.,Healer,80,0,0,Healer_Heal;Healer_Barrier;Healer_Purify;Healer_Blessing,Regenerate,1,
-Char_Archer,궁수,원거리 공격의 달인. 빈틈을 노려 치명적인 일격을 가합니다.,Archer,65,0,0,Archer_PiercingArrow;Archer_RapidShot;Archer_Mark;Archer_CriticalShot,Opportunist,0,1층 보스 클리어
 Char_Necromancer,네크로맨서,생명력을 다루는 흑마법사. 약화와 도트 데미지에 특화되어 있습니다.,Necromancer,80,0,0,Necro_LifeDrain;Necro_Curse;Necro_Decay;Necro_RaiseDead,Corrosive,0,2층 보스 클리어
 Char_Alchemist,연금술사,다양한 물약을 제조하는 연금술사. 힐과 디버프를 겸비합니다.,Alchemist,85,0,0,Alch_HealPotion;Alch_PoisonBomb;Alch_BoostPotion;Alch_ShieldPotion,Shell,0,3층 보스 클리어
-Char_Bard,음유시인,노래로 전장을 지배하는 음유시인. 파티 버프와 AP 회복에 특화되어 있습니다.,Bard,75,0,0,Bard_BattleSong;Bard_WeakenMelody;Bard_CourageChord;Bard_Blessing,PhaseShift,0,총 승리 3회 달성
 Enemy_Slime,슬라임,끈적끈적한 젤리 형태의 몬스터.,Warrior,22,0,0,Slime_Tackle;Slime_AcidSpit;Slime_Split;Slime_Jiggle,Regenerate,1,
 Enemy_Goblin,고블린,교활하고 빠른 작은 몬스터.,Rogue,26,0,0,Goblin_Scratch;Goblin_Bite;Goblin_Steal;Goblin_Hide,Opportunist,1,
 Enemy_Wolf,늑대,날카로운 이빨을 가진 사나운 늑대.,Rogue,21,0,0,Wolf_Bite;Wolf_Howl;Wolf_Lunge;Wolf_Sniff,Counter,1,

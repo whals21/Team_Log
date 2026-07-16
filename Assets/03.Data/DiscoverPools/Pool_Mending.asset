@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a910996bfd59a164a9ab3170d1ed01f5, type: 3}
+  m_Name: Pool_Mending
+  m_EditorClassIdentifier: 
+  _poolName: "\uD68C\uBCF5 \uBB3C\uC57D \uD480"
+  _category: 1
+  _description: "\uD68C\uBCF5/\uC274\uB4DC/\uC815\uD654 \uC601\uC5ED \u2014 \uB300\uC0C1
+    \uC0C1\uD0DC\uC5D0 \uB530\uB77C \uC120\uD0DD"
+  _entries:
+  - Skill: {fileID: 11400000, guid: fd3981dabe045b24f8283d1590bb4cd5, type: 2}
+    Weight: 30
+  - Skill: {fileID: 11400000, guid: 3687e088c0624ed458092a7f672d9c94, type: 2}
+    Weight: 20
+  - Skill: {fileID: 11400000, guid: 4b559c498571bd54d96b5f617a5b0555, type: 2}
+    Weight: 20
+  - Skill: {fileID: 11400000, guid: aeb71f43109da9e41a44796104bbf731, type: 2}
+    Weight: 15
+  - Skill: {fileID: 11400000, guid: 0b400f5715ac7f74181851996bac9c62, type: 2}
+    Weight: 15

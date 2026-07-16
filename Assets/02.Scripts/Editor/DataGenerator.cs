@@ -33,6 +33,7 @@ namespace TeamLog.Editor
         private const string EVENT_PATH = "Assets/03.Data/Events";
         private const string AUGMENT_PATH = "Assets/03.Data/Augments";
         private const string SPAWN_PATTERN_PATH = "Assets/03.Data/SpawnPatterns";
+        private const string DISCOVER_POOL_PATH = "Assets/03.Data/DiscoverPools";
 
         // Icon base paths
         private const string PICTO_BASE = "Assets/Layer Lab/GUI Pro-CasualGame/ResourcesData/Sprites/Components/Icon_PictoIcons/128";

@@ -12,6 +12,7 @@ using StatusEffectType = TeamLog.Characters.StatusEffectType;
 using TargetType = TeamLog.Characters.TargetType;
 using ResourceType = TeamLog.Characters.ResourceType;
 using ProphecyResourceComponent = TeamLog.Characters.ProphecyResourceComponent;
+using CorpseComponent = TeamLog.Characters.CorpseComponent;
 
 // Phase BK: 행동 키워드 타입 별칭
 using BehaviorKeyword = TeamLog.Skill.BehaviorKeyword;
@@ -50,7 +51,16 @@ namespace TeamLog.Combat.Turn
         public event System.Action OnEnemyTurnSequenceStarted; // 코루틴 시작 알림
         public event System.Action<Character> OnEnemyActing;   // 개별 적 행동 시작 (하이라이트용)
 
+        // Phase CC-2F: 시체 자동 행동/스킬 교체 알림 (UI 피드백용)
+        // necromancer, slotIndex, skill, target, damageDealt, healFromSoulLink
+        public event System.Action<Character, int, SkillData, Character, int, int> OnCorpseAction;
+        // necromancer, slotIndex, oldSkill, newSkill
+        public event System.Action<Character, int, SkillData, SkillData> OnCorpseSkillSwapped;
+
         private bool _sequentialEnemyTurn;
+
+        // Phase CC-2F: 적 처치 큐 — ProcessCorpseAction 시작 전 시체 스킬 자동 교체에 사용
+        private readonly List<Character> _pendingKilledEnemies = new();
 
         public int CurrentAP => _context.CurrentAP;
         public int MaxAP => _context.MaxAP;
@@ -82,10 +92,25 @@ namespace TeamLog.Combat.Turn
                 // Phase ARCH-5: 모든 스킬의 UsesThisBattle 리셋 (Fatigue/Momentum/Escalation/Mastery)
                 foreach (var inst in c.SkillInventory.SkillInstances)
                     inst.ResetUsesThisBattle();
+
+                // Phase CC-2F: Necromancer 시체 리셋 (매 전투 시작 시 기본 4스킬로)
+                if (c.Corpse != null)
+                    c.Corpse.ResetToBaseSkills();
             }
+
+            // Phase CC-2F: 적 처치 이벤트 구독 — 시체 스킬 자동 교체용 큐
+            CombatEventBus.OnKill += OnEnemyKilledForCorpse;
 
             CombatEventBus.FireBattleStart();
             StartNewTurn();
+        }
+
+        /// <summary>Phase CC-2F: 적 처치 시 큐에 추가 — 다음 ProcessCorpseAction에서 시체 스킬 교체.</summary>
+        private void OnEnemyKilledForCorpse(Character killed)
+        {
+            if (killed == null) return;
+            if (!_enemies.Contains(killed)) return; // 적만 처리 (플레이어 사망 스킵)
+            _pendingKilledEnemies.Add(killed);
         }
 
         public void StartNewTurn()
@@ -284,6 +309,33 @@ namespace TeamLog.Combat.Turn
                                     _skillExecutor.ExecuteSkillInternal(caster, skill, target, instance, 1f);
                                 }
                             }
+
+                            // Phase CC-2B: ComboMultiHit — Aster Multi-Shot
+                            // caster의 Combo 스택수만큼 추가 타격 (위력 100%).
+                            // Combo 소모는 costType=Combo, costAmount=1 설정으로 TurnManager 기본 자원 소모 파이프라인에서 처리.
+                            // Combo 0에서는 스킬 자체가 사용 불가 (MinResourceRequired=1 사전 검사).
+                            bool comboMultiHit = instance != null && instance.HasBehavior(BehaviorKeyword.ComboMultiHit);
+                            if (comboMultiHit && target.IsAlive && caster.Resource != null
+                                && caster.Resource.Resource == ResourceType.Combo
+                                && caster.Resource.CurrentStacks > 0)
+                            {
+                                int extraHits = caster.Resource.CurrentStacks; // Combo 1 → 1회, 3 → 3회
+                                for (int i = 0; i < extraHits; i++)
+                                {
+                                    if (!target.IsAlive) break;
+                                    _skillExecutor.ExecuteSkillInternal(caster, skill, target, instance, 1f);
+                                }
+                            }
+
+                            // Phase CC-2B: ComboFinisher — Aster Execute Shot
+                            // 스킬 사용으로 target이 사망하면 Combo 3 복구 (스노우볼).
+                            bool comboFinisher = instance != null && instance.HasBehavior(BehaviorKeyword.ComboFinisher);
+                            if (comboFinisher && !target.IsAlive && caster.Resource != null
+                                && caster.Resource.Resource == ResourceType.Combo
+                                && caster.IsAlive)
+                            {
+                                caster.Resource.AddStacks(3); // Execute Shot 킬 시 Combo 3 복구
+                            }
                         }
                     }
                     break;
@@ -347,8 +399,103 @@ namespace TeamLog.Combat.Turn
             if (CurrentPhase != TurnPhase.PlayerAction) return;
             _context.SetPhase(TurnPhase.Execution);
 
+            // Phase CC-2F: Mortis(Necromancer) 시체 자동 행동 — 플레이어 턴 종료 후 적 턴 전.
+            // 시체가 무작위 슬롯 스킬 1개를 무작위 적에게 시전. Soul Link 회복 적용.
+            if (CurrentPhase != TurnPhase.BattleEnd)
+                ProcessCorpseAction();
+
             if (CurrentPhase != TurnPhase.BattleEnd)
                 StartEnemyTurn();
+        }
+
+        /// <summary>
+        /// Phase CC-2F: 파티의 Necromancer 시체들이 매 턴 종료 후 자동 행동.
+        /// 시체는 무작위 슬롯 스킬을 무작위 살아있는 적에게 시전.
+        /// Soul Link 활성화 시 시체가 준 데미지의 Mul%를 Necromancer HP 회복.
+        /// </summary>
+        private void ProcessCorpseAction()
+        {
+            // Phase CC-2F: 직전 턴에서 죽은 적들로부터 시체 스킬 자동 교체
+            ProcessPendingCorpseSkillSwaps();
+
+            foreach (var member in _playerParty)
+            {
+                if (member?.Corpse == null || !member.Corpse.IsActive || !member.IsAlive) continue;
+
+                var (slotIdx, skill) = member.Corpse.GetRandomSkillWithIndex();
+                if (skill == null) continue;
+
+                // 무작위 살아있는 적 선택
+                var aliveEnemies = _enemies.FindAll(e => e.IsAlive);
+                if (aliveEnemies.Count == 0) break;
+                var target = aliveEnemies[UnityEngine.Random.Range(0, aliveEnemies.Count)];
+
+                // EmpowerNext/MassEmpower 보정 — powerMultiplier로 변환
+                int bonus = member.Corpse.MassEmpowerBonus + member.Corpse.ConsumeEmpowerNext();
+                float powerMul = 1f;
+                if (bonus > 0 && skill.Power > 0)
+                    powerMul = (float)(skill.Power + bonus) / skill.Power;
+
+                int hpBefore = target.Health.CurrentHP;
+                _skillExecutor.ExecuteSkillInternal(member, skill, target, null, powerMul);
+                int damageDealt = hpBefore - target.Health.CurrentHP;
+                if (damageDealt < 0) damageDealt = 0;
+
+                // Soul Link — 시체가 준 데미지의 Mul%를 Necromancer 회복
+                int soulLinkHeal = 0;
+                if (damageDealt > 0 && member.Corpse.SoulLinkRemainingTurns > 0)
+                {
+                    soulLinkHeal = System.Math.Max(1, (int)(damageDealt * member.Corpse.GetSoulLinkMultiplier()));
+                    member.Health.Heal(soulLinkHeal);
+                    CombatEventBus.FireHealApplied(member, soulLinkHeal);
+                }
+
+                // Phase CC-2F: UI 피드백 이벤트 발생
+                OnCorpseAction?.Invoke(member, slotIdx, skill, target, damageDealt, soulLinkHeal);
+
+                // Soul Link 턴 감소
+                member.Corpse.TickSoulLink();
+
+                // 시체 행동 후 전투 종료 체크
+                if (IsBattleEndedEarly()) break;
+            }
+        }
+
+        /// <summary>
+        /// Phase CC-2F: 적 처치 시 시체 스킬 자동 교체 처리.
+        /// 모달 UI 없이 자동 — 죽은 적의 스킬 중 무작위 1개를 시체 슬롯 무작위 1개에 교체.
+        /// 사유: 모달 동기화가 복잡하여 자동 교체로 단순화. 추후 모달 UI 확장 가능.
+        /// </summary>
+        private void ProcessPendingCorpseSkillSwaps()
+        {
+            if (_pendingKilledEnemies.Count == 0) return;
+
+            foreach (var necromancer in _playerParty)
+            {
+                if (necromancer?.Corpse == null || !necromancer.Corpse.IsActive) continue;
+
+                foreach (var killed in _pendingKilledEnemies)
+                {
+                    if (killed?.SkillInventory?.Skills == null) continue;
+                    var enemySkills = killed.SkillInventory.Skills;
+                    if (enemySkills.Count == 0) continue;
+
+                    // 무작위 적 스킬 1개 선택
+                    int skillIdx = UnityEngine.Random.Range(0, enemySkills.Count);
+                    var newSkill = enemySkills[skillIdx];
+                    if (newSkill == null) continue;
+
+                    // 무작위 시체 슬롯 교체
+                    int slotIdx = UnityEngine.Random.Range(0, CorpseComponent.CORPSE_SLOT_COUNT);
+                    var oldSkill = necromancer.Corpse.Slots[slotIdx];
+                    necromancer.Corpse.ReplaceSlot(slotIdx, newSkill);
+
+                    // Phase CC-2F: UI 피드백 — 스킬 교체 알림
+                    OnCorpseSkillSwapped?.Invoke(necromancer, slotIdx, oldSkill, newSkill);
+                }
+            }
+
+            _pendingKilledEnemies.Clear();
         }
 
         public void StartEnemyTurn()
@@ -526,6 +673,9 @@ namespace TeamLog.Combat.Turn
                 }
                 _context.SetPhase(TurnPhase.BattleEnd);
                 CombatEventBus.FireBattleEnd(allEnemiesDead);
+                // Phase CC-2F: 구독 해제 + 큐 비우기
+                CombatEventBus.OnKill -= OnEnemyKilledForCorpse;
+                _pendingKilledEnemies.Clear();
                 CombatEventBus.Clear();
                 DamageCalculator.ClearEvents();
                 SkillExecutor.ClearEvents();

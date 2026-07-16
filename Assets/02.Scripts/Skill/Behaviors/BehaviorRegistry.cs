@@ -58,6 +58,20 @@ namespace TeamLog.Skill.Behaviors
                 // ── Phase CC-2A: Umbra 리워크 ──
                 Register(new Implementations.StrongVsDebuffBehavior());          // Umbra Backstab — 도트 디버프 시 위력 2배
 
+                // ── Phase CC-2B: Aster 리워크 ── (TurnManager 직접 처리 — ComboMultiHit/ComboFinisher)
+                // 여기서는 등록 불필요. BehaviorKeyword enum만 정의됨.
+
+                // ── Phase CC-2C: Elara 리워크 ──
+                Register(new Implementations.MercyAccumulateBehavior());          // Elara Mend Wounds/Sanctuary — 힐 시 Mercy +N
+                Register(new Implementations.MercyConsumeBehavior());             // Elara Blessing of Mercy — Mercy 소모 (표시용)
+                Register(new Implementations.BondLinkBoostBehavior());            // Elara Bond Link — BondBoost 상태 부여
+
+                // ── Phase CC-2D: Calliope 리워크 ──
+                Register(new Implementations.MelodyHealingBehavior());            // Calliope Mending Song — CurrentMelody=Healing
+                Register(new Implementations.MelodyValorBehavior());              // Calliope Anthem of Valor — CurrentMelody=Valor
+                Register(new Implementations.MelodyDissonanceBehavior());         // Calliope Dissonant Chord — CurrentMelody=Dissonance
+                Register(new Implementations.MelodyInspirationBehavior());        // Calliope Inspiring Refrain — CurrentMelody=Inspiration
+
                 // ── Phase ARCH-4 보류 (상태 추적/TurnManager 수정 필요) ──
                 // FollowUp(5) — hitsTakenThisTurn 인프라 필요
                 // Fatigue(8)/Momentum(9) — usesThisBattle 추적 필요

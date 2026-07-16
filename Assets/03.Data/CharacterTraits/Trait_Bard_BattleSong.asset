@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: bard_battle_song
   _displayName: "\uC804\uD22C \uB178\uB798"
-  _description: "\uB9E4 \uD134 AP +1"
+  _description: "\uBD80 \uC120\uC728 \uC704\uB825 50% \u2192 75% (\uBA54\uC544\uB9AC
+    \uAC15\uD654)"
   _targetClass: 7
   _keywords:
-  - Type: 22
-    Value: 1
+  - Type: 31
+    Value: 0.75
     Trigger: 0
     ConditionParam: 0
   _isDefault: 1

@@ -12,21 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
   m_Name: Char_Healer
   m_EditorClassIdentifier: 
-  _characterName: "\uD790\uB7EC"
-  _characterClass: 0
-  _description: Healer
+  _characterName: "\uC5D8\uB77C\uB77C"
+  _characterClass: 2
+  _description: "\uBE5B\uC758 \uC5EC\uC2E0. \uD30C\uD2F0\uC5D0 \uD68C\uBCF5\uC758
+    \uC5F0\uACB0\uACE0\uB9AC\uB97C \uB9CC\uB4E4\uC5B4, \uB3D9\uB8CC\uAC00 \uD589\uB3D9\uD560
+    \uB54C\uB9C8\uB2E4 \uC0C1\uCC98\uB97C \uC5B4\uB8E8\uB9CC\uC9C4\uB2E4 \u2014 \uADF8\uB9AC\uACE0
+    \uADF8 \uD68C\uBCF5\uC774 \uC313\uC774\uBA74, \uCD95\uBCF5\uC774 \uB0B4\uB824\uC9C4\uB2E4"
   _baseHP: 80
   _baseATK: 0
   _baseDEF: 0
-  _enemyTrait: 1
+  _enemyTrait: 0
   _isBoss: 0
   _skills:
-  - {fileID: 11400000, guid: 4836e693326518a4a9bda867d38f69dd, type: 2}
-  - {fileID: 11400000, guid: 04a936e3b39ebce48bbcf25eb93404a9, type: 2}
-  - {fileID: 11400000, guid: 49dfc59d8b7d42a448704b391b1140f0, type: 2}
-  - {fileID: 11400000, guid: 79a815be6b20d15498c1ee20d67e64c6, type: 2}
+  - {fileID: 11400000, guid: 6b198d67270d7f445acb6060fa4a44df, type: 2}
+  - {fileID: 11400000, guid: fd2cb6f56d256d74bbfeba8dbf84981a, type: 2}
+  - {fileID: 11400000, guid: 7d9cda83eddf63845a7356c1c7927114, type: 2}
+  - {fileID: 11400000, guid: 37694c7bedff0b74dafa0176eb313c87, type: 2}
   _isDefault: 1
   _unlockCondition: 
-  _resourceType: 0
+  _resourceType: 8
   _baseCritChance: 0
   _baseCritDamageMul: 1.5
+  _corpseBaseSkills: []

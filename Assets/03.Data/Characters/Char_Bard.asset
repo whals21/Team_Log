@@ -12,21 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
   m_Name: Char_Bard
   m_EditorClassIdentifier: 
-  _characterName: "\uC74C\uC720\uC2DC\uC778"
-  _characterClass: 0
-  _description: Bard
+  _characterName: "\uCE7C\uB9AC\uC624\uD398"
+  _characterClass: 7
+  _description: "\uC11C\uC0AC\uC2DC\uC758 \uC5EC\uC2E0. \uB9E4 \uD134 \uB2E4\uB978
+    \uACE1\uC744 \uC5F0\uC8FC\uD558\uBA70, \uC9C1\uC804\uC758 \uACE1\uC774 \uBD80
+    \uC120\uC728\uB85C \uBA54\uC544\uB9AC\uCCD0 \uC6B8\uB824 \uD37C\uC9C4\uB2E4 \u2014
+    \uB450 \uC120\uC728\uC774 \uACB9\uCE60 \uB54C, \uBE44\uB85C\uC18C \uAD50\uD5A5\uACE1\uC774
+    \uC644\uC131\uB41C\uB2E4"
   _baseHP: 75
   _baseATK: 0
   _baseDEF: 0
-  _enemyTrait: 3
+  _enemyTrait: 0
   _isBoss: 0
   _skills:
-  - {fileID: 11400000, guid: 4c6dad51bd171af479bccb852553e93b, type: 2}
-  - {fileID: 11400000, guid: 5c01a4a1a08c4134593f461b3bdc509a, type: 2}
-  - {fileID: 11400000, guid: 26f5db91b876de64ab5f2dcc62854024, type: 2}
-  - {fileID: 11400000, guid: 550920d5442d6b3469ad8c9183818184, type: 2}
-  _isDefault: 0
-  _unlockCondition: "\uCD1D \uC2B9\uB9AC 3\uD68C \uB2EC\uC131"
-  _resourceType: 0
+  - {fileID: 11400000, guid: bd39da5d55902d64b9685c912f4377b7, type: 2}
+  - {fileID: 11400000, guid: 24a00bb6f441f4141984685c2af0bf89, type: 2}
+  - {fileID: 11400000, guid: 31a910f9cf98ea947a2b6292c104f79c, type: 2}
+  - {fileID: 11400000, guid: 95dc48759557d2b4a988ac6ff6ea3bd1, type: 2}
+  _isDefault: 1
+  _unlockCondition: 
+  _resourceType: 9
   _baseCritChance: 0
   _baseCritDamageMul: 1.5
+  _corpseBaseSkills: []

@@ -30,3 +30,4 @@ MonoBehaviour:
   _resourceType: 0
   _baseCritChance: 0
   _baseCritDamageMul: 1.5
+  _corpseBaseSkills: []

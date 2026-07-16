@@ -12,21 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
   m_Name: Char_Archer
   m_EditorClassIdentifier: 
-  _characterName: "\uAD81\uC218"
-  _characterClass: 0
-  _description: Archer
+  _characterName: "\uC544\uC2A4\uD14C\uB974"
+  _characterClass: 4
+  _description: "\uD3ED\uC6B0\uC758 \uC0AC\uC218. \uC274 \uC0C8 \uC5C6\uC774 \uC3E0\uC218\uB85D
+    \uD654\uC0B4\uC774 \uAC15\uD574\uC9C4\uB2E4 \u2014 \uBA48\uCD94\uC9C0 \uC54A\uB294
+    \uACF5\uACA9\uC774 \uACE7 \uC644\uBCBD\uD55C \uC0AC\uB0E5\uC774\uB2E4"
   _baseHP: 65
   _baseATK: 0
   _baseDEF: 0
-  _enemyTrait: 2
+  _enemyTrait: 0
   _isBoss: 0
   _skills:
-  - {fileID: 11400000, guid: e04cdab85b87d1046ba48756a8bbd2e1, type: 2}
-  - {fileID: 11400000, guid: 5f8f6836f4973034188833a6aca41e4b, type: 2}
-  - {fileID: 11400000, guid: 489c1bed8e0d728499753286e8bc9663, type: 2}
-  - {fileID: 11400000, guid: b162fba87d6dc714590897b6237f0664, type: 2}
-  _isDefault: 0
-  _unlockCondition: "1\uCE35 \uBCF4\uC2A4 \uD074\uB9AC\uC5B4"
-  _resourceType: 0
+  - {fileID: 11400000, guid: 0519c8d7154ae0943af7c235399b8f8d, type: 2}
+  - {fileID: 11400000, guid: d626b23502596264eaeaf07e3e8d4e09, type: 2}
+  - {fileID: 11400000, guid: 5ecf18cea871b9c4a8324b60c7b9fbf2, type: 2}
+  - {fileID: 11400000, guid: 8a4ad6399bc08c84ea639f9cfe821e84, type: 2}
+  _isDefault: 1
+  _unlockCondition: 
+  _resourceType: 7
   _baseCritChance: 0
   _baseCritDamageMul: 1.5
+  _corpseBaseSkills: []

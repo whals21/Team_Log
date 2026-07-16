@@ -189,6 +189,10 @@ namespace TeamLog.UI.Battle
             ResourceType.Frost => "서리",
             ResourceType.Prophecy => "예언",
             ResourceType.Charge => "전하",
+            ResourceType.Shadows => "그림자",
+            ResourceType.Combo => "연사",
+            ResourceType.Mercy => "자비",
+            ResourceType.Melody => "선율",
             _ => "자원",
         };
 
@@ -199,6 +203,10 @@ namespace TeamLog.UI.Battle
             ResourceType.Frost => "설",
             ResourceType.Prophecy => "예",
             ResourceType.Charge => "전",
+            ResourceType.Shadows => "그",
+            ResourceType.Combo => "콤",
+            ResourceType.Mercy => "엘",
+            ResourceType.Melody => "선",
             _ => "?",
         };
 
@@ -211,6 +219,10 @@ namespace TeamLog.UI.Battle
                 ResourceType.Vengeance => p.ResourceVengeance,
                 ResourceType.Frost => p.ResourceFrost,
                 ResourceType.Prophecy => p.ResourceProphecy,
+                ResourceType.Shadows => new Color(0.45f, 0.25f, 0.65f), // 보라/그림자 (Umbra)
+                ResourceType.Combo => new Color(0.90f, 0.35f, 0.20f), // 주황/폭우 (Aster)
+                ResourceType.Mercy => new Color(0.95f, 0.85f, 0.30f), // 황금/자비 (Elara)
+                ResourceType.Melody => new Color(0.40f, 0.70f, 0.95f), // 청록/선율 (Calliope)
                 _ => p.ResourceDefault,
             };
         }
@@ -222,6 +234,10 @@ namespace TeamLog.UI.Battle
             ResourceType.Frost => "매 턴 종료 시 절반 소실. 최대 3.",
             ResourceType.Prophecy => "1턴 뒤 발동 예약. 매 턴 시작 시 발동.",
             ResourceType.Charge => "매 턴 종료 시 다른 전하 적에게 스택 수만큼 도트.",
+            ResourceType.Shadows => "안 맞을 때 +1, 맞으면 리셋. 3스택 시 치명타 100%/2배. (Umbra)",
+            ResourceType.Combo => "스킬 사용 시 +1, 미사용 시 리셋. 최대 3. 다타수/Execute 위력. (Aster)",
+            ResourceType.Mercy => "매 턴 자동 힐 + 축전. 15 도달 시 자동 ATK+3 버스트. (Elara)",
+            ResourceType.Melody => "매 턴 주 선율 + 직전 부 선율(50%). 같은 스킬 연속 시 부 무효. (Calliope)",
             _ => "캐릭터 고유 자원",
         };
 
@@ -253,6 +269,18 @@ namespace TeamLog.UI.Battle
         public static string BuildSkillDescription(SkillData skill, Character caster, string separator = " | ")
         {
             var parts = new List<string>();
+
+            // Phase CC-2E: 발견 스킬 — 풀 카테고리 표시 후 종료
+            if (skill.IsDiscover && skill.DiscoverPool != null)
+            {
+                parts.Add($"발견: {GetDiscoverCategoryLabel(skill.DiscoverPool.Category)}");
+                int poolSize = skill.DiscoverPool.EntryCount;
+                int choices = DiscoverSystem.DEFAULT_CHOICE_COUNT;
+                if (caster?.PlayerTraitHandler != null)
+                    choices = DiscoverSystem.GetChoiceCount(caster);
+                parts.Add($"{choices}개 선택지 (풀 {poolSize}개)");
+                return string.Join(separator, parts);
+            }
 
             if (skill.Power > 0)
             {
@@ -329,6 +357,16 @@ namespace TeamLog.UI.Battle
             if (caster?.Resource != null) return caster.Resource.Resource;
             return ResourceType.None;
         }
+
+        /// <summary>발견 카테고리 → 한국어 라벨 (Phase CC-2E).</summary>
+        public static string GetDiscoverCategoryLabel(DiscoverCategory category) => category switch
+        {
+            DiscoverCategory.Mending => "회복",
+            DiscoverCategory.Strengthening => "버프",
+            DiscoverCategory.Crippling => "디버프",
+            DiscoverCategory.Catalytic => "유틸리티",
+            _ => "발견"
+        };
 
         /// <summary>
         /// BehaviorTag 한국어 라벨 (UI 요약용). 주요 Behavior만 표시, 기타는 null (표시 생략).

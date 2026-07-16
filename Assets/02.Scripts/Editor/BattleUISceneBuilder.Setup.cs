@@ -14,6 +14,101 @@ namespace TeamLog.Editor
     /// </summary>
     public partial class BattleUISceneBuilder
     {
+        /// <summary>
+        /// Phase CC-2E: 현재 씬에 DiscoverModal만 추가 — 기존 씬 디자인 100% 보존.
+        /// BattleScene.unity 또는 BattleTestScene.unity 열어두고 실행.
+        /// 이미 DiscoverModal이 있으면 스킵 (idempotent).
+        /// </summary>
+        [MenuItem("Tools/Battle UI/Add Discover Modal to Current Scene", false, 102)]
+        public static void AddDiscoverModalToCurrentScene()
+        {
+            // 부모 후보 탐색 — BattleUIRoot 우선, 없으면 BattleUICanvas
+            var rootGO = GameObject.Find("BattleUIRoot");
+            if (rootGO == null)
+                rootGO = GameObject.Find("BattleUICanvas");
+            if (rootGO == null)
+            {
+                Debug.LogError("[DiscoverModal] BattleUIRoot 또는 BattleUICanvas를 찾을 수 없음 — BattleScene/BattleTestScene을 먼저 여세요.");
+                return;
+            }
+
+            // 이미 DiscoverModal이 있으면 스킵 (idempotent)
+            var existing = GameObject.Find("DiscoverModal");
+            if (existing != null)
+            {
+                Debug.Log("[DiscoverModal] 이미 존재함 — 스킵. 재생성 원할 경우 먼저 수동 삭제하세요.");
+                WireDiscoverModalToUIManager();
+                return;
+            }
+
+            var rootRect = rootGO.GetComponent<RectTransform>();
+            if (rootRect == null)
+            {
+                Debug.LogError("[DiscoverModal] 부모 GameObject에 RectTransform 없음");
+                return;
+            }
+
+            // CreateDiscoverModal 호출 (Overlay.cs에 정의 — 같은 partial class)
+            CreateDiscoverModal(rootRect);
+
+            // BattleUIManager의 _discoverModal 필드 와이어링
+            WireDiscoverModalToUIManager();
+
+            EditorSceneManager.MarkSceneDirty(rootGO.scene);
+            // 자동 저장 — 사용자가 저장 단계 놓치는 것 방지
+            EditorSceneManager.SaveScene(rootGO.scene);
+            Debug.Log($"[DiscoverModal] 현재 씬({rootGO.scene.name})에 DiscoverModal 추가 + 자동 저장 완료.");
+        }
+
+        /// <summary>현재 씬의 BattleUIManager를 찾아 _discoverModal 필드 와이어링.</summary>
+        private static void WireDiscoverModalToUIManager()
+        {
+            // rootGO(BattleUIRoot 또는 BattleUICanvas)에서 BattleUIManager 탐색 — FindObjectOfType 금지 가드레일 준수
+            var rootGO = GameObject.Find("BattleUIRoot");
+            if (rootGO == null) rootGO = GameObject.Find("BattleUICanvas");
+            if (rootGO == null)
+            {
+                Debug.LogWarning("[DiscoverModal] BattleUIRoot/BattleUICanvas를 찾을 수 없음 — 수동으로 _discoverModal 필드 연결 필요");
+                return;
+            }
+
+            var uiManager = rootGO.GetComponent<BattleUIManager>()
+                ?? rootGO.GetComponentInChildren<BattleUIManager>(true);
+            if (uiManager == null)
+            {
+                Debug.LogWarning("[DiscoverModal] BattleUIManager 컴포넌트를 찾을 수 없음 — 수동으로 _discoverModal 필드 연결 필요");
+                return;
+            }
+
+            var modalGO = GameObject.Find("DiscoverModal");
+            if (modalGO == null)
+            {
+                Debug.LogWarning("[DiscoverModal] DiscoverModal GameObject를 찾을 수 없음");
+                return;
+            }
+
+            var modalUI = modalGO.GetComponent<DiscoverModalUI>();
+            if (modalUI == null)
+            {
+                Debug.LogError("[DiscoverModal] DiscoverModalUI 컴포넌트 없음 — 프리팹 생성 실패?");
+                return;
+            }
+
+            var ser = new SerializedObject(uiManager);
+            var prop = ser.FindProperty("_discoverModal");
+            if (prop != null)
+            {
+                prop.objectReferenceValue = modalUI;
+                ser.ApplyModifiedProperties();
+                EditorUtility.SetDirty(uiManager);
+                Debug.Log($"[DiscoverModal] BattleUIManager._discoverModal 와이어링 완료 → {modalGO.name}");
+            }
+            else
+            {
+                Debug.LogError("[DiscoverModal] BattleUIManager._discoverModal 필드를 찾을 수 없음 — 스키마 변경 확인 필요");
+            }
+        }
+
         [MenuItem("Tools/Battle UI/Setup Scripts in Current Scene", false, 101)]
         public static void SetupScriptsInCurrentScene()
         {
@@ -133,9 +228,9 @@ namespace TeamLog.Editor
             if (sceneSetup == null)
                 sceneSetup = setupGO.AddComponent<BattleSceneSetup>();
 
-            // CharacterData 에셋 할당
-            var warriorData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Warrior.asset");
-            var mageData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Mage.asset");
+            // CharacterData 에셋 할당 (Phase CC-2A GC: Warrior→Duran, Mage→Ashe 대체)
+            var warriorData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Duran.asset");
+            var mageData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Ashe.asset");
             var healerData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Healer.asset");
             var rogueData = AssetDatabase.LoadAssetAtPath<CharacterData>("Assets/03.Data/Characters/Char_Umbra.asset");
 
@@ -447,6 +542,20 @@ namespace TeamLog.Editor
             var popup = root.Find("CharacterPopup");
             if (popup != null)
                 SetPrivateField(uiManager, "_characterPopup", popup.GetComponent<CharacterPopupUI>());
+
+            // DiscoverModal (Phase CC-2E — Cael Alchemist)
+            var discoverModal = root.Find("DiscoverModal");
+            if (discoverModal != null)
+            {
+                var modalUI = discoverModal.GetComponent<DiscoverModalUI>();
+                if (modalUI != null)
+                {
+                    var uiSer = new SerializedObject(uiManager);
+                    var modalProp = uiSer.FindProperty("_discoverModal");
+                    if (modalProp != null) modalProp.objectReferenceValue = modalUI;
+                    uiSer.ApplyModifiedProperties();
+                }
+            }
 
             EditorUtility.SetDirty(uiManager);
         }

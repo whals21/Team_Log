@@ -24,7 +24,7 @@ MonoBehaviour:
   _effectDuration: 0
   _effectValue: 0
   _behaviors:
-  - Keyword: 49
+  - Keyword: 58
     Rank: 0
   _resourceGainType: 1
   _resourceGainAmount: 1
@@ -34,3 +34,9 @@ MonoBehaviour:
   _consumeAllResource: 0
   _minResourceRequired: 0
   _shieldFlags: 0
+  _isDiscover: 0
+  _discoverPool: {fileID: 0}
+  _isCorpseSkill: 0
+  _sourceEnemyId: 
+  _corpseAction: 0
+  _corpseActionValue: 0

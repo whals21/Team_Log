@@ -12,21 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
   m_Name: Char_Necromancer
   m_EditorClassIdentifier: 
-  _characterName: "\uB124\uD06C\uB85C\uB9E8\uC11C"
-  _characterClass: 0
-  _description: Necromancer
-  _baseHP: 80
+  _characterName: "\uBAA8\uD2F0\uC2A4"
+  _characterClass: 5
+  _description: "\uC8FD\uC74C\uC758 \uC2A4\uC2B9. \uC804\uD22C\uB9C8\uB2E4 \uC2DC\uCCB4\uB97C
+    \uC77C\uC73C\uCF1C \uC138\uC6B0\uACE0, \uC801\uC744 \uC4F0\uB7EC\uB728\uB824
+    \uADF8 \uAE30\uC220\uC744 \uC2DC\uCCB4\uC5D0\uAC8C \uBA39\uC5EC \uC131\uC7A5\uC2DC\uD0A8\uB2E4
+    \u2014 \uC8FD\uC74C\uC740 \uB05D\uC774 \uC544\uB2C8\uB77C, \uC0C8\uB85C\uC6B4
+    \uC2DC\uC791\uC774\uB2E4"
+  _baseHP: 75
   _baseATK: 0
   _baseDEF: 0
-  _enemyTrait: 9
+  _enemyTrait: 0
   _isBoss: 0
   _skills:
-  - {fileID: 11400000, guid: 8f1f7b437c5824e4bb2783f86a8541bb, type: 2}
-  - {fileID: 11400000, guid: a8f03503eb07d7a40a6cb7b3179b0fdc, type: 2}
-  - {fileID: 11400000, guid: 3c69b4e70339f9f468cc73ae25793fd1, type: 2}
-  - {fileID: 11400000, guid: 1e53768bb1369194db228dde2bf2a5f1, type: 2}
-  _isDefault: 0
-  _unlockCondition: "2\uCE35 \uBCF4\uC2A4 \uD074\uB9AC\uC5B4"
+  - {fileID: 11400000, guid: bf418b050db4ab142902c37cab1d87cc, type: 2}
+  - {fileID: 11400000, guid: 1249b79ed1ce9e54da6d20a383556937, type: 2}
+  - {fileID: 11400000, guid: 573ceda28cbc7c34dbc35f0775e1c182, type: 2}
+  - {fileID: 11400000, guid: 0518c39aea1966c49aef86654b66b200, type: 2}
+  _isDefault: 1
+  _unlockCondition: 
   _resourceType: 0
   _baseCritChance: 0
   _baseCritDamageMul: 1.5
+  _corpseBaseSkills:
+  - {fileID: 11400000, guid: 41c01ee6c6da7fe47ada697038eeade4, type: 2}
+  - {fileID: 11400000, guid: c312ff7a5c65c7a48a56684238aad31e, type: 2}
+  - {fileID: 11400000, guid: 9a6bdfc85d6700648acecc01ae8c9663, type: 2}
+  - {fileID: 11400000, guid: aeaad6dcdb0179e4cb7f8a50f4675662, type: 2}

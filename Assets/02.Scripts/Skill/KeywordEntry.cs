@@ -56,6 +56,30 @@ namespace TeamLog.Skill
         // ── Phase CC-2A: Umbra 특성 전용 ──
         ShadowsMaxUp,               // 자원 최대치 증가 (value = 보너스 양). "그림자 심화" 특성.
         PowerAddVsDebuff,           // 도트 디버프 적 대상 위력 가산 (value = +N). "약점 포착" 특성.
+
+        // ── Phase CC-2B: Aster 특성 전용 ──
+        ComboMaxPowerBonus,         // Combo가 최대치일 때 모든 스킬 위력 가산 (value = +N). "명사수" 특성.
+        PowerAddVsMark,             // Mark 상태 적 대상 위력 가산 (value = +N). "약점 포착" 특성.
+
+        // ── Phase CC-2C: Elara 특성 전용 ──
+        AutoHealBonus,              // 연결고리 자동 힐 위력 가산 (value = +N). "축복" 특성.
+        MercyCleanseBonus,          // 정화 시 Mercy 추가 축전 (value = +N). "순수 치유" 특성.
+        MercyBurstTargets,          // Mercy 버스트 대상 수 (value = N). "신성 방패" 특성. 기본 1.
+
+        // ── Phase CC-2D: Calliope 특성 전용 ──
+        EchoPowerMul,               // 부 선율 배율 (value = 0.75 등). "전투 노래" 특성. 기본 0.5.
+        RepeatNoPenalty,            // 같은 스킬 연속 시 부 선율 무효화 페널티 제거 (value = 1 플래그). "용기의 화음" 특성.
+        EchoBonusEffect,            // EchoMelody 발동 시 추가 효과 (value = 1 플래그). "치유 멜로디" 특성.
+
+        // ── Phase CC-2E: Cael 특성 전용 ──
+        DiscoverChoicesAdd,         // 발견 선택지 수 증가 (value = N). 기본 3 → 3+N. "물약 명인" 특성.
+        DiscoverWeightBonus,        // Crippling 카테고리 가중치 배수 (value = 2.0 등). "독성 폭발" 특성.
+        DiscoverApplyAll,           // 전투당 1회, 발견 선택지 모두 적용 (value = 1 플래그). "강화 물약" 특성.
+
+        // ── Phase CC-2F: Mortis 특성 전용 ──
+        SoulLinkMul,                // Soul Link 회복 비율 배수 (value = 0.75). 기본 0.5. "생명력 흡수" 특성.
+        CurseExtraDamage,           // Curse 걸린 적에게 추가 데미지 (value = N). "저주의 대가" 특성.
+        CorpseKillEmpower,          // 적 처치 시 시체 영구 강화 +N. "죽음의 수확" 특성.
     }
 
     /// <summary>

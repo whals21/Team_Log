@@ -90,20 +90,7 @@ namespace TeamLog.Characters
             }
         }
 
-        /// <summary>
-        /// Eviscerate 스킬 사용 후 호출 — Shadows 1 소모.
-        /// 기획: 매 턴 연속 Eviscerate 허용 (파티 보호 시).
-        /// 스킬 실행 파이프라인에서 호출.
-        /// </summary>
-        public void ConsumeOneForEviscerate()
-        {
-            ConsumeStacks(1);
-            // 소모 후에도 이번 턴 "안 맞음"이면 다음 턴 종료 시 +1 복구
-        }
-
-        /// <summary>
-        /// 스킬 사용 전 Shadow 조건 체크용 — Eviscerate가 Shadows 3인지 확인.
-        /// </summary>
-        public bool IsAtMax => CurrentStacks >= MaxStacks;
+        // (Phase CC-2A GC 2026-07-17) ConsumeOneForEviscerate() / IsAtMax 제거됨
+        // — 데드 코드. Eviscerate는 costType=Shadows, costAmount=1로 일반 자원 소모 파이프라인 사용.
     }
 }

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a910996bfd59a164a9ab3170d1ed01f5, type: 3}
+  m_Name: Pool_Crippling
+  m_EditorClassIdentifier: 
+  _poolName: "\uC57D\uD654 \uBB3C\uC57D \uD480"
+  _category: 3
+  _description: "\uB514\uBC84\uD504 \uC601\uC5ED \u2014 \uC801 \uC57D\uD654 \uBC29\uC2DD
+    \uC120\uD0DD (\uB3C5\uC131 \uD3ED\uBC1C \uD2B9\uC131 \uC2DC \uAC00\uC911\uCE58
+    2\uBC30)"
+  _entries:
+  - Skill: {fileID: 11400000, guid: bc4c2df16a770a74684bb476cacd427c, type: 2}
+    Weight: 25
+  - Skill: {fileID: 11400000, guid: 4b7bdb613e6a65f4aaf6cf8832f710ad, type: 2}
+    Weight: 20
+  - Skill: {fileID: 11400000, guid: d5047942c9dfefe46bcaf74e0b8a6e4b, type: 2}
+    Weight: 15
+  - Skill: {fileID: 11400000, guid: 2a853983b0ed50241bfa1c4f04efb40a, type: 2}
+    Weight: 15
+  - Skill: {fileID: 11400000, guid: 4da22fa23e25b7d41942b204ad74b870, type: 2}
+    Weight: 15
+  - Skill: {fileID: 11400000, guid: ab5d33074c129044a86bcb17777204d7, type: 2}
+    Weight: 10

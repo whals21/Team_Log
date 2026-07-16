@@ -11,12 +11,12 @@
 
 | # | 슬롯 | 이름 (TBD) | 핵심 메카닉 | 약점 유형 | 문서 | 상태 |
 |---|------|-----------|------------|---------|------|------|
-| 1 | Healer | TBD, the Healer | Life Bond (신성 에너지) | 자기 위험 | [01_Healer.md](01_Healer.md) | 🔴 초안 |
+| 1 | Healer | **Elara, the Healer** | **Mercy** (회복의 연결고리, 힐→버프 순환) | 순수 서포터 (딜 0) | [01_Healer.md](01_Healer.md) | 🟢 확정 |
 | 2 | Rogue | **Umbra, the Rogue** | **Shadows** (파티 보호형) | 자원 의존 + 파티 의존 | [02_Rogue.md](02_Rogue.md) | 🟢 확정 |
-| 3 | Archer | TBD, the Archer | Hunter's Mark | 역할 특화 | [03_Archer.md](03_Archer.md) | 🔴 초안 |
-| 4 | Necromancer | TBD, the Necromancer | Soul + 미니언 | 자원 효율 | [04_Necromancer.md](04_Necromancer.md) | 🔴 초안 |
-| 5 | Alchemist | TBD, the Alchemist | Reagent Reaction | 자원 효율 | [05_Alchemist.md](05_Alchemist.md) | 🔴 초안 |
-| 6 | Bard | TBD, the Bard | Rhythm | 자연 제한 | [06_Bard.md](06_Bard.md) | 🔴 초안 |
+| 3 | Archer | **Aster, the Archer** | **Combo** (연속 사격, Umbra 정반대) | 자원 의존 + 자원 획득 조건 엄격 | [03_Archer.md](03_Archer.md) | 🟢 확정 |
+| 4 | Necromancer | **Mortis, the Necromancer** | **Summoned Corpse** (동적 스킬 풀 + 자동 전투) | 간접 딜러 (본인 딜 약함) | [04_Necromancer.md](04_Necromancer.md) | 🟢 확정 |
+| 5 | Alchemist | **Cael, the Alchemist** | **Discover** (하스스톤 발견 — 스킬별 3개 랜덤 선택지) | 랜덤 의존 + UI 복잡 | [05_Alchemist.md](05_Alchemist.md) | 🟢 확정 |
+| 6 | Bard | **Calliope, the Bard** | **Melody** (주/부 선율 메아리, 매 턴 2효과 동시) | 자연 제한 (리듬 다양성 강제) | [06_Bard.md](06_Bard.md) | 🟢 확정 |
 
 **상태 범례**: 🔴 초안 → 🟡 논의 중 → 🟢 확정 → ⭐ [Characters/] 승격
 
@@ -114,3 +114,34 @@
 | 날짜 | 변경 |
 |------|------|
 | 2026-07-14 | 최초 작성. 6종 초안 동시 등록 |
+| 2026-07-16 | Archer 컨셉 후보 논의 → **D. Combo 채택** (Umbra 정반대 축). A(Mark 단독)/B(Focus+Mark)/C(Focus 단독) 후보 탈락. Quiver 백로그 추가 (아래) |
+
+---
+
+## 자원 메카닉 백로그 (참고 — 향후 신규 캐릭터/리워크 시 검토)
+
+> 기획 단계에서 검토했으나 채택되지 않은 자원 메카닉 아이디어. 새 캐릭터 설계 시 참조.
+
+### Quiver (한정 화살) — 2026-07-16 Archer 후보 E에서 보류
+> "한 전투당 N발의 완벽한 화살 — 매 발이 전략적 선택"
+
+- **컨셉**: 전투 시작 시 화살 7개 (단일 3 / 관통 2 / 광역 2처럼 종류별). 스킬 사용 시 화살 1 소모. 화살 0이면 기본 공격만 가능
+- **게임감**: StS 아이리스 독, 발라토 매치 카드와 유사 — 매 전투가 퍼즐 (언제 퍼부을지 아낄지)
+- **독창성**: 매우 높음 (로그라이크 자원 관리 극대화)
+- **구현 복잡도**: ★★★★☆ — UI(화살 카운터), 화살 종류 관리, 매 전투 리셋 로직
+- **사용 후보**: 신규 캐릭터 (예: Bombardier/Area Denial 컨셉) 또는 Necromancer 리워크 (미니언을 화살처럼 한정 자원화)
+- **검증 필요**: 화살 고갈 시 플레이어 좌절감, 전투당 7개 수치 밸런스
+
+### Predator (추적) — 2026-07-16 Archer 후보 F에서 보류
+> "상처 입힌 적은 끝까지 쫓는다"
+
+- **컨셉**: 적 처치 시 Hunt +1 (영구, 최대 5). 한 번 때린 적에게 추적 표식 → 매 턴 자동 추가 도트
+- **차별화**: Taranis(Charge 광역 연쇄) vs Predator(단일 지속 추적)
+- **사용 후보**: 신규 캐릭터 (Bounty Hunter/Tracker 컨셉)
+
+### Trick Arrows (함정 화살) — 2026-07-16 Archer 후보 G에서 보류
+> "화살이 박힌 자리가 곧 죽음의 자리"
+
+- **컨셉**: 빗나간 화살이 바닥에 박혀 지뢰처럼 작동. 적이 지나갈 때 폭발
+- **구현 복잡도**: ★★★★★ — Unity 타일/필드 시스템 재설계 필요 (현재 전투 필드는 절대좌표 기반 아님)
+- **판정**: 현재 인프라로 구현 불가. **부결**

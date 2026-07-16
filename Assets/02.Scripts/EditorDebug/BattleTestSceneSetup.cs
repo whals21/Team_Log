@@ -532,11 +532,11 @@ namespace TeamLog.EditorDebug
         /// </summary>
         private void PopulateDefaultTemplates()
         {
-            // ── 파티 템플릿 (4 슬롯) ──
-            AddPartyTemplate("균형 파티", "Char_Warrior", "Char_Mage", "Char_Healer", "Char_Umbra");
-            AddPartyTemplate("물리 특화", "Char_Warrior", "Char_Umbra", "Char_Archer", "Char_Bard");
-            AddPartyTemplate("마법 폭격", "Char_Mage", "Char_Necromancer", "Char_Alchemist", "Char_Healer");
-            AddPartyTemplate("생존 극대화", "Char_Warrior", "Char_Healer", "Char_Alchemist", "Char_Bard");
+            // ── 파티 템플릿 (4 슬롯) ── Phase CC-2A GC: Warrior/Mage 제거, 신규 캐릭터로 대체
+            AddPartyTemplate("균형 파티", "Char_Duran", "Char_Ashe", "Char_Healer", "Char_Umbra");
+            AddPartyTemplate("물리 특화", "Char_Duran", "Char_Umbra", "Char_Archer", "Char_Bard");
+            AddPartyTemplate("마법 폭격", "Char_Ashe", "Char_Lumi", "Char_Sibyl", "Char_Taranis");
+            AddPartyTemplate("생존 극대화", "Char_Duran", "Char_Healer", "Char_Alchemist", "Char_Bard");
             AddPartyTemplate("그림자 암살", "Char_Umbra", "Char_Archer", "Char_Bard", "Char_Necromancer");
 
             // ── 유물 템플릿 (6 슬롯) ──

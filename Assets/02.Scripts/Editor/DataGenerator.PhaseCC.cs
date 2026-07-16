@@ -199,13 +199,318 @@ namespace TeamLog.Editor
                 75, 0, 0, new[] { "Umbra_PoisonBlade", "Umbra_Backstab", "Umbra_Rupture", "Umbra_Eviscerate" },
                 EnemyTrait.None, true, "", ResourceType.Shadows);
 
-            Debug.Log("[DataGenerator] Phase CC 캐릭터 6종 생성 완료 (Ashe/Duran/Lumi/Sibyl/Taranis/Umbra)");
+            // ════════════════════════════════════════════
+            // Aster (Archer) — Combo 연속 사격 스킬 4종 (Phase CC-2B)
+            // ════════════════════════════════════════════
+            // 기획: ReworkDrafts/03_Archer.md
+            // 핵심: 매 턴 스킬을 쏠수록 Combo 강화. Umbra(Shadows)와 정반대 축.
+
+            // 1. Quick Shot — 단일 4, AP 1 (셋업). Combo +1은 ComboResourceComponent가 매 턴 스킬 사용 시 자동 처리.
+            CreatePhaseCCSkill("Aster_QuickShot", "빠른 사격", SkillType.Attack, TargetType.SingleEnemy,
+                power: 4, cost: 1);
+
+            // 2. Multi-Shot — 단일 3, AP 2. Combo 1 소모당 +1타격 (ComboMultiHit Behavior).
+            // costType=Combo, costAmount=1 → TurnManager 기본 자원 소모. minResourceRequired=1 (Combo 1+ 필수).
+            CreatePhaseCCSkill("Aster_MultiShot", "다중 사격", SkillType.Attack, TargetType.SingleEnemy,
+                power: 3, cost: 2,
+                costType: ResourceType.Combo, costAmount: 1,
+                minResourceRequired: 1,
+                behaviors: new BehaviorTag(BehaviorKeyword.ComboMultiHit, 0));
+
+            // 3. Hunter's Mark — 단일 Mark 부여 (2턴), AP 1. Archer 본인이 Mark 적 공격 시 +3 (PowerAddVsMark 특성).
+            CreatePhaseCCSkill("Aster_HuntersMark", "사냥표식", SkillType.Debuff, TargetType.SingleEnemy,
+                power: 0, cost: 1, statusEffect: StatusEffectType.Mark, effectDuration: 2, effectValue: 1);
+
+            // 4. Execute Shot — 단일 8 + Combo×5, AP 3. 모든 Combo 소모. 킬 시 Combo 3 복구 (ComboFinisher Behavior).
+            // resourcePowerPerStack=5 → Combo 1당 +5 위력 (3스택 시 8+15=23).
+            // consumeAllResource=true → TurnManager가 전량 소모. minResourceRequired=1.
+            CreatePhaseCCSkill("Aster_ExecuteShot", "처형 사격", SkillType.Attack, TargetType.SingleEnemy,
+                power: 8, cost: 3,
+                costType: ResourceType.Combo, costAmount: 0,
+                resourcePowerPerStack: 5, consumeAllResource: true,
+                minResourceRequired: 1,
+                behaviors: new BehaviorTag(BehaviorKeyword.ComboFinisher, 0));
+
+            // Aster — Archer (Combo 연속 사격).
+            // 매 턴 스킬을 쏠수록 Combo가 강해진다. 스킬을 안 쓰면 Combo 리셋.
+            CreatePhaseCCCharacter("Char_Archer", "아스테르", CharacterClass.Archer,
+                "폭우의 사수. 쉴 새 없이 쏠수록 화살이 강해진다 — 멈추지 않는 공격이 곧 완벽한 사냥이다",
+                65, 0, 0, new[] { "Aster_QuickShot", "Aster_MultiShot", "Aster_HuntersMark", "Aster_ExecuteShot" },
+                EnemyTrait.None, true, "", ResourceType.Combo);
+
+            // ════════════════════════════════════════════
+            // Elara (Healer) — Mercy 회복의 연결고리 스킬 4종 (Phase CC-2C)
+            // ════════════════════════════════════════════
+            // 기획: ReworkDrafts/01_Healer.md
+            // 핵심: 매 턴 자동 힐 + Mercy 축전 → 15 도달 시 자동 ATK+3 버스트. 힐과 버프의 순환.
+
+            // 1. Bond Link — 단일 BondBoost 부여 (2턴). 자동 힐 3→6 강화. AP 1 (셋업).
+            CreatePhaseCCSkill("Elara_BondLink", "연결의 끈", SkillType.Buff, TargetType.SingleAlly,
+                power: 0, cost: 1, statusEffect: StatusEffectType.BondBoost, effectDuration: 2, effectValue: 1,
+                behaviors: new BehaviorTag(BehaviorKeyword.BondLinkBoost, 0));
+
+            // 2. Mend Wounds — 단일 힐 10 + 도트 정화 (CleanseLowTarget) + Mercy +10 축전 (MercyAccumulate).
+            // CleanseLowTarget은 HP 50%- 시 정화이므로, 일반적으로는 힐만. 추후 별도 정화 Behavior 검토.
+            CreatePhaseCCSkill("Elara_MendWounds", "상처 치유", SkillType.Heal, TargetType.SingleAlly,
+                power: 10, cost: 2,
+                behaviors: new BehaviorTag[] {
+                    new(BehaviorKeyword.CleanseLowTarget, 0),
+                    new(BehaviorKeyword.MercyAccumulate, 0)
+                });
+
+            // 3. Blessing of Mercy — 단일 ATK+3 (3턴), Mercy 5 소모.
+            CreatePhaseCCSkill("Elara_BlessingOfMercy", "자비의 축복", SkillType.Buff, TargetType.SingleAlly,
+                power: 0, cost: 2, statusEffect: StatusEffectType.AttackUp, effectDuration: 3, effectValue: 3,
+                costType: ResourceType.Mercy, costAmount: 5,
+                behaviors: new BehaviorTag(BehaviorKeyword.MercyConsume, 0));
+
+            // 4. Sanctuary — 광역 힐 8 + Mercy 8 소모 (자원 임계). MercyAccumulate로 Mercy +8 축전 후 소모.
+            // (PostApply에서 Mercy +8 → 자동 버스트 가능성 → 이후 costAmount 8 소모)
+            CreatePhaseCCSkill("Elara_Sanctuary", "성소", SkillType.Heal, TargetType.AllAllies,
+                power: 8, cost: 3,
+                costType: ResourceType.Mercy, costAmount: 8,
+                behaviors: new BehaviorTag[] {
+                    new(BehaviorKeyword.MercyAccumulate, 0),
+                    new(BehaviorKeyword.MercyConsume, 0)
+                });
+
+            // Elara — Healer (Mercy 회복의 연결고리).
+            // 매 턴 연결된 파티원에게 자동 힐. 회복이 쌓이면 자동으로 파티원에게 축복이 내려진다.
+            CreatePhaseCCCharacter("Char_Healer", "엘라라", CharacterClass.Healer,
+                "빛의 여신. 파티에 회복의 연결고리를 만들어, 동료가 행동할 때마다 상처를 어루만진다 — 그리고 그 회복이 쌓이면, 축복이 내려진다",
+                80, 0, 0, new[] { "Elara_BondLink", "Elara_MendWounds", "Elara_BlessingOfMercy", "Elara_Sanctuary" },
+                EnemyTrait.None, true, "", ResourceType.Mercy);
+
+            // ════════════════════════════════════════════
+            // Calliope (Bard) — Melody 주/부 선율 메아리 스킬 4종 (Phase CC-2D)
+            // ════════════════════════════════════════════
+            // 기획: ReworkDrafts/06_Bard.md
+            // 핵심: 매 턴 다른 선율 연주 → 주 선율(100%) + 직전 턴 부 선율(50%) 자동 발동.
+
+            // 1. Mending Song — 단일 힐 8, AP 2. 회복 영역. CurrentMelody=Healing.
+            CreatePhaseCCSkill("Calliope_MendingSong", "치유의 노래", SkillType.Heal, TargetType.SingleAlly,
+                power: 8, cost: 2,
+                behaviors: new BehaviorTag[] { new(BehaviorKeyword.MelodyHealing, 0) });
+
+            // 2. Anthem of Valor — 광역 ATK+3 (2턴), AP 2. 버프 영역. CurrentMelody=Valor.
+            CreatePhaseCCSkill("Calliope_AnthemOfValor", "용기의 찬가", SkillType.Buff, TargetType.AllAllies,
+                power: 0, cost: 2, statusEffect: StatusEffectType.AttackUp, effectDuration: 2, effectValue: 3,
+                behaviors: new BehaviorTag[] { new(BehaviorKeyword.MelodyValor, 0) });
+
+            // 3. Dissonant Chord — 광역 적 ATK-3 (2턴), AP 2. 디버프 영역. CurrentMelody=Dissonance.
+            CreatePhaseCCSkill("Calliope_DissonantChord", "불협화음", SkillType.Debuff, TargetType.AllEnemies,
+                power: 0, cost: 2, statusEffect: StatusEffectType.AttackDown, effectDuration: 2, effectValue: 3,
+                behaviors: new BehaviorTag[] { new(BehaviorKeyword.MelodyDissonance, 0) });
+
+            // 4. Inspiring Refrain — 광역 쉴드 5, AP 2. 유틸리티 영역. CurrentMelody=Inspiration.
+            // (TODO: AP+1 효과는 별도 Behavior/인프라 필요 — 현재 쉴드만. 추후 확장)
+            CreatePhaseCCSkill("Calliope_InspiringRefrain", "영감의 후렴", SkillType.Shield, TargetType.AllAllies,
+                power: 5, cost: 2,
+                behaviors: new BehaviorTag[] { new(BehaviorKeyword.MelodyInspiration, 0) });
+
+            // Calliope — Bard (Melody 주/부 선율 메아리).
+            // 매 턴 다른 선율을 연주하며, 직전 곡이 부 선율로 메아리쳐 두 효과가 겹친다.
+            CreatePhaseCCCharacter("Char_Bard", "칼리오페", CharacterClass.Bard,
+                "서사시의 여신. 매 턴 다른 곡을 연주하며, 직전의 곡이 부 선율로 메아리쳐 울려 퍼진다 — 두 선율이 겹칠 때, 비로소 교향곡이 완성된다",
+                75, 0, 0, new[] { "Calliope_MendingSong", "Calliope_AnthemOfValor", "Calliope_DissonantChord", "Calliope_InspiringRefrain" },
+                EnemyTrait.None, true, "", ResourceType.Melody);
+
+            Debug.Log("[DataGenerator] Phase CC 캐릭터 9종 생성 완료 (Ashe/Duran/Lumi/Sibyl/Taranis/Umbra/Aster/Elara/Calliope)");
+
+            // ════════════════════════════════════════════
+            // Cael (Alchemist) — Discover 발견 메커니즘 (Phase CC-2E)
+            // ════════════════════════════════════════════
+            // 기획: ReworkDrafts/05_Alchemist.md
+            // 핵심: 매 스킬 3개 선택지 모달 팝업 (하스스톤 발견). 자원 없음, 순수 선택 기반.
+            // 발견 본체 스킬 4개 + 각 풀 5-7개 효과 스킬.
+
+            GenerateCaelDiscoverPools();
+
+            // 4개 발견 본체 스킬 (IsDiscover=true, DiscoverPool 연결)
+            CreatePhaseCCSkill("Cael_MendingBrew", "회복 물약", SkillType.Heal, TargetType.SingleAlly,
+                power: 0, cost: 2, isDiscover: true,
+                discoverPool: LoadDiscoverPool("Pool_Mending"));
+            CreatePhaseCCSkill("Cael_StrengtheningBrew", "강화 물약", SkillType.Buff, TargetType.SingleAlly,
+                power: 0, cost: 2, isDiscover: true,
+                discoverPool: LoadDiscoverPool("Pool_Strengthening"));
+            CreatePhaseCCSkill("Cael_CripplingBrew", "약화 물약", SkillType.Debuff, TargetType.SingleEnemy,
+                power: 0, cost: 2, isDiscover: true,
+                discoverPool: LoadDiscoverPool("Pool_Crippling"));
+            CreatePhaseCCSkill("Cael_CatalyticBrew", "촉매 물약", SkillType.Attack, TargetType.SingleEnemy,
+                power: 0, cost: 3, isDiscover: true,
+                discoverPool: LoadDiscoverPool("Pool_Catalytic"));
+
+            // Cael — Alchemist (Discover 발견 — 자원 없음, 매 스킬 3-4개 선택지).
+            // 발견 스킬 4개만 CharacterData._skills에 등록 (24개 풀 스킬은 드로우 풀 오염 방지로 등록 안 함).
+            CreatePhaseCCCharacter("Char_Alchemist", "켈", CharacterClass.Alchemist,
+                "연금술사. 매 스킬이 새로운 발견의 순간 — 풀에서 3개의 선택지를 무작위로 뽑아, 상황에 맞는 효과를 선택해 발동한다. 같은 스킬도 매번 다른 결과를 만든다",
+                80, 0, 0, new[] { "Cael_MendingBrew", "Cael_StrengtheningBrew", "Cael_CripplingBrew", "Cael_CatalyticBrew" },
+                EnemyTrait.None, true, "", ResourceType.None);
+
+            // ════════════════════════════════════════════
+            // Mortis (Necromancer) — Summoned Corpse 시체 메커니즘 (Phase CC-2F)
+            // ════════════════════════════════════════════
+            // 기획: ReworkDrafts/04_Necromancer.md
+            // 핵심: 매 턴 종료 후 시체가 4스킬 중 무작위 1개 자동 시전. 적 처치 시 스킬 교체.
+
+            // 시체 기본 스킬 4종 (전투 시작 시 시체 슬롯 초기화용)
+            CreatePhaseCCSkill("Corpse_Scratch", "할퀴기", SkillType.Attack, TargetType.SingleEnemy,
+                power: 4, cost: 0, isCorpseSkill: true);
+            CreatePhaseCCSkill("Corpse_PoisonBite", "독 물기", SkillType.Attack, TargetType.SingleEnemy,
+                power: 3, cost: 0, isCorpseSkill: true,
+                statusEffect: StatusEffectType.Poison, effectDuration: 2, effectValue: 3);
+            CreatePhaseCCSkill("Corpse_BoneToss", "뼈 던지기", SkillType.Attack, TargetType.SingleEnemy,
+                power: 4, cost: 0, isCorpseSkill: true,
+                statusEffect: StatusEffectType.Bleed, effectDuration: 2, effectValue: 3);
+            CreatePhaseCCSkill("Corpse_StunStrike", "기절 타격", SkillType.Attack, TargetType.SingleEnemy,
+                power: 2, cost: 0, isCorpseSkill: true,
+                statusEffect: StatusEffectType.Stun, effectDuration: 1, effectValue: 1);
+
+            // Mortis 본인 스킬 4종 (시체 강화 마법)
+            // 1. Empower Undead — Buff, Self, AP 1. 다음 시체 스킬 위력 +5.
+            CreatePhaseCCSkill("Mortis_EmpowerUndead", "강령술 강화", SkillType.Buff, TargetType.Self,
+                power: 0, cost: 1, corpseAction: CorpseActionType.EmpowerNext, corpseActionValue: 5);
+            // 2. Soul Link — Buff, Self, AP 2. 2턴간 시체가 준 데미지 50% 회복.
+            CreatePhaseCCSkill("Mortis_SoulLink", "영혼 결속", SkillType.Buff, TargetType.Self,
+                power: 0, cost: 2, corpseAction: CorpseActionType.SoulLink, corpseActionValue: 50);
+            // 3. Curse of Weakness — Debuff, SingleEnemy, AP 2. ATK-3 (2턴). DEF down은 일반 인프라 제약으로 생략.
+            CreatePhaseCCSkill("Mortis_CurseOfWeakness", "약화 저주", SkillType.Debuff, TargetType.SingleEnemy,
+                power: 0, cost: 2, statusEffect: StatusEffectType.AttackDown, effectDuration: 2, effectValue: 3);
+            // 4. Mass Empower — Buff, Self, AP 3. 시체 모든 스킬 영구 위력 +3.
+            CreatePhaseCCSkill("Mortis_MassEmpower", "대량 강화", SkillType.Buff, TargetType.Self,
+                power: 0, cost: 3, corpseAction: CorpseActionType.MassEmpower, corpseActionValue: 3);
+
+            // Mortis — Necromancer (Summoned Corpse — 시체 자동 전투).
+            // 매 턴 종료 후 시체가 4스킬 중 무작위 1개 자동 시전. 적 처치 시 스킬 교체.
+            CreatePhaseCCCharacter("Char_Necromancer", "모티스", CharacterClass.Necromancer,
+                "죽음의 스승. 전투마다 시체를 일으켜 세우고, 적을 쓰러뜨려 그 기술을 시체에게 먹여 성장시킨다 — 죽음은 끝이 아니라, 새로운 시작이다",
+                75, 0, 0, new[] { "Mortis_EmpowerUndead", "Mortis_SoulLink", "Mortis_CurseOfWeakness", "Mortis_MassEmpower" },
+                EnemyTrait.None, true, "", ResourceType.None,
+                corpseSkills: new[] { "Corpse_Scratch", "Corpse_PoisonBite", "Corpse_BoneToss", "Corpse_StunStrike" });
+
+            Debug.Log("[DataGenerator] Phase CC 캐릭터 11종 생성 완료 (Ashe/Duran/Lumi/Sibyl/Taranis/Umbra/Aster/Elara/Calliope/Cael/Mortis)");
         }
 
-        /// <summary>Phase CC 캐릭터 생성 헬퍼 — ResourceType 포함.</summary>
+        /// <summary>Cael 발견 풀 4종 + 효과 스킬 24개 생성 (Phase CC-2E).</summary>
+        private static void GenerateCaelDiscoverPools()
+        {
+            EnsureFolder(DISCOVER_POOL_PATH);
+
+            // ════ Mending (회복) — 5개 효과 ════
+            CreateDiscoverEffectSkill("DM_Heal10", "소회복", SkillType.Heal, TargetType.SingleAlly, 10);
+            CreateDiscoverEffectSkill("DM_Heal15", "대회복", SkillType.Heal, TargetType.SingleAlly, 15);
+            CreateDiscoverEffectSkill("DM_Shield10", "보호막", SkillType.Shield, TargetType.SingleAlly, 10);
+            CreateDiscoverEffectSkill("DM_Purify", "정화", SkillType.Purify, TargetType.SingleAlly, 0);
+            CreateDiscoverEffectSkill("DM_Heal8Regen", "재생 물약", SkillType.Heal, TargetType.SingleAlly, 8,
+                statusEffect: StatusEffectType.Regeneration, effectDuration: 2, effectValue: 4);
+
+            CreateDiscoverPool("Pool_Mending", "회복 물약 풀", DiscoverCategory.Mending,
+                "회복/쉴드/정화 영역 — 대상 상태에 따라 선택",
+                new[] { ("DM_Heal10", 30), ("DM_Heal15", 20), ("DM_Shield10", 20),
+                        ("DM_Purify", 15), ("DM_Heal8Regen", 15) });
+
+            // ════ Strengthening (버프) — 6개 효과 ════
+            CreateDiscoverEffectSkill("DS_Atk3", "공격 강화", SkillType.Buff, TargetType.SingleAlly, 0,
+                statusEffect: StatusEffectType.AttackUp, effectDuration: 2, effectValue: 3);
+            CreateDiscoverEffectSkill("DS_Def3", "방어 강화", SkillType.Buff, TargetType.SingleAlly, 0,
+                statusEffect: StatusEffectType.DefenseUp, effectDuration: 2, effectValue: 3);
+            CreateDiscoverEffectSkill("DS_Atk2", "속성 강화", SkillType.Buff, TargetType.SingleAlly, 0,
+                statusEffect: StatusEffectType.AttackUp, effectDuration: 2, effectValue: 2);
+            CreateDiscoverEffectSkill("DS_Def2", "보호 강화", SkillType.Buff, TargetType.SingleAlly, 0,
+                statusEffect: StatusEffectType.DefenseUp, effectDuration: 2, effectValue: 2);
+            CreateDiscoverEffectSkill("DS_AtkAll2", "전체 공격 강화", SkillType.Buff, TargetType.AllAllies, 0,
+                statusEffect: StatusEffectType.AttackUp, effectDuration: 1, effectValue: 2);
+            CreateDiscoverEffectSkill("DS_DefAll2", "전체 보호 강화", SkillType.Buff, TargetType.AllAllies, 0,
+                statusEffect: StatusEffectType.DefenseUp, effectDuration: 1, effectValue: 2);
+
+            CreateDiscoverPool("Pool_Strengthening", "강화 물약 풀", DiscoverCategory.Strengthening,
+                "버프 영역 — 현재 부족한 스탯 보충",
+                new[] { ("DS_Atk3", 25), ("DS_Def3", 20), ("DS_Atk2", 20),
+                        ("DS_Def2", 15), ("DS_AtkAll2", 10), ("DS_DefAll2", 10) });
+
+            // ════ Crippling (디버프) — 6개 효과 ════
+            CreateDiscoverEffectSkill("DC_AtkDown3", "약화 곰팡", SkillType.Debuff, TargetType.SingleEnemy, 0,
+                statusEffect: StatusEffectType.AttackDown, effectDuration: 2, effectValue: 3);
+            CreateDiscoverEffectSkill("DC_DefDown3", "부식 액체", SkillType.Debuff, TargetType.SingleEnemy, 0,
+                statusEffect: StatusEffectType.DefenseDown, effectDuration: 2, effectValue: 3);
+            CreateDiscoverEffectSkill("DC_Stun", "마비 독", SkillType.Debuff, TargetType.SingleEnemy, 0,
+                statusEffect: StatusEffectType.Stun, effectDuration: 1, effectValue: 1);
+            CreateDiscoverEffectSkill("DC_Poison", "맹독", SkillType.Debuff, TargetType.SingleEnemy, 0,
+                statusEffect: StatusEffectType.Poison, effectDuration: 3, effectValue: 3);
+            CreateDiscoverEffectSkill("DC_Burn", "발화제", SkillType.Debuff, TargetType.SingleEnemy, 0,
+                statusEffect: StatusEffectType.Burn, effectDuration: 3, effectValue: 4);
+            CreateDiscoverEffectSkill("DC_Bleed", "혈액 응고제", SkillType.Debuff, TargetType.SingleEnemy, 0,
+                statusEffect: StatusEffectType.Bleed, effectDuration: 3, effectValue: 3);
+
+            CreateDiscoverPool("Pool_Crippling", "약화 물약 풀", DiscoverCategory.Crippling,
+                "디버프 영역 — 적 약화 방식 선택 (독성 폭발 특성 시 가중치 2배)",
+                new[] { ("DC_AtkDown3", 25), ("DC_DefDown3", 20), ("DC_Stun", 15),
+                        ("DC_Poison", 15), ("DC_Burn", 15), ("DC_Bleed", 10) });
+
+            // ════ Catalytic (유틸리티) — 7개 효과 ════
+            CreateDiscoverEffectSkill("DX_Aoe6", "연쇄 폭발", SkillType.Attack, TargetType.AllEnemies, 6);
+            CreateDiscoverEffectSkill("DX_Single15", "고농도 폭약", SkillType.Attack, TargetType.SingleEnemy, 15);
+            CreateDiscoverEffectSkill("DX_Single8", "신속한 투척", SkillType.Attack, TargetType.SingleEnemy, 8);
+            CreateDiscoverEffectSkill("DX_PartyShield5", "진동 보호막", SkillType.Shield, TargetType.AllAllies, 5);
+            CreateDiscoverEffectSkill("DX_Charge", "전하 주입", SkillType.Debuff, TargetType.SingleEnemy, 0,
+                statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 2);
+            CreateDiscoverEffectSkill("DX_PartyHeal5", "치유 가스", SkillType.Heal, TargetType.AllAllies, 5);
+            CreateDiscoverEffectSkill("DX_Single10", "농축 타격", SkillType.Attack, TargetType.SingleEnemy, 10);
+
+            CreateDiscoverPool("Pool_Catalytic", "촉매 물약 풀", DiscoverCategory.Catalytic,
+                "유틸리티 영역 — 상황 특수 효과 (광역/폭딜/특수)",
+                new[] { ("DX_Aoe6", 20), ("DX_Single15", 20), ("DX_Single8", 15),
+                        ("DX_PartyShield5", 15), ("DX_Charge", 10),
+                        ("DX_PartyHeal5", 10), ("DX_Single10", 10) });
+
+            Debug.Log("[DataGenerator] Cael 발견 풀 4종 + 효과 스킬 24개 생성 완료");
+        }
+
+        /// <summary>발견 풀의 개별 효과 스킬 생성 — 모두 Cost=0 (본체에서 AP 청구).</summary>
+        private static void CreateDiscoverEffectSkill(string fileName, string name, SkillType type, TargetType target,
+            int power, StatusEffectType statusEffect = StatusEffectType.None,
+            int effectDuration = 0, int effectValue = 0)
+        {
+            CreatePhaseCCSkill(fileName, name, type, target,
+                power: power, cost: 0, // 발견 선택 스킬은 Cost=0 (본체에서 청구)
+                statusEffect: statusEffect, effectDuration: effectDuration, effectValue: effectValue);
+        }
+
+        /// <summary>발견 풀 데이터 .asset 생성.</summary>
+        private static void CreateDiscoverPool(string fileName, string poolName, DiscoverCategory category,
+            string description, (string skillFile, int weight)[] entries)
+        {
+            var path = $"{DISCOVER_POOL_PATH}/{fileName}.asset";
+            var pool = GetOrCreateAsset<DiscoverPoolData>(path);
+            pool.name = fileName;
+
+            SetPrivateField(pool, "_poolName", poolName);
+            SetPrivateField(pool, "_category", category);
+            SetPrivateField(pool, "_description", description);
+
+            var entryList = new List<DiscoverEntry>();
+            foreach (var (skillFile, weight) in entries)
+            {
+                var skill = AssetDatabase.LoadAssetAtPath<SkillData>($"{SKILL_PATH}/{skillFile}.asset");
+                if (skill != null)
+                    entryList.Add(new DiscoverEntry(skill, weight));
+                else
+                    Debug.LogWarning($"[DiscoverPool] 스킬 {skillFile} 로드 실패 — 풀 {fileName}");
+            }
+            SetPrivateField(pool, "_entries", entryList.ToArray());
+
+            EditorUtility.SetDirty(pool);
+        }
+
+        /// <summary>발견 풀 .asset 로드 헬퍼.</summary>
+        private static DiscoverPoolData LoadDiscoverPool(string fileName)
+            => AssetDatabase.LoadAssetAtPath<DiscoverPoolData>($"{DISCOVER_POOL_PATH}/{fileName}.asset");
+
+        /// <summary>Phase CC 캐릭터 생성 헬퍼 — ResourceType + corpseSkills 포함.</summary>
         private static void CreatePhaseCCCharacter(string fileName, string name, CharacterClass charClass,
             string desc, int hp, int atk, int def, string[] skills, EnemyTrait trait,
-            bool isDefault, string unlockCondition, ResourceType resourceType)
+            bool isDefault, string unlockCondition, ResourceType resourceType,
+            string[] corpseSkills = null)
         {
             var path = $"{CHAR_PATH}/{fileName}.asset";
             var character = GetOrCreateAsset<CharacterData>(path);
@@ -230,10 +535,22 @@ namespace TeamLog.Editor
             }
             SetPrivateField(character, "_skills", skillList);
 
+            // Phase CC-2F: Necromancer 시체 기본 스킬 등록
+            if (corpseSkills != null && corpseSkills.Length > 0)
+            {
+                var corpseList = new List<SkillData>();
+                foreach (var skillName in corpseSkills)
+                {
+                    var skill = AssetDatabase.LoadAssetAtPath<SkillData>($"{SKILL_PATH}/{skillName}.asset");
+                    if (skill != null) corpseList.Add(skill);
+                }
+                SetPrivateField(character, "_corpseBaseSkills", corpseList);
+            }
+
             EditorUtility.SetDirty(character);
         }
 
-        /// <summary>Phase CC 스킬 생성 헬퍼 — 자원 획득/소모/비례 위력 + 쉴드 속성 포함.</summary>
+        /// <summary>Phase CC 스킬 생성 헬퍼 — 자원 획득/소모/비례 위력 + 쉴드 속성 + 발견 스킬 + 시체 스킬 포함.</summary>
         private static void CreatePhaseCCSkill(string fileName, string name, SkillType type, TargetType target,
             int power, int cost, StatusEffectType statusEffect = StatusEffectType.None,
             int effectDuration = 0, int effectValue = 0,
@@ -242,6 +559,9 @@ namespace TeamLog.Editor
             int resourcePowerPerStack = 0, bool consumeAllResource = false,
             ShieldFlag shieldFlags = ShieldFlag.None,
             int minResourceRequired = 0,
+            bool isDiscover = false, DiscoverPoolData discoverPool = null,
+            bool isCorpseSkill = false,
+            CorpseActionType corpseAction = CorpseActionType.None, int corpseActionValue = 0,
             params BehaviorTag[] behaviors)
         {
             var path = $"{SKILL_PATH}/{fileName}.asset";
@@ -264,6 +584,11 @@ namespace TeamLog.Editor
             SetPrivateField(skill, "_consumeAllResource", consumeAllResource);
             SetPrivateField(skill, "_shieldFlags", shieldFlags);
             SetPrivateField(skill, "_minResourceRequired", minResourceRequired);
+            SetPrivateField(skill, "_isDiscover", isDiscover);
+            SetPrivateField(skill, "_discoverPool", discoverPool);
+            SetPrivateField(skill, "_isCorpseSkill", isCorpseSkill);
+            SetPrivateField(skill, "_corpseAction", corpseAction);
+            SetPrivateField(skill, "_corpseActionValue", corpseActionValue);
             SetPrivateField(skill, "_behaviors", behaviors ?? new BehaviorTag[0]);
 
             EditorUtility.SetDirty(skill);

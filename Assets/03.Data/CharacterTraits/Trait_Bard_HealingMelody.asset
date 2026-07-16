@@ -14,12 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: bard_healing_melody
   _displayName: "\uCE58\uC720 \uBA5C\uB85C\uB514"
-  _description: "\uB9E4 \uD134 \uC885\uB8CC \uC2DC HP +2 \uD68C\uBCF5"
+  _description: "EchoMelody \uBC1C\uB3D9 \uC2DC \uCD94\uAC00 \uD6A8\uACFC (Valor=\uC274\uB4DC+5,
+    Dissonance=\uCD94\uAC00 \uB3C4\uD2B8 \uB4F1)"
   _targetClass: 7
   _keywords:
-  - Type: 10
-    Value: 2
-    Trigger: 2
+  - Type: 33
+    Value: 1
+    Trigger: 0
     ConditionParam: 0
   _isDefault: 0
   _unlockCost: 60

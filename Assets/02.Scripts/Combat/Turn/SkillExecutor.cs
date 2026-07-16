@@ -8,6 +8,7 @@ using SkillInstance = TeamLog.Characters.SkillInstance;
 using SkillType = TeamLog.Characters.SkillType;
 using StatusEffectType = TeamLog.Characters.StatusEffectType;
 using StatType = TeamLog.Characters.StatType;
+using CorpseActionType = TeamLog.Characters.CorpseActionType;
 
 // Phase BK: BehaviorKeyword는 TeamLog.Skill 네임스페이스
 using BehaviorKeyword = TeamLog.Skill.BehaviorKeyword;
@@ -57,8 +58,33 @@ namespace TeamLog.Combat.Turn
             // 자원 비례 위력(ResourcePowerPerStack)이 Heal/Shield에도 적용됨
             _pipeline.ExecuteSkill(caster, skill, target, instance, powerMultiplier);
 
+            // Phase CC-2F: Mortis 본인 스킬의 시체 액션 처리 (EmpowerNext/MassEmpower/SoulLink)
+            if (caster?.Corpse != null && caster.Corpse.IsActive && skill.CorpseAction != CorpseActionType.None)
+            {
+                ApplyCorpseAction(caster, skill);
+            }
+
             OnSkillApplied?.Invoke(skill, target);
             CombatEventBus.FireSkillUsed(skill, caster);
+        }
+
+        /// <summary>Phase CC-2F: Mortis 스킬 시체 액션 적용 — EmpowerNext/MassEmpower/SoulLink.</summary>
+        private static void ApplyCorpseAction(Character caster, SkillData skill)
+        {
+            var corpse = caster.Corpse;
+            if (corpse == null) return;
+            switch (skill.CorpseAction)
+            {
+                case CorpseActionType.EmpowerNext:
+                    corpse.ApplyEmpowerNext(skill.CorpseActionValue);
+                    break;
+                case CorpseActionType.MassEmpower:
+                    corpse.ApplyMassEmpower(skill.CorpseActionValue);
+                    break;
+                case CorpseActionType.SoulLink:
+                    corpse.SoulLinkRemainingTurns = 2; // 2턴 지속
+                    break;
+            }
         }
 
         /// <summary>

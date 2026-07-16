@@ -12,21 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
   m_Name: Char_Alchemist
   m_EditorClassIdentifier: 
-  _characterName: "\uC5F0\uAE08\uC220\uC0AC"
-  _characterClass: 0
-  _description: Alchemist
-  _baseHP: 85
+  _characterName: "\uCF08"
+  _characterClass: 6
+  _description: "\uC5F0\uAE08\uC220\uC0AC. \uB9E4 \uC2A4\uD0AC\uC774 \uC0C8\uB85C\uC6B4
+    \uBC1C\uACAC\uC758 \uC21C\uAC04 \u2014 \uD480\uC5D0\uC11C 3\uAC1C\uC758 \uC120\uD0DD\uC9C0\uB97C
+    \uBB34\uC791\uC704\uB85C \uBF51\uC544, \uC0C1\uD669\uC5D0 \uB9DE\uB294 \uD6A8\uACFC\uB97C
+    \uC120\uD0DD\uD574 \uBC1C\uB3D9\uD55C\uB2E4. \uAC19\uC740 \uC2A4\uD0AC\uB3C4
+    \uB9E4\uBC88 \uB2E4\uB978 \uACB0\uACFC\uB97C \uB9CC\uB4E0\uB2E4"
+  _baseHP: 80
   _baseATK: 0
   _baseDEF: 0
-  _enemyTrait: 6
+  _enemyTrait: 0
   _isBoss: 0
   _skills:
-  - {fileID: 11400000, guid: 284829a39fad1d84081c766d6c6ecafd, type: 2}
-  - {fileID: 11400000, guid: 771da9ab69d82a948b641e51c3162028, type: 2}
-  - {fileID: 11400000, guid: e4e4d82402997fb4b9289af114fab6b0, type: 2}
-  - {fileID: 11400000, guid: 4110e1a34e151df469719cf3609c60b7, type: 2}
-  _isDefault: 0
-  _unlockCondition: "3\uCE35 \uBCF4\uC2A4 \uD074\uB9AC\uC5B4"
+  - {fileID: 11400000, guid: fbb2ed294ace39a4195eb66f38c5de09, type: 2}
+  - {fileID: 11400000, guid: 6a2113b3da77d4748bcf5d4b38a85020, type: 2}
+  - {fileID: 11400000, guid: 22314e0a2fb08004790f4a9c55402b3d, type: 2}
+  - {fileID: 11400000, guid: c5de99fcb9b8e4d459460e5fe8d0c044, type: 2}
+  _isDefault: 1
+  _unlockCondition: 
   _resourceType: 0
   _baseCritChance: 0
   _baseCritDamageMul: 1.5
+  _corpseBaseSkills: []

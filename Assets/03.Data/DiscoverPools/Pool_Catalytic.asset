@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a910996bfd59a164a9ab3170d1ed01f5, type: 3}
+  m_Name: Pool_Catalytic
+  m_EditorClassIdentifier: 
+  _poolName: "\uCD09\uB9E4 \uBB3C\uC57D \uD480"
+  _category: 4
+  _description: "\uC720\uD2F8\uB9AC\uD2F0 \uC601\uC5ED \u2014 \uC0C1\uD669 \uD2B9\uC218
+    \uD6A8\uACFC (\uAD11\uC5ED/\uD3ED\uB51C/\uD2B9\uC218)"
+  _entries:
+  - Skill: {fileID: 11400000, guid: 7e3ee8976f7b5524c813d912dd6a3f07, type: 2}
+    Weight: 20
+  - Skill: {fileID: 11400000, guid: 78fd3960d1e2727499451833e1331277, type: 2}
+    Weight: 20
+  - Skill: {fileID: 11400000, guid: e210a27463a823b46b9f652f32e79bd7, type: 2}
+    Weight: 15
+  - Skill: {fileID: 11400000, guid: 383fbc0f198ba3f49b65015ba8061ba9, type: 2}
+    Weight: 15
+  - Skill: {fileID: 11400000, guid: 68a4b19a125ce9b49ba8d13cbd05805a, type: 2}
+    Weight: 10
+  - Skill: {fileID: 11400000, guid: 03ac9188d013e7e48b35b7ad77fd7f2f, type: 2}
+    Weight: 10
+  - Skill: {fileID: 11400000, guid: 837190d4d15b82d45a006fd3444b16e2, type: 2}
+    Weight: 10

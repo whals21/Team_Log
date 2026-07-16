@@ -13,6 +13,23 @@ namespace TeamLog.Characters
         Prophecy,     // Sibyl (Oracle) — 예언(지연 발동)
         Charge,       // Taranis (Stormcaller) — 전하 네트워크
         Shadows,      // Umbra (Rogue) — 그림자 (파티 보호형 치명타 자원) — Phase CC-2A
+        Combo,        // Aster (Archer) — 연속 사격 (매 턴 스킬 사용 시 +1) — Phase CC-2B
+        Mercy,        // Elara (Healer) — 회복의 연결고리 (파티원별 회복량 추적) — Phase CC-2C
+        Melody,       // Calliope (Bard) — 주 선율 + 부 선율 메아리 — Phase CC-2D
+    }
+
+    /// <summary>
+    /// ★ Phase CC-2D: Bard 선율 종류 — 주 선율(CurrentMelody) / 부 선율(EchoMelody).
+    /// 매 턴 시작 시 Current → Echo로 이동, Echo 자동 발동 (주 선율의 50%).
+    /// 같은 선율 연속 시 부 선율 무효화 (매 턴 다른 스킬 유도).
+    /// </summary>
+    public enum MelodyType
+    {
+        None,         // 선율 없음 (초기/리셋)
+        Healing,      // Mending Song — 힐
+        Valor,        // Anthem of Valor — 파티 ATK+
+        Dissonance,   // Dissonant Chord — 적 ATK-
+        Inspiration,  // Inspiring Refrain — AP+ / 쉴드
     }
 
     /// <summary>
@@ -54,6 +71,16 @@ namespace TeamLog.Characters
 
         /// <summary>★ 스택 변화 이벤트 — 양수=획득, 음수=소모. UI 갱신/플로팅 텍스트용.</summary>
         public event System.Action<int> OnStacksChanged;
+
+        /// <summary>
+        /// ★ Phase CC-2C: Owner 캐릭터 참조 — Character 생성 시 설정.
+        /// MercyResourceComponent 등이 OnTurnStart 없이도 Owner에 접근 가능.
+        /// 기존 컴포넌트는 OnTurnStart(owner) 매개변수를 계속 사용 (회귀 0).
+        /// </summary>
+        public Character Owner { get; private set; }
+
+        /// <summary>Character 생성자에서 호출 — Owner 설정.</summary>
+        public void InitializeOwner(Character owner) => Owner = owner;
 
         /// <summary>현재 스택을 최대치로 제한.</summary>
         protected void ClampStacks()

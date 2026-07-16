@@ -14,12 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: alch_reinforced_potion
   _displayName: "\uAC15\uD654 \uBB3C\uC57D"
-  _description: "\uC804\uD22C \uC2DC\uC791 \uC2DC \uCD5C\uB300 HP +15"
+  _description: "\uC804\uD22C\uB2F9 1\uD68C, \uBC1C\uACAC \uC120\uD0DD\uC9C0 \uBAA8\uB450
+    \uC801\uC6A9 \uAC00\uB2A5 (3-4\uAC1C \uD6A8\uACFC \uB3D9\uC2DC \uBC1C\uB3D9)"
   _targetClass: 6
   _keywords:
-  - Type: 19
-    Value: 15
-    Trigger: 3
+  - Type: 36
+    Value: 1
+    Trigger: 0
     ConditionParam: 0
   _isDefault: 0
   _unlockCost: 60

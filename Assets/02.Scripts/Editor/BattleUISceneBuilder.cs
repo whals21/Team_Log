@@ -241,6 +241,7 @@ namespace TeamLog.Editor
             CreateCharacterPopup(root);
             CreateBattleEndOverlay(root);
             CreateTooltipUI(root);
+            CreateDiscoverModal(root); // Phase CC-2E: Cael Alchemist 발견 모달
         }
     }
 }

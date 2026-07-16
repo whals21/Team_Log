@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: archer_weak_point
   _displayName: "\uC57D\uC810 \uD3EC\uCC29"
-  _description: "\uC801 HP 60% \uBBF8\uB9CC \uC2DC \uC704\uB825 x1.4"
+  _description: "Hunter's Mark \uC801\uC5D0\uAC8C \uC704\uB825 +4 (Mark \uC758\uC874
+    \uAC15\uD654)"
   _targetClass: 4
   _keywords:
-  - Type: 1
-    Value: 1.4
-    Trigger: 12
-    ConditionParam: 0.6
+  - Type: 27
+    Value: 4
+    Trigger: 0
+    ConditionParam: 0
   _isDefault: 0
   _unlockCost: 30
   _soulUnlockCost: 0

@@ -573,5 +573,236 @@ namespace TeamLog.Editor
             if (scrollProp != null) scrollProp.objectReferenceValue = scrollRect;
             ser.ApplyModifiedProperties();
         }
+
+        // ══════════════════════════════════════════════════════════
+        //  Discover Modal (Phase CC-2E — Cael Alchemist)
+        //  하스스톤 발견 메커니즘: 스킬 시전 시 3-4개 카드 팝업
+        // ══════════════════════════════════════════════════════════
+
+        private static void CreateDiscoverModal(RectTransform parent)
+        {
+            // ── 최상위 오버레이 (sortingOrder=200으로 다른 UI 위에) ──
+            var overlayGO = new GameObject("DiscoverModal",
+                typeof(RectTransform), typeof(Canvas), typeof(CanvasGroup), typeof(GraphicRaycaster));
+            var overlayRect = overlayGO.GetComponent<RectTransform>();
+            overlayRect.SetParent(parent, false);
+            SetFillParent(overlayRect);
+            overlayGO.SetActive(false);
+
+            // 별도 Canvas — 최상위 오버레이로 동작 (BattleUICanvas=100 위)
+            var overlayCanvas = overlayGO.GetComponent<Canvas>();
+            overlayCanvas.overrideSorting = true;
+            overlayCanvas.sortingOrder = 200;
+            overlayCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            overlayGO.GetComponent<GraphicRaycaster>();
+
+            var overlayCg = overlayGO.GetComponent<CanvasGroup>();
+            overlayCg.alpha = 0f;
+            overlayCg.blocksRaycasts = true;
+            overlayCg.interactable = true;
+
+            // 반투명 어두운 배경 (클릭 차단용 Button)
+            var bgBtn = overlayGO.AddComponent<Button>();
+            var bgImg = overlayGO.AddComponent<Image>();
+            bgImg.color = new Color(0, 0, 0, 0.6f);
+            bgBtn.targetGraphic = bgImg;
+
+            // ── 중앙 패널 ──
+            var panel = NewRect("Panel", overlayRect);
+            panel.anchorMin = new Vector2(0.5f, 0.5f);
+            panel.anchorMax = new Vector2(0.5f, 0.5f);
+            panel.pivot = new Vector2(0.5f, 0.5f);
+            panel.sizeDelta = new Vector2(900, 360);
+            var panelImg = panel.gameObject.AddComponent<Image>();
+            panelImg.color = new Color(0.05f, 0.05f, 0.12f, 0.98f);
+            var panelOl = panel.gameObject.AddComponent<Outline>();
+            panelOl.effectColor = new Color(0.85f, 0.65f, 0.20f, 0.9f); // 황금 테두리
+            panelOl.effectDistance = new Vector2(3, -3);
+
+            // 패널 내부 VerticalLayoutGroup — Title + CardContainer
+            var panelVlg = panel.gameObject.AddComponent<VerticalLayoutGroup>();
+            panelVlg.padding = new RectOffset(20, 20, 14, 14);
+            panelVlg.spacing = 12;
+            panelVlg.childAlignment = TextAnchor.UpperCenter;
+            panelVlg.childControlWidth = true;
+            panelVlg.childControlHeight = false;
+            panelVlg.childForceExpandWidth = true;
+            panelVlg.childForceExpandHeight = false;
+
+            // 타이틀
+            var titleRect = NewRect("Title", panel);
+            SetFixedHeight(titleRect, 36);
+            var title = titleRect.gameObject.AddComponent<TextMeshProUGUI>();
+            title.font = GetOrCreateKoreanFont();
+            title.text = "발견";
+            title.fontSize = 24;
+            title.fontStyle = FontStyles.Bold;
+            title.alignment = TextAlignmentOptions.Center;
+            title.color = AccentYellow;
+
+            // 카드 컨테이너 (HorizontalLayoutGroup)
+            var cardContainer = NewRect("CardContainer", panel);
+            var containerLe = cardContainer.gameObject.AddComponent<LayoutElement>();
+            containerLe.preferredHeight = 260;
+            containerLe.flexibleHeight = 0;
+            var hlg = cardContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
+            hlg.padding = new RectOffset(12, 12, 8, 8);
+            hlg.spacing = 16;
+            hlg.childAlignment = TextAnchor.MiddleCenter;
+            hlg.childControlWidth = true;
+            hlg.childControlHeight = true;
+            hlg.childForceExpandWidth = true;
+            hlg.childForceExpandHeight = true;
+
+            // DiscoverCard 프리팹 생성
+            CreateDiscoverCardPrefab();
+
+            // 프리팹이 AssetDatabase에 인식되었는지 보장 — Refresh 후 로드
+            AssetDatabase.Refresh();
+            AssetDatabase.LoadAssetAtPath<GameObject>("Assets/03.Data/Prefabs/DiscoverCard.prefab");
+            var cardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/03.Data/Prefabs/DiscoverCard.prefab");
+            if (cardPrefab == null)
+                Debug.LogError("[DiscoverModal] DiscoverCard.prefab 로드 실패 — 모달 카드가 빈 상태로 표시됩니다. Assets/03.Data/Prefabs/DiscoverCard.prefab 파일 확인 필요");
+
+            // DiscoverModalUI 컴포넌트 추가 + 필드 와이어링
+            var modalUI = overlayGO.AddComponent<DiscoverModalUI>();
+            var ser = new SerializedObject(modalUI);
+            var cardContainerProp = ser.FindProperty("_cardContainer");
+            if (cardContainerProp != null) cardContainerProp.objectReferenceValue = cardContainer;
+            var titleProp = ser.FindProperty("_titleLabel");
+            if (titleProp != null) titleProp.objectReferenceValue = title;
+            var bgBtnProp = ser.FindProperty("_backgroundButton");
+            if (bgBtnProp != null) bgBtnProp.objectReferenceValue = bgBtn;
+            var cgProp = ser.FindProperty("_canvasGroup");
+            if (cgProp != null) cgProp.objectReferenceValue = overlayCg;
+
+            if (cardPrefab != null)
+            {
+                var cardPrefabProp = ser.FindProperty("_discoverCardPrefab");
+                if (cardPrefabProp != null) cardPrefabProp.objectReferenceValue = cardPrefab;
+            }
+
+            ser.ApplyModifiedProperties();
+        }
+
+        /// <summary>DiscoverCard 프리팹 생성 — RewardCard 패턴 차용.</summary>
+        private static void CreateDiscoverCardPrefab()
+        {
+            const string prefabPath = "Assets/03.Data/Prefabs/DiscoverCard.prefab";
+            if (!AssetDatabase.IsValidFolder("Assets/03.Data/Prefabs"))
+                AssetDatabase.CreateFolder("Assets/03.Data", "Prefabs");
+            AssetDatabase.DeleteAsset(prefabPath);
+
+            var go = new GameObject("DiscoverCard");
+            var rect = go.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(200, 260);
+
+            var layoutEl = go.AddComponent<LayoutElement>();
+            layoutEl.preferredWidth = 200;
+            layoutEl.preferredHeight = 260;
+            layoutEl.flexibleWidth = 1;
+            layoutEl.flexibleHeight = 1;
+
+            // 배경 — 스킬 타입별 색상 (기본 어두운 남색)
+            var bg = go.AddComponent<Image>();
+            bg.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
+            var bgOutline = go.AddComponent<Outline>();
+            bgOutline.effectColor = new Color(0.85f, 0.65f, 0.20f, 0.7f);
+            bgOutline.effectDistance = new Vector2(2, -2);
+            go.AddComponent<Button>();
+
+            // VerticalLayoutGroup으로 자식 자동 배치
+            var vlg = go.AddComponent<VerticalLayoutGroup>();
+            vlg.padding = new RectOffset(10, 10, 8, 8);
+            vlg.spacing = 4;
+            vlg.childAlignment = TextAnchor.UpperCenter;
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = false;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+
+            // 단축키 번호 (좌상단 배지)
+            var shortcutBadge = NewRect("ShortcutBadge", rect);
+            shortcutBadge.anchorMin = new Vector2(0, 1);
+            shortcutBadge.anchorMax = new Vector2(0, 1);
+            shortcutBadge.pivot = new Vector2(0, 1);
+            shortcutBadge.anchoredPosition = new Vector2(4, -4);
+            shortcutBadge.sizeDelta = new Vector2(28, 28);
+            // LayoutGroup 영향 받지 않도록
+            var shortcutLe = shortcutBadge.gameObject.AddComponent<LayoutElement>();
+            shortcutLe.ignoreLayout = true;
+            shortcutBadge.gameObject.AddComponent<Image>().color = new Color(0.95f, 0.82f, 0.25f, 0.95f);
+            var shortcutText = NewRect("T", shortcutBadge);
+            SetFillParent(shortcutText);
+            var shortcutTmp = AddText(shortcutText, "1", 16, FontStyles.Bold, TextAlignmentOptions.Center, Color.black);
+
+            // 아이콘 영역
+            var iconRect = NewRect("Icon", rect);
+            SetFixedHeight(iconRect, 80);
+            var iconImg = iconRect.gameObject.AddComponent<Image>();
+            iconImg.color = new Color(0.2f, 0.25f, 0.35f, 0.5f);
+            iconImg.preserveAspect = true;
+
+            // 스킬명
+            var nameRect = NewRect("NameText", rect);
+            SetFixedHeight(nameRect, 32);
+            var nameTmp = nameRect.gameObject.AddComponent<TextMeshProUGUI>();
+            nameTmp.font = GetOrCreateKoreanFont();
+            nameTmp.text = "---";
+            nameTmp.fontSize = 18;
+            nameTmp.fontStyle = FontStyles.Bold;
+            nameTmp.alignment = TextAlignmentOptions.Center;
+            nameTmp.color = TextWhite;
+            nameTmp.enableWordWrapping = true;
+
+            // 타입 라벨
+            var typeRect = NewRect("TypeText", rect);
+            SetFixedHeight(typeRect, 18);
+            var typeTmp = typeRect.gameObject.AddComponent<TextMeshProUGUI>();
+            typeTmp.font = GetOrCreateKoreanFont();
+            typeTmp.text = "";
+            typeTmp.fontSize = 12;
+            typeTmp.fontStyle = FontStyles.Bold;
+            typeTmp.alignment = TextAlignmentOptions.Center;
+            typeTmp.color = AccentYellow;
+
+            // 효과 설명
+            var descRect = NewRect("DescText", rect);
+            var descLe = descRect.gameObject.AddComponent<LayoutElement>();
+            descLe.flexibleHeight = 1;
+            descLe.minHeight = 60;
+            var descTmp = descRect.gameObject.AddComponent<TextMeshProUGUI>();
+            descTmp.font = GetOrCreateKoreanFont();
+            descTmp.text = "";
+            descTmp.fontSize = 12;
+            descTmp.alignment = TextAlignmentOptions.Center;
+            descTmp.color = TextDim;
+            descTmp.enableWordWrapping = true;
+            descTmp.overflowMode = TextOverflowModes.Ellipsis;
+
+            // DiscoverCard 컴포넌트 + 필드 와이어링
+            var card = go.AddComponent<DiscoverCard>();
+            var ser = new SerializedObject(card);
+            var bgProp = ser.FindProperty("_backgroundImage");
+            if (bgProp != null) bgProp.objectReferenceValue = bg;
+            var iconProp = ser.FindProperty("_iconImage");
+            if (iconProp != null) iconProp.objectReferenceValue = iconImg;
+            var shortcutProp = ser.FindProperty("_shortcutLabel");
+            if (shortcutProp != null) shortcutProp.objectReferenceValue = shortcutTmp;
+            var titleProp = ser.FindProperty("_titleLabel");
+            if (titleProp != null) titleProp.objectReferenceValue = nameTmp;
+            var typeLabelProp = ser.FindProperty("_typeLabel");
+            if (typeLabelProp != null) typeLabelProp.objectReferenceValue = typeTmp;
+            var descProp = ser.FindProperty("_descLabel");
+            if (descProp != null) descProp.objectReferenceValue = descTmp;
+            var btnProp = ser.FindProperty("_button");
+            if (btnProp != null) btnProp.objectReferenceValue = go.GetComponent<Button>();
+            ser.ApplyModifiedProperties();
+
+            PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
+            Object.DestroyImmediate(go);
+            AssetDatabase.Refresh(); // 생성 직후 AssetDatabase가 인식하도록 강제 갱신
+            Debug.Log("[DiscoverModal] DiscoverCard prefab created at " + prefabPath);
+        }
     }
 }

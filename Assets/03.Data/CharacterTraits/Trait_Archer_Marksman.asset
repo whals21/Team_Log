@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: archer_marksman
   _displayName: "\uBA85\uC0AC\uC218"
-  _description: "\uC704\uB825 +2 \uAC00\uC0B0"
+  _description: "Combo\uAC00 \uCD5C\uB300\uCE58(3)\uC77C \uB54C \uBAA8\uB4E0 \uC2A4\uD0AC
+    \uC704\uB825 +3"
   _targetClass: 4
   _keywords:
-  - Type: 2
-    Value: 2
+  - Type: 26
+    Value: 3
     Trigger: 0
     ConditionParam: 0
   _isDefault: 1

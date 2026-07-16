@@ -43,6 +43,10 @@ namespace TeamLog.Characters
         [Tooltip("치명타 피해 배율. 기본 1.5배. Umbra는 Shadows 3일 때 2.0배 적용.")]
         [SerializeField] private float _baseCritDamageMul = 1.5f;
 
+        [Header("시체 (Phase CC-2F — Mortis Necromancer)")]
+        [Tooltip("Necromancer 전용 — 시체 기본 4스킬. 매 전투 시작 시 시체 슬롯을 이 스킬들로 초기화.")]
+        [SerializeField] private List<SkillData> _corpseBaseSkills;
+
         #region Properties
         public string CharacterName => _characterName;
         public CharacterClass Class => _characterClass;
@@ -58,6 +62,7 @@ namespace TeamLog.Characters
         public ResourceType ResourceType => _resourceType;
         public float BaseCritChance => _baseCritChance;
         public float BaseCritDamageMul => _baseCritDamageMul;
+        public IReadOnlyList<SkillData> CorpseBaseSkills => _corpseBaseSkills;
         #endregion
     }
 

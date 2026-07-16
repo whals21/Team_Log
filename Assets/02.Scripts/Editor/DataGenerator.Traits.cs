@@ -58,26 +58,33 @@ namespace TeamLog.Editor
                 CharacterClass.Mage, isDefault: false, unlockCost: 60, soulCost: 1,
                 keywords: new[] { Kw(KeywordType.ExtraAP, 1) });
 
-            // 힐러 (Healer)
+            // 힐러 (Healer) — Phase CC-2C Elara 리워크
+            // 기획: ReworkDrafts/01_Healer.md
+            // Phase CC-2C 키워드 구현:
+            //   - AutoHealBonus → MercyResourceComponent.AutoHealPartyMembers에서 매 턴 자동 힐 +
+            //   - MercyCleanseBonus → Mend Wounds 정화 시 Mercy +N (후속 Behavior 확장)
+            //   - MercyBurstTargets → Mercy 버스트 대상 수 (기본 1 → N)
             CreateTrait("Trait_Healer_Blessing", "healer_blessing", "축복",
-                "힐 효과 +15%",
+                "연결고리 자동 힐 위력 +2 (3→5)",
                 CharacterClass.Healer, isDefault: true, unlockCost: 0, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.HealMul, 1.15f) });
+                keywords: new[] { Kw(KeywordType.AutoHealBonus, 2) });
 
             CreateTrait("Trait_Healer_PureHeal", "healer_pure_heal", "순수 치유",
-                "적 처치 시 HP +3 회복",
+                "Mend Wounds 정화 시 Mercy +3 추가 축전",
                 CharacterClass.Healer, isDefault: false, unlockCost: 30, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.OnKillHeal, 3, KeywordTrigger.OnKill) });
+                keywords: new[] { Kw(KeywordType.MercyCleanseBonus, 3) });
 
             CreateTrait("Trait_Healer_DivineShield", "healer_divine_shield", "신성 방패",
-                "힐 적용 시 쉴드 +2 획득",
+                "Mercy 버스트 대상 +1 (1명 → 2명)",
                 CharacterClass.Healer, isDefault: false, unlockCost: 60, soulCost: 1,
-                keywords: new[] { Kw(KeywordType.ShieldPerTurn, 2, KeywordTrigger.OnHealApplied) });
+                keywords: new[] { Kw(KeywordType.MercyBurstTargets, 2) });
 
             // 도적 (Rogue) — Phase CC-2A Umbra 리워크
             // 기획: ReworkDrafts/02_Rogue.md
-            // NOTE: ShadowsMaxUp / StrongVsDebuff 키워드는 후속 작업에서 추가 예정.
-            //       일단 텍스트는 리워크안으로 갱신하고, 키워드 효과는 기존 유지 (일부만 작동).
+            // Phase CC-2A 키워드 구현 완료:
+            //   - ShadowsMaxUp → CharacterTraitHandler.ApplyPassiveEffects에서 Resource.MaxStacksBonus 적용
+            //   - PowerAddVsDebuff → CharacterTraitHandler.GetBonusOutgoingDamage(target)에서 도트 적 +N
+            //     (DamageCalculator.DealDamage가 target을 넘김)
             CreateTrait("Trait_Rogue_AssassinInstinct", "rogue_assassin_instinct", "그림자 심화",
                 "Shadows 최대치 +1 (3→4). Shadows 4 = 치명타 피해 3.5배",
                 CharacterClass.Rogue, isDefault: true, unlockCost: 0, soulCost: 0,
@@ -93,72 +100,88 @@ namespace TeamLog.Editor
                 CharacterClass.Rogue, isDefault: false, unlockCost: 60, soulCost: 1,
                 keywords: new[] { Kw(KeywordType.DamageReduction, 3) }); // 받는 피해 -3 (기존 2→3)
 
-            // 궁수 (Archer)
+            // 궁수 (Archer) — Phase CC-2B Aster 리워크
+            // 기획: ReworkDrafts/03_Archer.md
+            // Phase CC-2B 키워드 구현:
+            //   - ComboMaxPowerBonus → CharacterTraitHandler.GetBonusOutgoingDamage에서 Combo 최대치 시 +
+            //   - PowerAddVsMark → Mark 상태 적 대상 +N
             CreateTrait("Trait_Archer_Marksman", "archer_marksman", "명사수",
-                "위력 +2 가산",
+                "Combo가 최대치(3)일 때 모든 스킬 위력 +3",
                 CharacterClass.Archer, isDefault: true, unlockCost: 0, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.PowerAdd, 2) });
+                keywords: new[] { Kw(KeywordType.ComboMaxPowerBonus, 3) });
 
             CreateTrait("Trait_Archer_WeakPoint", "archer_weak_point", "약점 포착",
-                "적 HP 60% 미만 시 위력 x1.4",
+                "Hunter's Mark 적에게 위력 +4 (Mark 의존 강화)",
                 CharacterClass.Archer, isDefault: false, unlockCost: 30, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.PowerMul, 1.4f, KeywordTrigger.OnEnemyLowHP, 0.6f) });
+                keywords: new[] { Kw(KeywordType.PowerAddVsMark, 4) });
 
             CreateTrait("Trait_Archer_RapidFire", "archer_rapid_fire", "속사",
-                "스킬 코스트 -1",
+                "스킬 코스트 -1 (Quick Shot AP 1→0, 매 턴 무료 Combo 축전)",
                 CharacterClass.Archer, isDefault: false, unlockCost: 60, soulCost: 1,
-                keywords: new[] { Kw(KeywordType.CostAdd, -1) });
+                keywords: new[] { Kw(KeywordType.CostAdd, -1) }); // TODO: Quick Shot에만 적용하도록 제한 검토 (현재 모든 스킬)
 
-            // 네크로맨서 (Necromancer)
+            // 네크로맨서 (Necromancer) — Phase CC-2F Mortis 리워크
+            // 기획: ReworkDrafts/04_Necromancer.md
+            // Phase CC-2F 키워드 구현:
+            //   - SoulLinkMul → Soul Link 회복 비율 배수 (기본 0.5 → 0.75)
+            //   - CurseExtraDamage → AttackDown(저주) 상태 적 대상 추가 데미지
+            //   - CorpseKillEmpower → 적 처치 시 시체 영구 강화 +N
             CreateTrait("Trait_Necro_LifeLeech", "necro_life_leech", "생명력 흡수",
-                "준 데미지의 15% 회복",
+                "Soul Link 회복 비율 50% → 75% (강화 흡혈)",
                 CharacterClass.Necromancer, isDefault: true, unlockCost: 0, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.DamageDealtHealPercent, 0.15f) });
+                keywords: new[] { Kw(KeywordType.SoulLinkMul, 0.75f) });
 
             CreateTrait("Trait_Necro_CursePrice", "necro_curse_price", "저주의 대가",
-                "버프/디버프 효과 x1.3",
+                "AttackDown(저주) 상태 적에게 +3 추가 데미지 (시체 처치 가속)",
                 CharacterClass.Necromancer, isDefault: false, unlockCost: 30, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.EffectMul, 1.3f) });
+                keywords: new[] { Kw(KeywordType.CurseExtraDamage, 3) });
 
             CreateTrait("Trait_Necro_DeathHarvest", "necro_death_harvest", "죽음의 수확",
-                "적 처치당 공격력 +1 누적",
+                "적 처치 시 시체 스킬 교체 + 영구 강화 +2 (시체 스노우볼)",
                 CharacterClass.Necromancer, isDefault: false, unlockCost: 60, soulCost: 1,
-                keywords: new[] { Kw(KeywordType.StackingPowerOnKill, 1, KeywordTrigger.OnKill) });
+                keywords: new[] { Kw(KeywordType.CorpseKillEmpower, 2) });
 
-            // 연금술사 (Alchemist)
+            // 연금술사 (Alchemist) — Phase CC-2E Cael 리워크
+            // 기획: ReworkDrafts/05_Alchemist.md
+            // Phase CC-2E 키워드 구현:
+            //   - DiscoverChoicesAdd → 발견 선택지 수 증가 (기본 3 → 3+N)
+            //   - DiscoverWeightBonus → Crippling 카테고리 가중치 배수 (독 specialize)
+            //   - DiscoverApplyAll → 전투당 1회 발견 선택지 모두 적용 (강화 물약)
             CreateTrait("Trait_Alch_PotionMaster", "alch_potion_master", "물약 명인",
-                "힐/쉴드 효과 +10%",
+                "발견 선택지 3 → 4개 (더 많은 옵션)",
                 CharacterClass.Alchemist, isDefault: true, unlockCost: 0, soulCost: 0,
-                keywords: new[] {
-                    Kw(KeywordType.HealMul, 1.1f),
-                    Kw(KeywordType.ShieldMul, 1.1f)
-                });
+                keywords: new[] { Kw(KeywordType.DiscoverChoicesAdd, 1) });
 
             CreateTrait("Trait_Alch_ToxicBurst", "alch_toxic_burst", "독성 폭발",
-                "상태이상 지속시간 +2턴",
+                "약화 물약 발견 풀에서 독/화상/출혈 등 독 계열 가중치 2배",
                 CharacterClass.Alchemist, isDefault: false, unlockCost: 30, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.DurationAdd, 2) });
+                keywords: new[] { Kw(KeywordType.DiscoverWeightBonus, 2.0f) });
 
             CreateTrait("Trait_Alch_ReinforcedPotion", "alch_reinforced_potion", "강화 물약",
-                "전투 시작 시 최대 HP +15",
+                "전투당 1회, 발견 선택지 모두 적용 가능 (3-4개 효과 동시 발동)",
                 CharacterClass.Alchemist, isDefault: false, unlockCost: 60, soulCost: 1,
-                keywords: new[] { Kw(KeywordType.MaxHPUp, 15, KeywordTrigger.OnBattleStart) });
+                keywords: new[] { Kw(KeywordType.DiscoverApplyAll, 1) });
 
-            // 음유시인 (Bard)
+            // 음유시인 (Bard) — Phase CC-2D Calliope 리워크
+            // 기획: ReworkDrafts/06_Bard.md
+            // Phase CC-2D 키워드 구현:
+            //   - EchoPowerMul → 부 선율 배율 (기본 0.5 → 0.75)
+            //   - RepeatNoPenalty → 같은 스킬 연속 시 부 선율 무효화 페널티 무시
+            //   - EchoBonusEffect → 부 선율 추가 효과 (후속 구현)
             CreateTrait("Trait_Bard_BattleSong", "bard_battle_song", "전투 노래",
-                "매 턴 AP +1",
+                "부 선율 위력 50% → 75% (메아리 강화)",
                 CharacterClass.Bard, isDefault: true, unlockCost: 0, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.ExtraAP, 1) });
+                keywords: new[] { Kw(KeywordType.EchoPowerMul, 0.75f) });
 
             CreateTrait("Trait_Bard_CourageChord", "bard_courage_chord", "용기의 화음",
-                "전투 시작 시 ATK +2 (영구)",
+                "같은 스킬 연속 사용 시 부 선율 무효화 페널티 제거 (자유 연주)",
                 CharacterClass.Bard, isDefault: false, unlockCost: 30, soulCost: 0,
-                keywords: new[] { Kw(KeywordType.ATKUp, 2, KeywordTrigger.OnBattleStart) });
+                keywords: new[] { Kw(KeywordType.RepeatNoPenalty, 1) });
 
             CreateTrait("Trait_Bard_HealingMelody", "bard_healing_melody", "치유 멜로디",
-                "매 턴 종료 시 HP +2 회복",
+                "EchoMelody 발동 시 추가 효과 (Valor=쉴드+5, Dissonance=추가 도트 등)",
                 CharacterClass.Bard, isDefault: false, unlockCost: 60, soulCost: 1,
-                keywords: new[] { Kw(KeywordType.HPPerTurn, 2, KeywordTrigger.OnTurnEnd) });
+                keywords: new[] { Kw(KeywordType.EchoBonusEffect, 1) });
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

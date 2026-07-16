@@ -14,15 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: alch_potion_master
   _displayName: "\uBB3C\uC57D \uBA85\uC778"
-  _description: "\uD790/\uC274\uB4DC \uD6A8\uACFC +10%"
+  _description: "\uBC1C\uACAC \uC120\uD0DD\uC9C0 3 \u2192 4\uAC1C (\uB354 \uB9CE\uC740
+    \uC635\uC158)"
   _targetClass: 6
   _keywords:
-  - Type: 7
-    Value: 1.1
-    Trigger: 0
-    ConditionParam: 0
-  - Type: 6
-    Value: 1.1
+  - Type: 34
+    Value: 1
     Trigger: 0
     ConditionParam: 0
   _isDefault: 1

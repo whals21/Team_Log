@@ -68,6 +68,16 @@ namespace TeamLog.Map
         // 파티
         public IReadOnlyList<Character> PlayerParty => _playerParty;
 
+        // ★ Phase CC-2D: 현재 전투 중인 적 목록 — BattleSceneSetup/TurnManager에서 매 전투 시작 시 설정.
+        // MelodyResourceComponent(부 선율 Dissonance) 등이 접근. null이면 해당 효과 스킵.
+        public IReadOnlyList<Character> CurrentEnemies { get; private set; }
+
+        /// <summary>현재 전투 적 목록 설정 — BattleSceneSetup.SetupBattle에서 호출.</summary>
+        public void SetCurrentEnemies(List<Character> enemies) => CurrentEnemies = enemies;
+
+        /// <summary>전투 종료 시 적 목록 클리어.</summary>
+        public void ClearCurrentEnemies() => CurrentEnemies = null;
+
         // 스테이지 테마 — 런 시작 시 각 스테이지별 1개씩 무작위 채택
         public List<StageThemeData> SelectedThemes { get; } = new();
         public StageThemeData CurrentStageTheme

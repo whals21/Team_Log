@@ -20,6 +20,9 @@ namespace TeamLog.Characters
         // 누적형 효과 상태
         private int _killStackCount;
 
+        // Phase CC-2E: Cael(Alchemist) "강화 물약" 특성 — 전투당 1회 ApplyAll 사용 가능
+        private bool _discoverApplyAllAvailable;
+
         // 트리거 체인 무한 루프 방지
         private int _triggerDepth;
         private const int MAX_TRIGGER_DEPTH = 5;
@@ -58,6 +61,12 @@ namespace TeamLog.Characters
                 if (kw.Type == KeywordType.ShadowsMaxUp && _owner.Resource != null)
                 {
                     _owner.Resource.MaxStacksBonus = (int)kw.Value;
+                }
+
+                // Phase CC-2F: Mortis "생명력 흡수" 특성 — Soul Link 회복 비율 설정
+                if (kw.Type == KeywordType.SoulLinkMul && _owner.Corpse != null)
+                {
+                    _owner.Corpse.SoulLinkMul = kw.Value;
                 }
             }
         }
@@ -129,6 +138,20 @@ namespace TeamLog.Characters
             if (target != null && HasDotDebuff(target))
                 bonus += QueryKeywordSum(KeywordType.PowerAddVsDebuff);
 
+            // Phase CC-2B: Combo 최대치 달성 시 위력 가산 (Aster "명사수" 특성)
+            if (_owner != null && _owner.Resource != null
+                && _owner.Resource.Resource == ResourceType.Combo
+                && _owner.Resource.CurrentStacks >= _owner.Resource.EffectiveMaxStacks)
+                bonus += QueryKeywordSum(KeywordType.ComboMaxPowerBonus);
+
+            // Phase CC-2B: Mark 상태 적 대상 추가 위력 (Aster "약점 포착" 특성)
+            if (target != null && HasMark(target))
+                bonus += QueryKeywordSum(KeywordType.PowerAddVsMark);
+
+            // Phase CC-2F: AttackDown(저주) 상태 적 대상 추가 위력 (Mortis "저주의 대가" 특성)
+            if (target != null && HasCurse(target))
+                bonus += QueryKeywordSum(KeywordType.CurseExtraDamage);
+
             return bonus;
         }
 
@@ -160,6 +183,18 @@ namespace TeamLog.Characters
 
         public int PeekNextAttackBonus() => _nextAttackBonusDamage;
 
+        // ── Phase CC-2E: Cael(Alchemist) 발견 특성 쿼리 ──
+
+        /// <summary>"강화 물약" 특성(DiscoverApplyAll) 보유 여부.</summary>
+        public bool HasDiscoverApplyAllTrait()
+            => QueryKeywordSum(KeywordType.DiscoverApplyAll) > 0;
+
+        /// <summary>발견 ApplyAll 사용 가능 여부 — 전투당 1회.</summary>
+        public bool CanUseDiscoverApplyAll() => _discoverApplyAllAvailable;
+
+        /// <summary>발견 ApplyAll 사용 처리 — 플래그 소진.</summary>
+        public void ConsumeDiscoverApplyAll() => _discoverApplyAllAvailable = false;
+
         /// <summary>
         /// Phase CC-2A: 대상이 도트/행동봉쇄 디버프 상태인지 확인.
         /// StrongVsDebuffBehavior.HasDotDebuff와 동일 로직 — 특성 시스템에서 재사용.
@@ -177,6 +212,22 @@ namespace TeamLog.Characters
                     return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Phase CC-2B: 대상이 Hunter's Mark 상태인지 확인 (Aster 자원 메카닉).
+        /// </summary>
+        private static bool HasMark(Character target)
+        {
+            return target?.StatusEffects != null && target.StatusEffects.HasEffect(StatusEffectType.Mark);
+        }
+
+        /// <summary>
+        /// Phase CC-2F: 대상이 AttackDown(저주) 상태인지 확인 (Mortis "저주의 대가" 특성).
+        /// </summary>
+        private static bool HasCurse(Character target)
+        {
+            return target?.StatusEffects != null && target.StatusEffects.HasEffect(StatusEffectType.AttackDown);
         }
 
         public int ConsumeNextAttackBonus()
@@ -207,6 +258,8 @@ namespace TeamLog.Characters
         private void OnBattleStart()
         {
             _killStackCount = 0;
+            // Phase CC-2E: "강화 물약" 특성 보유 시 매 전투마다 ApplyAll 1회 가용
+            _discoverApplyAllAvailable = QueryKeywordSum(KeywordType.DiscoverApplyAll) > 0;
             ApplyTrigger(KeywordTrigger.OnBattleStart);
         }
 
@@ -236,6 +289,14 @@ namespace TeamLog.Characters
             // Owner가 소속된 파티가 적을 처치했을 때 — owner가 살아있을 때만 처리
             if (_owner == null || !_owner.IsAlive) return;
             ApplyTrigger(KeywordTrigger.OnKill);
+
+            // Phase CC-2F: Mortis "죽음의 수확" 특성 — 적 처치 시 시체 영구 강화
+            if (_owner.Corpse != null && _owner.Corpse.IsActive)
+            {
+                int killEmpower = QueryKeywordSum(KeywordType.CorpseKillEmpower);
+                if (killEmpower > 0)
+                    _owner.Corpse.ApplyKillEmpower(killEmpower);
+            }
         }
 
         private void OnHealApplied(Character target, int amount)

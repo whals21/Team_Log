@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: archer_rapid_fire
   _displayName: "\uC18D\uC0AC"
-  _description: "\uC2A4\uD0AC \uCF54\uC2A4\uD2B8 -1"
+  _description: "\uC2A4\uD0AC \uCF54\uC2A4\uD2B8 -1 (Quick Shot AP 1\u21920, \uB9E4
+    \uD134 \uBB34\uB8CC Combo \uCD95\uC804)"
   _targetClass: 4
   _keywords:
   - Type: 3

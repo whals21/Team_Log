@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: alch_toxic_burst
   _displayName: "\uB3C5\uC131 \uD3ED\uBC1C"
-  _description: "\uC0C1\uD0DC\uC774\uC0C1 \uC9C0\uC18D\uC2DC\uAC04 +2\uD134"
+  _description: "\uC57D\uD654 \uBB3C\uC57D \uBC1C\uACAC \uD480\uC5D0\uC11C \uB3C5/\uD654\uC0C1/\uCD9C\uD608
+    \uB4F1 \uB3C5 \uACC4\uC5F4 \uAC00\uC911\uCE58 2\uBC30"
   _targetClass: 6
   _keywords:
-  - Type: 9
+  - Type: 35
     Value: 2
     Trigger: 0
     ConditionParam: 0

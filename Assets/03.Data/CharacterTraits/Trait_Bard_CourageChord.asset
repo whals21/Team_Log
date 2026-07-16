@@ -14,12 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: bard_courage_chord
   _displayName: "\uC6A9\uAE30\uC758 \uD654\uC74C"
-  _description: "\uC804\uD22C \uC2DC\uC791 \uC2DC ATK +2 (\uC601\uAD6C)"
+  _description: "\uAC19\uC740 \uC2A4\uD0AC \uC5F0\uC18D \uC0AC\uC6A9 \uC2DC \uBD80
+    \uC120\uC728 \uBB34\uD6A8\uD654 \uD398\uB110\uD2F0 \uC81C\uAC70 (\uC790\uC720
+    \uC5F0\uC8FC)"
   _targetClass: 7
   _keywords:
-  - Type: 20
-    Value: 2
-    Trigger: 3
+  - Type: 32
+    Value: 1
+    Trigger: 0
     ConditionParam: 0
   _isDefault: 0
   _unlockCost: 30

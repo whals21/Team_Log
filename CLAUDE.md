@@ -184,10 +184,18 @@ Assets/
 | CC-2G-2~7 | 기존 8종 스킬 리워크 완료 — Duran(Bulwark/Desperation) Lumi(Bulwark/GiantSlayer) Taranis(Explosion 신규) Sibyl(FollowUp/Echo/LimitBreak 신규 3종) Umbra(FollowUp) Aster(Momentum). Character.HitThisTurn 인프라 추가. |
 
 ### 진행 중
+- **★ Phase UI (Party Selection Scene) 완료 (2026-07-18)**: 웹 목업 → 유니티 구현 완료. 다크 판타지 고딕 톤. TitleScene → PartySelectionScene → MapScene 파이프 구축. 8개 UI 컴포넌트 + SceneBuilder + 23종 procedural Sprite + Cinzel/Cormorant 폰트. 상세 `2026-07-18.md`, `UIBestPractices.md`, `UIAutoBindHelper.cs`
 - **Phase CC-2G (기존 8종 스킬 리워크)**: 7/8 완료 (CC-2G-1 Ashe + CC-2G-2~7). CC-2G-8 Elara는 이미 4/4 보유로 생략. **로드맵 완료** — 후속 작업은 DataGenerator 메뉴 재실행 + Play 모드 검증. 상세 `2026-07-17-CC-2G-1.md`, `2026-07-17-CC-2G-2-7.md`
 - **Phase CC-2A (Umbra, the Rogue)**: 치명타 시스템 + ShadowsResourceComponent + StrongVsDebuffBehavior 코드 구현. .asset 생성/Play 검증 잔여. 상세 `2026-07-14.md`, `Characters/ReworkDrafts/02_Rogue.md`
 - **기존 6종 리워크 기획**: Healer/Archer/Necromancer/Alchemist/Bard (초안만). 우선순위: Archer → Healer → Bard → Alchemist → Necromancer. `Characters/ReworkDrafts/INDEX.md`
 - **BattleScene UI 개편 (2026-07-15~16)**: 5컬럼 동기화 그리드, 남색 톤, APArea 시각 분리(파란 테두리+밝은 남색), TargetBox 명시적 앵커, 캐릭터 카드 100px 확장 (ATK/DEF+자원을 HPBar 아래). Play 모드 최종 검증 잔여.
+
+### ★ 다음 UI 작업 후보 (2026-07-18 기준)
+- **특성 선택 데이터 전달**: PartySelectionScene에서 선택한 특성을 MapScene으로 전달 (`SelectedTraits` static 추가). 현재는 CharacterTraitSelectUI가 MapScene에서 재표시됨.
+- **신규 캐릭터 특성 에셋**: Ashe/Lumi/Sibyl/Taranis (Pyromancer/Cryomancer/Stormcaller/Oracle Class) 특성 12종 — CharacterTraits 폴더에 없음
+- **초상화 아트 에셋**: 11명 캐릭터 실제 일러스트 (현재 플레이스홀더 — 자원색 + 이니셜)
+- **전투 씬 UI 개편**: `UIBestPractices.md` + `UIAutoBindHelper.cs` 활용. `UI_Mockup/BattleScene_Umbra_Mockup.html` 등 기준
+- **UI 애니메이션**: 캐러셀 전환 페이드, 파티 슬롯 추가 펀치, EMBARK 버튼 글로우
 
 ### 잔여 (주요)
 - **Phase CC-2A 완성**: DataGenerator 메뉴 실행(Umbra .asset 생성), 특성 효과 적용(ShadowsMaxUp/StrongVsDebuff), 밸런스 시뮬레이션

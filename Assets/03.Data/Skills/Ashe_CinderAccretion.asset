@@ -23,7 +23,9 @@ MonoBehaviour:
   _statusEffect: 2
   _effectDuration: 2
   _effectValue: 3
-  _behaviors: []
+  _behaviors:
+  - Keyword: 44
+    Rank: 3
   _resourceGainType: 1
   _resourceGainAmount: 2
   _resourceCostType: 0

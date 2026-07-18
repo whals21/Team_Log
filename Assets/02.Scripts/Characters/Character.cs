@@ -31,6 +31,12 @@ namespace TeamLog.Characters
         public float CritChance { get; set; }
         public float CritDamageMul { get; set; }
 
+        // Phase CC-2G-5: FollowUp 추적 — 매 턴 시작 시 false, HP 데미지 받을 때 true.
+        // Sibyl Death Prophecy / Umbra Backstab 등 "이미 맞은 적 보너스" 용도.
+        public bool HitThisTurn { get; private set; }
+        public void MarkHitThisTurn() => HitThisTurn = true;
+        public void ResetHitThisTurn() => HitThisTurn = false;
+
         /// <summary>Phase CC: 자원 컴포넌트 장착 (캐릭터 생성 시 또는 런 시작 시).</summary>
         public void SetResource(CharacterResourceComponent resource)
         {

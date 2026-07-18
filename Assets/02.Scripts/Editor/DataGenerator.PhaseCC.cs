@@ -23,12 +23,14 @@ namespace TeamLog.Editor
         private static void GeneratePhaseCCCharacters()
         {
             // ════════════════════════════════════════════
-            // Ashe (Pyromancer) — Ember 자해 폭딜 스킬 4종
+            // Ashe (Pyromancer) — Ember 자해 폭딜 스킬 4종 (Phase CC-2G-1 리워크)
             // ════════════════════════════════════════════
-            // 1. Cinder Accretion — 셋업: 단일 5 + Burn, Ember +2
+            // 1. Cinder Accretion — 셋업: 단일 5 + Burn, Ember +2.
+            // Phase CC-2G-1: TargetFullHP(rank=3) 추가 — 풀피 적에게 5+3=8 위력 셋업 강화.
             CreatePhaseCCSkill("Ashe_CinderAccretion", "잿빛 응축", SkillType.Attack, TargetType.SingleEnemy,
                 power: 5, cost: 1, statusEffect: StatusEffectType.Burn, effectDuration: 2, effectValue: 3,
-                gainType: ResourceType.Ember, gainAmount: 2);
+                gainType: ResourceType.Ember, gainAmount: 2,
+                behaviors: new BehaviorTag(BehaviorKeyword.TargetFullHP, 3));
 
             // 2. Phoenix Renewal — 아군 힐 8 + Ember×3 추가 힐, Ember +1
             // 강화 조건: 대상 HP 50%- 시 Burn/Poison 정화 추가 (CleanseLowTarget).
@@ -39,19 +41,25 @@ namespace TeamLog.Editor
                 resourcePowerPerStack: 3, // Ember×3 추가 힐
                 behaviors: new BehaviorTag(BehaviorKeyword.CleanseLowTarget, 0));
 
-            // 3. Brand of Ash — 단일 8 + Ember×3 데미지, Ember -2 소모
+            // 3. Brand of Ash — 단일 8 + Ember×3 데미지, Ember -2 소모.
             // 강화 조건: 자신 HP 50%- 시 데미지 2배 (Berserk). Ashe는 자해 메카닉이라 임계 도달 잦음.
+            // Phase CC-2G-1: Desperation(rank=1) 추가 — 잃은 HP 10당 +1 위력 (Ember 자해와 시너지).
             CreatePhaseCCSkill("Ashe_BrandOfAsh", "잿더미 낙인", SkillType.Attack, TargetType.SingleEnemy,
                 power: 8, cost: 2,
                 costType: ResourceType.Ember, costAmount: 2,
                 resourcePowerPerStack: 3, // Ember×3 추가 위력
-                behaviors: new BehaviorTag(BehaviorKeyword.Berserk, 0)); // 자신 HP 50%- 시 2배
+                behaviors: new BehaviorTag[] {
+                    new(BehaviorKeyword.Berserk, 0),       // 자신 HP 50%- 시 2배
+                    new(BehaviorKeyword.Desperation, 1)    // 잃은 HP 10당 +1
+                });
 
-            // 4. Embrace of Cinders — 단일 30 + Ember×15, Ember 5 소모 (궁극기)
+            // 4. Embrace of Cinders — 단일 30 + Ember×15, Ember 5 소모 (궁극기).
+            // Phase CC-2G-1: AllIn(rank=10) 추가 — AP 0일 때 +10 위력 (풀충전 후 마무리 폭딜).
             CreatePhaseCCSkill("Ashe_EmbraceOfCinders", "잔불의 포옹", SkillType.Attack, TargetType.SingleEnemy,
                 power: 30, cost: 3,
                 costType: ResourceType.Ember, costAmount: 5,
-                resourcePowerPerStack: 15); // Ember×15 추가 위력 — 풀충전 시 30+75=105
+                resourcePowerPerStack: 15, // Ember×15 추가 위력 — 풀충전 시 30+75=105
+                behaviors: new BehaviorTag(BehaviorKeyword.AllIn, 10));
 
             // ════════════════════════════════════════════
             // Duran (Warrior) — Vengeance 복수 게이지 스킬 4종
@@ -67,16 +75,20 @@ namespace TeamLog.Editor
             CreatePhaseCCSkill("Duran_ProvokingShield", "도발 방패", SkillType.Buff, TargetType.Self,
                 power: 6, cost: 1, statusEffect: StatusEffectType.Taunt, effectDuration: 1, effectValue: 1);
 
-            // 3. Revenge Strike — 단일 10 + Vengeance×1, Vengeance 전량 소모
+            // 3. Revenge Strike — 단일 10 + Vengeance×1, Vengeance 전량 소모.
+            // Phase CC-2G-2: Bulwank(5) 추가 — 쉴드 보유 시 +5 (Shield Wall 콤보).
             CreatePhaseCCSkill("Duran_RevengeStrike", "복수의 일격", SkillType.Attack, TargetType.SingleEnemy,
                 power: 10, cost: 2,
                 costType: ResourceType.Vengeance, costAmount: 0,
-                resourcePowerPerStack: 1, consumeAllResource: true); // Vengeance 전량 소모
+                resourcePowerPerStack: 1, consumeAllResource: true, // Vengeance 전량 소모
+                behaviors: new BehaviorTag(BehaviorKeyword.Bulwark, 5));
 
-            // 4. Last Bastion — 자신 HP 25 회복 + 쉴드 25, Vengeance 15 소모 (궁극기)
+            // 4. Last Bastion — 자신 HP 25 회복 + 쉴드 25, Vengeance 15 소모 (궁극기).
+            // Phase CC-2G-2: Desperation(1) 추가 — 잃은 HP 10당 +1 (탱커 궁극기 강화).
             CreatePhaseCCSkill("Duran_LastBastion", "최후의 보루", SkillType.Shield, TargetType.Self,
                 power: 25, cost: 3,
-                costType: ResourceType.Vengeance, costAmount: 15);
+                costType: ResourceType.Vengeance, costAmount: 15,
+                behaviors: new BehaviorTag(BehaviorKeyword.Desperation, 1));
 
             // ════════════════════════════════════════════
             // Lumi (Cryomancer) — Frost 통제 스킬 4종
@@ -98,10 +110,15 @@ namespace TeamLog.Editor
                 power: 4, cost: 2, statusEffect: StatusEffectType.Freeze, effectDuration: 1, effectValue: 1,
                 gainType: ResourceType.Frost, gainAmount: 1);
 
-            // 4. Glacial Spike — 단일 12, Frost 3 소모 (폭딜)
+            // 4. Glacial Spike — 단일 12, Frost 3 소모 (폭딜).
+            // Phase CC-2G-3: Bulwark(4) + GiantSlayer(5) 추가 — Frost Armor 콤보 + 보스전 강화.
             CreatePhaseCCSkill("Lumi_GlacialSpike", "빙하 창", SkillType.Attack, TargetType.SingleEnemy,
                 power: 12, cost: 2,
-                costType: ResourceType.Frost, costAmount: 3);
+                costType: ResourceType.Frost, costAmount: 3,
+                behaviors: new BehaviorTag[] {
+                    new(BehaviorKeyword.Bulwark, 4),       // 쉴드 보유 시 +4 (Frost Armor 콤보)
+                    new(BehaviorKeyword.GiantSlayer, 5)    // 적 MaxHP 100+ 시 +5 (보스전)
+                });
 
             // ── Taranis (Stormcaller) Charge Network 연동 스킬 ──
             // Charge 상태이상(value=스택수, duration=3 — 자연 소멄은 value 기반으로 매 턴 -1, StatusEffectComponent에서 duration 소멸 스킵).
@@ -117,20 +134,30 @@ namespace TeamLog.Editor
                 power: 10, cost: 2, shieldFlags: ShieldFlag.GivesChargeOnAbsorb);
 
             CreatePhaseCCSkill("Taranis_Thunderstorm", "뇌우", SkillType.Attack, TargetType.AllEnemies,
-                power: 10, cost: 3, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 3);
+                power: 10, cost: 3, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 3,
+                behaviors: new BehaviorTag(BehaviorKeyword.Explosion, 3));
 
             // ── Sibyl (Oracle) Prophecy 연동 스킬 (간소화 — 일반 힐/딜로 처리, Prophecy 메카닉은 추후) ──
+            // Phase CC-2G-5: BehaviorTag 3종 추가로 조립식 시너지 혜택.
+            // 1. Death Prophecy — FollowUp(4): 이번 턴 이미 맞은 적 +4. 파티 일점사 시너지.
             CreatePhaseCCSkill("Sibyl_DeathProphecy", "죽음의 예언", SkillType.Attack, TargetType.SingleEnemy,
-                power: 14, cost: 1); // 일반 딜 (정식 Prophecy 1턴 뒤 발동은 추후)
+                power: 14, cost: 1,
+                behaviors: new BehaviorTag(BehaviorKeyword.FollowUp, 4));
 
+            // 2. Vision of Renewal — LimitBreak(8): 전투당 첫 사용 시 힐 +8 (12→20).
+            // "갱생" 컨셉 — 첫 사용은 강력한 회생이나, 전투가 길어질수록 효과 감소.
             CreatePhaseCCSkill("Sibyl_VisionOfRenewal", "갱생의 환영", SkillType.Heal, TargetType.SingleAlly,
-                power: 12, cost: 1);
+                power: 12, cost: 1,
+                behaviors: new BehaviorTag(BehaviorKeyword.LimitBreak, 8));
 
+            // 3. Borrowed Future — Buff Self (AttackUp). 행운의 시간 차용.
             CreatePhaseCCSkill("Sibyl_BorrowedFuture", "미래 차용", SkillType.Buff, TargetType.Self,
                 power: 0, cost: 1, statusEffect: StatusEffectType.AttackUp, effectDuration: 2, effectValue: 3);
 
+            // 4. Déjà Vu — Echo(0): 위력 절반 추가 데미지. "데자부" 컨셉 — 같은 공격이 반복됨.
             CreatePhaseCCSkill("Sibyl_DéjàVu", "데자부", SkillType.Attack, TargetType.SingleEnemy,
-                power: 10, cost: 1);
+                power: 10, cost: 1,
+                behaviors: new BehaviorTag(BehaviorKeyword.Echo, 0));
 
             // Ashe — Pyromancer (Ember 자해 폭딜).
             // Cinder Accretion(충전) + Brand of Ash(폭딜) + 기존 Mage 스킬 2종
@@ -175,9 +202,13 @@ namespace TeamLog.Editor
 
             // 2. Backstab — 단일 7, AP 2. 디버프 적 2배 (StrongVsDebuff BehaviorTag).
             // 대상이 Poison/Burn/Bleed/Freeze/Stun 중 하나라도 있으면 위력 ×2 (7 → 14).
+            // Phase CC-2G-6: FollowUp(3) 추가 — 이미 맞은 적 +3 (Poison Blade/Rupture 콤보).
             CreatePhaseCCSkill("Umbra_Backstab", "기습 찌르기", SkillType.Attack, TargetType.SingleEnemy,
                 power: 7, cost: 2,
-                behaviors: new BehaviorTag(BehaviorKeyword.StrongVsDebuff, 0));
+                behaviors: new BehaviorTag[] {
+                    new(BehaviorKeyword.StrongVsDebuff, 0),
+                    new(BehaviorKeyword.FollowUp, 3)
+                });
 
             // 3. Rupture — 단일 4 + Bleed 2턴, AP 1. HP 50%- 적 도트 +2턴 (Cull).
             CreatePhaseCCSkill("Umbra_Rupture", "할퀴기", SkillType.Attack, TargetType.SingleEnemy,
@@ -206,8 +237,11 @@ namespace TeamLog.Editor
             // 핵심: 매 턴 스킬을 쏠수록 Combo 강화. Umbra(Shadows)와 정반대 축.
 
             // 1. Quick Shot — 단일 4, AP 1 (셋업). Combo +1은 ComboResourceComponent가 매 턴 스킬 사용 시 자동 처리.
+            // Phase CC-2G-7: Momentum(1) 추가 — 매 사용 시 위력 +1 (UsesThisBattle 기반, 누적).
+            // 쉴 새 없이 쏠수록 화살이 강해지는 "폭우의 사수" 컨셉 강화.
             CreatePhaseCCSkill("Aster_QuickShot", "빠른 사격", SkillType.Attack, TargetType.SingleEnemy,
-                power: 4, cost: 1);
+                power: 4, cost: 1,
+                behaviors: new BehaviorTag(BehaviorKeyword.Momentum, 1));
 
             // 2. Multi-Shot — 단일 3, AP 2. Combo 1 소모당 +1타격 (ComboMultiHit Behavior).
             // costType=Combo, costAmount=1 → TurnManager 기본 자원 소모. minResourceRequired=1 (Combo 1+ 필수).

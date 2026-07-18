@@ -38,6 +38,7 @@ namespace TeamLog.Skill.Behaviors
 
                 // ── Phase ARCH-4: 신규 9종 (상태 추적 불필요 — 컨셉 6/7/11/12/15/16/17/18/21) ──
                 Register(new Implementations.FirstBloodBehavior());    // 6 — 풀피 대상
+                Register(new Implementations.TargetFullHPBehavior());  // Phase CC-2G-1 — 풀피 대상 (Ashe 전용 변형)
                 Register(new Implementations.CullBehavior());          // 7 — 절반 이하 대상
                 Register(new Implementations.DesperationBehavior());   // 11 — 잃은 HP당 +
                 Register(new Implementations.WoundBehavior());         // 12 — 잃은 HP당 -
@@ -54,6 +55,12 @@ namespace TeamLog.Skill.Behaviors
                 // ── 통합 파이프라인 검증 (2026-07-02): Pipeline 수정 0줄로 추가 ──
                 Register(new Implementations.CleanseLowTargetBehavior());        // Phoenix Renewal용 — Heal에 정화
                 Register(new Implementations.ResourceThresholdShieldBehavior()); // Shield Wall용 — Shield에 임계값 가산
+
+                // ── Phase CC-2G: 기존 8종 스킬 리워크 ──
+                Register(new Implementations.ExplosionBehavior());               // Taranis Thunderstorm — Charge 폭발
+                Register(new Implementations.FollowUpBehavior());                // Sibyl/Umbra — 이미 맞은 적 보너스
+                Register(new Implementations.EchoBehavior());                    // Sibyl — 위력 절반 2회
+                Register(new Implementations.LimitBreakBehavior());              // Sibyl — 전투당 1회 궁극기 강화
 
                 // ── Phase CC-2A: Umbra 리워크 ──
                 Register(new Implementations.StrongVsDebuffBehavior());          // Umbra Backstab — 도트 디버프 시 위력 2배

@@ -98,7 +98,8 @@ namespace TeamLog.UI.Title
             meta.HasPendingRun = false;
             SaveManager.SaveMeta();
 
-            SceneTransition.Instance.FadeToScene("MapScene");
+            // ★ 새 런 시작 — PartySelectionScene으로 이동 (캐릭터 선택 화면)
+            SceneTransition.Instance.FadeToScene("PartySelectionScene");
         }
 
         private void OnContinue()

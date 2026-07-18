@@ -26,6 +26,8 @@ MonoBehaviour:
   _behaviors:
   - Keyword: 48
     Rank: 0
+  - Keyword: 25
+    Rank: 3
   _resourceGainType: 0
   _resourceGainAmount: 0
   _resourceCostType: 0

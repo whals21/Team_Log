@@ -6,7 +6,7 @@
 
 ```
 Assets/
-├── 01.Scenes/          # TitleScene, MapScene, BattleScene, BattleTestScene, BattleUITestScene
+├── 01.Scenes/          # TitleScene, PartySelectionScene, MapScene, BattleScene, BattleTestScene, BattleUITestScene
 ├── 02.Scripts/
 │   ├── Characters/     # Character, CharacterData, Components/, SkillData, CharacterTraitData
 │   ├── Combat/         # AI/, Draw/, Turn/, DamageCalculator, CombatEventBus
@@ -16,14 +16,21 @@ Assets/
 │   ├── Shop/           # ShopData, ShopManager
 │   ├── Event/          # EventData, EventManager
 │   ├── Meta/           # MetaProgressionManager, AscensionManager, MetaUpgradeData
-│   ├── UI/             # Battle/, Map/, Reward/, Shop/, Event/, Meta/
+│   ├── UI/             # Battle/, Map/, PartySelection/, Reward/, Shop/, Event/, Meta/
 │   ├── Debug/          # GameDebugOptions (SRDebugger)
 │   ├── EditorDebug/    # BattleTestSceneSetup, BattleTestConfig
-│   ├── Editor/         # DataGenerator(10 partial), *SceneBuilder, BalanceSimulator(5 partial)
-│   └── Tests/          # Editor-mode 단위 테스트 (211개)
-├── 03.Data/            # ScriptableObject 에셋 (Characters/Skills/Relics/Items/Themes/Traits)
-└── 09.Docs/            # 기획서(GameDesign, DesignPillars), 캐릭터 문서, 작업일지, 밸런스 리포트
+│   ├── Editor/         # DataGenerator(10 partial), *SceneBuilder, PartySelectionSceneBuilder(2 partial), BalanceSimulator(5 partial)
+│   └── Tests/          # Editor-mode 단위 테스트
+├── 03.Data/            # ScriptableObject 에셋 (Characters/Skills/Relics/Items/Themes/Traits/UI/PartySelection)
+├── 08.Resource/Fonts/  # NanumGothic, Cinzel(4종), CormorantGaramond SDF 폰트
+└── 09.Docs/            # 기획서, 캐릭터 문서, 작업일지, UIBestPractices, UIFontSetupGuide 등
 ```
+
+### 씬 전환 파이프 (★ Phase UI 완료)
+- **TitleScene** → [새 게임] → **PartySelectionScene** → [EMBARK] → **MapScene** → [전투] → **BattleScene**
+- `PartySelectionController.SelectedParty` (static)로 파티 데이터 전달 — 씬 경계 우회
+- TitleScene.OnNewGame → SceneTransition.FadeToScene("PartySelectionScene")
+- MapSceneSetup.Start에서 SelectedParty 체크 → CharacterSelectUI 스킵
 
 ## 아키텍처 핵심
 
@@ -146,6 +153,12 @@ Assets/
 14. **씬 자기 리로드 static 플래그**: Start에서 consume (OnDestroy premature clear 주의)
 15. **MCP update_component 참조 필드 한계**: Unity Object 참조 필드 직접 설정 불가 → `SerializedObject.FindProperty.objectReferenceValue` + `ApplyModifiedProperties` 패턴 필요
 16. **UI Image sprite null + raycastTarget=true**: sprite null이면 Graphic이 raycast 무시 → `Sprite.Create(Texture2D.whiteTexture, ...)`로 WhiteSprite 할당
+17. **★ 한 파일에 여러 MonoBehaviour 정의 금지** (2026-07-18 UI 작업 발견): PartySlotItem이 PartySlotPanel.cs 안에 정의되어 있으면, Unity가 씬 직렬화 시 컴포넌트 참조를 깨뜨림 ("Missing Script" warning). 각 MonoBehaviour는 별도 .cs 파일에 정의할 것.
+18. **★ LayoutGroup childControlWidth/Height=false 주의**: false면 자식 LayoutElement.flexibleWidth/preferredWidth를 무시하고 자식 RectTransform.sizeDelta(기본 0,0)을 사용 → 0 크기로 붕괴. **UI 빌더에서는 기본 true로 설정**.
+19. **★ GameObject 이름 충돌** (2026-07-18): "Content"라는 이름이 씬에 여러 개 있으면 `FindChildRecursive`가 첫 번째만 찾음. 캐릭터 썸네일이 잘못된 위치에 생성되는 원인. 각 컨테이너는 고유 이름 사용 (CarouselContent, BadgeContent 등).
+20. **★ 자식 Image raycastTarget 가로채기** (2026-07-18): 부모 Button의 클릭을 자식 Image가 가로채면 버튼이 안 눌림. 특히 전체 영역을 덮는 오버레이(ActiveRing/LockOverlay 등)는 반드시 `raycastTarget=false`. Initialize에서 `GetComponentsInChildren<Image>(true)`로 강제 설정 권장.
+21. **★ UI 인스펙터 바인딩 실패 폴백** (2026-07-18): SceneBuilder의 `BindField`/`FindDescendant`가 실패할 수 있음 (직렬화 타이밍 이슈). 컨트롤러 Awake에서 `AutoBindMissingFields()` + 자식에서 `GetComponentInChildren<T>(true)`로 자동 보완 필수.
+22. **★ Image 컴포넌트의 자동 preferredSize** (2026-07-18): Image는 ILayoutElement 구현체라 Sprite 크기 기반 preferredWidth를 자동 보고. LayoutGroup이 `controlWidth=false`면 Image 자동 값이 사용되어 아이콘이 너무 크게 표시. LayoutElement.preferredWidth로 override하려면 반드시 `controlWidth=true` 필요.
 
 ## 현재 개발 상태 (2026-07-16 기준)
 
@@ -167,8 +180,11 @@ Assets/
 | UNIFIED-P | 완전 통일 파이프라인 (Attack/Heal/Shield/Buff 동일 경로, ExecutionPhase ApplyMain/PostApply 일반화) |
 | CC 2차 | Taranis Wire 전파(Propagate) + Duran ShieldInstance + 조건부 보너스 + 자원/특성 UI (ResourceBadge/TraitBadge) |
 | CC 3차 | 스킬 설명 갱신 + ResourceBadge 원형 디자인 + 패널 레이아웃 |
+| CC-2G-1 | Ashe 리워크 — TargetFullHP Behavior 신규 + Cinder Accretion/Brand of Ash/Embrace of Cinders BehaviorTag 부여 |
+| CC-2G-2~7 | 기존 8종 스킬 리워크 완료 — Duran(Bulwark/Desperation) Lumi(Bulwark/GiantSlayer) Taranis(Explosion 신규) Sibyl(FollowUp/Echo/LimitBreak 신규 3종) Umbra(FollowUp) Aster(Momentum). Character.HitThisTurn 인프라 추가. |
 
 ### 진행 중
+- **Phase CC-2G (기존 8종 스킬 리워크)**: 7/8 완료 (CC-2G-1 Ashe + CC-2G-2~7). CC-2G-8 Elara는 이미 4/4 보유로 생략. **로드맵 완료** — 후속 작업은 DataGenerator 메뉴 재실행 + Play 모드 검증. 상세 `2026-07-17-CC-2G-1.md`, `2026-07-17-CC-2G-2-7.md`
 - **Phase CC-2A (Umbra, the Rogue)**: 치명타 시스템 + ShadowsResourceComponent + StrongVsDebuffBehavior 코드 구현. .asset 생성/Play 검증 잔여. 상세 `2026-07-14.md`, `Characters/ReworkDrafts/02_Rogue.md`
 - **기존 6종 리워크 기획**: Healer/Archer/Necromancer/Alchemist/Bard (초안만). 우선순위: Archer → Healer → Bard → Alchemist → Necromancer. `Characters/ReworkDrafts/INDEX.md`
 - **BattleScene UI 개편 (2026-07-15~16)**: 5컬럼 동기화 그리드, 남색 톤, APArea 시각 분리(파란 테두리+밝은 남색), TargetBox 명시적 앵커, 캐릭터 카드 100px 확장 (ATK/DEF+자원을 HPBar 아래). Play 모드 최종 검증 잔여.
@@ -220,7 +236,7 @@ Assets/
 - **UI**: TextMesh Pro (NanumGothic SDF 한국어 폰트)
 - **입력**: New Input System
 - **에셋**: GUI Pro-CasualGame, Epic Toon FX, SRDebugger, DOTween, CombatMagicSpellsVIISFX, Motion Titles Pack
-- **테스트**: 211개 (Editor-mode 단위)
+- **테스트**: 297개 (Editor-mode 단위)
 
 ## ★사용자 설계 결정 (절대 준수)
 

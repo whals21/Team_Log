@@ -395,6 +395,7 @@ namespace TeamLog.UI.Battle
 
                 // Phase ARCH-4 조건부
                 case BehaviorKeyword.FirstBlood: return $"풀피 적 +{tag.Rank}";
+                case BehaviorKeyword.TargetFullHP: return $"풀피 적 +{tag.Rank}";
                 case BehaviorKeyword.Cull: return $"절반 이하 +{tag.Rank}";
                 case BehaviorKeyword.Desperation: return $"잃은 HP 비례 +";
                 case BehaviorKeyword.Wound: return $"잃은 HP 비례 -";
@@ -403,6 +404,12 @@ namespace TeamLog.UI.Battle
                 case BehaviorKeyword.Bulwark: return $"쉴드 보유 +{tag.Rank}";
                 case BehaviorKeyword.AllIn: return $"AP 0 시 +{tag.Rank}";
                 case BehaviorKeyword.Bounty: return $"킬 시 회복";
+                case BehaviorKeyword.FollowUp: return $"이미 맞은 적 +{tag.Rank}";
+                case BehaviorKeyword.Echo: return "위력 절반 2회";
+                case BehaviorKeyword.LimitBreak: return $"전투당 1회 +{tag.Rank}";
+                case BehaviorKeyword.Explosion: return $"전하 폭발 (스택×3)";
+                case BehaviorKeyword.Momentum: return $"사용 시 위력 +{tag.Rank} 누적";
+                case BehaviorKeyword.Fatigue: return $"사용 시 위력 -{tag.Rank} 누적";
 
                 default: return null; // PowerUp/Spread/Bounce/MultiHit 등은 별도 표기 또는 생략
             }

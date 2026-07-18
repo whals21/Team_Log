@@ -125,6 +125,10 @@ namespace TeamLog.Combat.Turn
             foreach (var c in _playerParty) if (c.IsAlive) c.Health.ResetShield();
             foreach (var c in _enemies) if (c.IsAlive) c.Health.ResetShield();
 
+            // Phase CC-2G-5: FollowUp 추적 — 매 턴 시작 시 HitThisTurn 리셋
+            foreach (var c in _playerParty) c.ResetHitThisTurn();
+            foreach (var c in _enemies) c.ResetHitThisTurn();
+
             // 적 특성: 턴 시작 훅 (Regenerate, Sturdy, PhaseShift, Rampage, Shell)
             foreach (var c in _enemies) if (c.IsAlive) c.TraitHandler.OnTurnStart(_context.TurnNumber);
 

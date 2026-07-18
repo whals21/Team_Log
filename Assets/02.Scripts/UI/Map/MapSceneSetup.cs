@@ -12,6 +12,7 @@ using TeamLog.Reward;
 using TeamLog.Skill;
 using TeamLog.UI;
 using TeamLog.UI.Event;
+using TeamLog.UI.PartySelection;  // ★ PartySelectionController.SelectedParty 참조용
 using TeamLog.UI.Reward;
 using TeamLog.UI.Shop;
 
@@ -107,9 +108,16 @@ namespace TeamLog.UI.Map
             }
             else
             {
-                // 새 런 시작 — 캐릭터 선택
-                if (_characterSelectUI != null && _allCharacters != null && _allCharacters.Length > 0)
+                // ★ 새 런 시작 — PartySelectionScene에서 파티를 이미 선택했는지 확인
+                var selectedParty = PartySelectionController.SelectedParty;
+                if (selectedParty != null && selectedParty.Count > 0)
                 {
+                    // PartySelectionScene에서 파티 받음 — CharacterSelectUI 스킵
+                    OnCharacterSelectConfirmed(selectedParty);
+                }
+                else if (_characterSelectUI != null && _allCharacters != null && _allCharacters.Length > 0)
+                {
+                    // 폴백: 기존 CharacterSelectUI 표시 (PartySelectionScene 거치지 않은 경우)
                     _characterSelectUI.Initialize(_allCharacters, SaveManager.Meta, OnCharacterSelectConfirmed);
                     _characterSelectUI.Show();
                 }

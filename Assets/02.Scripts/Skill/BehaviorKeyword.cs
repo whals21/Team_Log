@@ -76,7 +76,7 @@ namespace TeamLog.Skill
         Distribute,      // 무작위 분배 (데미지/힐 양쪽, TurnManager 수정)
         TargetHighestHP, // 가장 튼튼한 적 자동 선택
         MultiStrike,     // 매 타격 자유 지정
-        TargetFullHP,    // 풀피 적에게만 사용 가능 (사용 제약)
+        TargetFullHP,    // 풀피 대상 +N 위력 (PowerModify — Phase CC-2G-1 Ashe Cinder Accretion용)
         Flank,           // 행 가장자리 대상만 (선행: 적 행/열 시스템)
 
         // ── Phase CC: 캐릭터 고유 메카닉 ──

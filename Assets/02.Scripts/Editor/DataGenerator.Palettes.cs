@@ -21,8 +21,107 @@ namespace TeamLog.Editor
             const string path = "Assets/03.Data/UIPalette.asset";
             var palette = GetOrCreateAsset<UIPalette>(path);
             palette.name = "UIPalette";
+
+            // ── 배경 (기존) ──
+            palette.BgDark        = Hex("#141428");
+            palette.BgPanel       = WithA(Hex("#0a0a1a"), 0.8f);
+            palette.BgPanelLight  = WithA(Hex("#0f0f24"), 0.95f);
+            palette.BgTopBar      = WithA(Hex("#080814"), 0.95f);
+
+            // ── 다크 판타지 고딕 (Party Select 신규) ──
+            // 깊이 5단계
+            palette.DFVoid    = Hex("#050509");
+            palette.DFAbyss   = Hex("#0a0a14");
+            palette.DFDepth   = Hex("#11111f");
+            palette.DFSlate   = Hex("#1a1a2e");
+            palette.DFSlate2  = Hex("#232347");
+
+            // 골드 4단계
+            palette.DFGoldL   = Hex("#f4d35e");
+            palette.DFGold    = Hex("#d4af37");
+            palette.DFGoldD   = Hex("#8b6914");
+            palette.DFGoldX   = Hex("#4a3a0d");
+
+            // 핏빛 3단계
+            palette.DFBloodDeep = Hex("#5a0000");
+            palette.DFBlood     = Hex("#8b0000");
+            palette.DFBloodL    = Hex("#c0392b");
+
+            // 양피지 4단계
+            palette.DFParchment  = Hex("#c9b485");
+            palette.DFParchmentD = Hex("#8a7752");
+            palette.DFParchmentDd= Hex("#4d3f28");
+            palette.DFParchmentX = Hex("#2a2418");
+
+            // 잉크 3단계
+            palette.DFInk      = Hex("#f0e6d0");
+            palette.DFInkDim   = Hex("#a89878");
+            palette.DFInkFaint = Hex("#6b5e44");
+
+            // ── 강조/텍스트/HP/쉴드 (기존) ──
+            palette.AccentRed    = Hex("#c41f3b");
+            palette.AccentGreen  = Hex("#26ae61");
+            palette.AccentYellow = Hex("#f4d35e");
+            palette.TextWhite    = Hex("#f0e6d0");
+            palette.TextDim      = Hex("#a89878");
+
+            palette.HPNormal       = Hex("#26ae61");
+            palette.HPLow           = Hex("#ff8000");
+            palette.HPLowThreshold  = Hex("#4d4d4d");
+            palette.HPEnemy         = Hex("#c41f3b");
+            palette.ShieldBrown     = Hex("#b8732e");
+            palette.DamageColor     = Hex("#d93333");
+            palette.HealColor       = Hex("#26ae61");
+            palette.APNormal        = Hex("#f4d35e");
+            palette.APShortage      = Hex("#d93333");
+
+            // ── 스킬 타입 (신규 2종 포함) ──
+            palette.SkillAttack  = Hex("#c41f3b");
+            palette.SkillHeal    = Hex("#26ae61");
+            palette.SkillBuff    = Hex("#f4d35e");
+            palette.SkillDebuff  = Hex("#9933cc");
+            palette.SkillShield  = Hex("#b8732e");
+            palette.SkillPurify  = Hex("#66ccf2");
+            palette.SkillSummon  = Hex("#7da34a");
+            palette.SkillSpecial = Hex("#b388ff");
+
+            palette.BorderRed = WithA(Hex("#992a30"), 0.8f);
+
+            // ── 자원 11종 (Party Select 기준 — Sibyl Prophecy를 청록으로 변경) ──
+            palette.ResourceEmber     = Hex("#ff6b35");
+            palette.ResourceVengeance = Hex("#a8324a");
+            palette.ResourceFrost     = Hex("#5ec5e8");
+            palette.ResourceProphecy  = Hex("#6ed5b2"); // 청록 (시간/예언 컨셉)
+            palette.ResourceCharge    = Hex("#f7d046");
+            palette.ResourceShadows   = Hex("#9b6ec2");
+            palette.ResourceCombo     = Hex("#d4a017");
+            palette.ResourceCorpse    = Hex("#7da34a");
+            palette.ResourceDiscover  = Hex("#b388ff");
+            palette.ResourceMelody    = Hex("#ff8fab");
+            palette.ResourceMercy     = Hex("#ffe082");
+            palette.ResourceDefault   = Hex("#999999");
+
+            // ── 상태이상/특성/등급 등은 기존 default 유지 (변경 X) ──
+            // 필요 시 이곳에 추가 명시
+
             EditorUtility.SetDirty(palette);
-            Debug.Log("[DataGenerator] UIPalette asset ensured.");
+            Debug.Log("[DataGenerator] UIPalette asset generated with Dark Fantasy Gothic tokens (Party Select).");
+        }
+
+        // 헥스 컬러 파싱 헬퍼
+        private static Color Hex(string hex)
+        {
+            hex = hex.Replace("#", "");
+            byte r = System.Convert.ToByte(hex.Substring(0, 2), 16);
+            byte g = System.Convert.ToByte(hex.Substring(2, 2), 16);
+            byte b = System.Convert.ToByte(hex.Substring(4, 2), 16);
+            return new Color32(r, g, b, 255);
+        }
+
+        private static Color WithA(Color c, float a)
+        {
+            c.a = a;
+            return c;
         }
 
         #endregion

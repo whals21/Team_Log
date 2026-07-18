@@ -12,33 +12,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de9deed7cd31f914b854f656b1ec8d9c, type: 3}
   m_Name: UIPalette
   m_EditorClassIdentifier: 
-  BgDark: {r: 0.08, g: 0.08, b: 0.16, a: 1}
-  BgPanel: {r: 0.04, g: 0.04, b: 0.1, a: 0.8}
-  BgPanelLight: {r: 0.06, g: 0.06, b: 0.14, a: 0.95}
-  BgTopBar: {r: 0.03, g: 0.03, b: 0.08, a: 0.95}
-  AccentRed: {r: 0.77, g: 0.12, b: 0.23, a: 1}
-  AccentGreen: {r: 0.15, g: 0.68, b: 0.38, a: 1}
-  AccentYellow: {r: 0.96, g: 0.82, b: 0.25, a: 1}
-  TextWhite: {r: 1, g: 1, b: 1, a: 1}
-  TextDim: {r: 0.82, g: 0.82, b: 0.87, a: 1}
-  HPNormal: {r: 0.15, g: 0.68, b: 0.38, a: 1}
-  HPLow: {r: 1, g: 0.5, b: 0, a: 1}
-  HPLowThreshold: {r: 0.3, g: 0.3, b: 0.3, a: 1}
-  HPEnemy: {r: 0.77, g: 0.12, b: 0.23, a: 1}
-  ShieldBrown: {r: 0.72, g: 0.45, b: 0.2, a: 1}
-  DamageColor: {r: 0.85, g: 0.2, b: 0.2, a: 1}
-  HealColor: {r: 0.15, g: 0.68, b: 0.38, a: 1}
-  APNormal: {r: 0.96, g: 0.82, b: 0.25, a: 1}
-  APShortage: {r: 0.85, g: 0.2, b: 0.2, a: 1}
+  BgDark: {r: 0.078431375, g: 0.078431375, b: 0.15686275, a: 1}
+  BgPanel: {r: 0.039215688, g: 0.039215688, b: 0.101960786, a: 0.8}
+  BgPanelLight: {r: 0.05882353, g: 0.05882353, b: 0.14117648, a: 0.95}
+  BgTopBar: {r: 0.03137255, g: 0.03137255, b: 0.078431375, a: 0.95}
+  DFVoid: {r: 0.019607844, g: 0.019607844, b: 0.03529412, a: 1}
+  DFAbyss: {r: 0.039215688, g: 0.039215688, b: 0.078431375, a: 1}
+  DFDepth: {r: 0.06666667, g: 0.06666667, b: 0.12156863, a: 1}
+  DFSlate: {r: 0.101960786, g: 0.101960786, b: 0.18039216, a: 1}
+  DFSlate2: {r: 0.13725491, g: 0.13725491, b: 0.2784314, a: 1}
+  DFGoldL: {r: 0.95686275, g: 0.827451, b: 0.36862746, a: 1}
+  DFGold: {r: 0.83137256, g: 0.6862745, b: 0.21568628, a: 1}
+  DFGoldD: {r: 0.54509807, g: 0.4117647, b: 0.078431375, a: 1}
+  DFGoldX: {r: 0.2901961, g: 0.22745098, b: 0.050980393, a: 1}
+  DFBloodDeep: {r: 0.3529412, g: 0, b: 0, a: 1}
+  DFBlood: {r: 0.54509807, g: 0, b: 0, a: 1}
+  DFBloodL: {r: 0.7529412, g: 0.22352941, b: 0.16862746, a: 1}
+  DFParchment: {r: 0.7882353, g: 0.7058824, b: 0.52156866, a: 1}
+  DFParchmentD: {r: 0.5411765, g: 0.46666667, b: 0.32156864, a: 1}
+  DFParchmentDd: {r: 0.3019608, g: 0.24705882, b: 0.15686275, a: 1}
+  DFParchmentX: {r: 0.16470589, g: 0.14117648, b: 0.09411765, a: 1}
+  DFInk: {r: 0.9411765, g: 0.9019608, b: 0.8156863, a: 1}
+  DFInkDim: {r: 0.65882355, g: 0.59607846, b: 0.47058824, a: 1}
+  DFInkFaint: {r: 0.41960785, g: 0.36862746, b: 0.26666668, a: 1}
+  AccentRed: {r: 0.76862746, g: 0.12156863, b: 0.23137255, a: 1}
+  AccentGreen: {r: 0.14901961, g: 0.68235296, b: 0.38039216, a: 1}
+  AccentYellow: {r: 0.95686275, g: 0.827451, b: 0.36862746, a: 1}
+  TextWhite: {r: 0.9411765, g: 0.9019608, b: 0.8156863, a: 1}
+  TextDim: {r: 0.65882355, g: 0.59607846, b: 0.47058824, a: 1}
+  HPNormal: {r: 0.14901961, g: 0.68235296, b: 0.38039216, a: 1}
+  HPLow: {r: 1, g: 0.5019608, b: 0, a: 1}
+  HPLowThreshold: {r: 0.3019608, g: 0.3019608, b: 0.3019608, a: 1}
+  HPEnemy: {r: 0.76862746, g: 0.12156863, b: 0.23137255, a: 1}
+  ShieldBrown: {r: 0.72156864, g: 0.4509804, b: 0.18039216, a: 1}
+  DamageColor: {r: 0.8509804, g: 0.2, b: 0.2, a: 1}
+  HealColor: {r: 0.14901961, g: 0.68235296, b: 0.38039216, a: 1}
+  APNormal: {r: 0.95686275, g: 0.827451, b: 0.36862746, a: 1}
+  APShortage: {r: 0.8509804, g: 0.2, b: 0.2, a: 1}
   RerollNormal: {r: 1, g: 1, b: 1, a: 1}
   RerollEmpty: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-  SkillAttack: {r: 0.77, g: 0.12, b: 0.23, a: 1}
-  SkillHeal: {r: 0.15, g: 0.68, b: 0.38, a: 1}
-  SkillBuff: {r: 0.96, g: 0.82, b: 0.25, a: 1}
-  SkillDebuff: {r: 0.6, g: 0.3, b: 0.8, a: 1}
-  SkillShield: {r: 0.72, g: 0.45, b: 0.2, a: 1}
-  SkillPurify: {r: 0.4, g: 0.8, b: 0.95, a: 1}
-  BorderRed: {r: 0.6, g: 0.1, b: 0.18, a: 0.8}
+  SkillAttack: {r: 0.76862746, g: 0.12156863, b: 0.23137255, a: 1}
+  SkillHeal: {r: 0.14901961, g: 0.68235296, b: 0.38039216, a: 1}
+  SkillBuff: {r: 0.95686275, g: 0.827451, b: 0.36862746, a: 1}
+  SkillDebuff: {r: 0.6, g: 0.2, b: 0.8, a: 1}
+  SkillShield: {r: 0.72156864, g: 0.4509804, b: 0.18039216, a: 1}
+  SkillPurify: {r: 0.4, g: 0.8, b: 0.9490196, a: 1}
+  SkillSummon: {r: 0.49019608, g: 0.6392157, b: 0.2901961, a: 1}
+  SkillSpecial: {r: 0.7019608, g: 0.53333336, b: 1, a: 1}
+  BorderRed: {r: 0.6, g: 0.16470589, b: 0.1882353, a: 0.8}
   LogDamage: {r: 0.95, g: 0.4, b: 0.4, a: 1}
   LogHeal: {r: 0.4, g: 0.9, b: 0.6, a: 1}
   LogBuff: {r: 0.9, g: 0.8, b: 0.3, a: 1}
@@ -65,10 +86,17 @@ MonoBehaviour:
   EffectSleep: {r: 0.4, g: 0.3, b: 0.6, a: 1}
   EffectShield: {r: 0.5, g: 0.35, b: 0.15, a: 1}
   EffectDefault: {r: 0.4, g: 0.4, b: 0.4, a: 1}
-  ResourceEmber: {r: 0.9, g: 0.35, b: 0.1, a: 1}
-  ResourceVengeance: {r: 0.55, g: 0.15, b: 0.7, a: 1}
-  ResourceFrost: {r: 0.3, g: 0.75, b: 0.95, a: 1}
-  ResourceProphecy: {r: 0.85, g: 0.7, b: 0.25, a: 1}
+  ResourceEmber: {r: 1, g: 0.41960785, b: 0.20784314, a: 1}
+  ResourceVengeance: {r: 0.65882355, g: 0.19607843, b: 0.2901961, a: 1}
+  ResourceFrost: {r: 0.36862746, g: 0.77254903, b: 0.9098039, a: 1}
+  ResourceProphecy: {r: 0.43137255, g: 0.8352941, b: 0.69803923, a: 1}
+  ResourceCharge: {r: 0.96862745, g: 0.8156863, b: 0.27450982, a: 1}
+  ResourceShadows: {r: 0.60784316, g: 0.43137255, b: 0.7607843, a: 1}
+  ResourceCombo: {r: 0.83137256, g: 0.627451, b: 0.09019608, a: 1}
+  ResourceCorpse: {r: 0.49019608, g: 0.6392157, b: 0.2901961, a: 1}
+  ResourceDiscover: {r: 0.7019608, g: 0.53333336, b: 1, a: 1}
+  ResourceMelody: {r: 1, g: 0.56078434, b: 0.67058825, a: 1}
+  ResourceMercy: {r: 1, g: 0.8784314, b: 0.50980395, a: 1}
   ResourceDefault: {r: 0.6, g: 0.6, b: 0.6, a: 1}
   TraitRegenerate: {r: 0.1, g: 0.5, b: 0.5, a: 1}
   TraitOpportunist: {r: 0.6, g: 0.15, b: 0.15, a: 1}

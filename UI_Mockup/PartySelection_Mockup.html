@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Team Log — Party Selection UI Mockup v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     TEAM LOG — Party Selection Mockup v2
+     Tone: Dark Fantasy Gothic (Slay the Spire / Darkest Dungeon)
+     Layout: Central Carousel Focus + Rich Skill/Trait Cards
+     ========================================================= */
+
+  :root {
+    /* 깊이/배경 */
+    --void:          #050509;
+    --abyss:         #0a0a14;
+    --depth:         #11111f;
+    --slate:         #1a1a2e;
+    --slate-2:       #232347;
+
+    /* 양피지/석재 */
+    --parchment:     #c9b485;
+    --parchment-d:   #8a7752;
+    --parchment-dd:  #4d3f28;
+    --parchment-x:   #2a2418;
+
+    /* 금속/골드 */
+    --gold-l:        #f4d35e;
+    --gold:          #d4af37;
+    --gold-d:        #8b6914;
+    --gold-x:        #4a3a0d;
+
+    /* 핏빛/엠버 */
+    --blood:         #8b0000;
+    --blood-l:       #c0392b;
+    --ember-glow:    #ff6b35;
+
+    /* 범용 텍스트 */
+    --ink:           #f0e6d0;
+    --ink-dim:       #a89878;
+    --ink-faint:     #6b5e44;
+
+    /* 스킬 타입 색상 */
+    --type-attack:   #c0392b; /* 핏빛 */
+    --type-heal:     #4caf50; /* 초록 */
+    --type-shield:   #a0522d; /* 갈색 */
+    --type-buff:     #f4d35e; /* 골드 */
+    --type-debuff:   #9b59b6; /* 보라 */
+    --type-purify:   #5ec5e8; /* 시안 */
+    --type-summon:   #7da34a; /* 독녹 */
+    --type-special:  #b388ff; /* 연보라 */
+
+    /* 타겟 색상 */
+    --target-enemy:  #e74c3c;
+    --target-ally:   #4caf50;
+    --target-self:   #f4d35e;
+    --target-all:    #b388ff;
+
+    /* 사이즈 */
+    --screen-w: 1280px;
+    --screen-h: 820px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background:
+      radial-gradient(ellipse at top, #1a0d1f 0%, var(--abyss) 40%, var(--void) 100%);
+    min-height: 100vh;
+    font-family: 'Nanum Myeongjo', 'Cormorant Garamond', serif;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 25%, rgba(139,0,0,0.05) 0%, transparent 30%),
+      radial-gradient(circle at 85% 75%, rgba(212,175,55,0.04) 0%, transparent 30%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23c9b485' stroke-opacity='0.04' stroke-width='1'%3E%3Ccircle cx='100' cy='100' r='40'/%3E%3Ccircle cx='100' cy='100' r='65'/%3E%3Cpath d='M100,35 L115,100 L100,165 L85,100 Z'/%3E%3Cpath d='M35,100 L100,85 L165,100 L100,115 Z'/%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ============================= 게임 화면 ============================= */
+  .game-screen {
+    width: var(--screen-w);
+    height: var(--screen-h);
+    position: relative;
+    background:
+      linear-gradient(180deg,
+        var(--abyss) 0%,
+        var(--slate) 35%,
+        var(--depth) 70%,
+        var(--void) 100%);
+    border: 2px solid var(--gold-d);
+    border-radius: 4px;
+    box-shadow:
+      0 0 0 1px var(--gold-x) inset,
+      0 0 0 6px var(--abyss) inset,
+      0 0 0 7px var(--gold-d) inset,
+      0 0 80px rgba(212,175,55,0.15),
+      0 30px 60px rgba(0,0,0,0.8);
+    display: grid;
+    grid-template-rows: 56px 1fr 110px 86px;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .game-screen::before,
+  .game-screen::after {
+    content: '';
+    position: absolute;
+    width: 28px; height: 28px;
+    border: 2px solid var(--gold);
+    pointer-events: none;
+    z-index: 30;
+  }
+  .game-screen::before { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+  .game-screen::after  { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+
+  /* ============================= 헤더 ============================= */
+  .header {
+    display: flex; align-items: center;
+    padding: 0 36px;
+    background: linear-gradient(180deg, rgba(20,12,30,0.95) 0%, rgba(10,10,20,0.85) 100%);
+    border-bottom: 1px solid var(--gold-d);
+    position: relative;
+    z-index: 5;
+  }
+  .header::after {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: -2px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold) 20%, var(--gold-l) 50%, var(--gold) 80%, transparent 100%);
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; margin-right: auto; }
+  .crest { width: 34px; height: 34px; }
+  .crest svg { width: 100%; height: 100%; }
+  .title-text {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 0.18em;
+    color: var(--gold-l);
+    text-shadow: 0 0 10px rgba(212,175,55,0.6), 0 2px 0 var(--gold-d);
+  }
+  .subtitle {
+    font-size: 10px; color: var(--ink-dim);
+    letter-spacing: 0.4em; margin-top: -2px;
+    font-family: 'Cinzel', serif;
+  }
+  .meta-pills { display: flex; gap: 12px; align-items: center; }
+  .pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    background: linear-gradient(180deg, var(--slate-2), var(--slate));
+    border: 1px solid var(--gold-d);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    box-shadow: 0 2px 0 var(--abyss) inset;
+  }
+  .pill-label { color: var(--ink-faint); font-size: 9px; letter-spacing: 0.2em; }
+  .pill-value { color: var(--gold-l); font-weight: 700; }
+  .pill-asc .pill-value { color: var(--blood-l); }
+  .btn-settings {
+    width: 32px; height: 32px;
+    margin-left: 8px;
+    background: var(--slate);
+    border: 1px solid var(--gold-d);
+    border-radius: 2px;
+    color: var(--gold);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-settings:hover { background: var(--slate-2); color: var(--gold-l); border-color: var(--gold); }
+
+  /* ============================= 메인 스테이지 ============================= */
+  .stage {
+    position: relative;
+    display: grid;
+    grid-template-columns: 50px 1fr 50px;
+    overflow: hidden;
+  }
+
+  .nav-arrow {
+    background: linear-gradient(180deg, rgba(26,26,46,0.4), rgba(10,10,20,0.6));
+    border: none;
+    color: var(--gold);
+    font-size: 36px;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'Cinzel', serif;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-arrow::before {
+    content: '';
+    position: absolute; inset: 12px 4px;
+    border: 1px solid var(--gold-d);
+    pointer-events: none;
+  }
+  .nav-arrow:hover {
+    color: var(--gold-l);
+    text-shadow: 0 0 16px var(--gold-l);
+    background: linear-gradient(180deg, rgba(40,30,20,0.6), rgba(20,15,10,0.8));
+  }
+  .nav-arrow:hover::before { border-color: var(--gold); }
+
+  /* 메인 캐릭터 디스플레이 */
+  .character-stage {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    padding: 18px 18px 14px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* --- 초상화 --- */
+  .portrait-frame {
+    position: relative;
+    display: flex; flex-direction: column;
+    align-items: center;
+  }
+  .portrait {
+    width: 280px; height: 360px;
+    position: relative;
+    border-radius: 140px 140px 10px 10px;
+    background: var(--void);
+    border: 2px solid var(--gold-d);
+    box-shadow:
+      0 0 0 5px var(--abyss),
+      0 0 0 6px var(--gold-x),
+      0 0 30px rgba(0,0,0,0.9),
+      0 0 60px var(--char-glow, rgba(212,175,55,0.2));
+    overflow: hidden;
+    transition: box-shadow 0.5s;
+  }
+  .portrait::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 30%, var(--char-color, var(--ember-glow)) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.9) 0%, transparent 60%),
+      linear-gradient(180deg, var(--slate) 0%, var(--depth) 70%, var(--void) 100%);
+    opacity: 0.55;
+    transition: opacity 0.5s, background 0.5s;
+  }
+  .portrait::after {
+    content: var(--char-initial, 'A');
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 180px;
+    color: var(--char-color, var(--gold));
+    text-shadow: 0 0 30px var(--char-color, var(--gold)), 0 4px 0 rgba(0,0,0,0.8);
+    opacity: 0.18;
+    letter-spacing: -0.05em;
+    pointer-events: none;
+  }
+  .portrait-plate {
+    margin-top: -22px;
+    z-index: 2;
+    padding: 9px 26px;
+    background: linear-gradient(180deg, var(--slate-2), var(--depth));
+    border: 1px solid var(--gold);
+    border-radius: 2px;
+    box-shadow:
+      0 0 0 4px var(--abyss),
+      0 0 0 5px var(--gold-x),
+      0 8px 16px rgba(0,0,0,0.8);
+    text-align: center;
+    min-width: 220px;
+  }
+  .char-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: 0.14em;
+    color: var(--gold-l);
+    text-shadow: 0 0 8px rgba(0,0,0,0.9), 0 2px 0 var(--abyss);
+    margin-bottom: 2px;
+  }
+  .char-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.1em;
+  }
+  .resource-badge {
+    position: absolute;
+    top: 14px; right: 4px;
+    z-index: 3;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--char-color), var(--void));
+    border: 2px solid var(--gold);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    box-shadow: 0 0 0 2px var(--abyss), 0 0 16px var(--char-color), 0 4px 8px rgba(0,0,0,0.6);
+    color: var(--ink);
+    font-family: 'Cinzel', serif;
+  }
+  .resource-initial { font-size: 18px; font-weight: 900; line-height: 1; }
+  .resource-label  { font-size: 6px; letter-spacing: 0.15em; color: var(--ink-dim); margin-top: 2px; }
+  .lock-mark {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    width: 64px; height: 64px;
+    background: rgba(0,0,0,0.85);
+    border: 2px solid var(--blood-l);
+    border-radius: 50%;
+    display: none;
+    align-items: center; justify-content: center;
+    color: var(--blood-l);
+    font-size: 28px;
+    box-shadow: 0 0 24px rgba(192,57,43,0.5);
+  }
+  .portrait-frame.locked .lock-mark { display: flex; }
+  .portrait-frame.locked .portrait { filter: grayscale(0.9) brightness(0.4); }
+  .portrait-frame.locked .resource-badge { filter: grayscale(0.9) brightness(0.5); }
+
+  /* 자원 메커니즘 박스 (초상화 아래) */
+  .mechanic-box {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(40,30,15,0.5), rgba(20,15,8,0.7));
+    border: 1px solid var(--gold-d);
+    border-radius: 2px;
+    width: 280px;
+  }
+  .mechanic-title {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .mechanic-title::before { content: '◈'; color: var(--gold); }
+  .mechanic-desc {
+    font-size: 10.5px;
+    color: var(--parchment);
+    line-height: 1.45;
+  }
+  .mechanic-desc strong { color: var(--char-color, var(--gold-l)); font-weight: 700; }
+
+  /* --- 정보 패널 --- */
+  .info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .info-panel::-webkit-scrollbar { width: 6px; }
+  .info-panel::-webkit-scrollbar-track { background: var(--abyss); }
+  .info-panel::-webkit-scrollbar-thumb { background: var(--gold-d); border-radius: 3px; }
+
+  /* 정체성 인용구 */
+  .identity-quote {
+    position: relative;
+    padding: 10px 16px 10px 34px;
+    background: linear-gradient(90deg, rgba(74,58,13,0.4) 0%, rgba(42,36,24,0.3) 50%, transparent 100%);
+    border-left: 3px solid var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--parchment);
+    line-height: 1.45;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  }
+  .identity-quote::before {
+    content: '"';
+    position: absolute;
+    top: -2px; left: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 38px;
+    color: var(--gold);
+    line-height: 1;
+    opacity: 0.8;
+  }
+
+  /* 스탯 바 */
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-cell {
+    padding: 7px 10px;
+    background: linear-gradient(180deg, var(--slate), var(--depth));
+    border: 1px solid var(--gold-d);
+    border-radius: 2px;
+    text-align: center;
+    position: relative;
+  }
+  .stat-cell::before {
+    content: '';
+    position: absolute; top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 60%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .stat-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.2em; color: var(--ink-faint); margin-bottom: 2px; }
+  .stat-value { font-family: 'Cinzel', serif; font-weight: 700; font-size: 18px; color: var(--gold-l); text-shadow: 0 0 6px rgba(244,211,94,0.4); }
+  .stat-sub { font-size: 9px; color: var(--ink-dim); margin-top: 1px; }
+
+  /* 강점/약점 */
+  .trait-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .trait-box {
+    padding: 7px 11px;
+    background: linear-gradient(180deg, rgba(20,30,20,0.5), rgba(10,15,10,0.7));
+    border: 1px solid var(--ink-faint);
+    border-radius: 2px;
+    font-size: 10.5px;
+    line-height: 1.4;
+  }
+  .trait-box.weak {
+    background: linear-gradient(180deg, rgba(40,15,15,0.5), rgba(20,8,8,0.7));
+    border-color: var(--blood);
+  }
+  .trait-box strong {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    margin-bottom: 2px;
+  }
+  .trait-box.strength strong { color: #7da34a; }
+  .trait-box.weak strong { color: var(--blood-l); }
+
+  /* 섹션 라벨 */
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 2px;
+  }
+  .section-label::before { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold-d)); }
+  .section-label::after  { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold-d), transparent); }
+
+  /* ============================= 스킬 카드 (2x2 확장) ============================= */
+  .skill-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .skill-card {
+    padding: 9px 10px 8px;
+    background:
+      linear-gradient(180deg, var(--slate-2) 0%, var(--slate) 60%, var(--depth) 100%);
+    border: 1px solid var(--gold-d);
+    border-radius: 3px;
+    position: relative;
+    cursor: default;
+    transition: all 0.2s;
+    overflow: hidden;
+  }
+  .skill-card::before {
+    /* 좌측 컬러 띠 (타입별 색상) */
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--skill-type-color, var(--gold));
+    box-shadow: 0 0 8px var(--skill-type-color, var(--gold));
+  }
+  .skill-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--gold);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.6), 0 0 0 1px var(--gold);
+  }
+
+  .skill-head {
+    display: flex; align-items: flex-start; gap: 8px;
+    margin-bottom: 6px;
+  }
+  .skill-icon {
+    flex: 0 0 auto;
+    width: 32px; height: 32px;
+    background: radial-gradient(circle, var(--char-color), var(--abyss));
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 13px;
+    box-shadow: 0 0 8px var(--char-color), inset 0 0 8px rgba(0,0,0,0.6);
+  }
+  .skill-title {
+    flex: 1;
+    min-width: 0;
+  }
+  .skill-name {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold-l);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+  .skill-cost {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 7px;
+    background: var(--abyss);
+    border: 1px solid var(--gold-d);
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    color: var(--gold-l);
+    font-weight: 700;
+  }
+
+  /* 타겟/타입/위력 배지 행 */
+  .skill-badges {
+    display: flex; flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .skill-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px;
+    background: var(--abyss);
+    border: 1px solid var(--badge-color, var(--ink-faint));
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+    color: var(--badge-color, var(--ink-dim));
+    text-transform: uppercase;
+  }
+  .skill-badge.target  { --badge-color: var(--target-enemy); }
+  .skill-badge.type    { --badge-color: var(--skill-type-color); }
+  .skill-badge.power   {
+    --badge-color: var(--gold-l);
+    background: linear-gradient(180deg, rgba(244,211,94,0.15), var(--abyss));
+  }
+  .skill-badge.power strong { color: var(--gold-l); font-weight: 700; }
+
+  /* 스킬 설명 */
+  .skill-desc {
+    font-size: 10.5px;
+    color: var(--ink);
+    line-height: 1.45;
+    margin-bottom: 5px;
+  }
+  .skill-desc strong { color: var(--char-color, var(--gold-l)); font-weight: 700; }
+  .skill-bonus {
+    padding: 4px 7px;
+    background: linear-gradient(90deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+    border-left: 2px solid var(--gold);
+    border-radius: 2px;
+    font-size: 9.5px;
+    color: var(--parchment);
+    line-height: 1.4;
+    display: flex; align-items: flex-start; gap: 5px;
+  }
+  .skill-bonus::before {
+    content: '⚡';
+    color: var(--gold-l);
+    font-size: 10px;
+    flex: 0 0 auto;
+    margin-top: 1px;
+  }
+  .skill-bonus.restriction {
+    background: linear-gradient(90deg, rgba(192,57,43,0.2), rgba(192,57,43,0.05));
+    border-left-color: var(--blood-l);
+  }
+  .skill-bonus.restriction::before { content: '⚠'; color: var(--blood-l); }
+
+  /* ============================= 특성 카드 (확장) ============================= */
+  .traits-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 7px;
+  }
+  .trait-option {
+    padding: 8px 10px;
+    background: linear-gradient(180deg, var(--slate), var(--depth));
+    border: 1px solid var(--ink-faint);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .trait-option:hover {
+    border-color: var(--gold-d);
+    background: linear-gradient(180deg, var(--slate-2), var(--slate));
+  }
+  .trait-option.selected {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, rgba(74,58,13,0.4), var(--slate));
+    box-shadow: 0 0 0 1px var(--gold) inset, 0 0 8px rgba(212,175,55,0.2);
+  }
+  .trait-option.selected::after {
+    content: '✦';
+    position: absolute;
+    top: 4px; right: 6px;
+    color: var(--gold-l);
+    font-size: 11px;
+  }
+  .trait-option.locked { opacity: 0.55; cursor: not-allowed; }
+  .trait-option.locked:hover { transform: none; }
+
+  .trait-head {
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  .trait-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 10.5px;
+    color: var(--gold-l);
+    letter-spacing: 0.04em;
+    flex: 1;
+    min-width: 0;
+  }
+  .trait-tag {
+    padding: 1px 5px;
+    font-family: 'Cinzel', serif;
+    font-size: 7.5px;
+    letter-spacing: 0.15em;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+  .trait-tag.base { background: var(--gold-d); color: var(--ink); }
+  .trait-tag.meta  { background: var(--blood); color: var(--ink); }
+  .trait-desc {
+    color: var(--ink);
+    font-size: 10px;
+    line-height: 1.4;
+  }
+  .trait-desc strong { color: var(--gold-l); font-weight: 700; }
+  .trait-unlock {
+    margin-top: auto;
+    padding-top: 4px;
+    border-top: 1px dashed var(--ink-faint);
+    font-size: 8.5px;
+    color: var(--blood-l);
+    font-style: italic;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .trait-unlock::before { content: '🔒'; font-size: 9px; }
+
+  /* ============================= 캐러셀 썸네일 ============================= */
+  .carousel {
+    background: linear-gradient(180deg, var(--void) 0%, var(--abyss) 100%);
+    border-top: 1px solid var(--gold-d);
+    padding: 14px 24px 10px;
+    position: relative;
+    z-index: 5;
+  }
+  .carousel::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+  }
+  .carousel-track {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: flex-end;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .carousel-track::-webkit-scrollbar { height: 4px; }
+  .carousel-track::-webkit-scrollbar-track { background: var(--abyss); }
+  .carousel-track::-webkit-scrollbar-thumb { background: var(--gold-d); }
+
+  .char-thumb {
+    flex: 0 0 auto;
+    width: 78px;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.2s;
+    position: relative;
+  }
+  .char-thumb:hover { transform: translateY(-4px); }
+  .thumb-portrait {
+    width: 70px; height: 70px;
+    margin: 0 auto;
+    background: radial-gradient(circle, var(--char-color), var(--void));
+    border: 2px solid var(--gold-d);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 28px;
+    color: var(--ink);
+    text-shadow: 0 0 12px var(--char-color), 0 2px 0 rgba(0,0,0,0.8);
+    box-shadow: 0 0 0 2px var(--abyss), 0 0 16px rgba(0,0,0,0.8);
+    transition: all 0.25s;
+    position: relative;
+  }
+  .char-thumb.active .thumb-portrait {
+    border-color: var(--gold-l);
+    transform: scale(1.12);
+    box-shadow: 0 0 0 2px var(--abyss), 0 0 0 4px var(--gold), 0 0 24px var(--char-color);
+  }
+  .char-thumb.in-party .thumb-portrait::after {
+    content: '';
+    position: absolute;
+    top: -6px; right: -6px;
+    width: 22px; height: 22px;
+    background: var(--blood-l);
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--blood-l);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M6.5 12L2 7.5l1.4-1.4 3.1 3.1 6-6L14 4.6z'/%3E%3C/svg%3E");
+    background-size: 14px;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .thumb-name {
+    margin-top: 5px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+    transition: color 0.2s;
+  }
+  .char-thumb.active .thumb-name { color: var(--gold-l); }
+  .char-thumb:hover .thumb-name { color: var(--ink); }
+
+  /* ============================= 파티 슬롯 + 시작 ============================= */
+  .footer {
+    background: linear-gradient(180deg, var(--abyss) 0%, var(--void) 100%);
+    border-top: 1px solid var(--gold-d);
+    padding: 12px 36px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+    z-index: 5;
+  }
+  .footer::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+  }
+  .party-section { display: flex; align-items: center; gap: 14px; }
+  .party-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+  }
+  .party-slots { display: flex; gap: 12px; }
+  .party-slot {
+    width: 56px; height: 56px;
+    background: var(--void);
+    border: 2px dashed var(--ink-faint);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .party-slot-num {
+    position: absolute;
+    top: -8px; left: 50%;
+    transform: translateX(-50%);
+    width: 18px; height: 18px;
+    background: var(--slate-2);
+    border: 1px solid var(--gold-d);
+    border-radius: 50%;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gold-l);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .party-slot.filled {
+    border: 2px solid var(--gold);
+    border-style: solid;
+    background: radial-gradient(circle, var(--char-color), var(--void));
+    box-shadow: 0 0 0 2px var(--abyss), 0 0 14px var(--char-color);
+  }
+  .party-slot.filled .slot-initial {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--ink);
+    text-shadow: 0 0 10px var(--char-color), 0 2px 0 rgba(0,0,0,0.8);
+  }
+  .party-slot.empty .slot-initial {
+    font-size: 18px;
+    color: var(--ink-faint);
+  }
+  .start-section { display: flex; align-items: center; gap: 14px; }
+  .btn-secondary {
+    padding: 10px 18px;
+    background: linear-gradient(180deg, var(--slate-2), var(--slate));
+    border: 1px solid var(--gold-d);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover {
+    background: linear-gradient(180deg, var(--slate), var(--slate-2));
+    color: var(--gold-l);
+    border-color: var(--gold);
+  }
+  .btn-start {
+    padding: 14px 32px;
+    background: linear-gradient(180deg, var(--blood-l) 0%, var(--blood) 60%, #5a0000 100%);
+    border: 2px solid var(--gold);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.25em;
+    color: var(--gold-l);
+    cursor: pointer;
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8);
+    box-shadow:
+      0 0 0 1px var(--abyss) inset,
+      0 4px 0 #3a0000,
+      0 6px 12px rgba(0,0,0,0.7),
+      0 0 24px rgba(192,57,43,0.4);
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-start::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(244,211,94,0.3) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  .btn-start:hover:not(:disabled)::before { transform: translateX(100%); }
+  .btn-start:hover:not(:disabled) {
+    background: linear-gradient(180deg, #d04030 0%, #a02020 60%, #600000 100%);
+    box-shadow: 0 0 0 1px var(--abyss) inset, 0 4px 0 #3a0000, 0 8px 20px rgba(192,57,43,0.6), 0 0 40px rgba(244,211,94,0.3);
+  }
+  .btn-start:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 1px var(--abyss) inset, 0 2px 0 #3a0000, 0 3px 6px rgba(0,0,0,0.7);
+  }
+  .btn-start:disabled {
+    background: linear-gradient(180deg, var(--slate) 0%, var(--depth) 100%);
+    border-color: var(--ink-faint);
+    color: var(--ink-faint);
+    cursor: not-allowed;
+    text-shadow: none;
+    box-shadow: 0 2px 0 var(--abyss);
+  }
+
+  .stage.fade-out .portrait,
+  .stage.fade-out .info-panel { opacity: 0; transform: translateY(8px); }
+  .portrait, .info-panel { transition: opacity 0.3s, transform 0.3s; }
+
+  @media (max-width: 1320px) { body { align-items: flex-start; overflow: auto; } }
+</style>
+</head>
+<body>
+
+<div class="game-screen">
+
+  <!-- ============= 헤더 ============= -->
+  <header class="header">
+    <div class="header-logo">
+      <div class="crest">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="crestGlow" cx="50%" cy="40%">
+              <stop offset="0%" stop-color="#f4d35e"/>
+              <stop offset="100%" stop-color="#8b6914"/>
+            </radialGradient>
+          </defs>
+          <circle cx="32" cy="32" r="28" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="32" cy="32" r="22" fill="url(#crestGlow)" opacity="0.3"/>
+          <path d="M20,16 L24,48 L28,16 L32,48 L36,16 L40,48 L44,16"
+                fill="none" stroke="#f4d35e" stroke-width="2.2" stroke-linejoin="round"/>
+          <circle cx="32" cy="32" r="4" fill="#c0392b"/>
+          <path d="M16,52 L32,58 L48,52" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="title-text">TEAM LOG</div>
+        <div class="subtitle">A ROGUELIKE CHRONICLE</div>
+      </div>
+    </div>
+
+    <div class="meta-pills">
+      <div class="pill">
+        <span class="pill-label">STAGE</span>
+        <span class="pill-value">I — Grey Forest</span>
+      </div>
+      <div class="pill pill-asc">
+        <span class="pill-label">ASCENSION</span>
+        <span class="pill-value">5</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">GOLD</span>
+        <span class="pill-value">◐ 248</span>
+      </div>
+      <button class="btn-settings" title="설정">⚙</button>
+    </div>
+  </header>
+
+  <!-- ============= 메인 스테이지 ============= -->
+  <main class="stage">
+    <button class="nav-arrow" id="prevBtn" aria-label="이전 캐릭터">‹</button>
+
+    <div class="character-stage">
+      <!-- 초상화 + 자원 메커니즘 -->
+      <div class="portrait-frame" id="portraitFrame">
+        <div class="portrait" id="portrait"></div>
+        <div class="resource-badge" id="resourceBadge">
+          <div class="resource-initial" id="resInitial">E</div>
+          <div class="resource-label" id="resLabel">EMBER</div>
+        </div>
+        <div class="lock-mark">🔒</div>
+        <div class="portrait-plate">
+          <div class="char-name" id="charName">ASHE</div>
+          <div class="char-title" id="charTitle">the Pyromancer</div>
+        </div>
+        <!-- 자원 메커니즘 박스 -->
+        <div class="mechanic-box" id="mechanicBox">
+          <div class="mechanic-title">RESOURCE MECHANIC</div>
+          <div class="mechanic-desc" id="mechanicDesc"></div>
+        </div>
+      </div>
+
+      <!-- 정보 패널 -->
+      <div class="info-panel" id="infoPanel">
+        <div class="identity-quote" id="identityQuote"></div>
+
+        <div class="stat-row">
+          <div class="stat-cell">
+            <div class="stat-label">VIGOR</div>
+            <div class="stat-value" id="statHp">80</div>
+            <div class="stat-sub">HP</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">RESOURCE</div>
+            <div class="stat-value" id="statRes">0 / 10</div>
+            <div class="stat-sub" id="statResName">Ember</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">ROLE</div>
+            <div class="stat-value" id="statRole" style="font-size:13px; padding-top:3px;">Single Nuke</div>
+            <div class="stat-sub" id="statRoleKo">단일 폭딜</div>
+          </div>
+        </div>
+
+        <div class="trait-row">
+          <div class="trait-box strength">
+            <strong>◆ STRENGTH</strong>
+            <span id="charStrength"></span>
+          </div>
+          <div class="trait-box weak">
+            <strong>✕ VULNERABILITY</strong>
+            <span id="charWeak"></span>
+          </div>
+        </div>
+
+        <div class="section-label">SKILLS</div>
+        <div class="skill-grid" id="skillGrid"></div>
+
+        <div class="section-label">EQUIPPED TRAIT</div>
+        <div class="traits-grid" id="traitsGrid"></div>
+      </div>
+    </div>
+
+    <button class="nav-arrow" id="nextBtn" aria-label="다음 캐릭터">›</button>
+  </main>
+
+  <!-- ============= 캐러셀 ============= -->
+  <nav class="carousel">
+    <div class="carousel-track" id="carouselTrack"></div>
+  </nav>
+
+  <!-- ============= 파티 슬롯 + 시작 ============= -->
+  <footer class="footer">
+    <div class="party-section">
+      <div class="party-label">PARTY</div>
+      <div class="party-slots" id="partySlots"></div>
+    </div>
+    <div class="start-section">
+      <button class="btn-secondary" id="randomBtn">⚜ RANDOM</button>
+      <button class="btn-secondary" id="clearBtn">✕ CLEAR</button>
+      <button class="btn-start" id="startBtn" disabled>EMBARK ▶</button>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* =========================================================
+   스킬 타입 / 타겟 메타데이터
+   ========================================================= */
+const SKILL_TYPES = {
+  Attack:  { color: 'var(--type-attack)',  ko: '공격' },
+  Heal:    { color: 'var(--type-heal)',    ko: '치유' },
+  Shield:  { color: 'var(--type-shield)',  ko: '방어' },
+  Buff:    { color: 'var(--type-buff)',    ko: '강화' },
+  Debuff:  { color: 'var(--type-debuff)',  ko: '약화' },
+  Purify:  { color: 'var(--type-purify)',  ko: '정화' },
+  Summon:  { color: 'var(--type-summon)',  ko: '소환' },
+  Special: { color: 'var(--type-special)', ko: '특수' }
+};
+
+const TARGETS = {
+  SingleEnemy: { color: 'var(--target-enemy)', ko: '단일 적' },
+  AllEnemies:  { color: 'var(--target-all)',   ko: '전체 적' },
+  Self:        { color: 'var(--target-self)',  ko: '자신' },
+  SingleAlly:  { color: 'var(--target-ally)',  ko: '아군 1명' },
+  AllAllies:   { color: 'var(--target-ally)',  ko: '전체 아군' },
+  Pierce:      { color: 'var(--target-enemy)', ko: '관통' }
+};
+
+/* =========================================================
+   캐릭터 데이터 — 스킬/특성 상세 포함
+   ========================================================= */
+const CHARACTERS = [
+  {
+    id: 'ashe',
+    name: 'ASHE', title: 'the Pyromancer', initial: 'A',
+    color: '#ff6b35', glow: 'rgba(255,107,53,0.45)',
+    resource: { initial: 'E', label: 'EMBER', name: 'Ember', max: 5,
+                mechanic: '매 턴 시작 시 <strong>Ember +1</strong> 자동 부여. 턴 종료 시 <strong>Ember × 2 자해 피해</strong>. 방치 시 약 11턴 후 자멸.' },
+    identity: '타오르는 자, 자신을 재로 삼아 적을 불태운다 — 불을 쓰는 자가 아니라, 자신이 타고 있는 자.',
+    hp: 80,
+    role: 'Single Nuke', roleKo: '단일 폭딜',
+    strength: '화염 단일 폭딜 + Ember 축적 시 위력 증폭 (Brand of Ash 최대 46 데미지)',
+    weakness: '자해 (Ember × 2/턴 누적) — HP 관리 부담. 부활 시스템과 연계 필수',
+    skills: [
+      {
+        icon: '◈', name: 'Cinder Accretion', ap: 1, cost: 'AP 1',
+        type: 'Attack', target: 'SingleEnemy', power: 5,
+        desc: '단일 적에게 <strong>5 데미지</strong> + Burn 1스택 부여. Ember <strong>+2 충전</strong>.',
+        bonus: null
+      },
+      {
+        icon: '⚚', name: 'Phoenix Renewal', ap: 1, cost: 'AP 1',
+        type: 'Heal', target: 'SingleAlly', power: 8,
+        desc: '아군 1명 HP <strong>8 + Ember×3 회복</strong>. Ember <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '대상 아군 HP 50% 이하 — Burn/Poison 정화 추가' }
+      },
+      {
+        icon: '✦', name: 'Brand of Ash', ap: 2, cost: 'AP 2',
+        type: 'Attack', target: 'SingleEnemy', power: 8,
+        desc: '단일 적 <strong>8 + Ember×3 데미지</strong>. Ember <strong>-2 소비</strong>. 잔불 폭발로 화염 일격.',
+        bonus: { kind: 'bonus', text: '자신 HP 50% 이하 시 데미지 2배 (최대 46)' }
+      },
+      {
+        icon: '※', name: 'Embrace of Cinders', ap: 3, cost: 'AP 3',
+        type: 'Attack', target: 'SingleEnemy', power: 30,
+        desc: '단일 적 <strong>30 + Ember×15 데미지</strong> 결정타. Ember <strong>전부 소비</strong>. 사용 후 <strong>Ashe 사망</strong> (사망 패널티 면제).',
+        bonus: { kind: 'restriction', text: '사용 제약: Ember 5 필수 (완충 상태에서만 시전 가능)' }
+      }
+    ],
+    traits: [
+      { name: 'Burning Soul', tag: 'base',
+        desc: 'Ember 최대치 <strong>+3</strong>. 턴 종료 자해 -1 (Ember×1로 감소).',
+        unlock: '기본 장착' },
+      { name: 'Ember Mastery', tag: 'meta',
+        desc: 'Ember 획득량 <strong>+1/행동</strong>. Cinder Accretion이 Ember +3 부여.',
+        unlock: '메타 상점 — 기억 200' },
+      { name: 'Phoenix Heart', tag: 'meta',
+        desc: '사망 시 1회 <strong>50% HP 부활</strong> + 파티 전체 Ember 1 부여.',
+        unlock: '어센션 10 클리어', locked: true }
+    ],
+    locked: false, tag: 'NEW'
+  },
+
+  {
+    id: 'duran',
+    name: 'DURAN', title: 'the Warrior', initial: 'D',
+    color: '#a8324a', glow: 'rgba(168,50,74,0.45)',
+    resource: { initial: 'V', label: 'VENGEANCE', name: 'Vengeance', max: 10,
+                mechanic: '피격 시 <strong>Vengeance +1</strong>. 일부 스킬로 추가 획득. 공격 스킬 사용 시 <strong>Vengeance 소비</strong>하여 위력 증폭.' },
+    identity: '불멸의 성벽 — 받은 고통을 역심으로 전환하는 자. 맞을수록 더 깊이 벤다.',
+    hp: 120,
+    role: 'Tank / Burst', roleKo: '복수 탱커',
+    strength: '높은 HP + Vengeance 축적 시 버스트 딜 (Revenge Strike 최대 35)',
+    weakness: '비피격 시 출력 0 — 적의 어그로를 끌어야 위력 발휘',
+    skills: [
+      {
+        icon: '◊', name: 'Shield Bash', ap: 1, cost: 'AP 1',
+        type: 'Attack', target: 'SingleEnemy', power: 3,
+        desc: '자신 <strong>쉴드 8</strong> 획득 + 단일 적 <strong>3 데미지</strong>. Vengeance <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '쉴드 흡수 성공 시 Vengeance 추가 +1' }
+      },
+      {
+        icon: '⛨', name: 'Bulwark', ap: 2, cost: 'AP 2',
+        type: 'Shield', target: 'Self', power: 15,
+        desc: '자신 <strong>쉴드 15</strong> + 1턴 동안 받는 데미지 <strong>-30%</strong>. Vengeance <strong>+2 충전</strong>.',
+        bonus: { kind: 'bonus', text: '강공 막아낼 시 Vengeance 추가 +2' }
+      },
+      {
+        icon: '⚚', name: 'Revenge Strike', ap: 2, cost: 'AP 2',
+        type: 'Attack', target: 'SingleEnemy', power: 5,
+        desc: '단일 적 <strong>5 + Vengeance×3 데미지</strong>. Vengeance <strong>-3 소비</strong>.',
+        bonus: { kind: 'bonus', text: '이번 턴 피격 시 데미지 +50% (최대 35)' }
+      },
+      {
+        icon: '✤', name: 'Last Bastion', ap: 3, cost: 'AP 3',
+        type: 'Attack', target: 'SingleEnemy', power: 15,
+        desc: '단일 적 <strong>15 + Vengeance×5 데미지</strong> 최후의 일격. Vengeance <strong>전부 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Vengeance 5 이상 소모 시 적 Stun 1턴' }
+      }
+    ],
+    traits: [
+      { name: 'Iron Resolve', tag: 'base',
+        desc: 'Vengeance 최대치 <strong>+3</strong>. 턴 시작 시 Vengeance 0이면 +1.',
+        unlock: '기본 장착' },
+      { name: 'Counter Stance', tag: 'meta',
+        desc: '피격 시 <strong>25% 확률</strong>로 Vengeance +1 + 적에게 반격 3 데미지.',
+        unlock: '메타 상점 — 기억 200' },
+      { name: 'Berserker Soul', tag: 'meta',
+        desc: 'HP 30% 이하 시 <strong>방어력 +50%</strong>, Vengeance 획득량 2배.',
+        unlock: '어센션 8 클리어', locked: true }
+    ],
+    locked: false, tag: 'NEW'
+  },
+
+  {
+    id: 'lumi',
+    name: 'LUMI', title: 'the Cryomancer', initial: 'L',
+    color: '#5ec5e8', glow: 'rgba(94,197,232,0.45)',
+    resource: { initial: 'F', label: 'FROST', name: 'Frost', max: 8,
+                mechanic: '스킬로 <strong>Frost 충전/소비</strong>. Frost가 높을수록 얼음 마법 위력 증폭. 적을 <strong>Freeze</strong>로 행동 봉쇄.' },
+    identity: '빙결의 통제자 — 적의 행동을 영원히 얼려 버리는 자.',
+    hp: 70,
+    role: 'Control', roleKo: '군중 제어',
+    strength: 'Freeze 행동 봉쇄 + Frost × 스킬 위력 증폭 (자가 콤보)',
+    weakness: '도트 데미지 약함 — 단일 폭딜 부족. 보스전 Freeze 면역 주의',
+    skills: [
+      {
+        icon: '❄', name: 'Frostbolt', ap: 1, cost: 'AP 1',
+        type: 'Attack', target: 'SingleEnemy', power: 6,
+        desc: '단일 적 <strong>6 데미지</strong>. Frost <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '대상 Freeze 시 데미지 +50%' }
+      },
+      {
+        icon: '☼', name: "Winter's Grasp", ap: 2, cost: 'AP 2',
+        type: 'Attack', target: 'SingleEnemy', power: 8,
+        desc: '단일 적 <strong>8 + Frost×2 데미지</strong>. Frost <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '대상 도트(Burn/Poison/Bleed) 보유 시 Freeze 2턴 부여' }
+      },
+      {
+        icon: '◐', name: 'Glacial Spike', ap: 2, cost: 'AP 2',
+        type: 'Debuff', target: 'SingleEnemy', power: 0,
+        desc: '단일 적 <strong>Freeze 1턴</strong> 부여 (행동 봉쇄). Frost <strong>-2 소비</strong>.',
+        bonus: { kind: 'bonus', text: '이미 Freeze 대상 시 추가 4 데미지' }
+      },
+      {
+        icon: '❅', name: 'Permafrost', ap: 3, cost: 'AP 3',
+        type: 'Debuff', target: 'AllEnemies', power: 0,
+        desc: '모든 적 <strong>Freeze 1턴</strong> + 받는 데미지 <strong>+20%</strong> (2턴). Frost <strong>-3 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Frost 4 이상 시 추가 6 데미지 광역' }
+      }
+    ],
+    traits: [
+      { name: 'Frost Weaving', tag: 'base',
+        desc: 'Frost 최대치 <strong>+2</strong>. 부여한 Freeze 지속 +1턴.',
+        unlock: '기본 장착' },
+      { name: 'Deep Freeze', tag: 'meta',
+        desc: 'Freeze된 적은 받는 데미지 <strong>+25%</strong>. Frostbolt 도트 추가.',
+        unlock: '메타 상점 — 기억 220' },
+      { name: 'Eternal Winter', tag: 'meta',
+        desc: '적 Freeze 시마다 Frost <strong>+1 (영구)</strong>. 1런 1회 발동.',
+        unlock: '어센션 12 클리어', locked: true }
+    ],
+    locked: false, tag: 'NEW'
+  },
+
+  {
+    id: 'sibyl',
+    name: 'SIBYL', title: 'the Oracle', initial: 'S',
+    color: '#6ed5b2', glow: 'rgba(110,213,178,0.45)',
+    resource: { initial: 'P', label: 'PROPHECY', name: 'Prophecy', max: 5,
+                mechanic: '모든 스킬은 <strong>1턴 뒤 발동</strong>. Prophecy 충전으로 지연 효과 강화. 3턴마다 Hand of Fate 자동 시전.' },
+    identity: '미래에 투자하는 예언자 — 오늘 외면, 내일의 강타.',
+    hp: 65,
+    role: 'Delayed Nuke', roleKo: '지연 폭딜',
+    strength: '1턴 뒤 강력 효과 + 3턴 주기 콤보 (Hand of Fate 무작위 시전)',
+    weakness: '모든 스킬 1턴 뒤 발동 — 즉응 대응 불가, 첫 턴 부담',
+    skills: [
+      {
+        icon: '◉', name: 'Death Prophecy', ap: 1, cost: 'AP 1',
+        type: 'Attack', target: 'SingleEnemy', power: 8,
+        desc: '<strong>다음 턴</strong> 단일 적 <strong>8 데미지</strong>. Prophecy <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '1턴 뒤 대상 HP 50% 이하면 즉시 처치 (execution)' }
+      },
+      {
+        icon: '☸', name: 'Vision of Renewal', ap: 2, cost: 'AP 2',
+        type: 'Heal', target: 'SingleAlly', power: 12,
+        desc: '<strong>다음 턴</strong> 아군 1명 HP <strong>12 회복</strong> + 상태이상 정화. Prophecy <strong>-2 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Prophecy 3+ 시 회복량 2배' }
+      },
+      {
+        icon: '⌛', name: 'Borrowed Future', ap: 2, cost: 'AP 2',
+        type: 'Buff', target: 'Self', power: 0,
+        desc: '<strong>다음 턴</strong> 자신 모든 스킬 위력 <strong>+50%</strong>. Prophecy <strong>+2 충전</strong>.',
+        bonus: { kind: 'restriction', text: '대가: 2턴 뒤 자신 Stun 1턴' }
+      },
+      {
+        icon: '✺', name: 'Déjà Vu', ap: 3, cost: 'AP 3',
+        type: 'Attack', target: 'SingleEnemy', power: 15,
+        desc: '<strong>다음 턴</strong> 단일 적 <strong>15 데미지</strong> + 그 다음 턴 동일 데미지 반격 (Echo). Prophecy <strong>-3 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Prophecy 5+ 시 Echo 2회 반복' }
+      }
+    ],
+    traits: [
+      { name: "Death's Mark", tag: 'base',
+        desc: 'Prophecy 최대치 <strong>+2</strong>. Death Prophecy 임계 HP 50% → 70%.',
+        unlock: '기본 장착' },
+      { name: 'Hand of Fate', tag: 'meta',
+        desc: '<strong>3턴마다 무작위 스킬 자동 시전</strong> (AP 비용 무료).',
+        unlock: '메타 상점 — 기억 250' },
+      { name: 'Time Collapse', tag: 'meta',
+        desc: 'Prophecy 1회 <strong>즉시 발동</strong> (1턴 대기 스킵). 1런 1회.',
+        unlock: '어센션 10 클리어', locked: true }
+    ],
+    locked: false, tag: 'NEW'
+  },
+
+  {
+    id: 'taranis',
+    name: 'TARANIS', title: 'the Stormcaller', initial: 'T',
+    color: '#f7d046', glow: 'rgba(247,208,70,0.5)',
+    resource: { initial: 'C', label: 'CHARGE', name: 'Charge', max: 6,
+                mechanic: '적에게 <strong>Wire 부착</strong> → 매 턴 종료 시 자동 <strong>연쇄 번개</strong>. Wire는 인접 적에게 전파. Charge로 연쇄 강화.' },
+    identity: '네트워크에 투자하는 폭풍술사 — 한 번 얽힌 적은 끝까지 뇌격.',
+    hp: 75,
+    role: 'Chain Caster', roleKo: '연쇄 딜러',
+    strength: '광역 연쇄 (Wire 전파) + Grounding Field 서포트 (쉴드 흡수 시 Charge 역부여)',
+    weakness: '단일 보스전 약함 — 네트워크 구축 전 취약',
+    skills: [
+      {
+        icon: '⚡', name: 'Wire', ap: 1, cost: 'AP 1',
+        type: 'Debuff', target: 'SingleEnemy', power: 0,
+        desc: '적에게 <strong>Wire 부착</strong> (매 턴 2 도트, 인접 적 전파). Charge <strong>+1 충전</strong>.',
+        bonus: null
+      },
+      {
+        icon: '⛧', name: 'Branch', ap: 2, cost: 'AP 2',
+        type: 'Attack', target: 'SingleEnemy', power: 6,
+        desc: '단일 적 <strong>6 데미지</strong>. Wire 부착 적에게 추가 <strong>4 데미지</strong>, 인접 적 전파. Charge <strong>-1 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Charge 3+ 시 전파 범위 +1' }
+      },
+      {
+        icon: '☷', name: 'Grounding Field', ap: 2, cost: 'AP 2',
+        type: 'Shield', target: 'SingleAlly', power: 10,
+        desc: '아군 1명 <strong>쉴드 10</strong>. 접지장 — 적 공격 시 Charge 역부여. Charge <strong>+2 충전</strong>.',
+        bonus: { kind: 'bonus', text: '쉴드 흡수 시 Charge 추가 +1' }
+      },
+      {
+        icon: '🌩', name: 'Thunderstorm', ap: 3, cost: 'AP 3',
+        type: 'Attack', target: 'AllEnemies', power: 10,
+        desc: '모든 Wire 부착 적에게 <strong>10 + Charge×2 연쇄 번개</strong>. Charge <strong>-3 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Wire 부착 적 수만큼 위력 +5' }
+      }
+    ],
+    traits: [
+      { name: 'Compounding', tag: 'base',
+        desc: 'Charge 최대치 <strong>+2</strong>. Wire 도트 +1/턴.',
+        unlock: '기본 장착' },
+      { name: 'Thunder God', tag: 'meta',
+        desc: 'Chain 연쇄 데미지 <strong>+50%</strong>. Wire 부착 시 Charge +1.',
+        unlock: '메타 상점 — 기억 220' },
+      { name: 'Superconductor', tag: 'meta',
+        desc: 'Wire 전파 범위 <strong>+1</strong>. Thunderstorm 연쇄 횟수 +2.',
+        unlock: '어센션 12 클리어', locked: true }
+    ],
+    locked: false, tag: 'NEW'
+  },
+
+  {
+    id: 'umbra',
+    name: 'UMBRA', title: 'the Rogue', initial: 'U',
+    color: '#9b6ec2', glow: 'rgba(155,110,194,0.45)',
+    resource: { initial: 'S', label: 'SHADOWS', name: 'Shadows', max: 8,
+                mechanic: '<strong>Shadows 축적</strong> 시 치명타 확률 증가. 치명타 시 추가 효과. 그림자 속에서 은신/암살.' },
+    identity: '치명타 암살자 — 그림자 속에서 한 줄 빛이 되어 적을 가른다.',
+    hp: 60,
+    role: 'Critical Assassin', roleKo: '치명타 암살',
+    strength: 'Shadows 축적 시 치명타 확률 증가 + FollowUp 연속타 (Backstab 치명타 시 추가 타)',
+    weakness: '자원 축전 전 취약 — 초반 딜 부족, 저HP 근접 캐릭터',
+    skills: [
+      {
+        icon: '⚔', name: 'Backstab', ap: 1, cost: 'AP 1',
+        type: 'Attack', target: 'SingleEnemy', power: 6,
+        desc: '단일 적 <strong>6 데미지</strong>. Shadows <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '치명타 시 Shadows 추가 +1 + FollowUp (추가 3 데미지)' }
+      },
+      {
+        icon: '🗡', name: 'Shadow Stitch', ap: 2, cost: 'AP 2',
+        type: 'Debuff', target: 'SingleEnemy', power: 0,
+        desc: '단일 적 <strong>Stun 1턴</strong> (행동 봉쇄). Shadows <strong>-2 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Shadows 4+ 시 추가 5 데미지' }
+      },
+      {
+        icon: '☾', name: 'Cloak & Dagger', ap: 2, cost: 'AP 2',
+        type: 'Attack', target: 'SingleEnemy', power: 4,
+        desc: '은신 → 단일 적 <strong>4 데미지</strong>. 다음 공격 <strong>치명타 확정</strong>. Shadows <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '은신 상태에서 피격 시 자동 회피 (1회)' }
+      },
+      {
+        icon: '✗', name: 'Deathmark', ap: 3, cost: 'AP 3',
+        type: 'Attack', target: 'SingleEnemy', power: 12,
+        desc: '단일 적 <strong>12 + Shadows×3 데미지</strong>. 치명타 확정 + 3턴 도트. Shadows <strong>전부 소비</strong>.',
+        bonus: { kind: 'bonus', text: '대상 도트 상태 시 즉시 처치 (execution)' }
+      }
+    ],
+    traits: [
+      { name: 'Shadow Dance', tag: 'base',
+        desc: 'Shadows 최대치 <strong>+2</strong>. 턴 시작 시 Shadows +1.',
+        unlock: '기본 장착' },
+      { name: 'Critical Focus', tag: 'meta',
+        desc: '치명타 피해 <strong>+50%</strong>. 치명타 시 Shadows +1.',
+        unlock: '메타 상점 — 기억 200' },
+      { name: 'Death Whisper', tag: 'meta',
+        desc: '치명타 시 <strong>25% 확률 2연타</strong>. Backstab 치명타율 +20%.',
+        unlock: '어센션 10 클리어', locked: true }
+    ],
+    locked: false, tag: 'NEW'
+  },
+
+  {
+    id: 'aster',
+    name: 'ASTER', title: 'the Archer', initial: 'A',
+    color: '#d4a017', glow: 'rgba(212,160,23,0.45)',
+    resource: { initial: 'C', label: 'COMBO', name: 'Combo', max: 5,
+                mechanic: '매 턴 적에게 명중 시 <strong>Combo +1</strong>. 사용 시 <strong>Momentum</strong> 위력 보너스 (연속 사용 누적).' },
+    identity: '연속 사격의 달인 — 한 발 한 발이 다음 발을 위한 밑거름.',
+    hp: 65,
+    role: 'Ramp DPS', roleKo: '연속 딜러',
+    strength: 'Momentum 사용 시 위력 +, 연속 명중 시 폭발 (Quick Shot → Bullseye 콤보)',
+    weakness: '자원 획득 조건 엄격 — 매 턴 적중 필수, 빗나가면 콤보 초기화',
+    skills: [
+      {
+        icon: '➶', name: 'Quick Shot', ap: 1, cost: 'AP 1',
+        type: 'Attack', target: 'SingleEnemy', power: 4,
+        desc: '단일 적 <strong>4 데미지</strong>. Combo <strong>+1 충전</strong>. 빠른 사격.',
+        bonus: { kind: 'bonus', text: '적 명중 시 Combo 추가 +1 (한 턴 2회 충전 가능)' }
+      },
+      {
+        icon: '➹', name: 'Piercing Arrow', ap: 2, cost: 'AP 2',
+        type: 'Attack', target: 'Pierce', power: 7,
+        desc: '관통 화살 — 일렬 적에게 <strong>7 데미지</strong>. Combo <strong>-1 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Combo 3+ 시 방어력 무시' }
+      },
+      {
+        icon: '⊛', name: 'Marking Shot', ap: 2, cost: 'AP 2',
+        type: 'Debuff', target: 'SingleEnemy', power: 0,
+        desc: '단일 적 <strong>Mark 표식</strong> (다음 공격 데미지 +50%). Combo <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: 'Mark 적 치명타 시 추가 도트 3턴' }
+      },
+      {
+        icon: '☯', name: 'Bullseye', ap: 3, cost: 'AP 3',
+        type: 'Attack', target: 'SingleEnemy', power: 15,
+        desc: '단일 적 <strong>15 + Combo×4 데미지</strong> 완벽한 일격. Combo <strong>전부 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Mark 적에게 사용 시 데미지 3배' }
+      }
+    ],
+    traits: [
+      { name: 'Steady Aim', tag: 'base',
+        desc: 'Combo 획득 조건 완화 (어떤 명중이든 +1). Combo 최대 <strong>+1</strong>.',
+        unlock: '기본 장착' },
+      { name: 'Momentum Mastery', tag: 'meta',
+        desc: 'Momentum 위력 보너스 <strong>+50%</strong>. 연속 명중 시 Combo +1.',
+        unlock: '메타 상점 — 기억 220' },
+      { name: 'Trick Quiver', tag: 'meta',
+        desc: '화살 종류 3개 선택 가능 (관통/작렬/표식). 1턴 1회.',
+        unlock: '어센션 12 클리어', locked: true }
+    ],
+    locked: false, tag: 'REWORK'
+  },
+
+  {
+    id: 'mortis',
+    name: 'MORTIS', title: 'the Necromancer', initial: 'M',
+    color: '#7da34a', glow: 'rgba(125,163,74,0.4)',
+    resource: { initial: '☠', label: 'CORPSE', name: 'Corpse', max: 5,
+                mechanic: '적 처치 시 <strong>시체 자원</strong> 획득. 시체를 소환/폭발/흡수하여 전장 조작. 간접 딜러 (본인 직접 딜 낮음).' },
+    identity: '영혼 수확자 — 죽은 자가 남긴 것으로 산 자를 벤다.',
+    hp: 70,
+    role: 'Indirect Caster', roleKo: '간접 딜러',
+    strength: '소환 시체 자동 전투 + 처치 폭발 + 영혼 자원 (자원 루프)',
+    weakness: '빈사 적에게 약함 — 본인 직접 딜이 낮아 처치 타이밍 애매',
+    skills: [
+      {
+        icon: '⚰', name: 'Raise Dead', ap: 1, cost: 'AP 1',
+        type: 'Summon', target: 'Self', power: 0,
+        desc: '<strong>시체 1개 소환</strong> (자동 전투, 3턴 지속). Corpse <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '시체가 적 처치 시 영혼 +1' }
+      },
+      {
+        icon: '☠', name: 'Corpse Explosion', ap: 2, cost: 'AP 2',
+        type: 'Attack', target: 'AllEnemies', power: 4,
+        desc: '시체 1개를 <strong>폭발</strong>시켜 주변 적 <strong>4 광역 데미지</strong>. Corpse <strong>-1 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Corpse 3+ 시 폭발 위력 2배' }
+      },
+      {
+        icon: '࿇', name: 'Soul Harvest', ap: 2, cost: 'AP 2',
+        type: 'Debuff', target: 'SingleEnemy', power: 0,
+        desc: '단일 적 <strong>영혼 표식</strong> (처치 시 영혼 +2). Corpse <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '표식 적 사망 시 시체 자동 생성' }
+      },
+      {
+        icon: '☣', name: 'Plague Wind', ap: 3, cost: 'AP 3',
+        type: 'Debuff', target: 'AllEnemies', power: 0,
+        desc: '모든 적 <strong>독 도트 3턴 (5/턴)</strong>. Corpse <strong>-3 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Corpse 3+ 시 추가 Stun 1턴' }
+      }
+    ],
+    traits: [
+      { name: 'Necromancy', tag: 'base',
+        desc: '시체 소환 위력 <strong>+20%</strong>. 시체 지속 +1턴.',
+        unlock: '기본 장착' },
+      { name: 'Soul Eater', tag: 'meta',
+        desc: '적 처치 시 영혼 <strong>+1</strong>. 시체 사망 시 25% 확률 새 시체.',
+        unlock: '메타 상점 — 기억 220' },
+      { name: 'Lord of the Dead', tag: 'meta',
+        desc: '동시 소환수 <strong>+1</strong>. 시체 공격력 +50%.',
+        unlock: '어센션 12 클리어', locked: true }
+    ],
+    locked: false, tag: 'REWORK'
+  },
+
+  {
+    id: 'cael',
+    name: 'CAEL', title: 'the Alchemist', initial: 'C',
+    color: '#b388ff', glow: 'rgba(179,136,255,0.45)',
+    resource: { initial: '⚗', label: 'DISCOVER', name: 'Discover', max: 0,
+                mechanic: '<strong>하스스톤式 발견</strong> — 스킬마다 3개 중 1 랜덤 선택지. 매 시전 다른 효과. 도트+힐 하이브리드.' },
+    identity: '시약 반응 촉매자 — 매 스킬이 3가지 가능성을 품은 주사위.',
+    hp: 75,
+    role: 'Reaction Caster', roleKo: '반응 딜러',
+    strength: '물약 효율 + 도트/힐 하이브리드 (상황에 맞춰 선택)',
+    weakness: '고AP 비용 + 랜덤 의존 — 원하는 효과 안 나오면 딜레이. 평균 3~4AP',
+    skills: [
+      {
+        icon: '⚗', name: 'Catalyst', ap: 2, cost: 'AP 2',
+        type: 'Special', target: 'SingleEnemy', power: 6,
+        desc: '<strong>Discover 3选1</strong>: ① 화염 6 데미지 ② 독 도트 3턴 ③ 아군 8 힐.',
+        bonus: null
+      },
+      {
+        icon: '☤', name: 'Elixir Toss', ap: 2, cost: 'AP 2',
+        type: 'Special', target: 'AllEnemies', power: 4,
+        desc: '<strong>Discover 3选1</strong>: ① 광역 4 데미지 ② 광역 독 ③ 전체 아군 6 힐.',
+        bonus: { kind: 'bonus', text: 'Lab Notes 특성 시 선택지 +1' }
+      },
+      {
+        icon: '⚗', name: 'Transmutation', ap: 3, cost: 'AP 3',
+        type: 'Buff', target: 'Self', power: 3,
+        desc: '<strong>Discover 3选1</strong>: ① 자신 ATK+3 ② 적 DEF-3 ③ 자신 도트 정화.',
+        bonus: null
+      },
+      {
+        icon: '☣', name: "Philosopher's Stone", ap: 4, cost: 'AP 4',
+        type: 'Attack', target: 'SingleEnemy', power: 25,
+        desc: '연금술 정점 — 단일 적 <strong>25 데미지</strong> 황금빛 일격. Discover 없음.',
+        bonus: { kind: 'bonus', text: '처치 시 추가 골드 +20 획득' }
+      }
+    ],
+    traits: [
+      { name: 'Lab Notes', tag: 'base',
+        desc: 'Discover 선택지 <strong>+1</strong> (3→4). 모든 선택지 위력 +1.',
+        unlock: '기본 장착' },
+      { name: 'Volatile Mix', tag: 'meta',
+        desc: '물약 위력 <strong>+30%</strong>. 도트 지속 +1턴.',
+        unlock: '메타 상점 — 기억 220' },
+      { name: 'Golden Touch', tag: 'meta',
+        desc: '골드 획득 시 25% 확률 추가 효과 (전투 시 +5 골드).',
+        unlock: '어센션 12 클리어', locked: true }
+    ],
+    locked: false, tag: 'REWORK'
+  },
+
+  {
+    id: 'calliope',
+    name: 'CALLIOPE', title: 'the Bard', initial: 'C',
+    color: '#ff8fab', glow: 'rgba(255,143,171,0.45)',
+    resource: { initial: '♪', label: 'MELODY', name: 'Melody', max: 4,
+                mechanic: '스킬 사용 시 <strong>주 선율</strong> 또는 <strong>부 선율</strong> 발동. Melody 4스택 시 <strong>Grand Finale</strong>로 폭발.' },
+    identity: '리듬 지휘자 — 곡이 쌓여 피날레로 터진다.',
+    hp: 70,
+    role: 'Buffer / Burst', roleKo: '버퍼',
+    strength: 'Melody 4스택 Grand Finale 폭발 + 다중 버프 (주/부 선율 메아리)',
+    weakness: '턴당 스킬 밀도 부족 — 매 턴 행동 설계 까다로움, 빌드업 시간 필요',
+    skills: [
+      {
+        icon: '♪', name: 'Inspiring Note', ap: 1, cost: 'AP 1',
+        type: 'Buff', target: 'SingleAlly', power: 2,
+        desc: '아군 1명 <strong>ATK+2 (2턴)</strong>. Melody <strong>+1 충전</strong> (주 선율).',
+        bonus: { kind: 'bonus', text: 'Melody 3+ 시 전체 아군 버프' }
+      },
+      {
+        icon: '♫', name: 'Dissonant Chord', ap: 2, cost: 'AP 2',
+        type: 'Debuff', target: 'SingleEnemy', power: 0,
+        desc: '단일 적 <strong>DEF-3</strong> + 혼란 (다음 스킬 무작위 대상). Melody <strong>-1 소비</strong> (부 선율).',
+        bonus: { kind: 'bonus', text: '부 선율 효과 2배' }
+      },
+      {
+        icon: '♬', name: 'Harmony', ap: 2, cost: 'AP 2',
+        type: 'Heal', target: 'AllAllies', power: 6,
+        desc: '전체 아군 HP <strong>6 회복</strong>. Melody <strong>+1 충전</strong> (주 선율).',
+        bonus: { kind: 'bonus', text: 'Melody 3+ 시 추가 버프 (DEF+2 1턴)' }
+      },
+      {
+        icon: '𝄢', name: 'Grand Finale', ap: 3, cost: 'AP 3',
+        type: 'Attack', target: 'AllEnemies', power: 10,
+        desc: '모든 적 <strong>10 + Melody×4 데미지</strong>. Melody <strong>전부 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Melody 4+ 시 추가 Stun 1턴' }
+      }
+    ],
+    traits: [
+      { name: 'Perfect Pitch', tag: 'base',
+        desc: 'Melody 최대치 <strong>+1</strong>. Melody 획득량 +1.',
+        unlock: '기본 장착' },
+      { name: 'Echo', tag: 'meta',
+        desc: '스킬 효과 <strong>25% 확률</strong>로 2회 시전. Melody +1.',
+        unlock: '메타 상점 — 기억 220' },
+      { name: 'Virtuoso', tag: 'meta',
+        desc: 'Grand Finale 위력 <strong>+50%</strong>. Melody 4스택 시 전체 ATK 버프.',
+        unlock: '어센션 12 클리어', locked: true }
+    ],
+    locked: false, tag: 'REWORK'
+  },
+
+  {
+    id: 'elara',
+    name: 'ELARA', title: 'the Healer', initial: 'E',
+    color: '#ffe082', glow: 'rgba(255,224,130,0.5)',
+    resource: { initial: '✚', label: 'MERCY', name: 'Mercy', max: 5,
+                mechanic: '힐/정화 시 <strong>Mercy 축적</strong>. Mercy 소비하여 영구 버프 부여. 생명 순환 서포터.' },
+    identity: '생명 순환 서포터 — 치유와 정화가 한 몸이 되어 파티를 지킨다.',
+    hp: 60,
+    role: 'Pure Support', roleKo: '순수 서포터',
+    strength: '힐 + 정화 동시 + 영구 버프 (Mercy 누적). 부활 시스템과 최고 시너지',
+    weakness: '자기 생존 약함 + 딜 능력 0 — 파티 완전 의존',
+    skills: [
+      {
+        icon: '✚', name: 'Healing Word', ap: 1, cost: 'AP 1',
+        type: 'Heal', target: 'SingleAlly', power: 8,
+        desc: '아군 1명 HP <strong>8 회복</strong>. Mercy <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '대상 상태이상 보유 시 정화 동시' }
+      },
+      {
+        icon: '◇', name: 'Sanctuary', ap: 2, cost: 'AP 2',
+        type: 'Shield', target: 'SingleAlly', power: 12,
+        desc: '아군 1명 <strong>쉴드 12</strong> 부여. Mercy <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: 'Mercy 3+ 시 추가 도트 면역 1턴' }
+      },
+      {
+        icon: '∻', name: 'Cleanse Soul', ap: 2, cost: 'AP 2',
+        type: 'Purify', target: 'SingleAlly', power: 0,
+        desc: '아군 1명 <strong>모든 상태이상 정화</strong>. Mercy <strong>+1 충전</strong>.',
+        bonus: { kind: 'bonus', text: '부활 직후 대상에게 ATK+2 버프' }
+      },
+      {
+        icon: '✦', name: 'Divine Light', ap: 3, cost: 'AP 3',
+        type: 'Heal', target: 'AllAllies', power: 12,
+        desc: '전체 아군 HP <strong>12 회복</strong>. Mercy <strong>-3 소비</strong>.',
+        bonus: { kind: 'bonus', text: 'Mercy 5+ 시 1명 50% HP 부활' }
+      }
+    ],
+    traits: [
+      { name: 'Benevolence', tag: 'base',
+        desc: '힐 위력 <strong>+25%</strong>. Mercy 획득량 +1.',
+        unlock: '기본 장착' },
+      { name: 'Martyr', tag: 'meta',
+        desc: '자신 HP를 아군에게 <strong>나눠줄 수 있음</strong> (AP 0). 사용 시 Mercy +2.',
+        unlock: '메타 상점 — 기억 220' },
+      { name: "Saint's Resolve", tag: 'meta',
+        desc: '사망 시 1회 <strong>부활</strong> + 파티 전체 힐 30. 1런 1회.',
+        unlock: '어센션 10 클리어', locked: true }
+    ],
+    locked: false, tag: 'REWORK'
+  }
+];
+
+/* =========================================================
+   상태
+   ========================================================= */
+const MAX_PARTY = 4;
+let currentIndex = 0;
+const party = [null, null, null, null];
+const selectedTraits = {};
+
+/* =========================================================
+   렌더링
+   ========================================================= */
+function renderCarousel() {
+  const track = document.getElementById('carouselTrack');
+  track.innerHTML = '';
+  CHARACTERS.forEach((c, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'char-thumb';
+    if (i === currentIndex) thumb.classList.add('active');
+    if (party.includes(c.id)) thumb.classList.add('in-party');
+    thumb.style.setProperty('--char-color', c.color);
+    const tagMark = c.tag === 'NEW' ? ' ✦' : c.tag === 'REWORK' ? ' ⟳' : '';
+    thumb.innerHTML = `
+      <div class="thumb-portrait" style="--char-color:${c.color}">${c.initial}</div>
+      <div class="thumb-name">${c.name}${tagMark}</div>
+    `;
+    thumb.addEventListener('click', () => selectCharacter(i));
+    track.appendChild(thumb);
+  });
+}
+
+function renderMain() {
+  const c = CHARACTERS[currentIndex];
+
+  // 초상화
+  const frame = document.getElementById('portraitFrame');
+  frame.classList.toggle('locked', c.locked);
+  const portrait = document.getElementById('portrait');
+  portrait.style.setProperty('--char-color', c.color);
+  portrait.style.setProperty('--char-glow', c.glow);
+  portrait.style.setProperty('--char-initial', `"${c.initial}"`);
+
+  // 자원 메커니즘 박스 색상
+  const mechanicBox = document.getElementById('mechanicBox');
+  mechanicBox.style.setProperty('--char-color', c.color);
+  document.getElementById('mechanicDesc').innerHTML = c.resource.mechanic;
+
+  // 자원 배지
+  const resBadge = document.getElementById('resourceBadge');
+  resBadge.style.setProperty('--char-color', c.color);
+  document.getElementById('resInitial').textContent = c.resource.initial;
+  document.getElementById('resLabel').textContent = c.resource.label;
+
+  document.getElementById('charName').textContent = c.name;
+  document.getElementById('charTitle').textContent = c.title;
+  document.getElementById('identityQuote').textContent = c.identity;
+
+  document.getElementById('statHp').textContent = c.hp;
+  document.getElementById('statRes').textContent =
+    c.resource.max === 0 ? '∞' : `0 / ${c.resource.max}`;
+  document.getElementById('statResName').textContent = c.resource.name;
+  document.getElementById('statRole').textContent = c.role;
+  document.getElementById('statRoleKo').textContent = c.roleKo;
+
+  document.getElementById('charStrength').textContent = c.strength;
+  document.getElementById('charWeak').textContent = c.weakness;
+
+  // 스킬 카드들 (상세)
+  const skillGrid = document.getElementById('skillGrid');
+  skillGrid.innerHTML = '';
+  c.skills.forEach(s => {
+    const typeInfo = SKILL_TYPES[s.type];
+    const targetInfo = TARGETS[s.target];
+    const card = document.createElement('div');
+    card.className = 'skill-card';
+    card.style.setProperty('--char-color', c.color);
+    card.style.setProperty('--skill-type-color', typeInfo.color);
+
+    let bonusHTML = '';
+    if (s.bonus) {
+      bonusHTML = `<div class="skill-bonus${s.bonus.kind === 'restriction' ? ' restriction' : ''}">${s.bonus.text}</div>`;
+    }
+
+    card.innerHTML = `
+      <div class="skill-head">
+        <div class="skill-icon">${s.icon}</div>
+        <div class="skill-title">
+          <div class="skill-name">${s.name}</div>
+          <span class="skill-cost">${s.cost}</span>
+        </div>
+      </div>
+      <div class="skill-badges">
+        <span class="skill-badge type">${typeInfo.ko}</span>
+        <span class="skill-badge target">${targetInfo.ko}</span>
+        ${s.power > 0 ? `<span class="skill-badge power"><strong>${s.power}</strong> 위력</span>` : ''}
+      </div>
+      <div class="skill-desc">${s.desc}</div>
+      ${bonusHTML}
+    `;
+    skillGrid.appendChild(card);
+  });
+
+  // 특성
+  if (selectedTraits[c.id] === undefined) selectedTraits[c.id] = 0;
+  const traitsGrid = document.getElementById('traitsGrid');
+  traitsGrid.innerHTML = '';
+  c.traits.forEach((t, i) => {
+    const opt = document.createElement('div');
+    opt.className = 'trait-option';
+    if (i === selectedTraits[c.id]) opt.classList.add('selected');
+    if (t.locked) opt.classList.add('locked');
+    opt.style.setProperty('--char-color', c.color);
+    opt.innerHTML = `
+      <div class="trait-head">
+        <div class="trait-name">${t.name}</div>
+        <span class="trait-tag ${t.tag}">${t.tag === 'base' ? 'BASE' : 'META'}</span>
+      </div>
+      <div class="trait-desc">${t.desc}</div>
+      ${t.locked ? `<div class="trait-unlock">${t.unlock}</div>` : ''}
+    `;
+    if (!t.locked) {
+      opt.addEventListener('click', () => {
+        selectedTraits[c.id] = i;
+        renderMain();
+      });
+    }
+    traitsGrid.appendChild(opt);
+  });
+}
+
+function renderParty() {
+  const slotsEl = document.getElementById('partySlots');
+  slotsEl.innerHTML = '';
+  for (let i = 0; i < MAX_PARTY; i++) {
+    const id = party[i];
+    const slot = document.createElement('div');
+    slot.className = 'party-slot ' + (id ? 'filled' : 'empty');
+    const num = document.createElement('div');
+    num.className = 'party-slot-num';
+    num.textContent = i + 1;
+    slot.appendChild(num);
+
+    if (id) {
+      const c = CHARACTERS.find(x => x.id === id);
+      slot.style.setProperty('--char-color', c.color);
+      const initial = document.createElement('div');
+      initial.className = 'slot-initial';
+      initial.textContent = c.initial;
+      slot.appendChild(initial);
+      slot.title = `${i+1}번: ${c.name} — 클릭하여 제거`;
+      slot.addEventListener('click', () => removeFromParty(i));
+    } else {
+      const initial = document.createElement('div');
+      initial.className = 'slot-initial';
+      initial.textContent = '+';
+      slot.appendChild(initial);
+      slot.title = `${i+1}번 슬롯 비어있음 — 클릭하여 현재 캐릭터 추가`;
+      slot.addEventListener('click', addToParty);
+    }
+    slotsEl.appendChild(slot);
+  }
+
+  const filled = party.filter(x => x !== null).length;
+  document.getElementById('startBtn').disabled = filled === 0;
+  renderCarousel();
+}
+
+/* =========================================================
+   액션
+   ========================================================= */
+function selectCharacter(idx) {
+  if (idx === currentIndex) return;
+  const stage = document.querySelector('.stage');
+  stage.classList.add('fade-out');
+  setTimeout(() => {
+    currentIndex = idx;
+    renderMain();
+    renderCarousel();
+    stage.classList.remove('fade-out');
+  }, 200);
+}
+
+function addToParty() {
+  const c = CHARACTERS[currentIndex];
+  if (c.locked) return;
+  if (party.includes(c.id)) return;
+  const empty = party.indexOf(null);
+  if (empty === -1) { flashError('파티가 가득 찼습니다'); return; }
+  party[empty] = c.id;
+  renderParty();
+}
+
+function removeFromParty(slotIdx) {
+  if (party[slotIdx] === null) { addToParty(); return; }
+  party[slotIdx] = null;
+  const compacted = party.filter(x => x !== null);
+  while (compacted.length < MAX_PARTY) compacted.push(null);
+  for (let i = 0; i < MAX_PARTY; i++) party[i] = compacted[i];
+  renderParty();
+}
+
+function clearParty() {
+  for (let i = 0; i < MAX_PARTY; i++) party[i] = null;
+  renderParty();
+}
+
+function randomParty() {
+  clearParty();
+  const unlocked = CHARACTERS.filter(c => !c.locked);
+  const shuffled = unlocked.slice().sort(() => Math.random() - 0.5);
+  const count = Math.min(MAX_PARTY, shuffled.length);
+  for (let i = 0; i < count; i++) party[i] = shuffled[i].id;
+  renderParty();
+}
+
+function flashError(msg) {
+  const btn = document.getElementById('startBtn');
+  const original = btn.textContent;
+  btn.textContent = msg;
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = original; renderParty(); }, 1200);
+}
+
+function embark() {
+  const filled = party.filter(x => x !== null).length;
+  if (filled === 0) return;
+  alert(`런 시작!\n파티: ${party.filter(x=>x).map(id => CHARACTERS.find(c=>c.id===id).name).join(', ')}\n(실제 게임에서는 MapScene으로 전환됩니다)`);
+}
+
+/* =========================================================
+   바인딩
+   ========================================================= */
+document.getElementById('prevBtn').addEventListener('click', () => {
+  selectCharacter((currentIndex - 1 + CHARACTERS.length) % CHARACTERS.length);
+});
+document.getElementById('nextBtn').addEventListener('click', () => {
+  selectCharacter((currentIndex + 1) % CHARACTERS.length);
+});
+document.getElementById('portraitFrame').addEventListener('click', addToParty);
+document.getElementById('randomBtn').addEventListener('click', randomParty);
+document.getElementById('clearBtn').addEventListener('click', clearParty);
+document.getElementById('startBtn').addEventListener('click', embark);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft')  document.getElementById('prevBtn').click();
+  if (e.key === 'ArrowRight') document.getElementById('nextBtn').click();
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.tagName !== 'BUTTON') {
+    e.preventDefault();
+    addToParty();
+  }
+});
+
+renderMain();
+renderCarousel();
+renderParty();
+</script>
+
+</body>
+</html>

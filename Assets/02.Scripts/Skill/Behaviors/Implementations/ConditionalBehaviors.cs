@@ -1,3 +1,4 @@
+using TeamLog.Characters;
 using TeamLog.Combat;
 using Character = TeamLog.Characters.Character;
 
@@ -29,6 +30,23 @@ namespace TeamLog.Skill.Behaviors.Implementations
             if (target == null || target.Health == null) return power;
             if (target.Health.CurrentHP == target.Health.MaxHP)
                 return power + ctx.Instance?.GetBehaviorRank(BehaviorKeyword.FirstBlood) ?? 0;
+            return power;
+        }
+    }
+
+    /// <summary>TargetFullHP (Phase CC-2G-1) — 풀피 대상 +rank 위력. FirstBlood와 동일 로직이나 별도 키워드.</summary>
+    public class TargetFullHPBehavior : ISkillBehavior
+    {
+        public BehaviorKeyword Keyword => BehaviorKeyword.TargetFullHP;
+        public ExecutionPhase Phases => ExecutionPhase.PowerModify;
+        public int Order => 55; // Berserk(50) 후, FirstBlood(60) 전
+
+        public int ModifyPower(int power, SkillExecContext ctx)
+        {
+            var target = ctx.InitialTarget;
+            if (target == null || target.Health == null || target.Health.MaxHP <= 0) return power;
+            if (target.Health.CurrentHP >= target.Health.MaxHP)
+                return power + ctx.Instance?.GetBehaviorRank(BehaviorKeyword.TargetFullHP) ?? 0;
             return power;
         }
     }
@@ -146,6 +164,45 @@ namespace TeamLog.Skill.Behaviors.Implementations
     // PostApply Phase
     // ═══════════════════════════════════════════
 
+    /// <summary>Explosion (Phase CC-2G-4) — 타겟의 Charge 스택이 rank+일 때 추가 폭발 데미지.
+    /// Taranis Thunderstorm용 — Charge 축적된 적에게 추가 타격 (스택×3 위력).</summary>
+    public class ExplosionBehavior : ISkillBehavior
+    {
+        public BehaviorKeyword Keyword => BehaviorKeyword.Explosion;
+        public ExecutionPhase Phases => ExecutionPhase.PostApply;
+        public int Order => 40;
+        private const int DamagePerStack = 3;
+
+        public void OnPostApply(SkillExecContext ctx)
+        {
+            int rank = ctx.Instance?.GetBehaviorRank(BehaviorKeyword.Explosion) ?? 0;
+            if (rank <= 0) return;
+
+            var target = ctx.InitialTarget;
+            var caster = ctx.Caster;
+            if (target == null || !target.IsAlive || caster == null) return;
+            if (!target.StatusEffects.HasEffect(StatusEffectType.Charge)) return;
+
+            // Charge 스택 조회
+            int stacks = 0;
+            foreach (var eff in target.StatusEffects.GetAllEffects())
+            {
+                if (eff.Type == StatusEffectType.Charge) { stacks = eff.Value; break; }
+            }
+
+            if (stacks < rank) return; // rank 이상 스택 필요
+
+            int bonusDamage = stacks * DamagePerStack;
+            int hpBefore = target.Health.CurrentHP;
+            DamageCalculator.DealDamage(caster, target, bonusDamage);
+            int dealt = hpBefore - target.Health.CurrentHP;
+            ctx.LastActualDamage += dealt;
+
+            CombatEventBus.FireDamageDealt(caster, target, dealt);
+            CombatEventBus.FireDamageReceived(target, dealt);
+        }
+    }
+
     /// <summary>AllIn (컨셉 16) — 사용 후 AP가 0이면 +rank 위력. PostApply에서 체크하여 추가 데미지.</summary>
     public class AllInBehavior : ISkillBehavior
     {
@@ -174,6 +231,68 @@ namespace TeamLog.Skill.Behaviors.Implementations
 
             CombatEventBus.FireDamageDealt(caster, target, dealt);
             CombatEventBus.FireDamageReceived(target, dealt);
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // Phase CC-2G-5: Sibyl 신규 Behavior 3종 (FollowUp/Echo/LimitBreak)
+    // ═══════════════════════════════════════════
+
+    /// <summary>FollowUp (Phase CC-2G-5) — 이번 턴 이미 피해 입은 대상 +N 위력 (PowerModify).</summary>
+    public class FollowUpBehavior : ISkillBehavior
+    {
+        public BehaviorKeyword Keyword => BehaviorKeyword.FollowUp;
+        public ExecutionPhase Phases => ExecutionPhase.PowerModify;
+        public int Order => 65; // FirstBlood(60)/Cull(60)과 동일대역, 그룹 내 정렬
+
+        public int ModifyPower(int power, SkillExecContext ctx)
+        {
+            var target = ctx.InitialTarget;
+            if (target == null) return power;
+            if (!target.HitThisTurn) return power;
+            return power + ctx.Instance?.GetBehaviorRank(BehaviorKeyword.FollowUp) ?? 0;
+        }
+    }
+
+    /// <summary>Echo (Phase CC-2G-5) — 메인 타겟에게 위력 절반 추가 데미지 (PostApply).</summary>
+    public class EchoBehavior : ISkillBehavior
+    {
+        public BehaviorKeyword Keyword => BehaviorKeyword.Echo;
+        public ExecutionPhase Phases => ExecutionPhase.PostApply;
+        public int Order => 50;
+
+        public void OnPostApply(SkillExecContext ctx)
+        {
+            var target = ctx.InitialTarget;
+            var caster = ctx.Caster;
+            if (target == null || !target.IsAlive || caster == null) return;
+
+            // 현재 위력의 절반을 추가 데미지로 (최소 1)
+            int echoDamage = System.Math.Max(1, ctx.CurrentPower / 2);
+            int hpBefore = target.Health.CurrentHP;
+            DamageCalculator.DealDamage(caster, target, echoDamage);
+            int dealt = hpBefore - target.Health.CurrentHP;
+            ctx.LastActualDamage += dealt;
+
+            CombatEventBus.FireDamageDealt(caster, target, dealt);
+            CombatEventBus.FireDamageReceived(target, dealt);
+        }
+    }
+
+    /// <summary>LimitBreak (Phase CC-2G-5) — 전투당 첫 사용 시 +N 위력 (PowerModify).
+    /// UsesThisBattle == 0 (첫 사용)에서만 발동. 이후 사용은 보너스 없음.</summary>
+    public class LimitBreakBehavior : ISkillBehavior
+    {
+        public BehaviorKeyword Keyword => BehaviorKeyword.LimitBreak;
+        public ExecutionPhase Phases => ExecutionPhase.PowerModify;
+        public int Order => 80; // 다른 PowerModify 후 마지막 가산
+
+        public int ModifyPower(int power, SkillExecContext ctx)
+        {
+            // 첫 사용(UsesThisBattle == 0)에서만 발동
+            if (ctx.Instance == null) return power;
+            if (ctx.Instance.UsesThisBattle > 0) return power;
+            return power + ctx.Instance.GetBehaviorRank(BehaviorKeyword.LimitBreak);
         }
     }
 

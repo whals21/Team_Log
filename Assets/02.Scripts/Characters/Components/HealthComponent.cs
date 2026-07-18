@@ -96,6 +96,7 @@ namespace TeamLog.Characters
                 _currentHP = Mathf.Max(0, _currentHP - damage);
                 OnHPChanged?.Invoke(_currentHP, _maxHP);
                 OnDamageTaken?.Invoke(damage);
+                _owner?.MarkHitThisTurn(); // Phase CC-2G-5: FollowUp 추적
             }
 
             if (_currentHP <= 0)
@@ -126,6 +127,7 @@ namespace TeamLog.Characters
             _currentHP = Mathf.Max(0, _currentHP - damage);
             OnHPChanged?.Invoke(_currentHP, _maxHP);
             OnDamageTaken?.Invoke(damage);
+            _owner?.MarkHitThisTurn(); // Phase CC-2G-5: FollowUp 추적
 
             if (_currentHP <= 0)
             {

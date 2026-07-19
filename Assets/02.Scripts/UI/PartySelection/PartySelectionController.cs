@@ -60,7 +60,7 @@ namespace TeamLog.UI.PartySelection
         [SerializeField] private PartySlotPanel _partySlotPanel;
 
         [Header("Transition")]
-        [SerializeField] private string _nextSceneName = "MapScene";
+        [SerializeField] private string _nextSceneName = "MapSceneRework";
 
         // ── 내부 상태 ──
         private readonly List<CharacterDisplayData> _displayData = new();

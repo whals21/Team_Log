@@ -15,7 +15,7 @@ MonoBehaviour:
   _characterName: "\uC545\uB9C8 \uB9C8\uBC95\uC0AC"
   _characterClass: 0
   _description: Mage
-  _baseHP: 48
+  _baseHP: 12
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 5

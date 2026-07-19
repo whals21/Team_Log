@@ -16,7 +16,7 @@ MonoBehaviour:
   _characterClass: 9
   _description: "\uB0C9\uAE30 \uB9C8\uBC95\uC0AC. Frost\uB97C \uCD95\uC801\uD558\uC5EC
     \uC801\uC744 \uC5BC\uB9B0\uB2E4"
-  _baseHP: 75
+  _baseHP: 16
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 0

@@ -399,7 +399,7 @@ namespace TeamLog.Editor
             // ── CostBadge — bottom=2, 26x18 중앙 ──
             var costBadge = NewRect("CostBadge", rect);
             AnchorBottomCentered(costBadge, 2, 26, 18);
-            costBadge.gameObject.AddComponent<Image>().color = new Color(0.2f, 0.4f, 0.8f, 0.9f);
+            costBadge.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.78f, 0.31f, 0.95f); // ★ D 시안: 골드
             var costT = NewRect("CostText", costBadge);
             SetFillParent(costT);
             var costTmp = AddText(costT, "0", 12, FontStyles.Bold, TextAlignmentOptions.Center, Color.black);

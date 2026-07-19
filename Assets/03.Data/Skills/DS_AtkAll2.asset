@@ -22,7 +22,7 @@ MonoBehaviour:
   _icon: {fileID: 0}
   _statusEffect: 9
   _effectDuration: 1
-  _effectValue: 2
+  _effectValue: 1
   _behaviors: []
   _resourceGainType: 0
   _resourceGainAmount: 0

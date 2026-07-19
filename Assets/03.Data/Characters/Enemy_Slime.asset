@@ -15,7 +15,7 @@ MonoBehaviour:
   _characterName: "\uC2AC\uB77C\uC784"
   _characterClass: 0
   _description: Warrior
-  _baseHP: 22
+  _baseHP: 6
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 1

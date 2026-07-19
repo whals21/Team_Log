@@ -15,7 +15,7 @@ MonoBehaviour:
   _characterName: "\uADF8\uB9BC\uC790"
   _characterClass: 0
   _description: Rogue
-  _baseHP: 32
+  _baseHP: 8
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 6

@@ -16,7 +16,7 @@ MonoBehaviour:
   _characterClass: 8
   _description: "\uD654\uC5FC \uB9C8\uBC95\uC0AC. Ember \uC790\uC6D0\uC744 \uCD95\uC801\uD558\uC5EC
     \uC790\uD574 \uC704\uD5D8\uC744 \uAC10\uC218\uD558\uACE0 \uD3ED\uB51C\uC744 \uB0B8\uB2E4"
-  _baseHP: 70
+  _baseHP: 12
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 0

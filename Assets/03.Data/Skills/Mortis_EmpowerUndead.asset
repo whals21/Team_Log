@@ -37,4 +37,4 @@ MonoBehaviour:
   _isCorpseSkill: 0
   _sourceEnemyId: 
   _corpseAction: 1
-  _corpseActionValue: 5
+  _corpseActionValue: 2

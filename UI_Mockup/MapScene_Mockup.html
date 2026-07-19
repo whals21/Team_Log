@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Team Log — Map Scene UI Mockup v2 (Rework)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   TEAM LOG — Map Scene Mockup v2
+   Tone: Dark Fantasy Gothic (PartySelectionScene 디자인 언어 계승)
+   Concept: "Codex of the Damned" (저주받은 자들의 서)
+   Layout: 3-Column — Party Sidebar | Map Codex | Context Panel
+
+   ★ v2 변경사항 (사용자 피드백 반영)
+   1. Run Log 제거 → Augments 섹션으로 대체 (현재 보유 증강 풀)
+   2. 하단 "Deck" → "Skills" 로 명확화
+   3. 플로어 패스 재설계 — 9 레이어 구조:
+      Start → Battle#1 → Event → Battle#2(분기) → Event → Battle#3
+      → Event → Battle#4(분기) → Boss
+      = 일반/엘리트 전투 4번 + 보스 1번 + 전투 사이마다 이벤트
+   ========================================================= */
+
+:root {
+  /* 깊이/배경 — PartySelection과 동일 토큰 */
+  --void:          #050509;
+  --abyss:         #0a0a14;
+  --depth:         #11111f;
+  --slate:         #1a1a2e;
+  --slate-2:       #232347;
+
+  /* 양피지/석재 */
+  --parchment:     #c9b485;
+  --parchment-d:   #8a7752;
+  --parchment-dd:  #4d3f28;
+  --parchment-x:   #2a2418;
+
+  /* 금속/골드 4단계 */
+  --gold-l:        #f4d35e;
+  --gold:          #d4af37;
+  --gold-d:        #8b6914;
+  --gold-x:        #4a3a0d;
+
+  /* 핏빛/엠버 */
+  --blood-deep:    #5a0000;
+  --blood:         #8b0000;
+  --blood-l:       #c0392b;
+  --ember-glow:    #ff6b35;
+
+  /* 범용 텍스트 */
+  --ink:           #f0e6d0;
+  --ink-dim:       #a89878;
+  --ink-faint:     #6b5e44;
+
+  /* 노드 타입 색상 — 각 노드의 시각적 정체성 */
+  --node-start:    #6ed5b2;
+  --node-battle:   #c0392b;
+  --node-elite:    #f4d35e;
+  --node-boss:     #8b0000;
+  --node-event:    #b388ff;
+  --node-shop:     #5ec5e8;
+  --node-rest:     #4caf50;
+
+  /* 자원 6종 (UIPalette 정의 준거) */
+  --res-ember:     #ff6b35;
+  --res-vengeance: #a8324a;
+  --res-frost:     #5ec5e8;
+  --res-prophecy:  #6ed5b2;
+  --res-charge:    #f7d046;
+  --res-shadows:   #9b6ec2;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--void);
+  color: var(--ink);
+  font-family: 'Nanum Myeongjo', 'Cormorant Garamond', serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* =========================================================
+   APP CONTAINER — 3-Column Master Layout
+   ========================================================= */
+#app {
+  position: relative;
+  width: 100vw; height: 100vh;
+  display: grid;
+  grid-template-columns: 320px 1fr 360px;
+  grid-template-rows: 72px 1fr 56px;
+  grid-template-areas:
+    "header header header"
+    "left   map    right"
+    "footer footer footer";
+  background:
+    radial-gradient(ellipse at top, rgba(139,0,0,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at bottom, rgba(20,20,40,0.45) 0%, transparent 60%),
+    linear-gradient(180deg, var(--void) 0%, var(--abyss) 50%, var(--void) 100%);
+}
+
+#app::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 12% 28%, rgba(255,107,53,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 84% 12%, rgba(244,211,94,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 42% 88%, rgba(139,0,0,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 76% 64%, rgba(180,136,255,0.3) 0%, transparent 100%);
+  pointer-events: none;
+  animation: emberDrift 14s linear infinite;
+}
+@keyframes emberDrift {
+  0%   { transform: translateY(0); opacity: 0.7; }
+  50%  { opacity: 1; }
+  100% { transform: translateY(-30px); opacity: 0.5; }
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+#header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: linear-gradient(180deg, var(--depth) 0%, var(--abyss) 100%);
+  border-bottom: 2px solid var(--gold-d);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(244,211,94,0.2);
+  position: relative;
+  z-index: 10;
+}
+
+#header::before {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -4px; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold-d) 20%, var(--gold-l) 50%, var(--gold-d) 80%, transparent 100%);
+  opacity: 0.7;
+}
+
+.header-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 24px;
+  border-right: 1px solid rgba(212,175,55,0.25);
+  margin-right: 24px;
+}
+
+.brand-mark {
+  width: 38px; height: 38px;
+  border: 1.5px solid var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle, rgba(139,0,0,0.4) 0%, transparent 70%);
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  color: var(--gold-l);
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 6px rgba(244,211,94,0.6);
+}
+
+.brand-text {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--gold-l);
+  text-transform: uppercase;
+}
+
+.brand-text small {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--ink-dim);
+  font-weight: 400;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: linear-gradient(180deg, var(--slate) 0%, var(--slate-2) 100%);
+  border: 1px solid rgba(212,175,55,0.35);
+  border-radius: 4px;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--parchment);
+}
+
+.chip-icon {
+  width: 16px; height: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  color: var(--gold-l);
+}
+
+.chip-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--ink-dim);
+  letter-spacing: 0.5px;
+}
+
+.chip-value {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.header-spacer { flex: 1; }
+
+.ascension-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: linear-gradient(180deg, var(--blood-deep) 0%, var(--blood) 100%);
+  border: 1px solid var(--gold-d);
+  border-radius: 4px;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 12px rgba(139,0,0,0.3);
+}
+
+.ascension-display .chip-icon { color: var(--gold-l); }
+.ascension-display .chip-value { color: var(--gold-l); font-weight: 700; }
+
+/* =========================================================
+   LEFT SIDEBAR — 파티 / 유물 / 증강 (★ Run Log 제거)
+   ========================================================= */
+#left-panel {
+  grid-area: left;
+  background: linear-gradient(180deg, var(--slate) 0%, var(--depth) 100%);
+  border-right: 1px solid rgba(212,175,55,0.25);
+  box-shadow: inset -1px 0 0 rgba(0,0,0,0.5);
+  overflow-y: auto;
+  padding: 16px;
+  position: relative;
+  z-index: 5;
+}
+
+#left-panel::-webkit-scrollbar { width: 6px; }
+#left-panel::-webkit-scrollbar-track { background: var(--abyss); }
+#left-panel::-webkit-scrollbar-thumb { background: var(--gold-d); border-radius: 3px; }
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+}
+
+.panel-header h2 {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--gold-l);
+  text-transform: uppercase;
+}
+
+.panel-header .ornament {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--gold-d) 0%, transparent 100%);
+}
+
+.panel-header .ornament-left {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold-d) 100%);
+}
+
+/* 파티 멤버 카드 */
+.party-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.party-member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, var(--slate-2) 0%, var(--slate) 100%);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.party-member:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(212,175,55,0.2);
+  transform: translateX(2px);
+}
+
+.party-member.dead {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+}
+
+.party-portrait {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--member-color, var(--gold-d));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--member-color, var(--gold-l));
+  background: radial-gradient(circle, var(--slate) 0%, var(--depth) 100%);
+  flex-shrink: 0;
+  text-shadow: 0 0 4px var(--member-color, var(--gold));
+}
+
+.party-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.party-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--ink);
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.party-class {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 10px;
+  color: var(--ink-dim);
+  letter-spacing: 0.5px;
+}
+
+.party-hpbar {
+  margin-top: 4px;
+  height: 4px;
+  background: var(--abyss);
+  border: 1px solid var(--parchment-dd);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.party-hpbar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50 0%, #66bb6a 100%);
+  box-shadow: 0 0 4px rgba(76,175,80,0.5);
+}
+
+.party-hpbar-fill.low {
+  background: linear-gradient(90deg, #c0392b 0%, #ff6b35 100%);
+  animation: hpPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes hpPulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; box-shadow: 0 0 8px rgba(192,57,43,0.8); }
+}
+
+.party-resource {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--member-color, var(--gold-d));
+  display: flex; align-items: center; justify-content: center;
+  background: var(--abyss);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--member-color, var(--gold-l));
+  flex-shrink: 0;
+  box-shadow: inset 0 0 6px var(--member-color, transparent);
+}
+
+/* 유물 그리드 */
+.relic-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.relic-slot {
+  aspect-ratio: 1;
+  background: var(--abyss);
+  border: 1px solid var(--parchment-dd);
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  color: var(--gold-l);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.relic-slot.empty {
+  background: var(--depth);
+  border-style: dashed;
+  border-color: var(--parchment-x);
+}
+
+.relic-slot:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 8px rgba(212,175,55,0.4);
+  transform: scale(1.05);
+}
+
+.relic-slot.synergy::after {
+  content: "";
+  position: absolute;
+  top: -2px; right: -2px;
+  width: 8px; height: 8px;
+  background: var(--gold-l);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--gold-l);
+}
+
+/* ★ Augments 섹션 (Run Log 대체) */
+.augment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.augment-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: linear-gradient(90deg, var(--slate-2) 0%, var(--slate) 100%);
+  border-left: 3px solid var(--aug-color, var(--gold-d));
+  border-radius: 3px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.augment-row:hover {
+  background: linear-gradient(90deg, var(--slate) 0%, var(--slate-2) 100%);
+  border-left-color: var(--aug-color, var(--gold));
+  transform: translateX(2px);
+}
+
+.augment-icon {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--aug-color, var(--gold-l));
+  border: 1px solid var(--aug-color, var(--gold-d));
+  border-radius: 2px;
+  background: var(--abyss);
+  flex-shrink: 0;
+  text-shadow: 0 0 4px currentColor;
+}
+
+.augment-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.augment-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.augment-owner {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 10px;
+  color: var(--ink-dim);
+}
+
+.augment-rank {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 10px;
+  color: var(--aug-color, var(--gold-l));
+  padding: 2px 6px;
+  background: var(--abyss);
+  border: 1px solid var(--aug-color, var(--gold-d));
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   MAP CODEX (중앙 메인 영역) — ★ 9 레이어 구조
+   ========================================================= */
+#map-codex {
+  grid-area: map;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at center, rgba(42,36,24,0.6) 0%, var(--void) 80%);
+}
+
+.codex-frame {
+  position: absolute;
+  inset: 16px;
+  border: 1px solid var(--gold-d);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.codex-frame::before,
+.codex-frame::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(212,175,55,0.4);
+  border-radius: 4px;
+}
+
+.codex-frame::before { inset: 4px; }
+.codex-frame::after { inset: 8px; border-color: rgba(212,175,55,0.2); }
+
+.corner-rune {
+  position: absolute;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--gold-l);
+  text-shadow: 0 0 8px rgba(244,211,94,0.7);
+  background: radial-gradient(circle, rgba(139,0,0,0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.corner-rune.tl { top: 8px; left: 8px; }
+.corner-rune.tr { top: 8px; right: 8px; }
+.corner-rune.bl { bottom: 8px; left: 8px; }
+.corner-rune.br { bottom: 8px; right: 8px; }
+
+/* 테마 배너 (상단) */
+.theme-banner {
+  position: relative;
+  margin: 18px auto 0;
+  max-width: 580px;
+  padding: 10px 32px;
+  text-align: center;
+  background: linear-gradient(180deg, transparent 0%, rgba(42,36,24,0.5) 50%, transparent 100%);
+  z-index: 3;
+}
+
+.theme-stage {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.theme-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 5px;
+  color: var(--gold-l);
+  text-shadow:
+    0 0 12px rgba(244,211,94,0.5),
+    0 0 24px rgba(139,0,0,0.4);
+  text-transform: uppercase;
+}
+
+.theme-tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--parchment-d);
+  margin-top: 2px;
+}
+
+.theme-keywords {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.theme-keyword {
+  padding: 2px 10px;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  border: 1px solid var(--gold-d);
+  border-radius: 2px;
+  background: rgba(74,58,13,0.3);
+}
+
+/* 스테이지 진행 표시기 */
+.stage-pips {
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  z-index: 4;
+}
+
+.stage-pip {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold-d);
+  background: var(--abyss);
+  position: relative;
+  transition: all 0.3s;
+}
+
+.stage-pip.cleared {
+  background: var(--gold-d);
+  box-shadow: 0 0 6px rgba(139,105,20,0.6);
+}
+
+.stage-pip.current {
+  background: var(--blood);
+  border-color: var(--gold-l);
+  box-shadow: 0 0 12px rgba(192,57,43,0.8);
+  animation: stagePulse 2s ease-in-out infinite;
+}
+
+.stage-pip.locked { opacity: 0.3; }
+
+@keyframes stagePulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(192,57,43,0.8); }
+  50% { box-shadow: 0 0 20px rgba(244,211,94,0.6); }
+}
+
+/* 노드 맵 캔버스 — 9 레이어 */
+.node-map {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 110px 0 30px;
+}
+
+.map-canvas {
+  position: relative;
+  width: 540px;
+  height: 660px;
+}
+
+.connection-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.node-layer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 110px;
+  align-items: center;
+  z-index: 2;
+}
+
+.node {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--abyss);
+  border: 2px solid var(--node-color, var(--gold-d));
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    inset 0 0 8px rgba(0,0,0,0.7),
+    0 2px 8px rgba(0,0,0,0.6);
+}
+
+.node::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid var(--node-color, var(--gold-d));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.node-icon {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--node-color, var(--gold-l));
+  text-shadow: 0 0 6px currentColor;
+}
+
+.node-label {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+.node.visited {
+  background: var(--slate);
+  border-color: var(--ink-faint);
+  opacity: 0.45;
+}
+.node.visited .node-icon { color: var(--ink-faint); text-shadow: none; }
+
+.node.active {
+  border-color: var(--gold-l);
+  box-shadow:
+    inset 0 0 12px rgba(244,211,94,0.3),
+    0 0 20px var(--node-color, var(--gold)),
+    0 0 32px rgba(244,211,94,0.4);
+  transform: scale(1.12);
+}
+.node.active::before { opacity: 1; inset: -8px; }
+.node.active::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 1px dashed var(--gold-l);
+  opacity: 0.4;
+  animation: rotateRing 8s linear infinite;
+}
+@keyframes rotateRing { to { transform: rotate(360deg); } }
+
+.node.locked {
+  opacity: 0.32;
+  filter: grayscale(0.6);
+  cursor: not-allowed;
+}
+
+.node:not(.locked):hover {
+  border-color: var(--gold-l);
+  transform: scale(1.08);
+  box-shadow:
+    inset 0 0 12px rgba(244,211,94,0.2),
+    0 0 16px var(--node-color, var(--gold));
+}
+
+/* 분기 레이어 특수 처리 */
+.node-layer.branch {
+  gap: 90px;
+}
+
+.node-layer.branch::before {
+  content: "CHOICE OF PATH";
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(244,211,94,0.5);
+}
+
+/* 이벤트 사이 레이어 표시 */
+.node-layer.between::before {
+  content: "— between battles —";
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--ink-faint);
+  opacity: 0.7;
+}
+
+/* 노드 타입별 색상 */
+.node[data-type="start"]  { --node-color: var(--node-start); }
+.node[data-type="battle"] { --node-color: var(--node-battle); }
+.node[data-type="elite"]  { --node-color: var(--node-elite); }
+.node[data-type="boss"]   { --node-color: var(--node-boss); width: 64px; height: 64px; }
+.node[data-type="boss"] .node-icon { font-size: 26px; }
+.node[data-type="event"]  { --node-color: var(--node-event); }
+.node[data-type="shop"]   { --node-color: var(--node-shop); }
+.node[data-type="rest"]   { --node-color: var(--node-rest); }
+
+.node[data-type="boss"] {
+  box-shadow:
+    inset 0 0 16px rgba(0,0,0,0.9),
+    0 0 24px rgba(139,0,0,0.6),
+    0 0 48px rgba(139,0,0,0.3);
+}
+.node[data-type="boss"]::after {
+  content: "";
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 50%, rgba(139,0,0,0.2) 100%);
+  pointer-events: none;
+  animation: bossAura 3s ease-in-out infinite;
+}
+@keyframes bossAura {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* 플레이어 마커 */
+.player-marker {
+  position: absolute;
+  width: 70px; height: 70px;
+  pointer-events: none;
+  z-index: 5;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.player-marker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(244,211,94,0.4) 0%, transparent 70%);
+  animation: markerPulse 2s ease-in-out infinite;
+}
+
+.player-marker::after {
+  content: "";
+  position: absolute;
+  inset: 25%;
+  border: 2px solid var(--gold-l);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--gold-l);
+}
+
+@keyframes markerPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 0.9; }
+}
+
+/* =========================================================
+   RIGHT PANEL — Context / Node Detail
+   ========================================================= */
+#right-panel {
+  grid-area: right;
+  background: linear-gradient(180deg, var(--depth) 0%, var(--slate) 100%);
+  border-left: 1px solid rgba(212,175,55,0.25);
+  box-shadow: inset 1px 0 0 rgba(0,0,0,0.5);
+  overflow-y: auto;
+  padding: 16px;
+  position: relative;
+  z-index: 5;
+}
+
+#right-panel::-webkit-scrollbar { width: 6px; }
+#right-panel::-webkit-scrollbar-track { background: var(--abyss); }
+#right-panel::-webkit-scrollbar-thumb { background: var(--gold-d); border-radius: 3px; }
+
+.node-detail {
+  background: linear-gradient(180deg, var(--slate-2) 0%, var(--slate) 100%);
+  border: 1px solid var(--gold-d);
+  border-radius: 4px;
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.4);
+  position: relative;
+}
+
+.node-detail::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60%; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold-d) 50%, transparent 100%);
+}
+
+.detail-icon-large {
+  width: 56px; height: 56px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: var(--abyss);
+  border: 2px solid var(--node-battle);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 24px;
+  color: var(--node-battle);
+  text-shadow: 0 0 8px currentColor;
+  box-shadow: 0 0 16px rgba(192,57,43,0.4);
+}
+
+.detail-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--gold-l);
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.detail-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--ink-dim);
+  text-align: center;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.detail-description {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--parchment);
+  text-align: center;
+  padding: 8px 0;
+  border-top: 1px solid rgba(212,175,55,0.2);
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.detail-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.detail-stat {
+  padding: 6px 8px;
+  background: var(--abyss);
+  border: 1px solid var(--parchment-dd);
+  border-radius: 3px;
+  text-align: center;
+}
+
+.detail-stat-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 10px;
+  color: var(--ink-dim);
+  letter-spacing: 0.5px;
+}
+
+.detail-stat-value {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gold-l);
+}
+
+.action-button {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  background: linear-gradient(180deg, var(--blood) 0%, var(--blood-deep) 100%);
+  border: 1px solid var(--gold-d);
+  border-radius: 4px;
+  color: var(--gold-l);
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  box-shadow:
+    inset 0 1px 0 rgba(244,211,94,0.2),
+    inset 0 -2px 4px rgba(0,0,0,0.5),
+    0 2px 8px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.action-button:hover {
+  background: linear-gradient(180deg, var(--blood-l) 0%, var(--blood) 100%);
+  border-color: var(--gold-l);
+  box-shadow:
+    inset 0 1px 0 rgba(244,211,94,0.3),
+    0 0 16px rgba(192,57,43,0.5);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+#footer {
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: linear-gradient(180deg, var(--abyss) 0%, var(--void) 100%);
+  border-top: 1px solid var(--gold-d);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.6);
+  position: relative;
+  z-index: 10;
+}
+
+.footer-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--slate);
+  border: 1px solid var(--parchment-dd);
+  border-radius: 3px;
+  color: var(--parchment);
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.footer-btn:hover {
+  background: var(--slate-2);
+  border-color: var(--gold);
+  color: var(--gold-l);
+  box-shadow: 0 0 8px rgba(212,175,55,0.3);
+}
+
+.footer-btn-icon {
+  font-size: 14px;
+  color: var(--gold);
+}
+
+.run-stats {
+  display: flex;
+  gap: 16px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-dim);
+  letter-spacing: 0.5px;
+}
+
+.run-stats span strong {
+  font-family: 'Cinzel', serif;
+  font-style: normal;
+  color: var(--gold-l);
+  margin-left: 4px;
+  font-weight: 600;
+}
+
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- =========================== HEADER =========================== -->
+  <header id="header">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div class="brand-text">
+        Team Log
+        <small>Codex of the Damned</small>
+      </div>
+    </div>
+
+    <div class="header-section">
+      <div class="chip">
+        <span class="chip-icon">⚜</span>
+        <span class="chip-label">Stage</span>
+        <span class="chip-value">II — Crimson Chapel</span>
+      </div>
+      <div class="chip">
+        <span class="chip-icon">⚔</span>
+        <span class="chip-label">Floor</span>
+        <span class="chip-value">2 / 4</span>
+      </div>
+      <div class="chip">
+        <span class="chip-icon">◈</span>
+        <span class="chip-label">Gold</span>
+        <span class="chip-value">238</span>
+      </div>
+    </div>
+
+    <div class="header-spacer"></div>
+
+    <div class="header-section">
+      <div class="ascension-display">
+        <span class="chip-icon">☠</span>
+        <span class="chip-label">Ascension</span>
+        <span class="chip-value">7</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================== LEFT PANEL =========================== -->
+  <aside id="left-panel">
+
+    <div class="panel-header">
+      <div class="ornament-left"></div>
+      <h2>Party</h2>
+      <div class="ornament"></div>
+    </div>
+
+    <div class="party-list">
+      <div class="party-member" style="--member-color: var(--res-ember);">
+        <div class="party-portrait">A</div>
+        <div class="party-info">
+          <div class="party-name">Ashe</div>
+          <div class="party-class">Pyromancer · The Ember</div>
+          <div class="party-hpbar">
+            <div class="party-hpbar-fill" style="width: 68%;"></div>
+          </div>
+        </div>
+        <div class="party-resource">3</div>
+      </div>
+
+      <div class="party-member" style="--member-color: var(--res-vengeance);">
+        <div class="party-portrait">D</div>
+        <div class="party-info">
+          <div class="party-name">Duran</div>
+          <div class="party-class">Vanguard · The Bloodsworn</div>
+          <div class="party-hpbar">
+            <div class="party-hpbar-fill" style="width: 92%;"></div>
+          </div>
+        </div>
+        <div class="party-resource">5</div>
+      </div>
+
+      <div class="party-member" style="--member-color: var(--res-frost);">
+        <div class="party-portrait">L</div>
+        <div class="party-info">
+          <div class="party-name">Lumi</div>
+          <div class="party-class">Cryomancer · The Frost</div>
+          <div class="party-hpbar">
+            <div class="party-hpbar-fill low" style="width: 28%;"></div>
+          </div>
+        </div>
+        <div class="party-resource">2</div>
+      </div>
+
+      <div class="party-member" style="--member-color: var(--res-prophecy);">
+        <div class="party-portrait">S</div>
+        <div class="party-info">
+          <div class="party-name">Sibyl</div>
+          <div class="party-class">Oracle · The Seer</div>
+          <div class="party-hpbar">
+            <div class="party-hpbar-fill" style="width: 81%;"></div>
+          </div>
+        </div>
+        <div class="party-resource">1</div>
+      </div>
+    </div>
+
+    <div class="panel-header">
+      <div class="ornament-left"></div>
+      <h2>Relics</h2>
+      <div class="ornament"></div>
+    </div>
+
+    <div class="relic-grid">
+      <div class="relic-slot synergy" title="Vampire Fang">🦷</div>
+      <div class="relic-slot" title="Burning Sword">⚔</div>
+      <div class="relic-slot" title="Aegis">🛡</div>
+      <div class="relic-slot synergy" title="Slayer Sigil">☠</div>
+      <div class="relic-slot" title="Phoenix Feather">🜂</div>
+      <div class="relic-slot" title="Lucky Coin">◈</div>
+      <div class="relic-slot" title="Frozen Heart">❄</div>
+      <div class="relic-slot empty"></div>
+      <div class="relic-slot empty"></div>
+      <div class="relic-slot empty"></div>
+    </div>
+
+    <!-- ★ Augments (Run Log 대체) -->
+    <div class="panel-header">
+      <div class="ornament-left"></div>
+      <h2>Augments</h2>
+      <div class="ornament"></div>
+    </div>
+
+    <div class="augment-list">
+      <div class="augment-row" style="--aug-color: var(--res-ember);">
+        <div class="augment-icon">F</div>
+        <div class="augment-info">
+          <div class="augment-name">Cinder Accretion</div>
+          <div class="augment-owner">Ashe · Fireball</div>
+        </div>
+        <div class="augment-rank">R3</div>
+      </div>
+
+      <div class="augment-row" style="--aug-color: var(--node-elite);">
+        <div class="augment-icon">B</div>
+        <div class="augment-info">
+          <div class="augment-name">Berserk</div>
+          <div class="augment-owner">Ashe · Brand of Ash</div>
+        </div>
+        <div class="augment-rank">R2</div>
+      </div>
+
+      <div class="augment-row" style="--aug-color: var(--res-vengeance);">
+        <div class="augment-icon">D</div>
+        <div class="augment-info">
+          <div class="augment-name">Desperation</div>
+          <div class="augment-owner">Duran · Bulwark</div>
+        </div>
+        <div class="augment-rank">R1</div>
+      </div>
+
+      <div class="augment-row" style="--aug-color: var(--res-frost);">
+        <div class="augment-icon">T</div>
+        <div class="augment-info">
+          <div class="augment-name">TargetFreeze</div>
+          <div class="augment-owner">Lumi · Frostbolt</div>
+        </div>
+        <div class="augment-rank">R1</div>
+      </div>
+
+      <div class="augment-row" style="--aug-color: var(--res-prophecy);">
+        <div class="augment-icon">L</div>
+        <div class="augment-info">
+          <div class="augment-name">Limit Break</div>
+          <div class="augment-owner">Sibyl · Vision of Renewal</div>
+        </div>
+        <div class="augment-rank">R1</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- =========================== MAP CODEX =========================== -->
+  <main id="map-codex">
+
+    <div class="codex-frame"></div>
+    <div class="corner-rune tl">ᚱ</div>
+    <div class="corner-rune tr">ᚦ</div>
+    <div class="corner-rune bl">ᛟ</div>
+    <div class="corner-rune br">ᛞ</div>
+
+    <div class="stage-pips">
+      <div class="stage-pip cleared" title="Stage I — Grey Forest"></div>
+      <div class="stage-pip current" title="Stage II — Crimson Chapel"></div>
+      <div class="stage-pip locked" title="Stage III — Locked"></div>
+      <div class="stage-pip locked" title="Stage IV — Locked"></div>
+    </div>
+
+    <div class="theme-banner">
+      <div class="theme-stage">— Stage II —</div>
+      <div class="theme-name">Crimson Chapel</div>
+      <div class="theme-tagline">"Where saints bled and silence prayed."</div>
+      <div class="theme-keywords">
+        <div class="theme-keyword">UNDEAD</div>
+        <div class="theme-keyword">BLOOD</div>
+        <div class="theme-keyword">RITUAL</div>
+      </div>
+    </div>
+
+    <!-- ★ 9 레이어 노드 맵 (Start → 4전투 + 보스 + 전투 사이 이벤트 3개) -->
+    <div class="node-map">
+      <div class="map-canvas" id="mapCanvas">
+
+        <!--
+          레이어 구조 (캔버스 540×660):
+          L0 Start     top=10  (방문)
+          L1 Battle#1  top=80  (방문)
+          L2 Event     top=150 (방문)
+          L3 Battle#2  top=220 (분기: Battle/Elite, 방문)
+          L4 Event     top=290 (활성 — 현재 위치 후보)
+          L5 Battle#3  top=360
+          L6 Event     top=430
+          L7 Battle#4  top=500 (분기: Battle/Elite)
+          L8 Boss      top=585
+        -->
+
+        <!-- SVG 연결선 -->
+        <svg class="connection-lines" viewBox="0 0 540 660" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#8b6914" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#4a3a0d" stop-opacity="0.4"/>
+            </linearGradient>
+            <linearGradient id="lineActive" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#f4d35e" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#d4af37" stop-opacity="0.8"/>
+            </linearGradient>
+            <linearGradient id="lineFuture" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#4d3f28" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#2a2418" stop-opacity="0.2"/>
+            </linearGradient>
+          </defs>
+
+          <!-- L0(270,34) → L1(270,104) 직진 -->
+          <path d="M 270 34 L 270 104" stroke="url(#lineGradient)" stroke-width="2.5" fill="none"/>
+
+          <!-- L1(270,104) → L2(270,174) 직진 -->
+          <path d="M 270 104 L 270 174" stroke="url(#lineGradient)" stroke-width="2.5" fill="none"/>
+
+          <!-- L2(270,174) → L3 분기: Battle(225,244) / Elite(315,244) -->
+          <path d="M 270 174 Q 248 210 225 244" stroke="url(#lineGradient)" stroke-width="2.5" fill="none"/>
+          <path d="M 270 174 Q 292 210 315 244" stroke="url(#lineGradient)" stroke-width="2" fill="none" stroke-dasharray="4,3" opacity="0.5"/>
+
+          <!-- L3(225,244 visited) → L4 Event(270,314) -->
+          <path d="M 225 244 Q 248 280 270 314" stroke="url(#lineActive)" stroke-width="2.5" fill="none"/>
+
+          <!-- L4 Event(270,314) → L5 Battle#3(270,384) -->
+          <path d="M 270 314 L 270 384" stroke="url(#lineFuture)" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+
+          <!-- L5 Battle#3(270,384) → L6 Event(270,454) -->
+          <path d="M 270 384 L 270 454" stroke="url(#lineFuture)" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+
+          <!-- L6 Event(270,454) → L7 분기: Battle(225,524) / Elite(315,524) -->
+          <path d="M 270 454 Q 248 490 225 524" stroke="url(#lineFuture)" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+          <path d="M 270 454 Q 292 490 315 524" stroke="url(#lineFuture)" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+
+          <!-- L7(225 또는 315, 524) → L8 Boss(270,605) -->
+          <path d="M 225 524 Q 248 565 270 605" stroke="url(#lineFuture)" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+          <path d="M 315 524 Q 292 565 270 605" stroke="url(#lineFuture)" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+        </svg>
+
+        <!-- L0: Start -->
+        <div class="node-layer" style="top: 10px;">
+          <div class="node visited" data-type="start">
+            <span class="node-icon">⊙</span>
+            <span class="node-label">Origin</span>
+          </div>
+        </div>
+
+        <!-- L1: Battle #1 -->
+        <div class="node-layer" style="top: 80px;">
+          <div class="node visited" data-type="battle">
+            <span class="node-icon">⚔</span>
+            <span class="node-label">Battle I</span>
+          </div>
+        </div>
+
+        <!-- L2: Event (전투 사이 #1) -->
+        <div class="node-layer between" style="top: 150px;">
+          <div class="node visited" data-type="event">
+            <span class="node-icon">?</span>
+            <span class="node-label">Event</span>
+          </div>
+        </div>
+
+        <!-- L3: Battle #2 — 분기 (Battle / Elite) -->
+        <div class="node-layer branch" style="top: 220px;">
+          <div class="node visited" data-type="elite">
+            <span class="node-icon">★</span>
+            <span class="node-label">Elite</span>
+          </div>
+          <div class="node visited" data-type="battle">
+            <span class="node-icon">⚔</span>
+            <span class="node-label">Battle II</span>
+          </div>
+        </div>
+
+        <!-- L4: Event (전투 사이 #2) — ★ 현재 위치 후보 -->
+        <div class="node-layer between" style="top: 290px;">
+          <div class="node active" data-type="rest">
+            <span class="node-icon">⚜</span>
+            <span class="node-label">Rest</span>
+          </div>
+        </div>
+
+        <!-- L5: Battle #3 -->
+        <div class="node-layer" style="top: 360px;">
+          <div class="node locked" data-type="battle">
+            <span class="node-icon">⚔</span>
+            <span class="node-label">Battle III</span>
+          </div>
+        </div>
+
+        <!-- L6: Event (전투 사이 #3) -->
+        <div class="node-layer between" style="top: 430px;">
+          <div class="node locked" data-type="shop">
+            <span class="node-icon">$</span>
+            <span class="node-label">Shop</span>
+          </div>
+        </div>
+
+        <!-- L7: Battle #4 — 분기 (Battle / Elite) -->
+        <div class="node-layer branch" style="top: 500px;">
+          <div class="node locked" data-type="battle">
+            <span class="node-icon">⚔</span>
+            <span class="node-label">Battle IV</span>
+          </div>
+          <div class="node locked" data-type="elite">
+            <span class="node-icon">★</span>
+            <span class="node-label">Elite</span>
+          </div>
+        </div>
+
+        <!-- L8: Boss -->
+        <div class="node-layer" style="top: 580px;">
+          <div class="node locked" data-type="boss">
+            <span class="node-icon">☠</span>
+            <span class="node-label">Blood Queen</span>
+          </div>
+        </div>
+
+        <!-- 플레이어 마커 (현재 L4 Rest 위치) -->
+        <div class="player-marker" style="left: 50%; top: 314px;"></div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- =========================== RIGHT PANEL =========================== -->
+  <aside id="right-panel">
+
+    <div class="panel-header">
+      <div class="ornament-left"></div>
+      <h2>Selected</h2>
+      <div class="ornament"></div>
+    </div>
+
+    <!-- 선택된 노드 상세 -->
+    <div class="node-detail">
+      <div class="detail-icon-large" style="border-color: var(--node-rest); color: var(--node-rest); box-shadow: 0 0 16px rgba(76,175,80,0.4);">⚜</div>
+      <div class="detail-title">Sanctuary</div>
+      <div class="detail-subtitle">Crimson Chapel · Rest Site</div>
+
+      <div class="detail-description">
+        "Cold stone whispers of old prayers. The wounded may drink from the holy font."
+      </div>
+
+      <div class="detail-stats">
+        <div class="detail-stat">
+          <div class="detail-stat-label">Heal</div>
+          <div class="detail-stat-value">30%</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-label">Upgrade</div>
+          <div class="detail-stat-value">1 Card</div>
+        </div>
+      </div>
+
+      <button class="action-button">Rest Here</button>
+    </div>
+
+    <!-- 다음 경로 미리보기 -->
+    <div class="node-detail" style="border-color: var(--parchment-dd);">
+      <div class="detail-title" style="font-size: 12px; color: var(--ink-dim);">Next Path</div>
+      <div class="detail-subtitle">Battle III lies ahead</div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 6px 8px; background: var(--abyss); border-radius: 3px; border-left: 2px solid var(--node-battle);">
+          <span style="font-family: 'Cinzel', serif; font-size: 14px; color: var(--node-battle);">⚔</span>
+          <div>
+            <div style="font-family: 'Cinzel', serif; font-size: 11px; color: var(--ink); letter-spacing: 1px;">BATTLE III</div>
+            <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 10px; color: var(--ink-dim);">3 acolytes · ~120G</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 보스 예고 -->
+    <div class="node-detail" style="border-color: var(--blood); background: linear-gradient(180deg, rgba(90,0,0,0.3) 0%, var(--slate) 100%);">
+      <div style="text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 10px; color: var(--ink-dim); letter-spacing: 2px; margin-bottom: 6px;">— THIS FLOOR'S NEMESIS —</div>
+      <div class="detail-icon-large" style="border-color: var(--node-boss); color: var(--node-boss); margin: 8px auto;">☠</div>
+      <div class="detail-title" style="color: var(--blood-l); font-size: 14px;">Blood Queen</div>
+      <div class="detail-subtitle">195 HP · Ritual · Vampiric</div>
+    </div>
+
+  </aside>
+
+  <!-- =========================== FOOTER =========================== -->
+  <footer id="footer">
+    <div class="footer-section">
+      <!-- ★ Deck → Skills 로 명확화 -->
+      <button class="footer-btn" title="View party's skill cards">
+        <span class="footer-btn-icon">☰</span>
+        Skills
+      </button>
+      <button class="footer-btn" title="View equipped traits">
+        <span class="footer-btn-icon">⚜</span>
+        Traits
+      </button>
+      <button class="footer-btn" title="Map legend & tutorial">
+        <span class="footer-btn-icon">?</span>
+        Legend
+      </button>
+      <button class="footer-btn" title="Game options">
+        <span class="footer-btn-icon">⚙</span>
+        Options
+      </button>
+      <button class="footer-btn" title="Abandon current run">
+        <span class="footer-btn-icon">⌽</span>
+        Abandon
+      </button>
+    </div>
+
+    <div class="run-stats">
+      <span>Battles Won<strong>11</strong></span>
+      <span>Elites Slain<strong>2</strong></span>
+      <span>Floor<strong>2/4</strong></span>
+      <span>Time<strong>00:47:22</strong></span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// 노드 호버 인터랙션
+document.querySelectorAll('.node').forEach(node => {
+  node.addEventListener('mouseenter', () => {
+    if (!node.classList.contains('locked')) {
+      node.style.transform = 'scale(1.12)';
+    }
+  });
+  node.addEventListener('mouseleave', () => {
+    if (!node.classList.contains('active')) {
+      node.style.transform = '';
+    } else {
+      node.style.transform = 'scale(1.12)';
+    }
+  });
+});
+
+// 노드 클릭 — 활성 노드 전환
+document.querySelectorAll('.node').forEach(node => {
+  node.addEventListener('click', () => {
+    if (node.classList.contains('locked') || node.classList.contains('visited')) return;
+    document.querySelectorAll('.node.active').forEach(n => n.classList.remove('active'));
+    node.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.stage-pip').forEach(pip => {
+  pip.addEventListener('mouseenter', () => { pip.style.transform = 'scale(1.3)'; });
+  pip.addEventListener('mouseleave', () => { pip.style.transform = ''; });
+});
+</script>
+
+</body>
+</html>

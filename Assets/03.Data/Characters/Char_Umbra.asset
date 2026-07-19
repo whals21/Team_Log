@@ -18,7 +18,7 @@ MonoBehaviour:
     \uCE58\uBA85\uD0C0\uAC00 \uAC15\uD574\uC9C4\uB2E4 \u2014 \uB3D9\uB8CC\uAC00 \uADF8\uB140\uC758
     \uADF8\uB9BC\uC790\uB97C \uC9C0\uCF1C\uC904 \uB54C, \uC644\uBCBD\uD55C \uC554\uC0B4\uC774
     \uC644\uC131\uB41C\uB2E4"
-  _baseHP: 75
+  _baseHP: 14
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 0

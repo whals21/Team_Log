@@ -422,6 +422,20 @@ namespace TeamLog.UI.Battle
             }
         }
 
+        /// <summary>
+        /// ★ D 시안: TargetBox가 intent.Targets가 비어 있을 때 폴백용으로 사용.
+        /// 첫 번째 살아있는 파티원 반환.
+        /// </summary>
+        public Characters.Character GetFirstAlivePlayer()
+        {
+            if (_playerParty == null) return null;
+            foreach (var c in _playerParty)
+            {
+                if (c != null && c.IsAlive) return c;
+            }
+            return null;
+        }
+
         public void ClearAllHighlights()
         {
             foreach (var panel in _enemyPanels)

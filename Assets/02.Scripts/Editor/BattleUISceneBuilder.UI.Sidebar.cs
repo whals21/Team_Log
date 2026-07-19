@@ -295,9 +295,9 @@ namespace TeamLog.Editor
             targetBox.sizeDelta = new Vector2(180, 22); // panel.preferredWidth=180과 일치
             targetBox.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
             var targetBg = targetBox.gameObject.AddComponent<Image>();
-            targetBg.color = new Color(0.2f, 0.08f, 0.08f, 0.85f);
+            targetBg.color = new Color(0f, 0f, 0f, 0.7f); // ★ D 시안: 어둡게
             var targetOl = targetBox.gameObject.AddComponent<Outline>();
-            targetOl.effectColor = new Color(0.85f, 0.2f, 0.2f, 0.6f);
+            targetOl.effectColor = new Color(1f, 0.3f, 0.3f, 0.9f); // ★ 강렬한 빨강 테두리
             targetOl.effectDistance = new Vector2(1, -1);
 
             var targetHlg = targetBox.gameObject.AddComponent<HorizontalLayoutGroup>();
@@ -314,14 +314,14 @@ namespace TeamLog.Editor
             var arrowLe = targetArrow.gameObject.AddComponent<LayoutElement>();
             arrowLe.preferredWidth = 14;
             arrowLe.preferredHeight = 14;
-            AddText(targetArrow, "→", 12, FontStyles.Bold, TextAlignmentOptions.Center, new Color(0.9f, 0.3f, 0.3f));
+            AddText(targetArrow, "→", 12, FontStyles.Bold, TextAlignmentOptions.Center, new Color(1f, 0.4f, 0.4f)); // ★ 더 밝은 빨강
 
             // 타겟 초상화 (작은 박스)
             var targetPortrait = NewRect("Portrait", targetBox);
             var portLe = targetPortrait.gameObject.AddComponent<LayoutElement>();
             portLe.preferredWidth = 18;
             portLe.preferredHeight = 18;
-            targetPortrait.gameObject.AddComponent<Image>().color = new Color(0.15f, 0.2f, 0.35f, 0.9f);
+            targetPortrait.gameObject.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.15f, 0.9f); // ★ D 시안 어둡게
 
             // 타겟 이름
             var targetName = NewRect("Name", targetBox);
@@ -334,7 +334,7 @@ namespace TeamLog.Editor
             targetNameTmp.fontSize = 10;
             targetNameTmp.fontStyle = FontStyles.Bold;
             targetNameTmp.alignment = TextAlignmentOptions.Left;
-            targetNameTmp.color = new Color(1f, 0.55f, 0.5f);
+            targetNameTmp.color = new Color(1f, 1f, 1f); // ★ D 시안: 흰색
             targetNameTmp.raycastTarget = false;
             targetNameTmp.enableWordWrapping = false;
 

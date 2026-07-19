@@ -1,5 +1,13 @@
 // MapSceneSetup.Nodes.cs — 노드 디스패치 + 전투 시작 + 서브 UI 핸들러
 // 진입점+초기화: MapSceneSetup.cs
+//
+// ★ Node Detail Preview 파이프 (2단계 흐름):
+//   노드 클릭 → OnNodeClicked → PrepareNodePreview (적 샘플링 + 보상 계산)
+//                                  → NodeDetailPanel.Initialize(node, preview, OnConfirmAction)
+//   "Enter Battle" 버튼 → OnConfirmAction → MoveToNode → StartBattle (캐싱된 적 사용)
+//
+// 무작위 일관성 보장: 노드 클릭 시 1회 샘플링 → _previewedEnemies 캐싱 → StartBattle에서 재사용.
+// 다른 노드 클릭 시 자동으로 새 샘플링.
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,43 +18,188 @@ using TeamLog.Map;
 using TeamLog.Meta;
 using TeamLog.UI;
 using TeamLog.UI.Event;
+using TeamLog.UI.Map.Rework;  // ★ NodePreviewData / EnemyPreviewInfo / RewardPreviewInfo
 using TeamLog.UI.Shop;
 
 namespace TeamLog.UI.Map
 {
     public partial class MapSceneSetup
     {
+        // ★ Preview 파이프 상태 — _previewedNode != null인 동안 _previewedEnemies가 유효.
+        private MapNode _previewedNode;
+        private List<CharacterData> _previewedEnemies;
+
         private void OnNodeClicked(MapNode node)
         {
             if (!_runState.IsRunActive) return;
+            if (!node.IsActive) return;  // 잠긴 노드 무시
 
-            // 보스/엘리트: 이동 전 확인 다이얼로그
-            if (node.NodeType == MapNodeType.Boss || node.NodeType == MapNodeType.Elite)
+            // ★ 새 흐름 (MapSceneRework) — 2단계: 클릭 → 상세 패널 → 버튼 → 액션
+            if (_mapReworkView != null && _nodeDetailPanel != null)
             {
-                string label = node.NodeType == MapNodeType.Boss ? "보스" : "엘리트";
-                _pendingBattleNode = node;
-                if (_confirmationDialog != null)
-                {
-                    _confirmationDialog.Show(
-                        $"강력한 {label} 적이 기다리고 있습니다.\n전투를 시작하시겠습니까?",
-                        OnBattleConfirmed,
-                        () => { _pendingBattleNode = null; });
-                }
-                else
-                {
-                    OnBattleConfirmed();
-                }
+                PrepareNodePreview(node);
                 return;
             }
 
+            // 레거시 흐름 (기존 MapView) — 즉시 이동
             MoveToNode(node);
         }
 
-        private void OnBattleConfirmed()
+        /// <summary>
+        /// ★ Preview 빌더 — 노드에 대한 미리보기 데이터 생성 + NodeDetailPanel 갱신.
+        /// 1회 적 샘플링 → _previewedEnemies 캐싱 (StartBattle이 동일 적 사용).
+        /// </summary>
+        private void PrepareNodePreview(MapNode node)
         {
-            if (_pendingBattleNode == null) return;
-            MoveToNode(_pendingBattleNode);
-            _pendingBattleNode = null;
+            _previewedNode = node;
+            _previewedEnemies = SampleEnemiesForPreview(node);
+
+            var preview = BuildPreviewData(node, _previewedEnemies);
+            if (_nodeDetailPanel != null)
+                _nodeDetailPanel.Initialize(node, preview, OnConfirmAction);
+
+            Debug.Log($"[MapSceneSetup] PrepareNodePreview — node:{node.NodeType} Layer:{node.Layer} " +
+                      $"enemies:{(_previewedEnemies?.Count ?? 0)} gold:{preview?.Rewards?.Summary ?? "—"}");
+        }
+
+        /// <summary>
+        /// "Enter Battle" 버튼 클릭 시 호출 — 캐시된 노드로 실제 액션 수행.
+        /// </summary>
+        private void OnConfirmAction(MapNode node)
+        {
+            // 다른 노드가 선택된 상태면 무시 (UI 경쟁 상태 방지)
+            if (_previewedNode != node) return;
+            MoveToNode(node);
+        }
+
+        /// <summary>
+        /// NodePreviewData 빌더 — 노드 타입별 헤더/적/보상 데이터 조립.
+        /// </summary>
+        private NodePreviewData BuildPreviewData(MapNode node, List<CharacterData> enemies)
+        {
+            var typeInfo = NodeDetailPanel.GetStaticNodeTypeInfo(node.NodeType);
+            var preview = new NodePreviewData
+            {
+                NodeType = node.NodeType,
+                Title = typeInfo.DisplayName,
+                Subtitle = typeInfo.Subtitle,
+                Description = typeInfo.Description,
+                ActionLabel = typeInfo.ActionLabel,
+                ThemeColor = typeInfo.Color,
+                IconSymbol = typeInfo.IconSymbol,
+            };
+
+            // 전투 노드 — 적 목록 + 보상
+            bool isCombat = node.NodeType == MapNodeType.Battle
+                          || node.NodeType == MapNodeType.Elite
+                          || node.NodeType == MapNodeType.Boss;
+            if (isCombat)
+            {
+                preview.Enemies = BuildEnemyPreviewList(node, enemies);
+                preview.Rewards = TeamLog.Reward.RewardManager.GetPreview(node.NodeType, _runState);
+            }
+            else
+            {
+                // 비전투 노드 — 샘플링된 적이 없을 수도 있음. 빈 리스트.
+                preview.Enemies = new List<EnemyPreviewInfo>();
+            }
+
+            return preview;
+        }
+
+        /// <summary>
+        /// EnemyPreviewInfo 리스트 빌더 — 스케일링 후 추정 HP 포함.
+        /// </summary>
+        private List<EnemyPreviewInfo> BuildEnemyPreviewList(MapNode node, List<CharacterData> enemies)
+        {
+            var result = new List<EnemyPreviewInfo>();
+            if (enemies == null) return result;
+
+            float scaling = _runState.GetFloorScaling();
+            Color tint = node.NodeType switch
+            {
+                MapNodeType.Boss => new Color(0.55f, 0.06f, 0.06f, 1f),
+                MapNodeType.Elite => new Color(0.96f, 0.83f, 0.37f, 1f),
+                _ => new Color(0.75f, 0.22f, 0.17f, 1f)
+            };
+
+            foreach (var data in enemies)
+            {
+                if (data == null) continue;
+                int estimatedHP = System.Math.Max(1, (int)(data.BaseHP * scaling));
+                result.Add(new EnemyPreviewInfo
+                {
+                    Name = data.CharacterName,
+                    EstimatedHP = estimatedHP,
+                    Tint = tint
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// ★ 적 샘플링 — StartBattle의 샘플링 로직을 발췌 (CharacterData만 반환).
+        /// Boss: theme.boss / Elite: RollElitePattern or 랜덤 / Battle: RollNormalPattern or 랜덤.
+        /// </summary>
+        private List<CharacterData> SampleEnemiesForPreview(MapNode node)
+        {
+            var result = new List<CharacterData>();
+            var theme = _runState.CurrentStageTheme;
+            if (theme == null) return result;
+
+            var patternTable = theme.spawnPatternTable;
+
+            switch (node.NodeType)
+            {
+                case MapNodeType.Boss:
+                    if (theme.boss != null)
+                        result.Add(theme.boss);
+                    break;
+
+                case MapNodeType.Elite:
+                    if (patternTable != null && patternTable.ElitePatterns != null && patternTable.ElitePatterns.Length > 0)
+                    {
+                        var pattern = patternTable.ElitePatterns[Random.Range(0, patternTable.ElitePatterns.Length)];
+                        result.AddRange(ExtractDataFromPattern(pattern));
+                    }
+                    if (result.Count == 0 && theme.eliteEnemies != null && theme.eliteEnemies.Count > 0)
+                    {
+                        result.Add(theme.eliteEnemies[Random.Range(0, theme.eliteEnemies.Count)]);
+                    }
+                    break;
+
+                default: // 일반 전투
+                    if (patternTable != null && patternTable.NormalPatterns != null && patternTable.NormalPatterns.Length > 0)
+                    {
+                        var pattern = patternTable.NormalPatterns[Random.Range(0, patternTable.NormalPatterns.Length)];
+                        result.AddRange(ExtractDataFromPattern(pattern));
+                    }
+                    if (result.Count == 0 && theme.normalEnemies != null && theme.normalEnemies.Count > 0)
+                    {
+                        int count = Random.Range(1, 4);
+                        for (int i = 0; i < count; i++)
+                            result.Add(theme.normalEnemies[Random.Range(0, theme.normalEnemies.Count)]);
+                    }
+                    break;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// EnemySpawnPattern에서 CharacterData 리스트 추출 (Character 인스턴스 X).
+        /// </summary>
+        private List<CharacterData> ExtractDataFromPattern(EnemySpawnPattern pattern)
+        {
+            var list = new List<CharacterData>();
+            if (pattern?.enemies == null) return list;
+            foreach (var entry in pattern.enemies)
+            {
+                if (entry.enemyData == null) continue;
+                for (int i = 0; i < entry.count; i++)
+                    list.Add(entry.enemyData);
+            }
+            return list;
         }
 
         private void MoveToNode(MapNode node)
@@ -55,6 +208,10 @@ namespace TeamLog.UI.Map
             if (!moved) return;
 
             AudioManager.Instance.PlayUINodeClick();
+
+            // ★ 노드 이동 성공 → preview 캐시 무효화 (다음 preview 시 재샘플링되도록)
+            _previewedNode = null;
+            // _previewedEnemies는 StartBattle이 소비할 수 있으므로 여기서 클리어하지 않음.
 
             // UI 갱신
             if (_mapView != null)
@@ -97,34 +254,28 @@ namespace TeamLog.UI.Map
                 return;
             }
 
+            // ★ 캐싱 우선: _previewedNode == node이고 _previewedEnemies가 있으면 그걸 사용.
+            // 일관성 보장 — 미리보기에 표시된 적 = 실제 전투 적.
             var enemies = new List<Character>();
-            var patternTable = theme.spawnPatternTable;
+            List<CharacterData> enemiesData;
+            bool useCache = _previewedNode == node && _previewedEnemies != null && _previewedEnemies.Count > 0;
 
-            switch (node.NodeType)
+            if (useCache)
             {
-                case MapNodeType.Boss:
-                    if (theme.boss != null)
-                        enemies.Add(new Character(theme.boss));
-                    break;
-                case MapNodeType.Elite:
-                    if (patternTable != null)
-                        enemies = patternTable.RollElitePattern();
-                    // 폴백: 패턴 테이블이 없거나 비었으면 테마 엘리트 풀에서 무작위
-                    if (enemies.Count == 0 && theme.eliteEnemies != null && theme.eliteEnemies.Count > 0)
-                        enemies.Add(new Character(theme.eliteEnemies[UnityEngine.Random.Range(0, theme.eliteEnemies.Count)]));
-                    break;
-                default: // 일반 전투
-                    if (patternTable != null)
-                        enemies = patternTable.RollNormalPattern();
-                    // 폴백: 패턴 테이블이 없거나 비었으면 테마 일반 풀에서 무작위 1~3마리
-                    if (enemies.Count == 0 && theme.normalEnemies != null && theme.normalEnemies.Count > 0)
-                    {
-                        int count = UnityEngine.Random.Range(1, 4);
-                        for (int i = 0; i < count; i++)
-                            enemies.Add(new Character(theme.normalEnemies[UnityEngine.Random.Range(0, theme.normalEnemies.Count)]));
-                    }
-                    break;
+                enemiesData = _previewedEnemies;
             }
+            else
+            {
+                // 레거시 경로 (또는 캐시 미스) — 그 자리에서 샘플링
+                enemiesData = SampleEnemiesForPreview(node);
+            }
+
+            foreach (var data in enemiesData)
+                enemies.Add(new Character(data));
+
+            // 캐시 소비 후 클리어
+            _previewedNode = null;
+            _previewedEnemies = null;
 
             if (enemies.Count == 0)
             {
@@ -179,11 +330,13 @@ namespace TeamLog.UI.Map
 
         private void OpenEvent()
         {
-            if (_eventUI == null) return;
-
-            // Phase E3: 테마별 이벤트 우선 사용, 폴백으로 공통 풀
+            // ★ Phase EVENT: Rework View 우선, 폴백으로 기존 _eventUI
             EventData selected = PickRandomEvent();
-            if (selected != null)
+            if (selected == null) return;
+
+            if (_eventReworkView != null)
+                _eventReworkView.ShowEvent(selected);
+            else if (_eventUI != null)
                 _eventUI.ShowEvent(selected);
         }
 
@@ -222,7 +375,10 @@ namespace TeamLog.UI.Map
 
         private void OpenShop()
         {
-            if (_shopUI != null)
+            // ★ Phase SHOP: Rework View 우선, 폴백으로 기존 _shopUI
+            if (_shopReworkView != null)
+                _shopReworkView.OpenShop(_runState.CurrentFloor);
+            else if (_shopUI != null)
                 _shopUI.OpenShop(_runState.CurrentFloor);
         }
 

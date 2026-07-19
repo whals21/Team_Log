@@ -3,6 +3,7 @@ using UnityEngine;
 using TeamLog.Map;
 using TeamLog.Skill;
 using TeamLog.UI;
+using TeamLog.UI.Map.Rework;  // ★ Node Detail Preview 파이프 — RewardPreviewInfo 참조
 
 namespace TeamLog.Reward
 {
@@ -159,6 +160,45 @@ namespace TeamLog.Reward
                 MapNodeType.Elite => 30,
                 MapNodeType.Boss => 50,
                 _ => 15
+            };
+        }
+
+        /// <summary>
+        /// ★ Node Detail Preview 파이프 — 전투 노드 미리보기용 보상 정보 생성.
+        /// 기존 GenerateRewards와 분리된 정적 헬퍼 (실제 보상은 전투 후 동일 로직으로 생성됨).
+        /// 골드 범위는 GenerateRewards의 goldMin/goldMax와 동일.
+        /// </summary>
+        public static RewardPreviewInfo GetPreview(MapNodeType type, GameRunState runState)
+        {
+            // using TeamLog.UI.Map.Rework가 안 되어 있어도 타입은 같은 어셈블리라 참조 가능.
+            // (RewardManager는 TeamLog.Reward 네임스페이스 — NodePreviewData는 TeamLog.UI.Map.Rework)
+            return type switch
+            {
+                MapNodeType.Battle => new RewardPreviewInfo
+                {
+                    GoldMin = 10, GoldMax = 25,
+                    AugmentCount = 3,
+                    RelicChance = 0f,
+                    IncludesSouls = false,
+                    Summary = "10-25G · 3 Augments"
+                },
+                MapNodeType.Elite => new RewardPreviewInfo
+                {
+                    GoldMin = 30, GoldMax = 60,
+                    AugmentCount = 3,
+                    RelicChance = 0.5f,
+                    IncludesSouls = false,
+                    Summary = "30-60G · 3 Augments · 50% Relic"
+                },
+                MapNodeType.Boss => new RewardPreviewInfo
+                {
+                    GoldMin = 50, GoldMax = 100,
+                    AugmentCount = 3,
+                    RelicChance = 1f,
+                    IncludesSouls = true,
+                    Summary = "50-100G · 3 Augments · Relic · Souls"
+                },
+                _ => new RewardPreviewInfo { Summary = "—" }
             };
         }
     }

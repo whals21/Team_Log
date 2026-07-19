@@ -346,18 +346,28 @@ namespace TeamLog.UI.Battle
         {
             if (_targetBox == null) return;
 
+            // ★ D 시안: Attack/Debuff 의도일 때 항상 TargetBox 표시.
+            // intent.Targets가 비어 있으면 첫 번째 살아있는 플레이어를 폴백으로 표시.
             bool hasTarget = intent != null
-                && intent.Type == EnemyIntentType.Attack
-                && intent.Targets != null
-                && intent.Targets.Count > 0;
+                && (intent.Type == EnemyIntentType.Attack || intent.Type == EnemyIntentType.Debuff);
 
             _targetBox.SetActive(hasTarget);
 
             if (!hasTarget) return;
 
-            var target = intent.Targets[0];
+            // 대상 결정 — intent.Targets 우선, 비어 있으면 _uiManager에서 폴백
+            Characters.Character target = null;
+            if (intent.Targets != null && intent.Targets.Count > 0)
+            {
+                target = intent.Targets[0];
+            }
+            else if (_uiManager != null)
+            {
+                target = _uiManager.GetFirstAlivePlayer();
+            }
+
             if (_targetNameText != null)
-                _targetNameText.text = target?.Name ?? "?";
+                _targetNameText.text = target?.Data?.CharacterName ?? "?";
 
             // 타겟팅된 플레이어 패널에 붉은 테두리 표시
             if (_uiManager != null && target != null)

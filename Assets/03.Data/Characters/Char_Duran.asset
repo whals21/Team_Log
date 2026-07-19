@@ -16,7 +16,7 @@ MonoBehaviour:
   _characterClass: 0
   _description: "\uBD88\uBA78\uC758 \uC131\uBCBD. \uD53C\uACA9 \uC2DC Vengeance\uAC00
     \uCD95\uC801\uB418\uBA70 \uC18C\uBE44 \uC2A4\uD0AC\uB85C \uBC84\uC2A4\uD2B8 \uB51C"
-  _baseHP: 120
+  _baseHP: 30
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 0

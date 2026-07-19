@@ -349,12 +349,48 @@ SceneTransition.Instance.FadeToScene("PartySelectionScene");
 
 ## 참고 자료
 
-- `Assets/09.Docs/WorkLog/2026-07-18.md` — 상세 작업 이력
+- `Assets/09.Docs/WorkLog/2026-07-18.md` — PartySelection 상세 작업 이력
+- `Assets/09.Docs/WorkLog/2026-07-19.md` — ★ MapScene Rework 상세 작업 이력
 - `Assets/09.Docs/UIFontSetupGuide.md` — 폰트 설정
 - `Assets/09.Docs/UIDesignAssetManifest.md` — 에셋 분류
 - `Assets/09.Docs/PartySelectionUILayoutGuide.md` — 레이아웃 수동 조정 가이드
 - `Assets/02.Scripts/UI/UIAutoBindHelper.cs` — ★ 재사용 가능한 UI 헬퍼
-- `UI_Mockup/PartySelection_Mockup.html` — 웹 목업 (디자인 참고)
+- `UI_Mockup/PartySelection_Mockup.html` — PartySelection 웹 목업
+- `UI_Mockup/MapScene_Mockup.html` — ★ MapScene Rework 웹 목업 (v2 — 9 레이어)
+
+---
+
+## 12. ★ MapScene Rework 노하우 (2026-07-19 추가)
+
+PartySelection 노하우를 그대로 적용하여 MapScene을 전면 리워크하면서 학습한 추가 교훈.
+
+### 12.1 다른 씬 리워크 시 체크리스트
+- [ ] 기존 씬(MapScene.unity)은 보존, 새 Rework 씬(MapSceneRework.unity)으로 빌드 → 검증 후 교체
+- [ ] 새 폴더(Rework/)에 컴포넌트 배치, namespace도 별도(Rework)로 분리 — 기존 코드와 충돌 회피
+- [ ] SpriteGenerator는 씬 전용으로 별도 작성 (`MapSceneSpriteGenerator.cs`) — 공통 Sprite는 기존 것 재사용
+- [ ] 씬 빌더는 main + .Parts partial로 분할 — 헬퍼(CreateSection/CreatePanelHeader)는 main, 각 섹션은 .Parts
+
+### 12.2 ★ 다른 시스템의 데이터 API 사전 확인
+MapScene은 GameRunState/Character/SkillInventoryComponent 등 다양한 데이터 소스에 의존. 컴포넌트 작성 전 반드시:
+- `GameRunState.RelicHandler.Relics` (IReadOnlyList<RelicData>) — 보유 유물
+- `Character.Resource.CurrentStacks` — 자원 수치 (Stacks 아님)
+- `Character.Health.IsDead/CurrentHP/MaxHP` — HP 상태
+- `CharacterData.ResourceType` — 자원 타입 (UIPalette 매핑용)
+- `SkillInventoryComponent` — 증강 추출 API가 불명확하면 안전 폴백(빈 리스트)으로 두고 TODO 표시
+
+### 12.3 NonCombatLayers 명시적 분리 원칙
+"전투 사이마다 비전투 노드" 같은 요구사항은 무작위 배정으로는 보장 불가. MapGenerationConfig에 `NonCombatLayers` HashSet을 명시적으로 두고:
+1. GenerateFloor에서 비전투 레이어는 단일 노드(타입 미정)로 시작
+2. AssignSpecialNodeTypes가 1순위로 비전투 레이어에 Event/Shop/Rest 분배
+3. 폴백: 비전투 레이어 중 배정 못 받은 노드는 자동 Event 강제 (Battle으로 남기면 보장 깨짐)
+
+### 12.4 SpriteGenerator 재사용 패턴
+- `HexColor()`, `SaveSprite()`, `EnsureOutputDirectory()` 헬퍼는 거의 모든 UI 작업에 동일 패턴 적용 가능
+- 노드 아이콘의 "중앙 문양"은 폰트로 처리하는 것보다 픽셀 단위 직접 그리기가 더 선명 (폰트 fallback 이슈 회피)
+- 9-slice border는 Sprite 전체 영역 사용 시 `new Vector4(0,0,0,0)`으로 설정, 패널처럼 늘어나야 하면 명시적 border 값
+
+### 12.5 ★ PartySelectionSpriteGenerator와의 협력
+공통 에셋(골드 테두리/양피지 패널/남색 패널/핏빛 버튼)은 PartySelectionSpriteGenerator 출력을 그대로 재사용. 씬 전용 SpriteGenerator는 진짜 그 씬만의 고유 Sprite(노드 아이콘 등)만 생성. 중복 생성 방지.
 
 ---
 

@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Team Log — Battle Scene Mockup v3 (실제 구조 기반)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #050507;
+  --slate: #14141d;
+  --parchment: #d4c5a0;
+  --parchment-d: #a8987a;
+  --ink: #1a1208;
+  --ink-soft: #3a2e1e;
+  --gold: #c9a14a;
+  --gold-light: #e6c878;
+  --gold-dark: #8b6e2f;
+  --blood: #8b0000;
+  --blood-light: #c0392b;
+  --ember: #ff6b35;
+  --frost: #5ec5e8;
+  --venom: #6ed5b2;
+  --shadow: #b388ff;
+  --navy: #1e2a3e;
+  --navy-light: #2a3a52;
+  --navy-dark: #0f1828;
+  --res-ember: #ff6b35;
+  --res-vengeance: #c0392b;
+  --res-frost: #5ec5e8;
+  --res-prophecy: #b388ff;
+  --res-charge: #f4d35e;
+  --res-shadows: #6ed5b2;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--void);
+  color: var(--parchment);
+  font-family: 'Nanum Gothic', 'Cormorant Garamond', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(139, 0, 0, 0.06), transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(201, 161, 74, 0.05), transparent 50%),
+    var(--void);
+  z-index: -2;
+}
+
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* ============================================================
+   페이지 헤더
+   ============================================================ */
+.page-header {
+  text-align: center;
+  padding: 60px 20px 40px;
+  border-bottom: 1px solid rgba(201, 161, 74, 0.2);
+}
+
+.page-header h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 38px;
+  letter-spacing: 0.15em;
+  color: var(--gold-light);
+  margin-bottom: 12px;
+  text-shadow: 0 0 30px rgba(201, 161, 74, 0.3);
+}
+
+.page-header .subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--parchment-d);
+}
+
+.page-header .nav-pills {
+  margin-top: 24px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.page-header .nav-pills a {
+  padding: 6px 16px;
+  border: 1px solid rgba(201, 161, 74, 0.3);
+  background: rgba(20, 20, 29, 0.6);
+  color: var(--parchment);
+  text-decoration: none;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  transition: all 0.3s;
+}
+
+.page-header .nav-pills a:hover {
+  background: rgba(201, 161, 74, 0.15);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+/* ============================================================
+   섹션 공통
+   ============================================================ */
+.concept {
+  padding: 50px 20px;
+  border-bottom: 1px solid rgba(201, 161, 74, 0.15);
+}
+
+.concept-header {
+  max-width: 1600px;
+  margin: 0 auto 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px;
+  align-items: center;
+}
+
+.concept-num {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 56px;
+  color: var(--gold-dark);
+  line-height: 1;
+}
+
+.concept-title-block h2 {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--gold-light);
+  letter-spacing: 0.1em;
+  margin-bottom: 2px;
+}
+
+.concept-title-block .ko {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 12px;
+  color: var(--parchment-d);
+}
+
+.concept-vibe {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--gold);
+  padding: 4px 10px;
+  border: 1px solid rgba(201, 161, 74, 0.3);
+}
+
+/* ============================================================
+   배틀 프레임 — 실제 BattleScene.unity 구조 (1920×1080)
+   ============================================================
+   TopBar (44px)
+   ContentArea (적 카드 — TopBar 아래 ~ BottomBar 위)
+   BottomBar (280px) — PlayerStrip(파티 4) + SkillRow(스킬 5) + RightColumn(AP+버튼)
+*/
+.battle-stage {
+  max-width: 1600px;
+  margin: 0 auto;
+  position: relative;
+  border: 1px solid rgba(201, 161, 74, 0.2);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TopBar (44px) */
+.topbar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 2px solid;
+  flex-shrink: 0;
+}
+
+.topbar-left, .topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-right { margin-left: auto; }
+
+.turn-badge {
+  padding: 4px 12px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.floor-info {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.relic-bar {
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+  align-items: center;
+}
+
+.relic-icon {
+  width: 22px; height: 22px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.toggle-btn {
+  padding: 4px 10px;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 11px;
+  border: 1px solid;
+  cursor: pointer;
+}
+
+/* ContentArea (중앙) */
+.content-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.enemy-card {
+  width: 180px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  border: 1px solid;
+}
+
+.enemy-card.targeted::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid var(--blood-light);
+  pointer-events: none;
+}
+
+.enemy-intent-slot {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 6px;
+  border: 1px solid;
+  z-index: 2;
+}
+
+.intent-icon {
+  width: 18px; height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.intent-value {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.intent-text {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 10px;
+}
+
+.enemy-portrait {
+  width: 80px; height: 80px;
+  margin: 24px auto 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 36px;
+  border: 2px solid;
+}
+
+.enemy-name {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.enemy-hpbar {
+  height: 18px;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.enemy-hpfill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blood), var(--blood-light));
+}
+
+.enemy-hptext {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.enemy-status-row {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  min-height: 18px;
+}
+
+/* BottomBar (280px) */
+.bottom-bar {
+  height: 280px;
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  border-top: 2px solid;
+  flex-shrink: 0;
+}
+
+.bottom-left {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  gap: 6px;
+}
+
+/* PlayerStrip — 파티 카드 4개 가로 */
+.player-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  height: 110px;
+}
+
+.char-card {
+  padding: 6px 8px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 6px;
+  border: 1px solid;
+  position: relative;
+}
+
+.char-card.active {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+.char-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 20px;
+  border: 2px solid;
+  align-self: start;
+}
+
+.char-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  min-width: 0;
+}
+
+.char-name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.char-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.char-stats {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.char-hpbar {
+  height: 14px;
+  border: 1px solid;
+  position: relative;
+  overflow: hidden;
+}
+
+.char-hpfill {
+  height: 100%;
+  background: linear-gradient(90deg, #3a8a3a, #5dbb5d);
+}
+
+.char-hptext {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  line-height: 14px;
+}
+
+.char-resource-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.resource-badge {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 10px;
+  border: 1px solid;
+}
+
+.resource-value {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.char-status-row {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+  min-height: 14px;
+}
+
+.status-icon {
+  width: 14px; height: 14px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  border: 1px solid;
+}
+
+/* SkillRow — 스킬 슬롯 5개 가로 */
+.skill-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+}
+
+.skill-slot {
+  padding: 6px 8px;
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 6px;
+  align-items: center;
+  border: 1px solid;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.skill-slot:hover { transform: translateY(-2px); }
+
+.skill-cost {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 12px;
+  border: 1px solid;
+}
+
+.skill-info {
+  min-width: 0;
+}
+
+.skill-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skill-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 9px;
+  line-height: 1.2;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skill-power {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 16px;
+}
+
+/* RightColumn (AP + 버튼) */
+.right-column {
+  display: flex;
+  flex-direction: column;
+  border-left: 2px solid;
+}
+
+.ap-area {
+  height: 88px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-bottom: 1px solid;
+}
+
+.ap-pip-row {
+  display: flex;
+  gap: 4px;
+}
+
+.ap-pip {
+  width: 14px; height: 14px;
+  border: 1px solid;
+}
+
+.ap-pip.filled {
+  background: var(--gold);
+}
+
+.ap-text {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.button-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 4px;
+}
+
+.reroll-btn {
+  flex: 0.6;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  text-align: center;
+}
+
+.end-turn-btn {
+  flex: 1;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   시안 A — Cathedral Arena (황금+스테인드글라스 톤)
+   ============================================================ */
+.cathedral-arena .battle-stage {
+  background: linear-gradient(180deg, #0a0805 0%, #050402 100%);
+  border-color: var(--gold-dark);
+  box-shadow: 0 0 60px rgba(201, 161, 74, 0.12);
+}
+
+.cathedral-arena .topbar {
+  background: linear-gradient(180deg, rgba(40, 30, 15, 0.95), rgba(20, 15, 8, 0.9));
+  border-bottom-color: var(--gold-dark);
+}
+
+.cathedral-arena .turn-badge {
+  background: linear-gradient(180deg, var(--gold-dark), #5a4218);
+  color: var(--void);
+  border: 1px solid var(--gold);
+}
+
+.cathedral-arena .floor-info { color: var(--parchment); background: rgba(0,0,0,0.3); border: 1px solid var(--gold-dark); }
+.cathedral-arena .relic-bar { border: 1px solid var(--gold-dark); background: rgba(0,0,0,0.3); }
+.cathedral-arena .relic-icon { background: var(--gold-dark); color: var(--gold-light); border: 1px solid var(--gold); }
+.cathedral-arena .toggle-btn { color: var(--gold-light); border-color: var(--gold-dark); background: rgba(0,0,0,0.3); }
+
+.cathedral-arena .content-area {
+  background: radial-gradient(ellipse at center, rgba(201, 161, 74, 0.06), transparent 70%);
+}
+
+.cathedral-arena .enemy-card {
+  background: linear-gradient(180deg, rgba(40, 25, 15, 0.8), rgba(20, 12, 8, 0.6));
+  border-color: var(--gold-dark);
+}
+
+.cathedral-arena .enemy-intent-slot {
+  background: rgba(139, 0, 0, 0.9);
+  border-color: var(--blood);
+}
+.cathedral-arena .intent-icon { color: var(--blood-light); }
+.cathedral-arena .intent-value { color: var(--gold-light); }
+.cathedral-arena .intent-text { color: var(--parchment); }
+
+.cathedral-arena .enemy-portrait {
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.4), rgba(20, 12, 8, 1));
+  border-color: var(--blood);
+  color: var(--blood-light);
+  box-shadow: 0 0 12px rgba(139, 0, 0, 0.4);
+}
+
+.cathedral-arena .enemy-name { color: var(--gold-light); }
+.cathedral-arena .enemy-hpbar { border-color: var(--gold-dark); background: rgba(0,0,0,0.5); }
+
+.cathedral-arena .bottom-bar { border-top-color: var(--gold-dark); }
+
+.cathedral-arena .char-card {
+  background: linear-gradient(180deg, rgba(40, 30, 15, 0.7), rgba(20, 15, 8, 0.5));
+  border-color: var(--gold-dark);
+}
+
+.cathedral-arena .char-card.active {
+  background: linear-gradient(180deg, rgba(60, 45, 20, 0.9), rgba(30, 22, 10, 0.7));
+}
+
+.cathedral-arena .char-avatar {
+  background: radial-gradient(circle, rgba(201, 161, 74, 0.2), rgba(20, 15, 8, 1));
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+.cathedral-arena .char-name { color: var(--gold-light); }
+.cathedral-arena .char-stats { color: var(--parchment); }
+.cathedral-arena .char-hpbar { border-color: var(--gold-dark); }
+
+.cathedral-arena .skill-slot {
+  background: linear-gradient(180deg, rgba(40, 30, 15, 0.6), rgba(20, 14, 8, 0.4));
+  border-color: var(--gold-dark);
+  border-left: 3px solid var(--gold-dark);
+}
+
+.cathedral-arena .skill-slot:hover { border-left-color: var(--gold); }
+
+.cathedral-arena .skill-cost {
+  background: var(--gold);
+  color: var(--void);
+  border-color: var(--gold-dark);
+}
+
+.cathedral-arena .skill-name { color: var(--gold-light); }
+.cathedral-arena .skill-power { color: var(--gold-light); }
+
+.cathedral-arena .right-column { border-left-color: var(--gold-dark); background: rgba(20, 15, 8, 0.5); }
+.cathedral-arena .ap-area { border-bottom-color: var(--gold-dark); background: linear-gradient(180deg, rgba(60, 45, 20, 0.4), rgba(30, 22, 10, 0.3)); }
+.cathedral-arena .ap-pip { border-color: var(--gold-dark); background: rgba(0,0,0,0.5); }
+.cathedral-arena .ap-pip.filled { background: var(--gold); box-shadow: 0 0 6px rgba(201, 161, 74, 0.5); }
+.cathedral-arena .ap-text { color: var(--gold-light); }
+
+.cathedral-arena .reroll-btn { background: rgba(40, 30, 15, 0.7); color: var(--gold-light); border-color: var(--gold-dark); }
+.cathedral-arena .end-turn-btn { background: linear-gradient(180deg, var(--blood), #5a0000); color: var(--gold-light); border-color: var(--gold-dark); }
+
+/* ============================================================
+   시안 B — Bloodied Chronicle (양피지+핏빛)
+   ============================================================ */
+.bloodied-chronicle .battle-stage {
+  background: linear-gradient(180deg, #0a0a14 0%, #0e0c08 100%);
+  border-color: var(--ink-soft);
+}
+
+.bloodied-chronicle .topbar {
+  background: linear-gradient(180deg, rgba(58, 46, 30, 0.7), rgba(30, 22, 14, 0.6));
+  border-bottom-color: var(--ink-soft);
+}
+
+.bloodied-chronicle .turn-badge {
+  background: var(--ink);
+  color: var(--parchment);
+  border: 1px solid var(--ink-soft);
+}
+
+.bloodied-chronicle .floor-info { color: var(--parchment); background: rgba(58,46,30,0.3); border: 1px solid var(--ink-soft); }
+.bloodied-chronicle .relic-bar { border: 1px solid var(--ink-soft); background: rgba(58,46,30,0.2); }
+.bloodied-chronicle .relic-icon { background: var(--ink-soft); color: var(--parchment); border: 1px solid var(--ink); }
+.bloodied-chronicle .toggle-btn { color: var(--parchment); border-color: var(--ink-soft); background: rgba(58,46,30,0.3); }
+
+.bloodied-chronicle .content-area { background: rgba(20, 14, 8, 0.4); }
+
+.bloodied-chronicle .enemy-card {
+  background: rgba(58, 46, 30, 0.25);
+  border-color: rgba(58, 46, 30, 0.6);
+  border-left: 3px solid var(--blood);
+}
+
+.bloodied-chronicle .enemy-intent-slot {
+  background: rgba(40, 8, 8, 0.95);
+  border-color: var(--blood);
+}
+.bloodied-chronicle .intent-icon { color: var(--blood-light); }
+.bloodied-chronicle .intent-value { color: var(--blood-light); }
+.bloodied-chronicle .intent-text { color: var(--parchment); }
+
+.bloodied-chronicle .enemy-portrait {
+  background: rgba(58, 46, 30, 0.4);
+  border-color: var(--blood);
+  color: var(--blood-light);
+}
+
+.bloodied-chronicle .enemy-name { color: var(--parchment); }
+.bloodied-chronicle .enemy-hpbar { border-color: var(--ink-soft); background: rgba(0,0,0,0.5); }
+
+.bloodied-chronicle .bottom-bar { border-top-color: var(--ink-soft); }
+
+.bloodied-chronicle .char-card {
+  background: rgba(58, 46, 30, 0.2);
+  border-color: rgba(58, 46, 30, 0.5);
+  border-left: 3px solid var(--gold-dark);
+}
+
+.bloodied-chronicle .char-card.active {
+  background: rgba(58, 46, 30, 0.4);
+  border-left-color: var(--gold);
+}
+
+.bloodied-chronicle .char-avatar {
+  background: rgba(58, 46, 30, 0.5);
+  border-color: var(--ink);
+  color: var(--parchment);
+}
+
+.bloodied-chronicle .char-name { color: var(--parchment); }
+.bloodied-chronicle .char-stats { color: var(--parchment-d); }
+.bloodied-chronicle .char-hpbar { border-color: var(--ink-soft); }
+
+.bloodied-chronicle .skill-slot {
+  background: rgba(58, 46, 30, 0.25);
+  border-color: var(--ink-soft);
+  border-left: 3px solid var(--blood);
+}
+
+.bloodied-chronicle .skill-slot:hover { border-left-color: var(--blood-light); }
+
+.bloodied-chronicle .skill-cost {
+  background: var(--blood);
+  color: var(--parchment);
+  border-color: var(--ink);
+}
+
+.bloodied-chronicle .skill-name { color: var(--parchment); }
+.bloodied-chronicle .skill-power { color: var(--blood-light); }
+
+.bloodied-chronicle .right-column { border-left-color: var(--ink-soft); background: rgba(58, 46, 30, 0.15); }
+.bloodied-chronicle .ap-area { border-bottom-color: var(--ink-soft); background: rgba(58, 46, 30, 0.3); }
+.bloodied-chronicle .ap-pip { border-color: var(--ink-soft); }
+.bloodied-chronicle .ap-pip.filled { background: var(--blood); }
+.bloodied-chronicle .ap-text { color: var(--parchment); }
+
+.bloodied-chronicle .reroll-btn { background: rgba(58, 46, 30, 0.4); color: var(--parchment); border-color: var(--ink-soft); }
+.bloodied-chronicle .end-turn-btn { background: linear-gradient(180deg, var(--blood), #5a0000); color: var(--parchment); border-color: var(--ink); }
+
+/* ============================================================
+   시안 C — Abyssal Maw (보라+남색 심연)
+   ============================================================ */
+.abyssal-maw .battle-stage {
+  background: linear-gradient(180deg, #0a0a14 0%, #050508 100%);
+  border-color: rgba(179, 136, 255, 0.3);
+  box-shadow: 0 0 60px rgba(179, 136, 255, 0.1);
+}
+
+.abyssal-maw .topbar {
+  background: linear-gradient(180deg, rgba(30, 25, 50, 0.9), rgba(15, 12, 30, 0.8));
+  border-bottom-color: rgba(179, 136, 255, 0.3);
+}
+
+.abyssal-maw .turn-badge {
+  background: linear-gradient(180deg, rgba(60, 40, 100, 0.7), rgba(30, 20, 60, 0.7));
+  color: var(--shadow);
+  border: 1px solid var(--shadow);
+}
+
+.abyssal-maw .floor-info { color: var(--shadow); background: rgba(30, 20, 60, 0.4); border: 1px solid rgba(179, 136, 255, 0.3); }
+.abyssal-maw .relic-bar { border: 1px solid rgba(179, 136, 255, 0.3); background: rgba(30, 20, 60, 0.3); }
+.abyssal-maw .relic-icon { background: rgba(60, 40, 100, 0.5); color: var(--shadow); border: 1px solid var(--shadow); }
+.abyssal-maw .toggle-btn { color: var(--shadow); border-color: rgba(179, 136, 255, 0.3); background: rgba(30, 20, 60, 0.4); }
+
+.abyssal-maw .content-area {
+  background:
+    radial-gradient(ellipse at center, rgba(179, 136, 255, 0.06), transparent 60%),
+    linear-gradient(180deg, #0a0a14 0%, #050508 100%);
+  position: relative;
+}
+
+.abyssal-maw .content-area::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(0deg, transparent 49.5%, rgba(179, 136, 255, 0.025) 50%, transparent 50.5%),
+    linear-gradient(90deg, transparent 49.5%, rgba(179, 136, 255, 0.025) 50%, transparent 50.5%);
+  background-size: 30px 30px;
+  pointer-events: none;
+}
+
+.abyssal-maw .enemy-card {
+  background: linear-gradient(180deg, rgba(40, 25, 60, 0.7), rgba(15, 10, 25, 0.6));
+  border-color: rgba(179, 136, 255, 0.3);
+  box-shadow: 0 0 12px rgba(179, 136, 255, 0.12);
+}
+
+.abyssal-maw .enemy-intent-slot {
+  background: rgba(40, 8, 30, 0.95);
+  border-color: var(--blood);
+}
+.abyssal-maw .intent-icon { color: var(--blood-light); }
+.abyssal-maw .intent-value { color: var(--blood-light); }
+.abyssal-maw .intent-text { color: var(--parchment); }
+
+.abyssal-maw .enemy-portrait {
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.5), rgba(10, 5, 20, 1));
+  border-color: var(--blood);
+  color: var(--blood-light);
+  box-shadow: 0 0 16px rgba(139, 0, 0, 0.5);
+}
+
+.abyssal-maw .enemy-name { color: var(--parchment); }
+.abyssal-maw .enemy-hpbar { border-color: rgba(179, 136, 255, 0.3); background: rgba(0,0,0,0.5); }
+
+.abyssal-maw .bottom-bar { border-top-color: rgba(179, 136, 255, 0.3); }
+
+.abyssal-maw .char-card {
+  background: linear-gradient(180deg, rgba(30, 25, 50, 0.5), rgba(15, 12, 30, 0.4));
+  border-color: rgba(179, 136, 255, 0.25);
+}
+
+.abyssal-maw .char-card.active {
+  background: linear-gradient(180deg, rgba(60, 45, 100, 0.7), rgba(30, 22, 60, 0.6));
+}
+
+.abyssal-maw .char-avatar {
+  background: radial-gradient(circle, rgba(94, 197, 232, 0.2), rgba(15, 12, 30, 1));
+  border-color: var(--frost);
+  color: var(--frost);
+}
+
+.abyssal-maw .char-name { color: var(--frost); }
+.abyssal-maw .char-stats { color: var(--parchment-d); }
+.abyssal-maw .char-hpbar { border-color: rgba(179, 136, 255, 0.3); }
+
+.abyssal-maw .skill-slot {
+  background: rgba(30, 25, 50, 0.6);
+  border-color: rgba(179, 136, 255, 0.3);
+  border-left: 3px solid var(--shadow);
+}
+
+.abyssal-maw .skill-slot:hover { box-shadow: 0 0 10px rgba(179, 136, 255, 0.3); }
+
+.abyssal-maw .skill-cost {
+  background: var(--shadow);
+  color: var(--void);
+  border-color: rgba(179, 136, 255, 0.6);
+}
+
+.abyssal-maw .skill-name { color: var(--shadow); }
+.abyssal-maw .skill-power { color: var(--shadow); }
+
+.abyssal-maw .right-column { border-left-color: rgba(179, 136, 255, 0.3); background: rgba(15, 12, 30, 0.4); }
+.abyssal-maw .ap-area { border-bottom-color: rgba(179, 136, 255, 0.3); background: linear-gradient(180deg, rgba(60, 40, 100, 0.4), rgba(30, 20, 60, 0.3)); }
+.abyssal-maw .ap-pip { border-color: var(--shadow); background: rgba(0,0,0,0.5); }
+.abyssal-maw .ap-pip.filled { background: var(--shadow); box-shadow: 0 0 6px rgba(179, 136, 255, 0.5); }
+.abyssal-maw .ap-text { color: var(--shadow); }
+
+.abyssal-maw .reroll-btn { background: rgba(60, 40, 100, 0.4); color: var(--shadow); border-color: rgba(179, 136, 255, 0.3); }
+.abyssal-maw .end-turn-btn { background: linear-gradient(180deg, var(--blood), #5a0000); color: var(--parchment); border-color: var(--blood); }
+
+/* ============================================================
+   시안 D — Sleek Combat HUD (모던 미니멀)
+   ============================================================ */
+.sleek-hud .battle-stage {
+  background: linear-gradient(180deg, #0a0a14 0%, #050508 100%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.sleek-hud .topbar {
+  background: rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sleek-hud .turn-badge {
+  background: rgba(201, 161, 74, 0.15);
+  color: var(--gold-light);
+  border: 1px solid var(--gold-dark);
+}
+
+.sleek-hud .floor-info { color: var(--parchment-d); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); }
+.sleek-hud .relic-bar { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
+.sleek-hud .relic-icon { background: rgba(255,255,255,0.08); color: var(--gold-light); border: 1px solid var(--gold-dark); }
+.sleek-hud .toggle-btn { color: var(--parchment); border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); }
+
+.sleek-hud .content-area { background: linear-gradient(180deg, transparent, rgba(0,0,0,0.4)); }
+
+.sleek-hud .enemy-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+.sleek-hud .enemy-card.targeted { border-left: 3px solid var(--blood-light); }
+
+.sleek-hud .enemy-intent-slot {
+  background: rgba(192, 57, 43, 0.85);
+  border-color: var(--blood-light);
+  border-radius: 3px;
+}
+.sleek-hud .intent-icon { color: white; }
+.sleek-hud .intent-value { color: white; }
+.sleek-hud .intent-text { color: rgba(255,255,255,0.85); }
+
+.sleek-hud .enemy-portrait {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: var(--blood-light);
+  color: var(--blood-light);
+}
+
+.sleek-hud .enemy-name { color: #ffffff; }
+.sleek-hud .enemy-hpbar { border-color: rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); }
+
+.sleek-hud .bottom-bar { border-top: 1px solid rgba(255,255,255,0.08); }
+
+.sleek-hud .char-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 3px solid var(--gold-dark);
+  border-radius: 3px;
+}
+
+.sleek-hud .char-card.active {
+  background: rgba(201, 161, 74, 0.06);
+  border-left-color: var(--gold-light);
+}
+
+.sleek-hud .char-avatar {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: var(--gold-dark);
+  color: var(--gold-light);
+}
+
+.sleek-hud .char-name { color: #ffffff; }
+.sleek-hud .char-stats { color: var(--parchment-d); }
+.sleek-hud .char-hpbar { border-color: rgba(255,255,255,0.1); }
+
+.sleek-hud .skill-slot {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid var(--gold-dark);
+  border-radius: 3px;
+}
+
+.sleek-hud .skill-slot:hover { border-left-color: var(--gold-light); }
+
+.sleek-hud .skill-cost {
+  background: var(--gold);
+  color: var(--void);
+}
+
+.sleek-hud .skill-name { color: #ffffff; }
+.sleek-hud .skill-power { color: var(--gold-light); }
+
+.sleek-hud .right-column { border-left: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.3); }
+.sleek-hud .ap-area { border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(201, 161, 74, 0.05); }
+.sleek-hud .ap-pip { border-color: var(--gold-dark); background: rgba(0,0,0,0.5); border-radius: 2px; }
+.sleek-hud .ap-pip.filled { background: var(--gold); }
+.sleek-hud .ap-text { color: var(--gold-light); }
+
+.sleek-hud .reroll-btn { background: rgba(255,255,255,0.03); color: var(--gold-light); border: 1px solid var(--gold-dark); border-radius: 3px; }
+.sleek-hud .end-turn-btn { background: linear-gradient(180deg, var(--blood-light), var(--blood)); color: white; border: 1px solid var(--blood-light); border-radius: 3px; }
+
+/* ============================================================
+   하단 비교표
+   ============================================================ */
+.mockup-footer {
+  padding: 50px 30px;
+  background: var(--void);
+  border-top: 1px solid rgba(201, 161, 74, 0.2);
+  text-align: center;
+}
+
+.mockup-footer h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  color: var(--gold-light);
+  margin-bottom: 12px;
+  letter-spacing: 0.1em;
+}
+
+.mockup-footer .compare-table {
+  max-width: 900px;
+  margin: 24px auto;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.mockup-footer .compare-table th,
+.mockup-footer .compare-table td {
+  padding: 10px 12px;
+  text-align: left;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(201, 161, 74, 0.15);
+}
+
+.mockup-footer .compare-table th {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+.mockup-footer .compare-table .star { color: var(--gold); letter-spacing: -1px; }
+
+.mockup-footer .verdict {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--parchment-d);
+  margin-top: 24px;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.8;
+}
+
+@media (max-width: 1100px) {
+  .battle-stage { aspect-ratio: auto; }
+  .player-strip { grid-template-columns: repeat(2, 1fr); }
+  .skill-row { grid-template-columns: repeat(3, 1fr); }
+  .bottom-bar { grid-template-columns: 1fr; }
+  .right-column { border-left: none; border-top: 2px solid; flex-direction: row; }
+  .ap-area { width: 200px; border-bottom: none; border-right: 1px solid; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>BATTLE SCENE — 실제 구조 기반 시안</h1>
+  <div class="subtitle">Team Log · BattleScene.unity 구조 유지 · 스타일만 변경 · 2026-07-20</div>
+  <nav class="nav-pills">
+    <a href="#a">A · Cathedral Arena</a>
+    <a href="#b">B · Bloodied Chronicle</a>
+    <a href="#c">C · Abyssal Maw</a>
+    <a href="#d">D · Sleek Combat HUD</a>
+    <a href="#compare">Compare</a>
+  </nav>
+</header>
+
+<!-- ============================================================
+     공통 HTML — 모든 시안이 동일 구조. CSS class만 다름
+     ============================================================ -->
+
+<!-- 시안 A -->
+<section id="a" class="concept cathedral-arena">
+  <div class="concept-header">
+    <div class="concept-num">A</div>
+    <div class="concept-title-block">
+      <h2>CATHEDRAL ARENA</h2>
+      <div class="ko">대성당 투기장 — 황금+스테인드글라스. Event/Shop B와 톤 일관</div>
+    </div>
+    <div class="concept-vibe">GOTHIC · SACRED ★ B 일관</div>
+  </div>
+  <div class="battle-stage">
+    <!-- TopBar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="turn-badge">Turn 1</span>
+        <span class="floor-info">F2 일반 · 층 2/4 · Crimson Chapel</span>
+        <div class="relic-bar">
+          <div class="relic-icon">⚔</div>
+          <div class="relic-icon">◈</div>
+          <div class="relic-icon">★</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="toggle-btn">파티</button>
+        <button class="toggle-btn">로그</button>
+        <button class="toggle-btn">2x</button>
+      </div>
+    </div>
+
+    <!-- ContentArea -->
+    <div class="content-area">
+      <div class="enemy-card targeted">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">⚔</span>
+          <span class="intent-value">8</span>
+          <span class="intent-text">공격</span>
+        </div>
+        <div class="enemy-portrait">☠</div>
+        <div class="enemy-name">Blood Acolyte</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:55%"></div>
+          <span class="enemy-hptext">28 / 50</span>
+        </div>
+        <div class="enemy-status-row">
+          <div class="status-icon" style="background:#5a8a3a;color:white;">P</div>
+          <div class="status-icon" style="background:#3a5a8a;color:white;">F</div>
+        </div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">✦</span>
+          <span class="intent-value">-</span>
+          <span class="intent-text">강화</span>
+        </div>
+        <div class="enemy-portrait">☠</div>
+        <div class="enemy-name">Hooded Cultist</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:90%"></div>
+          <span class="enemy-hptext">18 / 20</span>
+        </div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">⚔</span>
+          <span class="intent-value">5</span>
+          <span class="intent-text">공격</span>
+        </div>
+        <div class="enemy-portrait">☠</div>
+        <div class="enemy-name">Hooded Cultist</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:70%"></div>
+          <span class="enemy-hptext">14 / 20</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BottomBar -->
+    <div class="bottom-bar">
+      <div class="bottom-left">
+        <!-- PlayerStrip (4 카드) -->
+        <div class="player-strip">
+          <div class="char-card active">
+            <div class="char-avatar">D</div>
+            <div class="char-info">
+              <div class="char-name-row">
+                <span class="char-name">Duran</span>
+                <span class="char-stats">ATK 0 DEF 0</span>
+              </div>
+              <div class="char-hpbar">
+                <div class="char-hpfill" style="width:80%"></div>
+                <span class="char-hptext">96/120</span>
+              </div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-vengeance);color:white;border-color:var(--blood);">V</span>
+                <span class="resource-value" style="color:var(--res-vengeance);">5</span>
+              </div>
+              <div class="char-status-row">
+                <div class="status-icon" style="background:#8a3a3a;color:white;border-color:var(--blood);">도</div>
+              </div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar" style="border-color:var(--res-ember);color:var(--res-ember);">A</div>
+            <div class="char-info">
+              <div class="char-name-row">
+                <span class="char-name">Ashe</span>
+                <span class="char-stats">ATK 0 DEF 0</span>
+              </div>
+              <div class="char-hpbar">
+                <div class="char-hpfill" style="width:60%"></div>
+                <span class="char-hptext">54/90</span>
+              </div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-ember);color:white;border-color:var(--ember);">E</span>
+                <span class="resource-value" style="color:var(--res-ember);">3</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar" style="border-color:var(--res-frost);color:var(--res-frost);">L</div>
+            <div class="char-info">
+              <div class="char-name-row">
+                <span class="char-name">Lumi</span>
+                <span class="char-stats">ATK 0 DEF 0</span>
+              </div>
+              <div class="char-hpbar">
+                <div class="char-hpfill" style="width:90%"></div>
+                <span class="char-hptext">81/90</span>
+              </div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-frost);color:white;border-color:var(--frost);">F</span>
+                <span class="resource-value" style="color:var(--res-frost);">2</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar" style="border-color:var(--res-prophecy);color:var(--res-prophecy);">S</div>
+            <div class="char-info">
+              <div class="char-name-row">
+                <span class="char-name">Sibyl</span>
+                <span class="char-stats">ATK 0 DEF 0</span>
+              </div>
+              <div class="char-hpbar">
+                <div class="char-hpfill" style="width:100%"></div>
+                <span class="char-hptext">75/75</span>
+              </div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-prophecy);color:white;border-color:var(--shadow);">P</span>
+                <span class="resource-value" style="color:var(--res-prophecy);">0</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SkillRow (5 슬롯) -->
+        <div class="skill-row">
+          <div class="skill-slot">
+            <div class="skill-cost">1</div>
+            <div class="skill-info">
+              <div class="skill-name">Slash</div>
+              <div class="skill-desc">단일 8 데미지</div>
+            </div>
+            <div class="skill-power">8</div>
+          </div>
+          <div class="skill-slot">
+            <div class="skill-cost">2</div>
+            <div class="skill-info">
+              <div class="skill-name">Shield Bash</div>
+              <div class="skill-desc">6 + 쉴드 5</div>
+            </div>
+            <div class="skill-power">6</div>
+          </div>
+          <div class="skill-slot">
+            <div class="skill-cost">1</div>
+            <div class="skill-info">
+              <div class="skill-name">Taunt</div>
+              <div class="skill-desc">도발 +3V</div>
+            </div>
+            <div class="skill-power">-</div>
+          </div>
+          <div class="skill-slot">
+            <div class="skill-cost">2</div>
+            <div class="skill-info">
+              <div class="skill-name">Ember Bolt</div>
+              <div class="skill-desc">10 + 화염</div>
+            </div>
+            <div class="skill-power">10</div>
+          </div>
+          <div class="skill-slot">
+            <div class="skill-cost">1</div>
+            <div class="skill-info">
+              <div class="skill-name">Cinder</div>
+              <div class="skill-desc">+2 Ember</div>
+            </div>
+            <div class="skill-power">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RightColumn -->
+      <div class="right-column">
+        <div class="ap-area">
+          <div class="ap-pip-row">
+            <div class="ap-pip filled"></div>
+            <div class="ap-pip filled"></div>
+            <div class="ap-pip filled"></div>
+            <div class="ap-pip filled"></div>
+            <div class="ap-pip"></div>
+          </div>
+          <div class="ap-text">AP 4/5</div>
+        </div>
+        <div class="button-area">
+          <button class="reroll-btn">리롤<br>2/2</button>
+          <button class="end-turn-btn">턴 종료<br>[T]</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 시안 B -->
+<section id="b" class="concept bloodied-chronicle">
+  <div class="concept-header">
+    <div class="concept-num">B</div>
+    <div class="concept-title-block">
+      <h2>BLOODIED CHRONICLE</h2>
+      <div class="ko">핏빛 연대기 — 양피지+잉크+핏빛. Title B(Tome)와 연결</div>
+    </div>
+    <div class="concept-vibe">GRITTY · LITERATE</div>
+  </div>
+  <div class="battle-stage">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="turn-badge">Turn 1</span>
+        <span class="floor-info">F2 일반 · 층 2/4 · Rotbloom Bog</span>
+        <div class="relic-bar">
+          <div class="relic-icon">⚔</div>
+          <div class="relic-icon">◈</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="toggle-btn">파티</button>
+        <button class="toggle-btn">로그</button>
+        <button class="toggle-btn">2x</button>
+      </div>
+    </div>
+    <div class="content-area">
+      <div class="enemy-card targeted">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">⚔</span>
+          <span class="intent-value">6</span>
+          <span class="intent-text">공격+독</span>
+        </div>
+        <div class="enemy-portrait">☠</div>
+        <div class="enemy-name">Plague Rat</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:55%"></div>
+          <span class="enemy-hptext">11 / 20</span>
+        </div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">✦</span>
+          <span class="intent-value">-</span>
+          <span class="intent-text">저주</span>
+        </div>
+        <div class="enemy-portrait">☠</div>
+        <div class="enemy-name">Bogwitch</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:80%"></div>
+          <span class="enemy-hptext">24 / 30</span>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <div class="bottom-left">
+        <div class="player-strip">
+          <div class="char-card active">
+            <div class="char-avatar">D</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Duran</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:80%"></div><span class="char-hptext">96/120</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-vengeance);color:white;border-color:var(--blood);">V</span>
+                <span class="resource-value" style="color:var(--blood-light);">5</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar">A</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Ashe</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:60%"></div><span class="char-hptext">54/90</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-ember);color:white;border-color:var(--ember);">E</span>
+                <span class="resource-value" style="color:var(--ember);">3</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar">L</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Lumi</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:90%"></div><span class="char-hptext">81/90</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-frost);color:white;border-color:var(--frost);">F</span>
+                <span class="resource-value" style="color:var(--frost);">2</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar">S</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Sibyl</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:100%"></div><span class="char-hptext">75/75</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-prophecy);color:white;border-color:var(--shadow);">P</span>
+                <span class="resource-value" style="color:var(--shadow);">0</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-slot"><div class="skill-cost">1</div><div class="skill-info"><div class="skill-name">Slash</div><div class="skill-desc">단일 8</div></div><div class="skill-power">8</div></div>
+          <div class="skill-slot"><div class="skill-cost">2</div><div class="skill-info"><div class="skill-name">Shield Bash</div><div class="skill-desc">6 + 쉴드</div></div><div class="skill-power">6</div></div>
+          <div class="skill-slot"><div class="skill-cost">1</div><div class="skill-info"><div class="skill-name">Taunt</div><div class="skill-desc">도발 +3V</div></div><div class="skill-power">-</div></div>
+          <div class="skill-slot"><div class="skill-cost">2</div><div class="skill-info"><div class="skill-name">Ember Bolt</div><div class="skill-desc">10 + 화염</div></div><div class="skill-power">10</div></div>
+          <div class="skill-slot"><div class="skill-cost">1</div><div class="skill-info"><div class="skill-name">Cinder</div><div class="skill-desc">+2 Ember</div></div><div class="skill-power">-</div></div>
+        </div>
+      </div>
+      <div class="right-column">
+        <div class="ap-area">
+          <div class="ap-pip-row">
+            <div class="ap-pip filled"></div><div class="ap-pip filled"></div><div class="ap-pip filled"></div><div class="ap-pip filled"></div><div class="ap-pip"></div>
+          </div>
+          <div class="ap-text">AP 4/5</div>
+        </div>
+        <div class="button-area">
+          <button class="reroll-btn">리롤<br>2/2</button>
+          <button class="end-turn-btn">턴 종료<br>[T]</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 시안 C -->
+<section id="c" class="concept abyssal-maw">
+  <div class="concept-header">
+    <div class="concept-num">C</div>
+    <div class="concept-title-block">
+      <h2>ABYSSAL MAW</h2>
+      <div class="ko">심연의 아가리 — 보라+남색+어둠. 가장 음산/압박</div>
+    </div>
+    <div class="concept-vibe">EERIE · OPPRESSIVE</div>
+  </div>
+  <div class="battle-stage">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="turn-badge">Turn 1</span>
+        <span class="floor-info">F3 심연 · 층 3/4 · Abyssal Trench</span>
+        <div class="relic-bar">
+          <div class="relic-icon">◈</div>
+          <div class="relic-icon">★</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="toggle-btn">파티</button>
+        <button class="toggle-btn">로그</button>
+        <button class="toggle-btn">2x</button>
+      </div>
+    </div>
+    <div class="content-area">
+      <div class="enemy-card targeted">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">⚔</span>
+          <span class="intent-value">12</span>
+          <span class="intent-text">공격</span>
+        </div>
+        <div class="enemy-portrait">◉</div>
+        <div class="enemy-name">Tentacle</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:45%"></div>
+          <span class="enemy-hptext">14 / 30</span>
+        </div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">❄</span>
+          <span class="intent-value">-</span>
+          <span class="intent-text">빙결</span>
+        </div>
+        <div class="enemy-portrait">◉</div>
+        <div class="enemy-name">Kraken Spawn</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:90%"></div>
+          <span class="enemy-hptext">27 / 30</span>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <div class="bottom-left">
+        <div class="player-strip">
+          <div class="char-card active">
+            <div class="char-avatar">D</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Duran</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:80%"></div><span class="char-hptext">96/120</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-vengeance);color:white;border-color:var(--blood);">V</span>
+                <span class="resource-value" style="color:var(--blood-light);">5</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar">A</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Ashe</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:60%"></div><span class="char-hptext">54/90</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-ember);color:white;border-color:var(--ember);">E</span>
+                <span class="resource-value" style="color:var(--ember);">3</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar">L</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Lumi</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:90%"></div><span class="char-hptext">81/90</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-frost);color:white;border-color:var(--frost);">F</span>
+                <span class="resource-value" style="color:var(--frost);">2</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar">S</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Sibyl</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:100%"></div><span class="char-hptext">75/75</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-prophecy);color:white;border-color:var(--shadow);">P</span>
+                <span class="resource-value" style="color:var(--shadow);">0</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-slot"><div class="skill-cost">1</div><div class="skill-info"><div class="skill-name">Slash</div><div class="skill-desc">단일 8</div></div><div class="skill-power">8</div></div>
+          <div class="skill-slot"><div class="skill-cost">3</div><div class="skill-info"><div class="skill-name">Pierce</div><div class="skill-desc">10 + 관통</div></div><div class="skill-power">10</div></div>
+          <div class="skill-slot"><div class="skill-cost">2</div><div class="skill-info"><div class="skill-name">Ember Bolt</div><div class="skill-desc">10 + 화염</div></div><div class="skill-power">10</div></div>
+          <div class="skill-slot"><div class="skill-cost">2</div><div class="skill-info"><div class="skill-name">Frostbolt</div><div class="skill-desc">7 + 빙결</div></div><div class="skill-power">7</div></div>
+          <div class="skill-slot"><div class="skill-cost">1</div><div class="skill-info"><div class="skill-name">Foresee</div><div class="skill-desc">1턴 뒤</div></div><div class="skill-power">-</div></div>
+        </div>
+      </div>
+      <div class="right-column">
+        <div class="ap-area">
+          <div class="ap-pip-row">
+            <div class="ap-pip filled"></div><div class="ap-pip filled"></div><div class="ap-pip filled"></div><div class="ap-pip filled"></div><div class="ap-pip"></div>
+          </div>
+          <div class="ap-text">AP 4/5</div>
+        </div>
+        <div class="button-area">
+          <button class="reroll-btn">리롤<br>2/2</button>
+          <button class="end-turn-btn">턴 종료<br>[T]</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 시안 D -->
+<section id="d" class="concept sleek-hud">
+  <div class="concept-header">
+    <div class="concept-num">D</div>
+    <div class="concept-title-block">
+      <h2>SLEEK COMBAT HUD</h2>
+      <div class="ko">모던 전투 HUD — 미니멀+강렬 대비. 가독성 1위</div>
+    </div>
+    <div class="concept-vibe">MODERN · READABLE</div>
+  </div>
+  <div class="battle-stage">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="turn-badge">Turn 1</span>
+        <span class="floor-info">F2 · Grey Forest · 2/4</span>
+        <div class="relic-bar">
+          <div class="relic-icon">⚔</div>
+          <div class="relic-icon">◈</div>
+          <div class="relic-icon">★</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="toggle-btn">파티</button>
+        <button class="toggle-btn">로그</button>
+        <button class="toggle-btn">2x</button>
+      </div>
+    </div>
+    <div class="content-area">
+      <div class="enemy-card targeted">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">⚔</span>
+          <span class="intent-value">7</span>
+          <span class="intent-text">공격</span>
+        </div>
+        <div class="enemy-portrait">W</div>
+        <div class="enemy-name">Gray Wolf</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:55%"></div>
+          <span class="enemy-hptext">11/20</span>
+        </div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">⚔</span>
+          <span class="intent-value">4</span>
+          <span class="intent-text">공격</span>
+        </div>
+        <div class="enemy-portrait">G</div>
+        <div class="enemy-name">Goblin Scout</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:90%"></div>
+          <span class="enemy-hptext">9/10</span>
+        </div>
+      </div>
+      <div class="enemy-card">
+        <div class="enemy-intent-slot">
+          <span class="intent-icon">⚔</span>
+          <span class="intent-value">4</span>
+          <span class="intent-text">공격</span>
+        </div>
+        <div class="enemy-portrait">G</div>
+        <div class="enemy-name">Goblin Scout</div>
+        <div class="enemy-hpbar">
+          <div class="enemy-hpfill" style="width:70%"></div>
+          <span class="enemy-hptext">7/10</span>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <div class="bottom-left">
+        <div class="player-strip">
+          <div class="char-card active">
+            <div class="char-avatar">D</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Duran</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:80%"></div><span class="char-hptext">96/120</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-vengeance);color:white;border-color:var(--blood);">V</span>
+                <span class="resource-value" style="color:var(--blood-light);">5</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar">A</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Ashe</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:60%"></div><span class="char-hptext">54/90</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-ember);color:white;border-color:var(--ember);">E</span>
+                <span class="resource-value" style="color:var(--ember);">3</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar">L</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Lumi</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:90%"></div><span class="char-hptext">81/90</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-frost);color:white;border-color:var(--frost);">F</span>
+                <span class="resource-value" style="color:var(--frost);">2</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+          <div class="char-card">
+            <div class="char-avatar">S</div>
+            <div class="char-info">
+              <div class="char-name-row"><span class="char-name">Sibyl</span><span class="char-stats">ATK 0 DEF 0</span></div>
+              <div class="char-hpbar"><div class="char-hpfill" style="width:100%"></div><span class="char-hptext">75/75</span></div>
+              <div class="char-resource-row">
+                <span class="resource-badge" style="background:var(--res-prophecy);color:white;border-color:var(--shadow);">P</span>
+                <span class="resource-value" style="color:var(--shadow);">0</span>
+              </div>
+              <div class="char-status-row"></div>
+            </div>
+          </div>
+        </div>
+        <div class="skill-row">
+          <div class="skill-slot"><div class="skill-cost">1</div><div class="skill-info"><div class="skill-name">Slash</div><div class="skill-desc">8 damage</div></div><div class="skill-power">8</div></div>
+          <div class="skill-slot"><div class="skill-cost">2</div><div class="skill-info"><div class="skill-name">Shield Bash</div><div class="skill-desc">6 + Shield 5</div></div><div class="skill-power">6</div></div>
+          <div class="skill-slot"><div class="skill-cost">1</div><div class="skill-info"><div class="skill-name">Taunt</div><div class="skill-desc">Provoke +3V</div></div><div class="skill-power">-</div></div>
+          <div class="skill-slot"><div class="skill-cost">2</div><div class="skill-info"><div class="skill-name">Ember Bolt</div><div class="skill-desc">10 + Burn</div></div><div class="skill-power">10</div></div>
+          <div class="skill-slot"><div class="skill-cost">1</div><div class="skill-info"><div class="skill-name">Cinder</div><div class="skill-desc">+2 Ember</div></div><div class="skill-power">-</div></div>
+        </div>
+      </div>
+      <div class="right-column">
+        <div class="ap-area">
+          <div class="ap-pip-row">
+            <div class="ap-pip filled"></div><div class="ap-pip filled"></div><div class="ap-pip filled"></div><div class="ap-pip filled"></div><div class="ap-pip"></div>
+          </div>
+          <div class="ap-text">AP 4/5</div>
+        </div>
+        <div class="button-area">
+          <button class="reroll-btn">리롤<br>2/2</button>
+          <button class="end-turn-btn">턴 종료<br>[T]</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="compare" class="mockup-footer">
+  <h3>SUMMARY — YOUR CALL</h3>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>시안</th><th>다크판타지</th><th>B 톤 일치</th><th>가독성</th><th>정보 밀도</th><th>구현난이도</th><th>종합</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong style="color:var(--gold-light)">A · Cathedral</strong></td><td class="star">★★★★★</td><td class="star">★★★★★</td><td class="star">★★★</td><td class="star">★★★★</td><td class="star">★★★</td><td><strong>톤 일관 ★</strong></td></tr>
+      <tr><td><strong style="color:var(--gold-light)">B · Chronicle</strong></td><td class="star">★★★★</td><td class="star">★★★</td><td class="star">★★★★</td><td class="star">★★★★</td><td class="star">★★★★</td><td><strong>거친 전투</strong></td></tr>
+      <tr><td><strong style="color:var(--gold-light)">C · Abyssal</strong></td><td class="star">★★★★★</td><td class="star">★★</td><td class="star">★★★</td><td class="star">★★★</td><td class="star">★★★</td><td><strong>가장 음산</strong></td></tr>
+      <tr><td><strong style="color:var(--gold-light)">D · Sleek HUD</strong></td><td class="star">★★★</td><td class="star">★★</td><td class="star">★★★★★</td><td class="star">★★★★</td><td class="star">★★★★★</td><td><strong>가독성 ★</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="verdict">
+    <strong style="color:var(--gold-light)">실제 BattleScene.unity 구조 유지</strong> (TopBar 44px / ContentArea / BottomBar 280px = PlayerStrip 4카드 + SkillRow 5슬롯 + RightColumn AP/버튼). 스타일만 변경.<br><br>
+    <strong style="color:var(--gold-light)">제 추천 — A (Cathedral Arena)</strong>: Event/Shop B와 톤 일관성이 가장 중요. 황금빛 글로우로 전투도 "신성한 의식"처럼 표현.<br>
+    또는 <strong style="color:var(--gold-light)">D (Sleek)</strong>: 가독성 최우선. 모던 인디 트렌드 일치.<br><br>
+    <strong>하이브리드</strong>: D의 미니멀 레이아웃 + A의 황금빛 글로우로 가독성과 다크 판타지 톤 동시 확보 가능.
+  </div>
+</footer>
+
+</body>
+</html>

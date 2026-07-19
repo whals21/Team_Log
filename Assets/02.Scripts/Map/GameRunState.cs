@@ -424,15 +424,15 @@ namespace TeamLog.Map
                         if (!member.IsAlive) continue;
                         if (roll == 0)
                         {
-                            member.Health.SetMaxHP(member.Health.MaxHP + 15);
-                            member.Health.Heal(15);
+                            member.Health.SetMaxHP(member.Health.MaxHP + 4);
+                            member.Health.Heal(4);
                         }
                         else if (roll == 1)
-                            member.Stats.AddPermanentBase(StatType.ATK, 2);
+                            member.Stats.AddPermanentBase(StatType.ATK, 1);
                         else
-                            member.Stats.AddPermanentBase(StatType.DEF, 2);
+                            member.Stats.AddPermanentBase(StatType.DEF, 1);
                     }
-                    string statName = roll == 0 ? "HP+15" : (roll == 1 ? "ATK+2" : "DEF+2");
+                    string statName = roll == 0 ? "HP+4" : (roll == 1 ? "ATK+1" : "DEF+1");
                     AddLog($"엘리트 보너스: 파티 영구 강화 ({statName})");
                     break;
 

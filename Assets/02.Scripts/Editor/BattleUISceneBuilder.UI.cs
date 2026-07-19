@@ -138,7 +138,7 @@ namespace TeamLog.Editor
             speedBtn.sizeDelta = new Vector2(50, 28);
             var speedB = speedBtn.gameObject.AddComponent<Button>();
             var speedImg = speedBtn.gameObject.AddComponent<Image>();
-            speedImg.color = new Color(0.2f, 0.2f, 0.35f, 0.9f);
+            speedImg.color = new Color(0.1f, 0.1f, 0.1f, 0.7f); // ★ D 시안: 미니멀 어둡게
             speedB.targetGraphic = speedImg;
             var speedLabel = NewRect("SpeedLabel", speedBtn);
             SetFillParent(speedLabel);
@@ -160,7 +160,7 @@ namespace TeamLog.Editor
             logToggle.sizeDelta = new Vector2(80, 28);
             var logBtn = logToggle.gameObject.AddComponent<Button>();
             var logImg = logToggle.gameObject.AddComponent<Image>();
-            logImg.color = new Color(0.17f, 0.17f, 0.27f, 0.9f);
+            logImg.color = new Color(0.1f, 0.1f, 0.1f, 0.7f); // ★ D 시안
             logBtn.targetGraphic = logImg;
             var logLabel = NewRect("T", logToggle);
             SetFillParent(logLabel);
@@ -181,7 +181,7 @@ namespace TeamLog.Editor
             partyToggle.sizeDelta = new Vector2(80, 28);
             var partyBtn = partyToggle.gameObject.AddComponent<Button>();
             var partyImg = partyToggle.gameObject.AddComponent<Image>();
-            partyImg.color = new Color(0.17f, 0.17f, 0.27f, 0.9f);
+            partyImg.color = new Color(0.1f, 0.1f, 0.1f, 0.7f); // ★ D 시안
             partyBtn.targetGraphic = partyImg;
             var partyLabel = NewRect("T", partyToggle);
             SetFillParent(partyLabel);
@@ -303,7 +303,8 @@ namespace TeamLog.Editor
         //  AP 영역 (CharRow 우측 — 행1 열5)
         // ══════════════════════════════════════════════════════════
 
-        private static readonly Color APCyan = new Color(0.3f, 0.75f, 0.97f);
+        // ★ D 시안: AP 강조색을 골드로 변경 (남색 → 미니멀 골드)
+        private static readonly Color APCyan = new Color(0.9f, 0.78f, 0.31f); // #e6c878 gold-light
 
         private static void CreateAPArea(RectTransform rightColumn)
         {
@@ -314,18 +315,18 @@ namespace TeamLog.Editor
             apArea.pivot = new Vector2(0.5f, 1);
             apArea.anchoredPosition = new Vector2(0, 0);
             apArea.sizeDelta = new Vector2(0, 88);
-            // ★ 명확한 영역 구분: 밝은 남색 배경 + Outline 테두리
+            // ★ D 시안: AP 영역을 명확히 구분 — 불투명 배경 + 하단 구분선
             var apBg = apArea.gameObject.AddComponent<Image>();
-            apBg.color = new Color(0.14f, 0.20f, 0.32f, 1.0f); // 남색 (BottomBar보다 밝게)
+            apBg.color = new Color(0.08f, 0.08f, 0.12f, 0.85f); // ★ 불투명하게 (경계 명확화)
             var apOutline = apArea.gameObject.AddComponent<Outline>();
-            apOutline.effectColor = new Color(0.3f, 0.75f, 0.97f, 0.8f); // APCyan 테두리
+            apOutline.effectColor = new Color(0.9f, 0.78f, 0.31f, 0.3f); // 골드 테두리
             apOutline.effectDistance = new Vector2(2, -2);
 
-            // ★ 상단 정렬 — PipRow와 APText 모두 APArea 상단에 배치되어 RerollButton과 최대 거리
+            // ★ 중앙 정렬 — PipRow와 APText가 APArea 중앙에 위치하여 리롤 영역과 분리
             var apVlg = apArea.gameObject.AddComponent<VerticalLayoutGroup>();
             apVlg.spacing = 6;
-            apVlg.padding = new RectOffset(8, 8, 10, 6);
-            apVlg.childAlignment = TextAnchor.UpperCenter;
+            apVlg.padding = new RectOffset(8, 8, 10, 10);
+            apVlg.childAlignment = TextAnchor.MiddleCenter; // ★ UpperCenter → MiddleCenter
             apVlg.childControlWidth = true;
             apVlg.childControlHeight = false;
             apVlg.childForceExpandWidth = true;
@@ -385,7 +386,7 @@ namespace TeamLog.Editor
             rerollBtn.offsetMax = new Vector2(-6, -4);
             var rerollB = rerollBtn.gameObject.AddComponent<Button>();
             var rerollImg = rerollBtn.gameObject.AddComponent<Image>();
-            rerollImg.color = new Color(0.85f, 0.45f, 0.1f, 0.95f);
+            rerollImg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f); // ★ D 시안: 미니멀 회색
             rerollB.targetGraphic = rerollImg;
             var rerollLabel = NewRect("T", rerollBtn);
             SetFillParent(rerollLabel);

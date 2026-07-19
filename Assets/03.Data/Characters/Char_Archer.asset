@@ -17,7 +17,7 @@ MonoBehaviour:
   _description: "\uD3ED\uC6B0\uC758 \uC0AC\uC218. \uC274 \uC0C8 \uC5C6\uC774 \uC3E0\uC218\uB85D
     \uD654\uC0B4\uC774 \uAC15\uD574\uC9C4\uB2E4 \u2014 \uBA48\uCD94\uC9C0 \uC54A\uB294
     \uACF5\uACA9\uC774 \uACE7 \uC644\uBCBD\uD55C \uC0AC\uB0E5\uC774\uB2E4"
-  _baseHP: 65
+  _baseHP: 16
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 0

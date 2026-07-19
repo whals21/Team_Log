@@ -19,7 +19,7 @@ MonoBehaviour:
     \uC120\uC728\uB85C \uBA54\uC544\uB9AC\uCCD0 \uC6B8\uB824 \uD37C\uC9C4\uB2E4 \u2014
     \uB450 \uC120\uC728\uC774 \uACB9\uCE60 \uB54C, \uBE44\uB85C\uC18C \uAD50\uD5A5\uACE1\uC774
     \uC644\uC131\uB41C\uB2E4"
-  _baseHP: 75
+  _baseHP: 18
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 0

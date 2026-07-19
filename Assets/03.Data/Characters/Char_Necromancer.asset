@@ -19,7 +19,7 @@ MonoBehaviour:
     \uADF8 \uAE30\uC220\uC744 \uC2DC\uCCB4\uC5D0\uAC8C \uBA39\uC5EC \uC131\uC7A5\uC2DC\uD0A8\uB2E4
     \u2014 \uC8FD\uC74C\uC740 \uB05D\uC774 \uC544\uB2C8\uB77C, \uC0C8\uB85C\uC6B4
     \uC2DC\uC791\uC774\uB2E4"
-  _baseHP: 75
+  _baseHP: 20
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 0

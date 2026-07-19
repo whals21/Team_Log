@@ -17,22 +17,22 @@ namespace TeamLog.Editor
     /// </summary>
     public partial class BattleUISceneBuilder
     {
-        // ── 색상 팔레트 ──
-        private static readonly Color BgDark = new Color(0.08f, 0.08f, 0.16f);
-        private static readonly Color AccentRed = new Color(0.77f, 0.12f, 0.23f);
-        private static readonly Color AccentGreen = new Color(0.15f, 0.68f, 0.38f);
-        private static readonly Color AccentYellow = new Color(0.96f, 0.82f, 0.25f);
-        private static readonly Color BorderRed = new Color(0.6f, 0.1f, 0.18f, 0.8f);
+        // ── 색상 팔레트 (D 시안: Sleek Combat HUD — 미니멀/모던/가독성) ──
+        private static readonly Color BgDark = new Color(0.03f, 0.03f, 0.05f);             // 거의 검정
+        private static readonly Color AccentRed = new Color(0.77f, 0.12f, 0.23f);          // HP/위험 (유지)
+        private static readonly Color AccentGreen = new Color(0.15f, 0.68f, 0.38f);         // HP (유지)
+        private static readonly Color AccentYellow = new Color(0.96f, 0.82f, 0.25f);        // 선택 하이라이트 (유지)
+        private static readonly Color BorderRed = new Color(1f, 1f, 1f, 0.08f);             // ★ 미니멀 — 희미한 흰색 테두리
         private static readonly Color TextWhite = Color.white;
-        private static readonly Color TextDim = new Color(0.82f, 0.82f, 0.87f);
+        private static readonly Color TextDim = new Color(0.65f, 0.65f, 0.70f);             // ★ 더 어두운 회색
         private static readonly Color ShieldBrown = new Color(0.72f, 0.45f, 0.2f);
 
-        // ── 남색 톤 패널 색상 (목업 #1e2a3e 계열 통일) ──
-        private static readonly Color PanelBgNavy = new Color(0.12f, 0.16f, 0.24f, 0.95f);   // #1e2a3e
-        private static readonly Color TopBarBgNavy = new Color(0.09f, 0.13f, 0.24f, 0.95f);  // #16213e
-        private static readonly Color BottomBarBgNavy = new Color(0.08f, 0.08f, 0.14f, 0.95f);
-        private static readonly Color SlotBgNavy = new Color(0.12f, 0.16f, 0.24f, 0.95f);    // #1e2a3e
-        private static readonly Color DividerNavy = new Color(0.16f, 0.16f, 0.30f, 0.80f);   // #2a2a4e
+        // ── D 시안 패널 색상 (미니멀 톤 — 투명+어두운 회색) ──
+        private static readonly Color PanelBgNavy = new Color(0.06f, 0.06f, 0.09f, 0.80f);  // ★ 미니멀 투명
+        private static readonly Color TopBarBgNavy = new Color(0.05f, 0.05f, 0.08f, 0.85f); // ★ 어두운 회색
+        private static readonly Color BottomBarBgNavy = new Color(0.04f, 0.04f, 0.06f, 0.85f);
+        private static readonly Color SlotBgNavy = new Color(0.08f, 0.08f, 0.12f, 0.90f);   // ★ 미니멀
+        private static readonly Color DividerNavy = new Color(0.15f, 0.15f, 0.18f, 0.50f);  // ★ 순수 회색
 
         // ── GUI 에셋 스프라이트 경로 ──
         private const string SPRITE_BASE = "Assets/Layer Lab/GUI Pro-CasualGame/ResourcesData/Sprites/Components";

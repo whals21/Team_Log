@@ -22,7 +22,7 @@ MonoBehaviour:
   _icon: {fileID: 0}
   _statusEffect: 9
   _effectDuration: 3
-  _effectValue: 3
+  _effectValue: 2
   _behaviors:
   - Keyword: 52
     Rank: 0

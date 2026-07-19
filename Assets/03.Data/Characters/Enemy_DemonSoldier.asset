@@ -16,7 +16,7 @@ MonoBehaviour:
   _characterClass: 0
   _description: "\uC9C0\uC625\uC758 \uAD70\uB300\uB97C \uC774\uB8E8\uB294 \uC545\uB9C8
     \uC804\uC0AC."
-  _baseHP: 42
+  _baseHP: 11
   _baseATK: 0
   _baseDEF: 0
   _enemyTrait: 4

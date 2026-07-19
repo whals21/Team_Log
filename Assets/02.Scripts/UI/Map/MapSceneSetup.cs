@@ -11,10 +11,11 @@ using TeamLog.Meta;
 using TeamLog.Reward;
 using TeamLog.Skill;
 using TeamLog.UI;
-using TeamLog.UI.Event;
+using TeamLog.UI.Event;  // ★ EventUI + EventReworkView (Phase EVENT) 연결
 using TeamLog.UI.PartySelection;  // ★ PartySelectionController.SelectedParty 참조용
 using TeamLog.UI.Reward;
 using TeamLog.UI.Shop;
+using TeamLog.UI.Map.Rework;  // ★ MapReworkView / PartySidebarPanel 연결 (Phase UI-2)
 
 namespace TeamLog.UI.Map
 {
@@ -47,6 +48,16 @@ namespace TeamLog.UI.Map
     {
         [Header("UI")]
         [SerializeField] private MapView _mapView;
+        [Header("UI (Event Rework — Phase EVENT)")]
+        [SerializeField] private EventReworkView _eventReworkView;     // ★ null이면 기존 _eventUI 사용 (하위 호환)
+        [Header("UI (Shop Rework — Phase SHOP)")]
+        [SerializeField] private ShopReworkView _shopReworkView;       // ★ null이면 기존 _shopUI 사용 (하위 호환)
+        [Header("UI (Rework — Phase UI-2)")]
+        [SerializeField] private MapReworkView _mapReworkView;             // ★ MapSceneRework용. null이면 기존 _mapView 사용 (하위 호환)
+        [SerializeField] private PartySidebarPanel _partySidebarPanel;     // ★ 좌측 사이드바 (런타임에 파티/유물/증강 갱신)
+        [SerializeField] private ThemeBanner _themeBanner;                 // ★ 테마 배너
+        [SerializeField] private NodeDetailPanel _nodeDetailPanel;         // ★ 우측 노드 상세
+        [SerializeField] private HeaderController _headerController;       // ★ Phase 5 — 헤더 칩 런타임 갱신
         [SerializeField] private EventUI _eventUI;
         [SerializeField] private ShopUI _shopUI;
         [SerializeField] private RewardUI _rewardUI;
@@ -86,7 +97,6 @@ namespace TeamLog.UI.Map
 
         private GameRunState _runState;
         private List<Character> _playerParty;
-        private MapNode _pendingBattleNode;
 
         private const string BattleSceneName = "BattleScene";
 
@@ -238,9 +248,11 @@ namespace TeamLog.UI.Map
             // 스테이지 테마 후보 주입
             _runState.SetThemeCandidates(BuildThemeCandidates());
 
-            InitializeSubUIs();
-
+            // ★ Priority 8 (치명 수정): StartRun을 먼저 호출해서 CurrentMap/CurrentStageTheme을 생성한 뒤 InitializeSubUIs.
+            // 이전 순서(InitializeSubUIs → StartRun)에서는 CurrentMap==null이라 NodeDetailPanel/ThemeBanner 초기화가 스킵됨.
             _runState.StartRun();
+
+            InitializeSubUIs();
 
             // Phase 8E: 시작 유물 지급 (메타 강화로 해금 시)
             ApplyStartingRelics(filteredRelicPool, meta);
@@ -248,6 +260,11 @@ namespace TeamLog.UI.Map
             // 메타 데이터에 런 시작 기록
             meta.HasPendingRun = true;
             SaveManager.SaveMeta();
+
+            // ★ Phase UI-2: 현재 씬 이름으로 ReturnScene 설정 (MapSceneRework에서 온 경우 복귀용)
+            // BattleSceneSetup은 SceneManager.LoadScene(returnScene)으로 복귀.
+            var currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            TeamLog.Combat.BattleSceneSetup.SetReturnScene(currentScene.name);
         }
 
         /// <summary>
@@ -317,8 +334,11 @@ namespace TeamLog.UI.Map
             InitializeSubUIs();
 
             // MapView 복원
-            if (_mapView != null && _runState.CurrentMap != null)
-                _mapView.Initialize(_runState.CurrentMap, _runState.Gold, OnNodeClicked);
+            InitializeMapView(_runState.CurrentMap);
+
+            // ★ 현재 씬 이름으로 ReturnScene 설정 (전투 후 복귀용)
+            var currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            TeamLog.Combat.BattleSceneSetup.SetReturnScene(currentScene.name);
 
             // 전투 결과 처리
             if (BattleResult.HasPendingResult)
@@ -365,8 +385,7 @@ namespace TeamLog.UI.Map
             // 현재 층 맵 재생성
             _runState.GenerateCurrentFloorMap();
 
-            if (_mapView != null && _runState.CurrentMap != null)
-                _mapView.Initialize(_runState.CurrentMap, _runState.Gold, OnNodeClicked);
+            InitializeMapView(_runState.CurrentMap);
 
             // 메타 데이터에 대기 중 런 표시
             var meta = SaveManager.Meta;
@@ -378,10 +397,19 @@ namespace TeamLog.UI.Map
         {
             if (_eventUI != null)
                 _eventUI.Initialize(_runState, OnEventComplete);
+            // ★ Phase EVENT: EventReworkView 초기화
+            if (_eventReworkView != null)
+                _eventReworkView.Initialize(_runState, OnEventComplete);
             if (_shopUI != null)
             {
                 _shopUI.Initialize(_runState, OnShopExit, _relicPool);
                 _shopUI.SetAugmentPool(_augmentPool);
+            }
+            // ★ Phase SHOP: ShopReworkView 초기화
+            if (_shopReworkView != null)
+            {
+                _shopReworkView.Initialize(_runState, OnShopExit, _relicPool);
+                _shopReworkView.SetAugmentPool(_augmentPool);
             }
             if (_rewardUI != null)
                 _rewardUI.Initialize(_runState, OnRewardComplete);
@@ -397,12 +425,54 @@ namespace TeamLog.UI.Map
                 _tutorialUI.Initialize(_runState);
             if (_stageBonusUI != null)
                 _stageBonusUI.Initialize(_runState, OnStageBonusComplete);
+
+            // ★ Phase UI-2: Rework 컴포넌트 초기화
+            if (_partySidebarPanel != null)
+                _partySidebarPanel.Initialize(_runState);
+            if (_themeBanner != null && _runState.CurrentStageTheme != null)
+                _themeBanner.Initialize(_runState.CurrentStageTheme, _runState.CurrentFloor);
+            // ★ Node Detail Preview 파이프 — Start 노드는 preview 없이 onAction만 바인딩.
+            // 사용자가 임의 노드 클릭 시 PrepareNodePreview가 preview 갱신.
+            if (_nodeDetailPanel != null && _runState.CurrentMap?.CurrentNode != null)
+                _nodeDetailPanel.Initialize(_runState.CurrentMap.CurrentNode, OnConfirmAction);
         }
 
         private void OnMapChanged(MapFloor mapFloor)
         {
-            if (_mapView != null)
+            InitializeMapView(mapFloor);
+        }
+
+        /// <summary>
+        /// ★ 맵 뷰 초기화 헬퍼 — MapReworkView가 있으면 Rework 뷰, 아니면 기존 MapView (하위 호환).
+        /// </summary>
+        private void InitializeMapView(MapFloor mapFloor)
+        {
+            if (_mapReworkView != null)
+            {
+                _mapReworkView.Initialize(mapFloor, OnNodeClicked);
+            }
+            else if (_mapView != null)
+            {
                 _mapView.Initialize(mapFloor, _runState.Gold, OnNodeClicked);
+            }
+
+            // 테마 배너 갱신
+            if (_themeBanner != null && _runState?.CurrentStageTheme != null)
+            {
+                _themeBanner.Initialize(_runState.CurrentStageTheme, _runState.CurrentFloor);
+            }
+
+            // 사이드바 새로고침 (맵 변경 = 파티 상태 변화 가능성)
+            if (_partySidebarPanel != null)
+            {
+                _partySidebarPanel.Refresh();
+            }
+
+            // ★ Phase 5 — 헤더 칩 갱신 (GameRunState 기반 런타임 값으로)
+            if (_headerController != null && _runState != null)
+            {
+                _headerController.Refresh(_runState);
+            }
         }
 
         /// <summary>

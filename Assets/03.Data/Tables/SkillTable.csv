@@ -1,129 +1,129 @@
 id,displayName,description,type,target,power,cost,weight,statusEffect,effectDuration,effectValue
-Slime_Tackle,몸통박치기,기본 공격입니다.,Attack,SingleEnemy,4,0,25,None,0,0
-Slime_AcidSpit,산성 침,독이 섞인 공격입니다.,Attack,SingleEnemy,2,0,25,Poison,2,2
-Slime_Split,분열 준비,쉴드를 얻습니다.,Shield,Self,6,0,25,None,0,0
+Slime_Tackle,몸통박치기,기본 공격입니다.,Attack,SingleEnemy,1,0,25,None,0,0
+Slime_AcidSpit,산성 침,독이 섞인 공격입니다.,Attack,SingleEnemy,1,0,25,Poison,2,1
+Slime_Split,분열 준비,쉴드를 얻습니다.,Shield,Self,2,0,25,None,0,0
 Slime_Jiggle,출렁임,아무 일도 일어나지 않습니다.,Buff,Self,0,0,25,None,0,0
-Goblin_Scratch,긁기,빠른 공격입니다.,Attack,SingleEnemy,5,0,25,None,0,0
-Goblin_Bite,물기,강한 공격입니다.,Attack,SingleEnemy,6,0,25,None,0,0
-Goblin_Steal,약화 공격,적의 공격력을 감소시킵니다.,Attack,SingleEnemy,4,0,25,AttackDown,1,2
-Goblin_Hide,은신,쉴드를 얻습니다.,Shield,Self,5,0,25,None,0,0
-Skeleton_Slash,베기,낡은 검으로 공격합니다.,Attack,SingleEnemy,5,0,25,None,0,0
-Skeleton_BoneThrow,뼈 투척,뼈를 던져 공격합니다.,Attack,SingleEnemy,4,0,25,None,0,0
-Skeleton_DefensiveStance,방어 태세,쉴드를 얻습니다.,Shield,Self,7,0,25,None,0,0
-Skeleton_Rattle,뼈 울림,적의 방어력을 감소시킵니다.,Debuff,SingleEnemy,0,0,25,DefenseDown,1,2
-Wolf_Bite,물기,날카로운 이빨로 공격합니다.,Attack,SingleEnemy,6,0,25,None,0,0
-Wolf_Howl,울부짖기,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,1,2
-Wolf_Lunge,돌진,강력하게 돌진합니다.,Attack,SingleEnemy,7,0,25,None,0,0
+Goblin_Scratch,긁기,빠른 공격입니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Goblin_Bite,물기,강한 공격입니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Goblin_Steal,약화 공격,적의 공격력을 감소시킵니다.,Attack,SingleEnemy,1,0,25,AttackDown,1,1
+Goblin_Hide,은신,쉴드를 얻습니다.,Shield,Self,2,0,25,None,0,0
+Skeleton_Slash,베기,낡은 검으로 공격합니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Skeleton_BoneThrow,뼈 투척,뼈를 던져 공격합니다.,Attack,SingleEnemy,1,0,25,None,0,0
+Skeleton_DefensiveStance,방어 태세,쉴드를 얻습니다.,Shield,Self,2,0,25,None,0,0
+Skeleton_Rattle,뼈 울림,적의 방어력을 감소시킵니다.,Debuff,SingleEnemy,0,0,25,DefenseDown,1,1
+Wolf_Bite,물기,날카로운 이빨로 공격합니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Wolf_Howl,울부짖기,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,1,1
+Wolf_Lunge,돌진,강력하게 돌진합니다.,Attack,SingleEnemy,2,0,25,None,0,0
 Wolf_Sniff,냄새 맡기,주변을 탐색합니다.,Buff,Self,0,0,25,None,0,0
-Mushroom_Spore,포자 확산,모든 적에게 독 포자를 퍼뜨립니다.,Debuff,AllEnemies,0,0,25,Poison,2,2
-Mushroom_Headbutt,박치기,몸통으로 공격합니다.,Attack,SingleEnemy,4,0,25,None,0,0
-Mushroom_Regrow,재생,체력을 회복합니다.,Heal,Self,5,0,25,None,0,0
-Mushroom_ToxicMist,맹독 안개,강한 독을 걸습니다.,Debuff,SingleEnemy,0,0,25,Poison,2,2
-Bat_Screech,초음파,모든 적에게 초음파 공격합니다.,Attack,AllEnemies,2,0,25,None,0,0
-Bat_DrainLife,흡혈,적의 체력을 빨아먹습니다.,Attack,SingleEnemy,4,0,25,None,0,0
-Bat_Evasion,회피 비행,쉴드를 얻습니다.,Shield,Self,5,0,25,None,0,0
-Bat_Curse,저주 소리,적의 공격력을 감소시킵니다.,Debuff,SingleEnemy,0,0,25,AttackDown,1,2
-EliteKnight_Slash,참격,강력한 검 공격입니다.,Attack,SingleEnemy,8,0,25,None,0,0
-EliteKnight_ShieldBash,방패 들이밀기,쉴드를 얻고 적을 기절시킵니다.,Shield,Self,12,0,25,Stun,1,0
+Mushroom_Spore,포자 확산,모든 적에게 독 포자를 퍼뜨립니다.,Debuff,AllEnemies,0,0,25,Poison,2,1
+Mushroom_Headbutt,박치기,몸통으로 공격합니다.,Attack,SingleEnemy,1,0,25,None,0,0
+Mushroom_Regrow,재생,체력을 회복합니다.,Heal,Self,2,0,25,None,0,0
+Mushroom_ToxicMist,맹독 안개,강한 독을 겁니다.,Debuff,SingleEnemy,0,0,25,Poison,2,1
+Bat_Screech,초음파,모든 적에게 초음파 공격합니다.,Attack,AllEnemies,1,0,25,None,0,0
+Bat_DrainLife,흡혈,적의 체력을 빨아먹습니다.,Attack,SingleEnemy,1,0,25,None,0,0
+Bat_Evasion,회피 비행,쉴드를 얻습니다.,Shield,Self,2,0,25,None,0,0
+Bat_Curse,저주 소리,적의 공격력을 감소시킵니다.,Debuff,SingleEnemy,0,0,25,AttackDown,1,1
+EliteKnight_Slash,참격,강력한 검 공격입니다.,Attack,SingleEnemy,3,0,25,None,0,0
+EliteKnight_ShieldBash,방패 들이밀기,쉴드를 얻고 적을 기절시킵니다.,Shield,Self,4,0,25,Stun,1,0
 EliteKnight_Taunt,도발,적의 공격을 유도합니다.,Buff,Self,0,0,25,Taunt,1,0
-EliteKnight_Warcry,전투 함성,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,2,3
-EliteMage_Fireball,화염구,강력한 불꽃 공격입니다.,Attack,SingleEnemy,11,0,25,Burn,2,3
-EliteMage_Blizzard,눈보라,모든 적에게 데미지를 줍니다.,Attack,AllEnemies,6,0,25,Freeze,1,0
-EliteMage_Barrier,마법 장벽,쉴드를 얻습니다.,Shield,Self,10,0,25,None,0,0
-EliteMage_Drain,흡수,적의 생명력을 흡수합니다.,Attack,SingleEnemy,6,0,25,None,0,0
-DarkSlime_CorruptStrike,오염 공격,어둠의 힘으로 공격합니다.,Attack,SingleEnemy,7,0,25,None,0,0
-DarkSlime_PoisonCloud,독 구름,맹독을 내뿜습니다.,Debuff,AllEnemies,0,0,25,Poison,3,3
-DarkSlime_DarkShield,어둠의 방패,쉴드를 얻습니다.,Shield,Self,8,0,25,None,0,0
-DarkSlime_Absorb,흡수,체력을 회복합니다.,Heal,Self,7,0,25,None,0,0
-BossVT_Strike,넝쿨 채찍,단일 물리 공격입니다.,Attack,SingleEnemy,15,0,25,None,0,0
-BossVT_PoisonBreath,독성 포자,전체에 독을 겁니다.,Attack,AllEnemies,12,0,25,Poison,3,3
-BossVT_Regrow,재생 성장,HP를 회복합니다.,Heal,Self,18,0,25,None,0,0
-BossVT_Roots,속박 뿌리,단일 적을 기절시킵니다.,Attack,SingleEnemy,13,0,25,Stun,1,0
-BossFM_IceLance,얼음 창,단일 빙결 공격입니다.,Attack,SingleEnemy,17,0,25,Freeze,1,0
-BossFM_FrostNova,서리 파열,전체 빙결 공격입니다.,Attack,AllEnemies,13,0,25,Freeze,1,0
-BossFM_IceBarrier,얼음 방벽,쉴드를 얻습니다.,Shield,Self,16,0,25,None,0,0
-BossFM_Chill,냉기 저하,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,3
-BossSL_SandBlast,모래 폭풍,단일 공격입니다.,Attack,SingleEnemy,16,0,25,None,0,0
-BossSL_Burrow,은폐 잠복,방어력을 증가시킵니다.,Buff,Self,0,0,25,DefenseUp,2,3
-BossSL_Devour,집어삼키기,강력한 단일 공격입니다.,Attack,SingleEnemy,21,0,25,None,0,0
-BossSL_Quicksand,유사,전체 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,2,3
-BossBQ_Bite,흡혈 송곳니,단일 공격입니다.,Attack,SingleEnemy,20,0,25,None,0,0
-BossBQ_BloodSwarm,피의 무리,전체에 독을 겁니다.,Attack,AllEnemies,17,0,25,Poison,3,3
-BossBQ_CrimsonRite,진홍 의식,대량 HP 회복입니다.,Heal,Self,25,0,25,None,0,0
-BossBQ_Mesmerize,매혹의 눈빛,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,3
-BossPL_ToxicSlash,부패 베기,단일 독 공격입니다.,Attack,SingleEnemy,22,0,25,Poison,3,4
-BossPL_PlagueCloud,역병 구름,전체 독 공격입니다.,Attack,AllEnemies,18,0,25,Poison,3,4
-BossPL_Festering,괴저,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,3
-BossPL_Regurgitate,역류 재생,HP를 회복합니다.,Heal,Self,18,0,25,None,0,0
-BossLK_DeathBolt,죽음의 화살,단일 공격입니다.,Attack,SingleEnemy,22,0,25,None,0,0
-BossLK_Curse,리치의 저주,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,4
-BossLK_SoulHarvest,영혼 수확,전체 공격입니다.,Attack,AllEnemies,19,0,25,None,0,0
-BossLK_Phylactery,생명의 항아리,강력한 쉴드를 얻습니다.,Shield,Self,20,0,25,None,0,0
-BossKr_Tentacle,촉수 타격,단일 공격입니다.,Attack,SingleEnemy,22,0,25,None,0,0
-BossKr_Whirlpool,소용돌이,전체 공격입니다.,Attack,AllEnemies,18,0,25,None,0,0
-BossKr_InkCloud,먹구름,전체 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,2,4
-BossKr_Constrict,조임 공격,단일 적을 기절시킵니다.,Attack,SingleEnemy,20,0,25,Stun,1,0
-BossSLo_Lightning,벼락,단일 기절 공격입니다.,Attack,SingleEnemy,23,0,25,Stun,1,0
-BossSLo_ChainBolt,연쇄 번개,전체 공격입니다.,Attack,AllEnemies,18,0,25,None,0,0
-BossSLo_ThunderStrike,뇌격,강력한 단일 공격입니다.,Attack,SingleEnemy,26,0,25,None,0,0
-BossSLo_StormAura,폭풍의 기운,공격력을 증가시킵니다.,Buff,Self,0,0,25,AttackUp,2,4
-BossVW_ShadowStrike,그림자 일격,단일 공격입니다.,Attack,SingleEnemy,24,0,25,None,0,0
-BossVW_PhaseShift,공허 이동,방어력을 증가시킵니다.,Buff,Self,0,0,25,DefenseUp,2,3
-BossVW_VoidRend,공허 찢기,전체 방어력을 감소시킵니다.,Attack,AllEnemies,17,0,25,DefenseDown,2,3
-BossVW_Drain,차원 흡수,단일 공격입니다.,Attack,SingleEnemy,20,0,25,None,0,0
-BossFE_Inferno,지옥불,전체 화염 공격입니다.,Attack,AllEnemies,22,0,25,Burn,3,5
-BossFE_CrownOfFire,화염의 왕관,공격력을 크게 증가시킵니다.,Buff,Self,0,0,25,AttackUp,3,5
-BossFE_Meteor,염황 메테오,전체 강력 화염 공격입니다.,Attack,AllEnemies,24,0,25,Burn,3,5
-BossFE_FireBreath,화염 숨결,단일 화염 공격입니다.,Attack,SingleEnemy,30,0,25,Burn,2,4
-BossIG_Glacier,빙하 강타,전체 빙결 공격입니다.,Attack,AllEnemies,21,0,25,Freeze,2,0
-BossIG_AbsoluteZero,절대영도,전체 강력 빙결 공격입니다.,Attack,AllEnemies,24,0,25,Freeze,2,0
-BossIG_FrostArmor,서리 갑옷,강력한 쉴드를 얻습니다.,Shield,Self,22,0,25,None,0,0
-BossIG_WinterBlessing,겨울의 축복,공격력을 크게 증가시킵니다.,Buff,Self,0,0,25,AttackUp,3,5
-BossAD_Hellfire,지옥의 불길,전체 화염 공격입니다.,Attack,AllEnemies,25,0,25,Burn,3,5
-BossAD_DarkPact,암흑 계약,대량 HP 회복입니다.,Heal,Self,30,0,25,None,0,0
-BossAD_LegionSummon,군단 소환,공격력을 크게 증가시킵니다.,Buff,Self,0,0,25,AttackUp,3,5
-BossAD_Apocalypse,대파멸,전체 강력 화염 공격입니다.,Attack,AllEnemies,28,0,25,Burn,3,5
-Mummy_Wrap,붕대 감기,붕대로 감아 독을 퍼뜨립니다.,Attack,SingleEnemy,5,0,25,Poison,2,2
-Mummy_Curse,저주,적의 방어력을 저주로 감소시킵니다.,Debuff,SingleEnemy,0,0,25,DefenseDown,2,2
-Mummy_Bandage,붕대 보호,붕대로 보호막을 만듭니다.,Shield,Self,7,0,25,None,0,0
+EliteKnight_Warcry,전투 함성,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,2,2
+EliteMage_Fireball,화염구,강력한 불꽃 공격입니다.,Attack,SingleEnemy,4,0,25,Burn,2,2
+EliteMage_Blizzard,눈보라,모든 적에게 데미지를 줍니다.,Attack,AllEnemies,2,0,25,Freeze,1,0
+EliteMage_Barrier,마법 장벽,쉴드를 얻습니다.,Shield,Self,3,0,25,None,0,0
+EliteMage_Drain,흡수,적의 생명력을 흡수합니다.,Attack,SingleEnemy,2,0,25,None,0,0
+DarkSlime_CorruptStrike,오염 공격,어둠의 힘으로 공격합니다.,Attack,SingleEnemy,2,0,25,None,0,0
+DarkSlime_PoisonCloud,독 구름,맹독을 내뿜습니다.,Debuff,AllEnemies,0,0,25,Poison,3,2
+DarkSlime_DarkShield,어둠의 방패,쉴드를 얻습니다.,Shield,Self,2,0,25,None,0,0
+DarkSlime_Absorb,흡수,체력을 회복합니다.,Heal,Self,2,0,25,None,0,0
+BossVT_Strike,넝쿨 채찍,단일 물리 공격입니다.,Attack,SingleEnemy,5,0,25,None,0,0
+BossVT_PoisonBreath,독성 포자,전체에 독을 겁니다.,Attack,AllEnemies,4,0,25,Poison,3,2
+BossVT_Regrow,재생 성장,HP를 회복합니다.,Heal,Self,5,0,25,None,0,0
+BossVT_Roots,속박 뿌리,단일 적을 기절시킵니다.,Attack,SingleEnemy,5,0,25,Stun,1,0
+BossFM_IceLance,얼음 창,단일 빙결 공격입니다.,Attack,SingleEnemy,6,0,25,Freeze,1,0
+BossFM_FrostNova,서리 파열,전체 빙결 공격입니다.,Attack,AllEnemies,5,0,25,Freeze,1,0
+BossFM_IceBarrier,얼음 방벽,쉴드를 얻습니다.,Shield,Self,5,0,25,None,0,0
+BossFM_Chill,냉기 저하,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,2
+BossSL_SandBlast,모래 폭풍,단일 공격입니다.,Attack,SingleEnemy,6,0,25,None,0,0
+BossSL_Burrow,은폐 잠복,방어력을 증가시킵니다.,Buff,Self,0,0,25,DefenseUp,2,2
+BossSL_Devour,집어삼키기,강력한 단일 공격입니다.,Attack,SingleEnemy,7,0,25,None,0,0
+BossSL_Quicksand,유사,전체 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,2,2
+BossBQ_Bite,흡혈 송곳니,단일 공격입니다.,Attack,SingleEnemy,7,0,25,None,0,0
+BossBQ_BloodSwarm,피의 무리,전체에 독을 겁니다.,Attack,AllEnemies,6,0,25,Poison,3,2
+BossBQ_CrimsonRite,진홍 의식,대량 HP 회복입니다.,Heal,Self,8,0,25,None,0,0
+BossBQ_Mesmerize,매혹의 눈빛,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,2
+BossPL_ToxicSlash,부패 베기,단일 독 공격입니다.,Attack,SingleEnemy,8,0,25,Poison,3,2
+BossPL_PlagueCloud,역병 구름,전체 독 공격입니다.,Attack,AllEnemies,6,0,25,Poison,3,2
+BossPL_Festering,괴저,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,2
+BossPL_Regurgitate,역류 재생,HP를 회복합니다.,Heal,Self,5,0,25,None,0,0
+BossLK_DeathBolt,죽음의 화살,단일 공격입니다.,Attack,SingleEnemy,8,0,25,None,0,0
+BossLK_Curse,리치의 저주,전체 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,2,2
+BossLK_SoulHarvest,영혼 수확,전체 공격입니다.,Attack,AllEnemies,7,0,25,None,0,0
+BossLK_Phylactery,생명의 항아리,강력한 쉴드를 얻습니다.,Shield,Self,6,0,25,None,0,0
+BossKr_Tentacle,촉수 타격,단일 공격입니다.,Attack,SingleEnemy,8,0,25,None,0,0
+BossKr_Whirlpool,소용돌이,전체 공격입니다.,Attack,AllEnemies,6,0,25,None,0,0
+BossKr_InkCloud,먹구름,전체 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,2,2
+BossKr_Constrict,조임 공격,단일 적을 기절시킵니다.,Attack,SingleEnemy,7,0,25,Stun,1,0
+BossSLo_Lightning,벼락,단일 기절 공격입니다.,Attack,SingleEnemy,8,0,25,Stun,1,0
+BossSLo_ChainBolt,연쇄 번개,전체 공격입니다.,Attack,AllEnemies,6,0,25,None,0,0
+BossSLo_ThunderStrike,뇌격,강력한 단일 공격입니다.,Attack,SingleEnemy,9,0,25,None,0,0
+BossSLo_StormAura,폭풍의 기운,공격력을 증가시킵니다.,Buff,Self,0,0,25,AttackUp,2,2
+BossVW_ShadowStrike,그림자 일격,단일 공격입니다.,Attack,SingleEnemy,8,0,25,None,0,0
+BossVW_PhaseShift,공허 이동,방어력을 증가시킵니다.,Buff,Self,0,0,25,DefenseUp,2,2
+BossVW_VoidRend,공허 찢기,전체 방어력을 감소시킵니다.,Attack,AllEnemies,6,0,25,DefenseDown,2,2
+BossVW_Drain,차원 흡수,단일 공격입니다.,Attack,SingleEnemy,7,0,25,None,0,0
+BossFE_Inferno,지옥불,전체 화염 공격입니다.,Attack,AllEnemies,8,0,25,Burn,3,3
+BossFE_CrownOfFire,화염의 왕관,공격력을 크게 증가시킵니다.,Buff,Self,0,0,25,AttackUp,3,3
+BossFE_Meteor,염황 메테오,전체 강력 화염 공격입니다.,Attack,AllEnemies,8,0,25,Burn,3,3
+BossFE_FireBreath,화염 숨결,단일 화염 공격입니다.,Attack,SingleEnemy,11,0,25,Burn,2,2
+BossIG_Glacier,빙하 강타,전체 빙결 공격입니다.,Attack,AllEnemies,7,0,25,Freeze,2,0
+BossIG_AbsoluteZero,절대영도,전체 강력 빙결 공격입니다.,Attack,AllEnemies,8,0,25,Freeze,2,0
+BossIG_FrostArmor,서리 갑옷,강력한 쉴드를 얻습니다.,Shield,Self,7,0,25,None,0,0
+BossIG_WinterBlessing,겨울의 축복,공격력을 크게 증가시킵니다.,Buff,Self,0,0,25,AttackUp,3,3
+BossAD_Hellfire,지옥의 불길,전체 화염 공격입니다.,Attack,AllEnemies,9,0,25,Burn,3,3
+BossAD_DarkPact,암흑 계약,대량 HP 회복입니다.,Heal,Self,9,0,25,None,0,0
+BossAD_LegionSummon,군단 소환,공격력을 크게 증가시킵니다.,Buff,Self,0,0,25,AttackUp,3,3
+BossAD_Apocalypse,대파멸,전체 강력 화염 공격입니다.,Attack,AllEnemies,10,0,25,Burn,3,3
+Mummy_Wrap,붕대 감기,붕대로 감아 독을 퍼뜨립니다.,Attack,SingleEnemy,2,0,25,Poison,2,1
+Mummy_Curse,저주,적의 방어력을 저주로 감소시킵니다.,Debuff,SingleEnemy,0,0,25,DefenseDown,2,1
+Mummy_Bandage,붕대 보호,붕대로 보호막을 만듭니다.,Shield,Self,2,0,25,None,0,0
 Mummy_Sandstorm,모래 폭풍,모래 폭풍으로 공격력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,AttackDown,1,1
-Archer_Precision,정밀 사격,정확한 조준으로 화살을 쏩니다.,Attack,SingleEnemy,6,0,25,None,0,0
-Archer_PoisonArrow,독화살,독이 묻은 화살을 쏩니다.,Attack,SingleEnemy,4,0,25,Poison,3,2
-Archer_Retreat,후퇴,거리를 벌려 쉴드를 얻습니다.,Shield,Self,5,0,25,None,0,0
-Archer_Aim,조준,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,1,2
-Wraith_Drain,영혼 흡수,대상의 영혼을 빨아들입니다.,Attack,SingleEnemy,6,0,25,None,0,0
-Wraith_Chill,차가운 손길,차가운 기운으로 공격합니다.,Attack,SingleEnemy,5,0,25,None,0,0
-Wraith_Phase,위상 이동,차원을 넘어 회피합니다.,Shield,Self,6,0,25,None,0,0
-Wraith_Wail,죽음의 울부짖음,모든 적의 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,1,2
-Shadow_Blade,그림자 칼날,어둠의 칼로 공격합니다.,Attack,SingleEnemy,7,0,25,None,0,0
-Shadow_Smoke,연막,연막으로 보호막을 얻습니다.,Shield,Self,6,0,25,None,0,0
+Archer_Precision,정밀 사격,정확한 조준으로 화살을 쏩니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Archer_PoisonArrow,독화살,독이 묻은 화살을 쏩니다.,Attack,SingleEnemy,1,0,25,Poison,3,1
+Archer_Retreat,후퇴,거리를 벌려 쉴드를 얻습니다.,Shield,Self,2,0,25,None,0,0
+Archer_Aim,조준,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,1,1
+Wraith_Drain,영혼 흡수,대상의 영혼을 빨아들입니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Wraith_Chill,차가운 손길,차가운 기운으로 공격합니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Wraith_Phase,위상 이동,차원을 넘어 회피합니다.,Shield,Self,2,0,25,None,0,0
+Wraith_Wail,죽음의 울부짖음,모든 적의 방어력을 감소시킵니다.,Debuff,AllEnemies,0,0,25,DefenseDown,1,1
+Shadow_Blade,그림자 칼날,어둠의 칼로 공격합니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Shadow_Smoke,연막,연막으로 보호막을 얻습니다.,Shield,Self,2,0,25,None,0,0
 Shadow_Hide,은신,어둠 속에 숨습니다.,Buff,Self,0,0,25,None,0,0
-Shadow_Strike,암습,어둠에서 기습합니다.,Attack,SingleEnemy,5,0,25,None,0,0
-Demon_Sword,마도검,마력이 깃든 검으로 공격합니다.,Attack,SingleEnemy,6,0,25,None,0,0
-Demon_FireSlash,화염 베기,불꽃을 품은 참격입니다.,Attack,SingleEnemy,5,0,25,Burn,2,3
-Demon_Shield,방패 막기,방패로 피해를 막습니다.,Shield,Self,8,0,25,None,0,0
-Demon_Warcry,전투 함성,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,1,2
-Gargoyle_Smash,석조 일격,돌 주먹으로 내려칩니다.,Attack,SingleEnemy,6,0,25,None,0,0
-Gargoyle_Spike,돌 가시,날카로운 돌가시로 공격합니다.,Attack,SingleEnemy,4,0,25,None,0,0
-Gargoyle_StoneArmor,석화 방어,돌로 변하여 방어합니다.,Shield,Self,10,0,25,None,0,0
-Gargoyle_PoisonGas,독가스,독가스를 내뿜습니다.,Debuff,AllEnemies,0,0,25,Poison,2,2
-Shaman_Lightning,번개 창,번개로 강력한 공격을 합니다.,Attack,SingleEnemy,10,0,25,None,0,0
-Shaman_HealRain,치유의 비,비를 내려 체력을 회복합니다.,Heal,Self,7,0,25,None,0,0
-Shaman_BloodRitual,피의 의식,공격력이 대폭 증가합니다.,Buff,Self,0,0,25,AttackUp,2,4
-Shaman_Totem,토템 방어,토템으로 보호막을 얻습니다.,Shield,Self,10,0,25,None,0,0
-Captain_Strike,지휘 타격,군단의 힘을 담은 공격입니다.,Attack,SingleEnemy,8,0,25,None,0,0
-Captain_ShieldWall,방패 벽,거대 방패로 방어합니다.,Shield,Self,14,0,25,None,0,0
-Captain_Warcry,전투 함성,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,2,3
-Captain_BoneShield,뼈 방패,방어력이 증가합니다.,Buff,Self,0,0,25,DefenseUp,1,3
-DemonMage_Hellfire,지옥불,지옥의 불꽃으로 공격합니다.,Attack,SingleEnemy,12,0,25,Burn,2,4
-DemonMage_DarkPulse,암흑 파동,어둠의 파동으로 전체 공격합니다.,Attack,AllEnemies,7,0,25,None,0,0
-DemonMage_CurseBarrier,저주받은 결계,저주의 방어막을 칩니다.,Shield,Self,10,0,25,None,0,0
-DemonMage_SoulBurn,영혼 불태우기,대상의 방어력을 태웁니다.,Debuff,SingleEnemy,0,0,25,DefenseDown,2,2
-Necro_LifeDrain,생명력 흡수,적의 생명력을 빼앗아 자신의 것으로 만듭니다.,Attack,SingleEnemy,10,2,25,None,0,0
-Necro_Curse,저주,적의 공격력을 약화시킵니다.,Debuff,SingleEnemy,0,1,25,AttackDown,2,3
-Necro_Decay,부패,적을 부패시켜 독 데미지를 줍니다.,Attack,SingleEnemy,4,1,25,Poison,3,3
-Necro_RaiseDead,사령술,죽은 자를 일으켜 광역 공격합니다.,Attack,AllEnemies,7,3,25,None,0,0
-Alch_HealPotion,치유 물약,아군에게 치유 물약을 투여합니다.,Heal,SingleAlly,12,1,25,None,0,0
-Alch_PoisonBomb,독 폭탄,독이 든 폭탄을 투척합니다.,Attack,AllEnemies,6,2,25,Poison,2,3
-Alch_BoostPotion,강화 물약,아군의 공격력을 강화합니다.,Buff,SingleAlly,0,1,25,AttackUp,2,4
-Alch_ShieldPotion,보호막 물약,아군에게 보호막을 부여합니다.,Shield,SingleAlly,10,2,25,None,0,0
+Shadow_Strike,암습,어둠에서 기습합니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Demon_Sword,마도검,마력이 깃든 검으로 공격합니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Demon_FireSlash,화염 베기,불꽃을 품은 참격입니다.,Attack,SingleEnemy,2,0,25,Burn,2,2
+Demon_Shield,방패 막기,방패로 피해를 막습니다.,Shield,Self,2,0,25,None,0,0
+Demon_Warcry,전투 함성,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,1,1
+Gargoyle_Smash,석조 일격,돌 주먹으로 내려칩니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Gargoyle_Spike,돌 가시,날카로운 돌가시로 공격합니다.,Attack,SingleEnemy,1,0,25,None,0,0
+Gargoyle_StoneArmor,석화 방어,돌로 변하여 방어합니다.,Shield,Self,3,0,25,None,0,0
+Gargoyle_PoisonGas,독가스,독가스를 내뿜습니다.,Debuff,AllEnemies,0,0,25,Poison,2,1
+Shaman_Lightning,번개 창,번개로 강력한 공격을 합니다.,Attack,SingleEnemy,4,0,25,None,0,0
+Shaman_HealRain,치유의 비,비를 내려 체력을 회복합니다.,Heal,Self,2,0,25,None,0,0
+Shaman_BloodRitual,피의 의식,공격력이 대폭 증가합니다.,Buff,Self,0,0,25,AttackUp,2,2
+Shaman_Totem,토템 방어,토템으로 보호막을 얻습니다.,Shield,Self,3,0,25,None,0,0
+Captain_Strike,지휘 타격,군단의 힘을 담은 공격입니다.,Attack,SingleEnemy,3,0,25,None,0,0
+Captain_ShieldWall,방패 벽,거대 방패로 방어합니다.,Shield,Self,4,0,25,None,0,0
+Captain_Warcry,전투 함성,공격력이 증가합니다.,Buff,Self,0,0,25,AttackUp,2,2
+Captain_BoneShield,뼈 방패,방어력이 증가합니다.,Buff,Self,0,0,25,DefenseUp,1,2
+DemonMage_Hellfire,지옥불,지옥의 불꽃으로 공격합니다.,Attack,SingleEnemy,4,0,25,Burn,2,2
+DemonMage_DarkPulse,암흑 파동,어둠의 파동으로 전체 공격합니다.,Attack,AllEnemies,2,0,25,None,0,0
+DemonMage_CurseBarrier,저주받은 결계,저주의 방어막을 칩니다.,Shield,Self,3,0,25,None,0,0
+DemonMage_SoulBurn,영혼 불태우기,대상의 방어력을 태웁니다.,Debuff,SingleEnemy,0,0,25,DefenseDown,2,1
+Necro_LifeDrain,생명력 흡수,적의 생명력을 빼앗아 자신의 것으로 만듭니다.,Attack,SingleEnemy,4,2,25,None,0,0
+Necro_Curse,저주,적의 공격력을 약화시킵니다.,Debuff,SingleEnemy,0,1,25,AttackDown,2,2
+Necro_Decay,부패,적을 부패시켜 독 데미지를 줍니다.,Attack,SingleEnemy,1,1,25,Poison,3,2
+Necro_RaiseDead,사령술,죽은 자를 일으켜 광역 공격합니다.,Attack,AllEnemies,2,3,25,None,0,0
+Alch_HealPotion,치유 물약,아군에게 치유 물약을 투여합니다.,Heal,SingleAlly,4,1,25,None,0,0
+Alch_PoisonBomb,독 폭탄,독이 든 폭탄을 투척합니다.,Attack,AllEnemies,2,2,25,Poison,2,2
+Alch_BoostPotion,강화 물약,아군의 공격력을 강화합니다.,Buff,SingleAlly,0,1,25,AttackUp,2,2
+Alch_ShieldPotion,보호막 물약,아군에게 보호막을 부여합니다.,Shield,SingleAlly,3,2,25,None,0,0

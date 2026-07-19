@@ -16,7 +16,7 @@ MonoBehaviour:
   _description: 
   _skillType: 2
   _targetType: 4
-  _power: 6
+  _power: 2
   _cost: 1
   _weight: 50
   _icon: {fileID: 0}

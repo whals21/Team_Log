@@ -16,7 +16,7 @@ MonoBehaviour:
   _description: "\uC5B4\uB460\uC758 \uD30C\uB3D9\uC73C\uB85C \uC804\uCCB4 \uACF5\uACA9\uD569\uB2C8\uB2E4."
   _skillType: 0
   _targetType: 1
-  _power: 7
+  _power: 2
   _cost: 0
   _weight: 25
   _icon: {fileID: 21300000, guid: 6a804579ee240497ab330defdfcfad4e, type: 3}

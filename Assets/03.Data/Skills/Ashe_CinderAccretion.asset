@@ -16,13 +16,13 @@ MonoBehaviour:
   _description: 
   _skillType: 0
   _targetType: 0
-  _power: 5
+  _power: 2
   _cost: 1
   _weight: 50
   _icon: {fileID: 0}
   _statusEffect: 2
   _effectDuration: 2
-  _effectValue: 3
+  _effectValue: 2
   _behaviors:
   - Keyword: 44
     Rank: 3

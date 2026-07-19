@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Team Log — Shop Scene Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   기본 팔레트 — 다크 판타지 고딕 톤 (Event UI와 동일)
+   ============================================================ */
+:root {
+  --void:        #050507;
+  --void-deep:   #02020380;
+  --slate:       #14141d;
+  --slate-warm:  #1a1410;
+  --parchment:   #d4c5a0;
+  --parchment-d: #a8987a;
+  --ink:         #1a1208;
+  --ink-soft:    #3a2e1e;
+  --gold:        #c9a14a;
+  --gold-light:  #e6c878;
+  --gold-dark:   #8b6e2f;
+  --blood:       #8b0000;
+  --blood-light: #c0392b;
+  --ember:       #ff6b35;
+  --frost:       #5ec5e8;
+  --venom:       #6ed5b2;
+  --shadow:      #b388ff;
+
+  /* 등급 컬러 (Rarity) */
+  --rarity-common:    #9d9d9d;
+  --rarity-rare:      #4a9eff;
+  --rarity-unique:    #c084fc;
+  --rarity-cursed:    #c0392b;
+  --rarity-relic:     #f4d35e;
+
+  /* Slot Type (Augment/Relic) */
+  --type-augment: #c98a3a;   /* 호박색 — 증강 */
+  --type-relic:   #d4af37;   /* 황금 — 유물 */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--void);
+  color: var(--parchment);
+  font-family: 'Nanum Gothic', 'Cormorant Garamond', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(139, 0, 0, 0.08), transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(201, 161, 74, 0.06), transparent 50%),
+    var(--void);
+  z-index: -2;
+}
+
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* ============================================================
+   페이지 헤더
+   ============================================================ */
+.page-header {
+  text-align: center;
+  padding: 60px 20px 40px;
+  border-bottom: 1px solid rgba(201, 161, 74, 0.2);
+}
+
+.page-header h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 42px;
+  letter-spacing: 0.15em;
+  color: var(--gold-light);
+  margin-bottom: 12px;
+  text-shadow: 0 0 30px rgba(201, 161, 74, 0.3);
+}
+
+.page-header .subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--parchment-d);
+  letter-spacing: 0.05em;
+}
+
+.page-header .nav-pills {
+  margin-top: 28px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.page-header .nav-pills a {
+  padding: 8px 20px;
+  border: 1px solid rgba(201, 161, 74, 0.3);
+  background: rgba(20, 20, 29, 0.6);
+  color: var(--parchment);
+  text-decoration: none;
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  transition: all 0.3s;
+}
+
+.page-header .nav-pills a:hover {
+  background: rgba(201, 161, 74, 0.15);
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+/* ============================================================
+   섹션 공통
+   ============================================================ */
+.concept {
+  padding: 80px 40px;
+  border-bottom: 1px solid rgba(201, 161, 74, 0.15);
+}
+
+.concept-header {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+}
+
+.concept-num {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 72px;
+  color: var(--gold-dark);
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.concept-title-block h2 {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--gold-light);
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+.concept-title-block .ko {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 14px;
+  color: var(--parchment-d);
+}
+
+.concept-vibe {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--gold);
+  padding: 6px 14px;
+  border: 1px solid rgba(201, 161, 74, 0.3);
+  letter-spacing: 0.05em;
+}
+
+.concept-stage {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 32px;
+  align-items: start;
+}
+
+.concept-notes {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 13px;
+  color: var(--parchment-d);
+  line-height: 1.8;
+  padding: 24px;
+  background: rgba(20, 20, 29, 0.7);
+  border-left: 2px solid var(--gold-dark);
+}
+
+.concept-notes h4 {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.concept-notes ul { list-style: none; padding: 0; }
+.concept-notes li { padding: 4px 0 4px 16px; position: relative; }
+.concept-notes li::before {
+  content: '◆';
+  position: absolute;
+  left: 0;
+  color: var(--gold-dark);
+  font-size: 10px;
+  top: 7px;
+}
+.concept-notes .pros { color: var(--venom); }
+.concept-notes .cons { color: var(--blood-light); }
+
+/* ============================================================
+   공통 데이터 — 상점 슬롯 5개 (3 Augment + 2 Relic)
+   ============================================================ */
+.shop-sample-data { display: none; }
+
+/* ============================================================
+   시안 A — Parchment Ledger (양피지 장부)
+   ============================================================ */
+.parchment-ledger {
+  padding: 60px 40px;
+  background:
+    radial-gradient(ellipse at center, rgba(212, 197, 160, 0.05), transparent 70%),
+    linear-gradient(180deg, #0a0a14 0%, #0e0c08 100%);
+}
+
+.ledger-card {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #d4c5a0 0%, #c4b08a 40%, #a8987a 100%);
+  padding: 32px 40px 28px;
+  box-shadow:
+    0 0 0 1px rgba(139, 110, 47, 0.4),
+    0 0 60px rgba(212, 197, 160, 0.15),
+    0 30px 60px rgba(0, 0, 0, 0.7),
+    inset 0 0 100px rgba(58, 46, 30, 0.25);
+  clip-path: polygon(
+    0% 1%, 3% 0%, 10% 0.5%, 20% 0%, 35% 1%, 50% 0%, 65% 1%, 80% 0%, 92% 0.5%, 97% 0%, 100% 1%,
+    100% 99%, 97% 100%, 92% 99.5%, 80% 100%, 65% 99%, 50% 100%, 35% 99%, 20% 100%, 10% 99.5%, 3% 100%, 0% 99%
+  );
+  color: var(--ink);
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.ledger-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(58, 46, 30, 0.1), transparent 30%),
+    radial-gradient(ellipse at 80% 70%, rgba(58, 46, 30, 0.08), transparent 40%);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 2px double rgba(58, 46, 30, 0.5);
+  margin-bottom: 20px;
+}
+
+.ledger-title-block { text-align: left; }
+
+.ledger-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--ink);
+  letter-spacing: 0.08em;
+}
+
+.ledger-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.ledger-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.ledger-tab {
+  padding: 6px 18px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--ink-soft);
+  border: 1px solid rgba(58, 46, 30, 0.4);
+  background: transparent;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.ledger-tab.active {
+  background: var(--ink);
+  color: var(--parchment);
+}
+
+.ledger-gold-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 8px 16px;
+  background: rgba(58, 46, 30, 0.1);
+  border-left: 3px solid var(--gold-dark);
+}
+
+.ledger-gold-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.ledger-gold-value {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--gold-dark);
+}
+
+.ledger-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ledger-slot {
+  position: relative;
+  background: rgba(58, 46, 30, 0.06);
+  border: 1px solid rgba(58, 46, 30, 0.3);
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ledger-slot:hover {
+  background: rgba(58, 46, 30, 0.12);
+  transform: translateY(-1px);
+}
+
+.ledger-slot.type-augment { border-left: 3px solid var(--type-augment); }
+.ledger-slot.type-relic    { border-left: 3px solid var(--type-relic); grid-column: span 1; }
+.ledger-slot.rarity-rare   { box-shadow: inset 0 0 0 1px rgba(74, 158, 255, 0.4); }
+.ledger-slot.rarity-unique { box-shadow: inset 0 0 0 1px rgba(192, 132, 252, 0.5); }
+.ledger-slot.rarity-relic  { box-shadow: inset 0 0 0 1px rgba(244, 211, 94, 0.5); }
+
+.ledger-slot.sold { opacity: 0.4; }
+
+.ledger-slot-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ledger-slot-icon {
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(58, 46, 30, 0.15);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.ledger-slot-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink);
+  flex: 1;
+}
+
+.ledger-slot-price {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--gold-dark);
+}
+
+.ledger-slot-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.ledger-slot-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  background: var(--ink);
+  color: var(--parchment);
+  text-transform: uppercase;
+}
+
+.ledger-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(58, 46, 30, 0.4);
+}
+
+.ledger-footer-hint {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.ledger-exit-btn {
+  padding: 8px 24px;
+  background: var(--ink);
+  color: var(--parchment);
+  border: 1px solid var(--gold-dark);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   시안 B — Stained Glass Reliquary (스테인드글라스 유물함)
+   ============================================================ */
+.stained-reliquary {
+  padding: 60px 40px;
+  background:
+    radial-gradient(ellipse at center top, rgba(201, 161, 74, 0.12), transparent 60%),
+    #000;
+}
+
+.reliquary-frame {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  border: 2px solid var(--gold-dark);
+  box-shadow:
+    0 0 80px rgba(201, 161, 74, 0.2),
+    0 30px 80px rgba(0, 0, 0, 0.8);
+}
+
+/* 상단 스테인드글라스 (장식용) */
+.reliquary-crown {
+  height: 80px;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 100%, var(--gold-light) 0%, var(--gold) 8%, transparent 16%),
+    conic-gradient(from 0deg at 50% 100%,
+      rgba(201, 161, 74, 0.6) 0deg,
+      rgba(139, 0, 0, 0.5) 30deg,
+      rgba(201, 161, 74, 0.7) 60deg,
+      rgba(110, 213, 178, 0.4) 90deg,
+      rgba(201, 161, 74, 0.6) 120deg,
+      rgba(139, 0, 0, 0.5) 150deg,
+      rgba(201, 161, 74, 0.7) 180deg,
+      rgba(110, 213, 178, 0.4) 210deg,
+      rgba(201, 161, 74, 0.6) 240deg,
+      rgba(139, 0, 0, 0.5) 270deg,
+      rgba(201, 161, 74, 0.7) 300deg,
+      rgba(110, 213, 178, 0.4) 330deg,
+      rgba(201, 161, 74, 0.6) 360deg
+    );
+  border-bottom: 1px solid var(--gold);
+  overflow: hidden;
+}
+
+.reliquary-crown::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, transparent 33%, rgba(0,0,0,0.4) 33.5%, rgba(0,0,0,0.4) 34%, transparent 34.5%),
+    linear-gradient(90deg, transparent 66%, rgba(0,0,0,0.4) 66.5%, rgba(0,0,0,0.4) 67%, transparent 67.5%),
+    linear-gradient(45deg, transparent 49.5%, rgba(0,0,0,0.3) 50%, transparent 50.5%),
+    linear-gradient(-45deg, transparent 49.5%, rgba(0,0,0,0.3) 50%, transparent 50.5%);
+  mix-blend-mode: multiply;
+}
+
+.reliquary-crown-emblem {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: rgba(0, 0, 0, 0.7);
+  text-shadow: 0 0 20px var(--gold-light), 0 0 40px var(--gold);
+  z-index: 2;
+}
+
+/* 본문 패널 */
+.reliquary-panel {
+  background:
+    linear-gradient(180deg, rgba(20, 20, 29, 0.95) 0%, rgba(10, 10, 20, 1) 100%);
+  padding: 32px 40px 28px;
+  position: relative;
+}
+
+.reliquary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.reliquary-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--gold-light);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 20px rgba(201, 161, 74, 0.4);
+}
+
+.reliquary-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--parchment-d);
+  margin-top: 2px;
+}
+
+.reliquary-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.reliquary-tab {
+  padding: 6px 18px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--parchment-d);
+  border: 1px solid rgba(201, 161, 74, 0.3);
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.reliquary-tab.active {
+  background: linear-gradient(180deg, var(--gold-dark), #6b521e);
+  color: var(--void);
+  border-color: var(--gold);
+}
+
+.reliquary-gold {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 10px 18px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--gold-dark);
+}
+
+.reliquary-gold-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--gold-dark);
+}
+
+.reliquary-gold-value {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--gold-light);
+  text-shadow: 0 0 12px rgba(201, 161, 74, 0.4);
+}
+
+.reliquary-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.reliquary-slot {
+  position: relative;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(40, 30, 15, 0.6), rgba(20, 15, 8, 0.4));
+  border: 1px solid rgba(201, 161, 74, 0.25);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.reliquary-slot:hover {
+  background: linear-gradient(180deg, rgba(60, 45, 20, 0.7), rgba(40, 30, 15, 0.5));
+  border-color: var(--gold);
+  box-shadow: inset 0 0 30px rgba(201, 161, 74, 0.15);
+}
+
+.reliquary-slot.type-augment { border-top: 2px solid var(--type-augment); }
+.reliquary-slot.type-relic    { border-top: 2px solid var(--type-relic); }
+.reliquary-slot.rarity-rare   { box-shadow: inset 0 0 0 1px rgba(74, 158, 255, 0.5), 0 0 12px rgba(74, 158, 255, 0.2); }
+.reliquary-slot.rarity-unique { box-shadow: inset 0 0 0 1px rgba(192, 132, 252, 0.6), 0 0 12px rgba(192, 132, 252, 0.25); }
+.reliquary-slot.rarity-relic  { box-shadow: inset 0 0 0 1px rgba(244, 211, 94, 0.6), 0 0 16px rgba(244, 211, 94, 0.3); }
+
+.reliquary-slot.sold { opacity: 0.35; }
+
+.reliquary-slot-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.reliquary-slot-icon {
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--gold-dark);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--gold-light);
+}
+
+.reliquary-slot-name {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  color: var(--parchment);
+  flex: 1;
+}
+
+.reliquary-slot-price {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--gold-light);
+}
+
+.reliquary-slot-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--parchment-d);
+  line-height: 1.4;
+}
+
+.reliquary-slot-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--gold-light);
+  border: 1px solid currentColor;
+  text-transform: uppercase;
+}
+
+.reliquary-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid rgba(201, 161, 74, 0.2);
+}
+
+.reliquary-exit-btn {
+  padding: 10px 24px;
+  background: linear-gradient(180deg, var(--blood), #5a0000);
+  color: var(--gold-light);
+  border: 1px solid var(--gold-dark);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   시안 C — Alchemist's Laboratory (연금술사 실험실)
+   ============================================================ */
+.alchemist-lab {
+  padding: 60px 40px;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(110, 213, 178, 0.08), transparent 50%),
+    radial-gradient(ellipse at 70% 70%, rgba(179, 136, 255, 0.08), transparent 50%),
+    linear-gradient(180deg, #0f1a14 0%, #050a08 100%);
+}
+
+.lab-shelf {
+  max-width: 900px;
+  margin: 0 auto;
+  background:
+    radial-gradient(ellipse at center top, rgba(60, 80, 50, 0.4), transparent 60%),
+    linear-gradient(180deg, #1a2418 0%, #0a120c 100%);
+  border: 1px solid rgba(110, 213, 178, 0.25);
+  box-shadow:
+    0 0 60px rgba(110, 213, 178, 0.15),
+    0 30px 80px rgba(0, 0, 0, 0.8),
+    inset 0 0 80px rgba(0, 0, 0, 0.5);
+  padding: 28px 32px 24px;
+  position: relative;
+}
+
+/* 조명 효과 */
+.lab-shelf::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 80%; height: 100px;
+  background: linear-gradient(180deg, rgba(110, 213, 178, 0.12) 0%, transparent 100%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.lab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.lab-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--venom);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 16px rgba(110, 213, 178, 0.5);
+}
+
+.lab-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--shadow);
+  margin-top: 2px;
+}
+
+.lab-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.lab-tab {
+  padding: 6px 18px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--shadow);
+  border: 1px solid rgba(179, 136, 255, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.lab-tab.active {
+  background: linear-gradient(180deg, var(--shadow), #6b4ca0);
+  color: var(--void);
+  border-color: var(--venom);
+}
+
+.lab-gold {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  border-left: 3px solid var(--venom);
+}
+
+.lab-gold-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--venom);
+}
+
+.lab-gold-value {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--gold-light);
+  text-shadow: 0 0 10px rgba(201, 161, 74, 0.4);
+}
+
+/* 선반 — 유리병들이 진열된 느낌 */
+.lab-shelf-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 16px 12px;
+  background: linear-gradient(180deg, transparent 0%, transparent 70%, rgba(60, 40, 20, 0.6) 100%);
+  border-bottom: 3px solid rgba(110, 213, 178, 0.3);
+  position: relative;
+}
+
+.lab-shelf-row::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 0; right: 0;
+  height: 1px;
+  background: rgba(110, 213, 178, 0.15);
+}
+
+.lab-slot {
+  position: relative;
+  padding: 12px 8px 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(110, 213, 178, 0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.lab-slot:hover {
+  background: rgba(60, 100, 80, 0.4);
+  border-color: var(--venom);
+  box-shadow: 0 0 16px rgba(110, 213, 178, 0.3);
+  transform: translateY(-2px);
+}
+
+.lab-slot.type-augment { border-top: 2px solid var(--type-augment); }
+.lab-slot.type-relic   { border-top: 2px solid var(--type-relic); }
+.lab-slot.rarity-rare   { box-shadow: inset 0 0 8px rgba(74, 158, 255, 0.4); }
+.lab-slot.rarity-unique { box-shadow: inset 0 0 8px rgba(192, 132, 252, 0.5); }
+
+.lab-slot.sold { opacity: 0.3; }
+
+.lab-vial {
+  width: 44px; height: 56px;
+  margin: 0 auto 8px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.lab-vial-bottle {
+  width: 32px; height: 44px;
+  background: linear-gradient(180deg, transparent 0%, transparent 25%, rgba(110, 213, 178, 0.5) 30%, rgba(110, 213, 178, 0.8) 100%);
+  border: 1px solid var(--venom);
+  border-radius: 50% 50% 30% 30% / 20% 20% 80% 80%;
+  position: relative;
+}
+
+.lab-vial-bottle::before {
+  content: '';
+  position: absolute;
+  top: -10px; left: 50%;
+  transform: translateX(-50%);
+  width: 6px; height: 12px;
+  background: rgba(60, 40, 20, 0.8);
+  border: 1px solid var(--venom);
+}
+
+.lab-vial-icon {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 20px;
+  color: var(--gold-light);
+  text-shadow: 0 0 10px rgba(201, 161, 74, 0.8);
+  z-index: 2;
+}
+
+.lab-slot.relic .lab-vial-bottle {
+  background: linear-gradient(180deg, transparent 0%, transparent 25%, rgba(244, 211, 94, 0.5) 30%, rgba(244, 211, 94, 0.8) 100%);
+  border-color: var(--type-relic);
+}
+
+.lab-slot-name {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  color: var(--parchment);
+  margin-bottom: 2px;
+  line-height: 1.2;
+  min-height: 26px;
+}
+
+.lab-slot-price {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gold-light);
+  margin-top: 4px;
+}
+
+.lab-slot-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  padding: 1px 5px;
+  background: var(--void);
+  border: 1px solid var(--venom);
+  color: var(--venom);
+  text-transform: uppercase;
+}
+
+.lab-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid rgba(110, 213, 178, 0.2);
+}
+
+.lab-footer-hint {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--shadow);
+}
+
+.lab-exit-btn {
+  padding: 8px 20px;
+  background: rgba(60, 40, 80, 0.5);
+  color: var(--venom);
+  border: 1px solid var(--venom);
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   시안 D — Merchant Caravan (떠돌이 상인 캐러밴)
+   ============================================================ */
+.merchant-caravan {
+  padding: 60px 40px;
+  background:
+    radial-gradient(ellipse at center, rgba(201, 138, 58, 0.12), transparent 60%),
+    linear-gradient(180deg, #1a1006 0%, #0a0603 100%);
+}
+
+.caravan-tent {
+  max-width: 900px;
+  margin: 0 auto;
+  background:
+    linear-gradient(180deg, rgba(60, 40, 20, 0.6) 0%, rgba(30, 18, 8, 0.9) 100%);
+  border: 2px solid rgba(201, 138, 58, 0.4);
+  padding: 0;
+  box-shadow:
+    0 0 0 4px rgba(0, 0, 0, 0.6),
+    0 30px 80px rgba(0, 0, 0, 0.8),
+    inset 0 0 60px rgba(201, 138, 58, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 천막 지붕 — 삼각형 패턴 */
+.caravan-tent::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 24px;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(120, 60, 20, 0.6) 0px,
+      rgba(120, 60, 20, 0.6) 40px,
+      rgba(180, 100, 40, 0.6) 40px,
+      rgba(180, 100, 40, 0.6) 80px);
+  border-bottom: 2px solid var(--gold-dark);
+}
+
+/* 바닥 짚/가죽 패턴 */
+.caravan-tent::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 16px;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(80, 50, 25, 0.4) 0px,
+      rgba(80, 50, 25, 0.4) 8px,
+      rgba(100, 65, 30, 0.4) 8px,
+      rgba(100, 65, 30, 0.4) 16px);
+  border-top: 1px solid var(--gold-dark);
+}
+
+.caravan-content { padding: 44px 36px 32px; }
+
+.caravan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.caravan-title-block { text-align: left; }
+
+.caravan-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--type-augment);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 12px rgba(201, 138, 58, 0.5);
+}
+
+.caravan-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--parchment-d);
+  margin-top: 2px;
+}
+
+.caravan-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.caravan-tab {
+  padding: 6px 18px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--parchment-d);
+  background: linear-gradient(180deg, rgba(120, 70, 25, 0.4), rgba(80, 45, 15, 0.4));
+  border: 1px solid rgba(201, 138, 58, 0.4);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.caravan-tab.active {
+  background: linear-gradient(180deg, var(--type-augment), #8a5e22);
+  color: var(--void);
+  border-color: var(--gold);
+}
+
+.caravan-gold {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 10px 18px;
+  background: rgba(40, 25, 10, 0.6);
+  border: 1px solid rgba(201, 138, 58, 0.4);
+  border-left: 4px solid var(--gold);
+}
+
+.caravan-gold-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--type-augment);
+}
+
+.caravan-gold-value {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--gold-light);
+  text-shadow: 0 0 10px rgba(244, 211, 94, 0.5);
+}
+
+.caravan-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.caravan-slot {
+  position: relative;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(60, 40, 20, 0.5), rgba(30, 18, 8, 0.4));
+  border: 1px solid rgba(201, 138, 58, 0.3);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.caravan-slot:hover {
+  background: linear-gradient(180deg, rgba(100, 65, 30, 0.7), rgba(60, 40, 20, 0.5));
+  border-color: var(--type-augment);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.caravan-slot.type-augment { border-left: 4px solid var(--type-augment); }
+.caravan-slot.type-relic   { border-left: 4px solid var(--type-relic); }
+.caravan-slot.rarity-rare   { box-shadow: inset 2px 0 0 var(--rarity-rare); }
+.caravan-slot.rarity-unique { box-shadow: inset 2px 0 0 var(--rarity-unique); }
+.caravan-slot.rarity-relic  { box-shadow: inset 2px 0 0 var(--rarity-relic); }
+
+.caravan-slot.sold { opacity: 0.4; }
+
+.caravan-slot-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.caravan-slot-icon {
+  width: 36px; height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(201, 138, 58, 0.3), rgba(60, 40, 20, 0.6));
+  border: 1px solid var(--gold-dark);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--gold-light);
+}
+
+.caravan-slot-name {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--parchment);
+  flex: 1;
+  line-height: 1.2;
+}
+
+.caravan-slot-price {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--gold-light);
+  margin-left: 4px;
+}
+
+.caravan-slot-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--parchment-d);
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.caravan-slot-badge {
+  position: absolute;
+  top: 6px; right: 6px;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  background: var(--void);
+  color: var(--gold-light);
+  border: 1px solid var(--type-augment);
+  text-transform: uppercase;
+}
+
+.caravan-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid rgba(201, 138, 58, 0.3);
+}
+
+.caravan-footer-hint {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--parchment-d);
+}
+
+.caravan-exit-btn {
+  padding: 8px 20px;
+  background: linear-gradient(180deg, var(--blood), #5a0000);
+  color: var(--gold-light);
+  border: 1px solid var(--gold-dark);
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   Slot Type / Rarity 매트릭스
+   ============================================================ */
+.matrix-section {
+  padding: 80px 40px;
+  background: var(--void);
+  border-top: 1px solid rgba(201, 161, 74, 0.15);
+}
+
+.matrix-section h2 {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--gold-light);
+  text-align: center;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.matrix-section .matrix-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--parchment-d);
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.matrix-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.matrix-card {
+  background: rgba(20, 20, 29, 0.6);
+  border: 1px solid rgba(201, 161, 74, 0.2);
+  padding: 20px 16px;
+  position: relative;
+  min-height: 220px;
+}
+
+.matrix-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--rarity-color);
+}
+
+.matrix-card .rarity-icon {
+  font-family: 'Cinzel', serif;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--rarity-color);
+  text-shadow: 0 0 16px var(--rarity-color);
+  text-align: center;
+  margin: 8px 0 6px;
+}
+
+.matrix-card .rarity-name {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--gold-light);
+  text-align: center;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.matrix-card .rarity-ko {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 11px;
+  color: var(--parchment-d);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.matrix-card .rarity-features {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 10px;
+  color: var(--parchment);
+  line-height: 1.6;
+  padding-top: 10px;
+  border-top: 1px solid rgba(201, 161, 74, 0.15);
+  list-style: none;
+}
+
+.matrix-card .rarity-features li {
+  padding: 2px 0;
+}
+
+.matrix-card .rarity-features li::before {
+  content: '·';
+  color: var(--rarity-color);
+  margin-right: 4px;
+  font-weight: 700;
+}
+
+/* ============================================================
+   Confirmation Dialog 예시 (구매 확인 모달)
+   ============================================================ */
+.confirm-section {
+  padding: 80px 40px;
+  background: var(--slate);
+  border-top: 1px solid rgba(201, 161, 74, 0.15);
+}
+
+.confirm-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.confirm-card {
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--accent-color);
+  text-align: center;
+  position: relative;
+}
+
+.confirm-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top, var(--accent-color), transparent 60%);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.confirm-card .confirm-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.confirm-card .confirm-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--gold-light);
+  margin-bottom: 8px;
+}
+
+.confirm-card .confirm-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--parchment-d);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.confirm-card .confirm-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.confirm-card button {
+  padding: 6px 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  background: transparent;
+}
+
+.confirm-card button.confirm-yes { color: var(--venom); }
+.confirm-card button.confirm-no  { color: var(--blood-light); }
+
+/* ============================================================
+   푸터
+   ============================================================ */
+.mockup-footer {
+  padding: 60px 40px;
+  background: var(--void);
+  border-top: 1px solid rgba(201, 161, 74, 0.2);
+  text-align: center;
+}
+
+.mockup-footer h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  color: var(--gold-light);
+  margin-bottom: 16px;
+  letter-spacing: 0.1em;
+}
+
+.mockup-footer .compare-table {
+  max-width: 900px;
+  margin: 32px auto;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.mockup-footer .compare-table th,
+.mockup-footer .compare-table td {
+  padding: 12px 16px;
+  text-align: left;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(201, 161, 74, 0.15);
+}
+
+.mockup-footer .compare-table th {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+.mockup-footer .compare-table .star {
+  color: var(--gold);
+  letter-spacing: -1px;
+}
+
+.mockup-footer .verdict {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--parchment-d);
+  margin-top: 32px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.8;
+}
+
+/* ============================================================
+   반응형
+   ============================================================ */
+@media (max-width: 1100px) {
+  .concept-stage { grid-template-columns: 1fr; }
+  .ledger-slots, .reliquary-slots, .caravan-slots { grid-template-columns: repeat(2, 1fr); }
+  .lab-shelf-row { grid-template-columns: repeat(3, 1fr); }
+  .matrix-grid { grid-template-columns: repeat(2, 1fr); }
+  .confirm-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     페이지 헤더
+     ============================================================ -->
+<header class="page-header">
+  <h1>SHOP UI — 4 CONCEPTS</h1>
+  <div class="subtitle">Team Log · Dark Fantasy Gothic · 2026-07-19</div>
+  <nav class="nav-pills">
+    <a href="#a">A · Parchment Ledger</a>
+    <a href="#b">B · Stained Reliquary</a>
+    <a href="#c">C · Alchemist's Lab</a>
+    <a href="#d">D · Merchant Caravan</a>
+    <a href="#matrix">Rarity Matrix</a>
+    <a href="#confirm">Confirm Dialog</a>
+  </nav>
+</header>
+
+<!-- ============================================================
+     시안 A — Parchment Ledger
+     ============================================================ -->
+<section id="a" class="concept parchment-ledger">
+  <div class="concept-header">
+    <div class="concept-num">A</div>
+    <div class="concept-title-block">
+      <h2>PARCHMENT LEDGER</h2>
+      <div class="ko">상인의 장부 · 오래된 도시 상점의 장부를 펼친 듯한</div>
+    </div>
+    <div class="concept-vibe">CLASSIC · WARM</div>
+  </div>
+
+  <div class="concept-stage">
+    <div class="ledger-card">
+      <div class="ledger-header">
+        <div class="ledger-title-block">
+          <div class="ledger-title">MERCHANT'S LEDGER</div>
+          <div class="ledger-subtitle">— Wandering Trader, Floor 2 —</div>
+        </div>
+        <div class="ledger-tabs">
+          <button class="ledger-tab active">Buy</button>
+          <button class="ledger-tab">Sell</button>
+        </div>
+      </div>
+
+      <div class="ledger-gold-bar">
+        <span class="ledger-gold-label">Your Gold</span>
+        <span class="ledger-gold-value">142 G</span>
+      </div>
+
+      <div class="ledger-slots">
+        <!-- Augment 1 (Common) -->
+        <div class="ledger-slot type-augment">
+          <div class="ledger-slot-top">
+            <div class="ledger-slot-icon">⚔</div>
+            <div class="ledger-slot-name">Sharp Edge</div>
+            <div class="ledger-slot-price">45 G</div>
+          </div>
+          <div class="ledger-slot-desc">+3 ATK. 일반 증강.</div>
+        </div>
+        <!-- Augment 2 (Rare) -->
+        <div class="ledger-slot type-augment rarity-rare">
+          <span class="ledger-slot-badge" style="background:#1e3a5f; color:#9dc4ff;">RARE</span>
+          <div class="ledger-slot-top">
+            <div class="ledger-slot-icon">✦</div>
+            <div class="ledger-slot-name">Echo Strike</div>
+            <div class="ledger-slot-price">58 G</div>
+          </div>
+          <div class="ledger-slot-desc">동일 적 2회 타격.</div>
+        </div>
+        <!-- Augment 3 (Unique) -->
+        <div class="ledger-slot type-augment rarity-unique">
+          <span class="ledger-slot-badge" style="background:#3d1f5f; color:#d8b4fe;">UNIQUE</span>
+          <div class="ledger-slot-top">
+            <div class="ledger-slot-icon">★</div>
+            <div class="ledger-slot-name">Limit Break</div>
+            <div class="ledger-slot-price">72 G</div>
+          </div>
+          <div class="ledger-slot-desc">전투당 1회 위력 2배.</div>
+        </div>
+        <!-- Relic 1 (Rare) -->
+        <div class="ledger-slot type-relic rarity-relic">
+          <span class="ledger-slot-badge" style="background:#5a4a0e; color:#f4d35e;">RELIC</span>
+          <div class="ledger-slot-top">
+            <div class="ledger-slot-icon">◈</div>
+            <div class="ledger-slot-name">Bloodstone</div>
+            <div class="ledger-slot-price">85 G</div>
+          </div>
+          <div class="ledger-slot-desc">킬 시 HP 5 회복.</div>
+        </div>
+        <!-- Relic 2 (Sold) -->
+        <div class="ledger-slot type-relic sold">
+          <span class="ledger-slot-badge" style="background:#3a3a3a;">SOLD</span>
+          <div class="ledger-slot-top">
+            <div class="ledger-slot-icon">◈</div>
+            <div class="ledger-slot-name">Old Coin</div>
+            <div class="ledger-slot-price">40 G</div>
+          </div>
+          <div class="ledger-slot-desc">골드 10% 추가 획득.</div>
+        </div>
+        <!-- 빈 슬롯 또는 6번째 -->
+        <div class="ledger-slot type-augment">
+          <div class="ledger-slot-top">
+            <div class="ledger-slot-icon">⛨</div>
+            <div class="ledger-slot-name">Iron Wall</div>
+            <div class="ledger-slot-price">52 G</div>
+          </div>
+          <div class="ledger-slot-desc">+5 DEF. 쉴드 +10.</div>
+        </div>
+      </div>
+
+      <div class="ledger-footer">
+        <span class="ledger-footer-hint">"지혜로운 자가 더 오래 산다, 나그네여."</span>
+        <button class="ledger-exit-btn">Leave</button>
+      </div>
+    </div>
+
+    <aside class="concept-notes">
+      <h4>분위기 키워드</h4>
+      <ul>
+        <li>오래된 도시 장부</li>
+        <li>양피지 + 잉크</li>
+        <li>따뜻한 호박 톤</li>
+        <li>도시 상인의 신뢰감</li>
+        <li>장부 넘기는 듯한 느낌</li>
+      </ul>
+      <h4 style="margin-top:20px">장점</h4>
+      <ul>
+        <li class="pros">+ 텍스트 가독성 최고</li>
+        <li class="pros">+ 따뜻하고 친근한 분위기</li>
+        <li class="pros">+ 정보 밀도 높음</li>
+        <li class="pros">+ Event A와 톤 일관</li>
+      </ul>
+      <h4 style="margin-top:20px">단점</h4>
+      <ul>
+        <li class="cons">− Event B(스테인드글라스)와 톤 안 맞음</li>
+        <li class="cons">− 어둡/음산한 느낌 약함</li>
+        <li class="cons">− 일러스트 영역 부족</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<!-- ============================================================
+     시안 B — Stained Glass Reliquary
+     ============================================================ -->
+<section id="b" class="concept stained-reliquary">
+  <div class="concept-header">
+    <div class="concept-num">B</div>
+    <div class="concept-title-block">
+      <h2>STAINED GLASS RELIQUARY</h2>
+      <div class="ko">스테인드글라스 유물함 · 대성당 지하 성소의 신성한 보관소</div>
+    </div>
+    <div class="concept-vibe">GOTHIC · SACRED ★ EVENT B 일관</div>
+  </div>
+
+  <div class="concept-stage">
+    <div class="reliquary-frame">
+      <div class="reliquary-crown">
+        <div class="reliquary-crown-emblem">✦</div>
+      </div>
+
+      <div class="reliquary-panel">
+        <div class="reliquary-header">
+          <div>
+            <div class="reliquary-title">RELICS OF THE FOLD</div>
+            <div class="reliquary-subtitle">— Crimson Chapel · Sanctum —</div>
+          </div>
+          <div class="reliquary-tabs">
+            <button class="reliquary-tab active">Buy</button>
+            <button class="reliquary-tab">Sell</button>
+          </div>
+        </div>
+
+        <div class="reliquary-gold">
+          <span class="reliquary-gold-label">✦ GOLD ✦</span>
+          <span class="reliquary-gold-value">142 G</span>
+        </div>
+
+        <div class="reliquary-slots">
+          <div class="reliquary-slot type-augment">
+            <div class="reliquary-slot-top">
+              <div class="reliquary-slot-icon">⚔</div>
+              <div class="reliquary-slot-name">Sharp Edge</div>
+              <div class="reliquary-slot-price">45</div>
+            </div>
+            <div class="reliquary-slot-desc">+3 ATK. 일반 증강.</div>
+          </div>
+          <div class="reliquary-slot type-augment rarity-rare">
+            <span class="reliquary-slot-badge" style="color:#9dc4ff;">RARE</span>
+            <div class="reliquary-slot-top">
+              <div class="reliquary-slot-icon">✦</div>
+              <div class="reliquary-slot-name">Echo Strike</div>
+              <div class="reliquary-slot-price">58</div>
+            </div>
+            <div class="reliquary-slot-desc">동일 적 2회 타격.</div>
+          </div>
+          <div class="reliquary-slot type-augment rarity-unique">
+            <span class="reliquary-slot-badge" style="color:#d8b4fe;">UNIQUE</span>
+            <div class="reliquary-slot-top">
+              <div class="reliquary-slot-icon">★</div>
+              <div class="reliquary-slot-name">Limit Break</div>
+              <div class="reliquary-slot-price">72</div>
+            </div>
+            <div class="reliquary-slot-desc">전투당 1회 위력 2배.</div>
+          </div>
+          <div class="reliquary-slot type-relic rarity-relic">
+            <span class="reliquary-slot-badge" style="color:#f4d35e;">RELIC</span>
+            <div class="reliquary-slot-top">
+              <div class="reliquary-slot-icon">◈</div>
+              <div class="reliquary-slot-name">Bloodstone</div>
+              <div class="reliquary-slot-price">85</div>
+            </div>
+            <div class="reliquary-slot-desc">킬 시 HP 5 회복.</div>
+          </div>
+          <div class="reliquary-slot type-relic sold">
+            <span class="reliquary-slot-badge" style="color:#888;">SOLD</span>
+            <div class="reliquary-slot-top">
+              <div class="reliquary-slot-icon">◈</div>
+              <div class="reliquary-slot-name">Old Coin</div>
+              <div class="reliquary-slot-price">40</div>
+            </div>
+            <div class="reliquary-slot-desc">골드 10% 추가 획득.</div>
+          </div>
+          <div class="reliquary-slot type-augment">
+            <div class="reliquary-slot-top">
+              <div class="reliquary-slot-icon">⛨</div>
+              <div class="reliquary-slot-name">Iron Wall</div>
+              <div class="reliquary-slot-price">52</div>
+            </div>
+            <div class="reliquary-slot-desc">+5 DEF. 쉴드 +10.</div>
+          </div>
+        </div>
+
+        <div class="reliquary-footer">
+          <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:var(--gold-dark);">"모든 거래는 신성한 서약이다."</span>
+          <button class="reliquary-exit-btn">Leave</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="concept-notes">
+      <h4>분위기 키워드</h4>
+      <ul>
+        <li>대성당 지하 성소</li>
+        <li>스테인드글라스 황금빛</li>
+        <li>유물함(성궤) 느낌</li>
+        <li>신성한 서약</li>
+        <li>Event B와 100% 톤 일관</li>
+      </ul>
+      <h4 style="margin-top:20px">장점</h4>
+      <ul>
+        <li class="pros">+ 다크 판타지 톤 일관성 최고</li>
+        <li class="pros">+ Event B와 자연스러운 연결</li>
+        <li class="pros">+ 황금/신성 강조 적합</li>
+        <li class="pros">+ Rarity 글로우 효과 극대화</li>
+      </ul>
+      <h4 style="margin-top:20px">단점</h4>
+      <ul>
+        <li class="cons">− 텍스트가 다소 가독성 낮음</li>
+        <li class="cons">− 어두워서 친근함 부족</li>
+        <li class="cons">− 상점보다 "성소"에 가까움</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<!-- ============================================================
+     시안 C — Alchemist's Laboratory
+     ============================================================ -->
+<section id="c" class="concept alchemist-lab">
+  <div class="concept-header">
+    <div class="concept-num">C</div>
+    <div class="concept-title-block">
+      <h2>ALCHEMIST'S LABORATORY</h2>
+      <div class="ko">연금술사의 실험실 · 유리병 진열된 선반의 기묘한 신비함</div>
+    </div>
+    <div class="concept-vibe">MYSTICAL · ARCANE</div>
+  </div>
+
+  <div class="concept-stage">
+    <div class="lab-shelf">
+      <div class="lab-header">
+        <div>
+          <div class="lab-title">BUBBLING CONCOCTIONS</div>
+          <div class="lab-subtitle">— Mystical Elixirs &amp; Enchanted Relics —</div>
+        </div>
+        <div class="lab-tabs">
+          <button class="lab-tab active">Buy</button>
+          <button class="lab-tab">Sell</button>
+        </div>
+      </div>
+
+      <div class="lab-gold">
+        <span class="lab-gold-label">◈ ARCANE GOLD</span>
+        <span class="lab-gold-value">142 G</span>
+      </div>
+
+      <div class="lab-shelf-row">
+        <div class="lab-slot">
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">⚔</div>
+          </div>
+          <div class="lab-slot-name">Sharp Edge</div>
+          <div class="lab-slot-price">45 G</div>
+        </div>
+        <div class="lab-slot rarity-rare">
+          <span class="lab-slot-badge">RARE</span>
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">✦</div>
+          </div>
+          <div class="lab-slot-name">Echo Strike</div>
+          <div class="lab-slot-price">58 G</div>
+        </div>
+        <div class="lab-slot rarity-unique">
+          <span class="lab-slot-badge" style="color:#d8b4fe;border-color:#d8b4fe;">UNIQ</span>
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">★</div>
+          </div>
+          <div class="lab-slot-name">Limit Break</div>
+          <div class="lab-slot-price">72 G</div>
+        </div>
+        <div class="lab-slot relic">
+          <span class="lab-slot-badge" style="color:#f4d35e;border-color:#f4d35e;">RELIC</span>
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">◈</div>
+          </div>
+          <div class="lab-slot-name">Bloodstone</div>
+          <div class="lab-slot-price">85 G</div>
+        </div>
+        <div class="lab-slot relic sold">
+          <span class="lab-slot-badge" style="color:#888;border-color:#666;">SOLD</span>
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">◈</div>
+          </div>
+          <div class="lab-slot-name">Old Coin</div>
+          <div class="lab-slot-price">40 G</div>
+        </div>
+      </div>
+
+      <div class="lab-shelf-row">
+        <div class="lab-slot">
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">⛨</div>
+          </div>
+          <div class="lab-slot-name">Iron Wall</div>
+          <div class="lab-slot-price">52 G</div>
+        </div>
+        <div class="lab-slot rarity-rare">
+          <span class="lab-slot-badge">RARE</span>
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">⚛</div>
+          </div>
+          <div class="lab-slot-name">Wire Net</div>
+          <div class="lab-slot-price">68 G</div>
+        </div>
+        <div class="lab-slot">
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">☠</div>
+          </div>
+          <div class="lab-slot-name">Venom Tip</div>
+          <div class="lab-slot-price">49 G</div>
+        </div>
+        <div class="lab-slot relic">
+          <span class="lab-slot-badge" style="color:#f4d35e;border-color:#f4d35e;">RELIC</span>
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">◉</div>
+          </div>
+          <div class="lab-slot-name">Lucky Charm</div>
+          <div class="lab-slot-price">78 G</div>
+        </div>
+        <div class="lab-slot">
+          <div class="lab-vial">
+            <div class="lab-vial-bottle"></div>
+            <div class="lab-vial-icon">✦</div>
+          </div>
+          <div class="lab-slot-name">Mana Crystal</div>
+          <div class="lab-slot-price">61 G</div>
+        </div>
+      </div>
+
+      <div class="lab-footer">
+        <span class="lab-footer-hint">"각 병마다 영혼이 깃들어 있다..."</span>
+        <button class="lab-exit-btn">Leave</button>
+      </div>
+    </div>
+
+    <aside class="concept-notes">
+      <h4>분위기 키워드</h4>
+      <ul>
+        <li>연금술사 실험실</li>
+        <li>유리병/시약/마법진</li>
+        <li>청록 + 보라 글로우</li>
+        <li>5×2 선반형 진열</li>
+        <li>마법/신비 컨셉 강조</li>
+      </ul>
+      <h4 style="margin-top:20px">장점</h4>
+      <ul>
+        <li class="pros">+ 진열 아이템이 시각적으로 돋보임</li>
+        <li class="pros">+ 마법적 분위기 극대화</li>
+        <li class="pros">+ 많은 슬롯 표시에 유리</li>
+        <li class="pros">+ 아이템별 병 색상 다양화 가능</li>
+      </ul>
+      <h4 style="margin-top:20px">단점</h4>
+      <ul>
+        <li class="cons">− 상점 느낌보다 연금술 느낌 강함</li>
+        <li class="cons">− 각 병이 작아 텍스트 가독성 낮음</li>
+        <li class="cons">− 일반 상점(NPC)과 안 어울림</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<!-- ============================================================
+     시안 D — Merchant Caravan
+     ============================================================ -->
+<section id="d" class="concept merchant-caravan">
+  <div class="concept-header">
+    <div class="concept-num">D</div>
+    <div class="concept-title-block">
+      <h2>MERCHANT CARAVAN</h2>
+      <div class="ko">떠돌이 상인 캐러밴 · 가죽 천막의 따뜻하고 거친 분위기</div>
+    </div>
+    <div class="concept-vibe">RUGGED · TRADER</div>
+  </div>
+
+  <div class="concept-stage">
+    <div class="caravan-tent">
+      <div class="caravan-content">
+        <div class="caravan-header">
+          <div class="caravan-title-block">
+            <div class="caravan-title">WANDERING CARAVAN</div>
+            <div class="caravan-subtitle">— Stops at Floor 2 ·Pack Mule's Wares —</div>
+          </div>
+          <div class="caravan-tabs">
+            <button class="caravan-tab active">Buy</button>
+            <button class="caravan-tab">Sell</button>
+          </div>
+        </div>
+
+        <div class="caravan-gold">
+          <span class="caravan-gold-label">◆ PURSE</span>
+          <span class="caravan-gold-value">142 G</span>
+        </div>
+
+        <div class="caravan-slots">
+          <div class="caravan-slot type-augment">
+            <div class="caravan-slot-top">
+              <div class="caravan-slot-icon">⚔</div>
+              <div class="caravan-slot-name">Sharp Edge</div>
+              <div class="caravan-slot-price">45 G</div>
+            </div>
+            <div class="caravan-slot-desc">+3 ATK. 일반 증강.</div>
+          </div>
+          <div class="caravan-slot type-augment rarity-rare">
+            <span class="caravan-slot-badge">RARE</span>
+            <div class="caravan-slot-top">
+              <div class="caravan-slot-icon">✦</div>
+              <div class="caravan-slot-name">Echo Strike</div>
+              <div class="caravan-slot-price">58 G</div>
+            </div>
+            <div class="caravan-slot-desc">동일 적 2회 타격.</div>
+          </div>
+          <div class="caravan-slot type-augment rarity-unique">
+            <span class="caravan-slot-badge" style="color:#d8b4fe;border-color:#d8b4fe;">UNIQ</span>
+            <div class="caravan-slot-top">
+              <div class="caravan-slot-icon">★</div>
+              <div class="caravan-slot-name">Limit Break</div>
+              <div class="caravan-slot-price">72 G</div>
+            </div>
+            <div class="caravan-slot-desc">전투당 1회 위력 2배.</div>
+          </div>
+          <div class="caravan-slot type-relic rarity-relic">
+            <span class="caravan-slot-badge" style="color:#f4d35e;border-color:#f4d35e;">RELIC</span>
+            <div class="caravan-slot-top">
+              <div class="caravan-slot-icon">◈</div>
+              <div class="caravan-slot-name">Bloodstone</div>
+              <div class="caravan-slot-price">85 G</div>
+            </div>
+            <div class="caravan-slot-desc">킬 시 HP 5 회복.</div>
+          </div>
+          <div class="caravan-slot type-relic sold">
+            <span class="caravan-slot-badge" style="color:#888;border-color:#666;">SOLD</span>
+            <div class="caravan-slot-top">
+              <div class="caravan-slot-icon">◈</div>
+              <div class="caravan-slot-name">Old Coin</div>
+              <div class="caravan-slot-price">40 G</div>
+            </div>
+            <div class="caravan-slot-desc">골드 10% 추가 획득.</div>
+          </div>
+          <div class="caravan-slot type-augment">
+            <div class="caravan-slot-top">
+              <div class="caravan-slot-icon">⛨</div>
+              <div class="caravan-slot-name">Iron Wall</div>
+              <div class="caravan-slot-price">52 G</div>
+            </div>
+            <div class="caravan-slot-desc">+5 DEF. 쉴드 +10.</div>
+          </div>
+        </div>
+
+        <div class="caravan-footer">
+          <span class="caravan-footer-hint">"다음 마을까지 3일, 신중하게 고르게나."</span>
+          <button class="caravan-exit-btn">Leave</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="concept-notes">
+      <h4>분위기 키워드</h4>
+      <ul>
+        <li>떠돌이 상인 천막</li>
+        <li>가죽 + 나무 + 천</li>
+        <li>따뜻한 호박/갈색 톤</li>
+        <li>거친 거래소 느낌</li>
+        <li>신뢰감 + 모험의 향기</li>
+      </ul>
+      <h4 style="margin-top:20px">장점</h4>
+      <ul>
+        <li class="pros">+ "상점"에 가장 잘 맞는 분위기</li>
+        <li class="pros">+ 거래/모험 컨셉과 일치</li>
+        <li class="pros">+ 가독성 양호 + 따뜻함</li>
+        <li class="pros">+ 마차/캐러밴 시각적 즐거움</li>
+      </ul>
+      <h4 style="margin-top:20px">단점</h4>
+      <ul>
+        <li class="cons">− Event B(스테인드글라스)와 톤 상이</li>
+        <li class="cons">− 신성/고딕 분위기 약함</li>
+        <li class="cons">− 천막 패턴이 진부할 수 있음</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<!-- ============================================================
+   Rarity Matrix — 5종 (Common/Rare/Unique/Relic/Cursed)
+   ============================================================ -->
+<section id="matrix" class="matrix-section">
+  <h2>RARITY — 5 TIERS</h2>
+  <div class="matrix-sub">등급별 글로우 색상 + 테두리 + 시각적 강조 (모든 시안 공통 적용 가능)</div>
+
+  <div class="matrix-grid">
+    <div class="matrix-card" style="--rarity-color: var(--rarity-common);">
+      <div class="rarity-icon">·</div>
+      <div class="rarity-name">Common</div>
+      <div class="rarity-ko">일반</div>
+      <ul class="rarity-features">
+        <li>회색 테두리</li>
+        <li>글로우 없음</li>
+        <li>+1~3 위력</li>
+        <li>30~50 G 가격대</li>
+      </ul>
+    </div>
+
+    <div class="matrix-card" style="--rarity-color: var(--rarity-rare);">
+      <div class="rarity-icon">◆</div>
+      <div class="rarity-name">Rare</div>
+      <div class="rarity-ko">희귀</div>
+      <ul class="rarity-features">
+        <li>파랑 글로우</li>
+        <li>테두리 강조</li>
+        <li>특수 효과 1종</li>
+        <li>50~75 G 가격대</li>
+      </ul>
+    </div>
+
+    <div class="matrix-card" style="--rarity-color: var(--rarity-unique);">
+      <div class="rarity-icon">★</div>
+      <div class="rarity-name">Unique</div>
+      <div class="rarity-ko">유일</div>
+      <ul class="rarity-features">
+        <li>보라 강렬 글로우</li>
+        <li>Rune 효과</li>
+        <li>강력 특수 효과</li>
+        <li>70~100 G 가격대</li>
+      </ul>
+    </div>
+
+    <div class="matrix-card" style="--rarity-color: var(--rarity-relic);">
+      <div class="rarity-icon">◈</div>
+      <div class="rarity-name">Relic</div>
+      <div class="rarity-ko">유물 (별도 슬롯)</div>
+      <ul class="rarity-features">
+        <li>황금 글로우</li>
+        <li>파티 전체 효과</li>
+        <li>파티 영구</li>
+        <li>40~120 G 가격대</li>
+      </ul>
+    </div>
+
+    <div class="matrix-card" style="--rarity-color: var(--rarity-cursed);">
+      <div class="rarity-icon">☠</div>
+      <div class="rarity-name">Cursed</div>
+      <div class="rarity-ko">저주 (마이너스)</div>
+      <ul class="rarity-features">
+        <li>핏빛 글로우</li>
+        <li>가격 저렴/공짜</li>
+        <li>강력하지만 부작용</li>
+        <li>구매 전 경고 표시</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+   Confirmation Dialog — 3가지 상황
+   ============================================================ -->
+<section id="confirm" class="confirm-section">
+  <h2 style="font-family:'Cinzel',serif;font-weight:700;font-size:28px;color:var(--gold-light);text-align:center;letter-spacing:0.1em;margin-bottom:8px;">CONFIRMATION — 3 SCENARIOS</h2>
+  <div class="matrix-sub" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--parchment-d);text-align:center;margin-bottom:48px;">구매 전 확인 모달 — 일반/부족/저주 상황별</div>
+
+  <div class="confirm-grid">
+    <div class="confirm-card" style="--accent-color: var(--venom);">
+      <div class="confirm-label">NORMAL PURCHASE</div>
+      <div class="confirm-title">Echo Strike</div>
+      <div class="confirm-desc">
+        58 골드로 <strong style="color:var(--gold-light)">Echo Strike</strong> 구매?<br>
+        현재 보유: <strong style="color:var(--gold-light)">142 G</strong> → 구매 후: <strong style="color:var(--gold-light)">84 G</strong>
+      </div>
+      <div class="confirm-buttons">
+        <button class="confirm-yes">Confirm</button>
+        <button class="confirm-no">Cancel</button>
+      </div>
+    </div>
+
+    <div class="confirm-card" style="--accent-color: var(--rarity-rare);">
+      <div class="confirm-label">ASSIGN TO?</div>
+      <div class="confirm-title">증강 부착 위치</div>
+      <div class="confirm-desc">
+        어느 캐릭터의 어느 스킬에 부착?<br>
+        <em style="font-size:11px;color:var(--parchment-d);">Duran / Ashe / Lumi / Sibyl</em>
+      </div>
+      <div class="confirm-buttons">
+        <button class="confirm-yes" style="color:var(--rarity-rare);">Select</button>
+        <button class="confirm-no">Cancel</button>
+      </div>
+    </div>
+
+    <div class="confirm-card" style="--accent-color: var(--rarity-cursed);">
+      <div class="confirm-label">⚠ CURSED ITEM</div>
+      <div class="confirm-title">Blood Pact</div>
+      <div class="confirm-desc">
+        <strong style="color:#ff6b6b;">저주 증강</strong> — 강력하지만 매 턴 HP -2.<br>
+        정말 구매하시겠습니까?
+      </div>
+      <div class="confirm-buttons">
+        <button class="confirm-yes" style="color:var(--rarity-cursed);">Accept Curse</button>
+        <button class="confirm-no">Cancel</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+   비교표 / 최종 의견
+   ============================================================ -->
+<footer class="mockup-footer">
+  <h3>SUMMARY — YOUR CALL</h3>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>시안</th>
+        <th>상점 분위기</th>
+        <th>Event B 톤 일치</th>
+        <th>가독성</th>
+        <th>진열 효과</th>
+        <th>구현난이도</th>
+        <th>종합</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong style="color:var(--gold-light)">A · Ledger</strong></td>
+        <td class="star">★★★★</td>
+        <td class="star">★★</td>
+        <td class="star">★★★★★</td>
+        <td class="star">★★★</td>
+        <td class="star">★★★★</td>
+        <td><strong>클래식/실용</strong></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--gold-light)">B · Reliquary</strong></td>
+        <td class="star">★★★★</td>
+        <td class="star">★★★★★</td>
+        <td class="star">★★★</td>
+        <td class="star">★★★★</td>
+        <td class="star">★★★</td>
+        <td><strong>톤 일관 ★추천</strong></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--gold-light)">C · Lab</strong></td>
+        <td class="star">★★★</td>
+        <td class="star">★★</td>
+        <td class="star">★★</td>
+        <td class="star">★★★★★</td>
+        <td class="star">★★</td>
+        <td><strong>진열 위주</strong></td>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--gold-light)">D · Caravan</strong></td>
+        <td class="star">★★★★★</td>
+        <td class="star">★★</td>
+        <td class="star">★★★★</td>
+        <td class="star">★★★</td>
+        <td class="star">★★★</td>
+        <td><strong>모험/거래</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="verdict">
+    <strong style="color:var(--gold-light)">제 추천 — B (Stained Glass Reliquary)</strong>:<br>
+    Event UI에서 이미 B 시안을 선택하셨으므로, 상점도 B로 가면 <strong>다크 판타지 고딕 톤이 완벽히 일관</strong>됩니다.
+    특히 상점은 황금/보물이 주 컨셉이라 스테인드글라스 황금빛과 가장 잘 어울리고,
+    Relic(유물) 슬롯이 "성소의 유물함" 컨셉과 완벽 부합합니다.<br><br>
+    다만, <strong>모험/거래 느낌</strong>을 더 주고 싶다면 <strong style="color:var(--gold-light)">D (Caravan)</strong>가 "상점다운 상점"이라는 점에서 매력적입니다.
+    이 경우 상점만 톤이 약간 벗어나지만, 게임 전체의 장소 다양성(이벤트=신성/상점=세속) 측면에서 오히려 긍정적일 수 있습니다.
+  </div>
+</footer>
+
+</body>
+</html>

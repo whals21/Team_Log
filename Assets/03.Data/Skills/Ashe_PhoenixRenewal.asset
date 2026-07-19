@@ -16,7 +16,7 @@ MonoBehaviour:
   _description: 
   _skillType: 1
   _targetType: 2
-  _power: 8
+  _power: 3
   _cost: 1
   _weight: 50
   _icon: {fileID: 0}
@@ -30,7 +30,7 @@ MonoBehaviour:
   _resourceGainAmount: 1
   _resourceCostType: 0
   _resourceCostAmount: 0
-  _resourcePowerPerStack: 3
+  _resourcePowerPerStack: 1
   _consumeAllResource: 0
   _minResourceRequired: 0
   _shieldFlags: 0

@@ -16,13 +16,13 @@ MonoBehaviour:
   _description: "\uC804\uCCB4 \uBC29\uC5B4\uB825\uC744 \uAC10\uC18C\uC2DC\uD0B5\uB2C8\uB2E4."
   _skillType: 0
   _targetType: 1
-  _power: 17
+  _power: 6
   _cost: 0
   _weight: 25
   _icon: {fileID: 21300000, guid: 6a804579ee240497ab330defdfcfad4e, type: 3}
   _statusEffect: 8
   _effectDuration: 2
-  _effectValue: 3
+  _effectValue: 2
   _behaviors: []
   _resourceGainType: 0
   _resourceGainAmount: 0

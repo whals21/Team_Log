@@ -31,7 +31,7 @@ MonoBehaviour:
   _resourcePowerPerStack: 0
   _consumeAllResource: 0
   _minResourceRequired: 0
-  _shieldFlags: 1
+  _shieldFlags: 0
   _isDiscover: 0
   _discoverPool: {fileID: 0}
   _isCorpseSkill: 0

@@ -121,16 +121,20 @@ namespace TeamLog.Combat.Turn
             foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();
             foreach (var c in _enemies) if (c.IsAlive) c.ApplyStatModifiers();
 
-            // 턴 시작 시 모든 캐릭터의 쉴드 리셋
+            // 쉴드 리셋 — 각 진영은 자기 턴 시작 시 자기 진영 쉴드만 리셋.
+            // ★ Phase GF (2026-07-22): A안 — 적 쉴드는 적 턴 시작(StartEnemyTurn)에 리셋.
+            // 이렇게 해야 적이 자기 턴에 건 쉴드가 다음 플레이어 턴에 흡수됨 (Wisp_Wobble 등).
+            // 기존에는 매 턴 시작에 둘 다 리셋해서 적 쉴드가 플레이어 턴에 의미 없었음.
             foreach (var c in _playerParty) if (c.IsAlive) c.Health.ResetShield();
-            foreach (var c in _enemies) if (c.IsAlive) c.Health.ResetShield();
 
             // Phase CC-2G-5: FollowUp 추적 — 매 턴 시작 시 HitThisTurn 리셋
             foreach (var c in _playerParty) c.ResetHitThisTurn();
             foreach (var c in _enemies) c.ResetHitThisTurn();
 
-            // 적 특성: 턴 시작 훅 (Regenerate, Sturdy, PhaseShift, Rampage, Shell)
-            foreach (var c in _enemies) if (c.IsAlive) c.TraitHandler.OnTurnStart(_context.TurnNumber);
+            // ★ Phase CC (2026-07-22): 적 특성(Regenerate 등)은 적 턴 시작으로 이동.
+            // 기존에는 플레이어 턴 시작에 발동했으나, 적 턴에 발동하는 것이 자연스러움.
+            // 또한 Charge 도트(적 턴 종료)와 같은 적 턴 내에서 회복/데미지가 일어나 사용자가 한눈에 파악 가능.
+            // foreach (var c in _enemies) if (c.IsAlive) c.TraitHandler.OnTurnStart(_context.TurnNumber);
 
             // 키워드: HPPerTurn — 매턴 HP 변화 (저주: 감소, 재생: 회복)
             foreach (var c in _playerParty)
@@ -201,6 +205,13 @@ namespace TeamLog.Combat.Turn
         public bool ExecuteSkillImmediately(Character caster, SkillData skill, Character target, SkillInstance instance)
         {
             if (caster.IsDead) return false;
+
+            // ★ Phase GF (2026-07-22): CC (Stun/Freeze/Sleep) 행동 불가.
+            // 시전자가 CC 상태면 스킬 시전 차단. UI는 ActionBarUI에서 별도 처리 권장.
+            if (caster.StatusEffects.IsIncapacitated)
+            {
+                return false;
+            }
 
             // AP 체크 — 증강 + 장착 특성 반영 코스트 사용
             int effectiveCost = instance != null ? instance.EffectiveCost : skill.Cost;
@@ -408,6 +419,13 @@ namespace TeamLog.Combat.Turn
             if (CurrentPhase != TurnPhase.BattleEnd)
                 ProcessCorpseAction();
 
+            // ★ Phase GF (2026-07-22): 플레이어 턴 종료 처리 — 적 턴 진입 전.
+            // 플레이어 상태이상 감소 (Poison 2턴 등이 정확히 2번의 플레이어 턴에만 적용).
+            // 기존에는 ProcessTurnEnd가 적 턴 종료 시에만 호출되어 양 진영 모두 1번씩 감소.
+            // 이제 플레이어는 자기 턴 종료 시, 적은 자기 턴 종료 시 각각 감소 (StS 표준).
+            if (CurrentPhase != TurnPhase.BattleEnd)
+                ProcessPlayerTurnEnd();
+
             if (CurrentPhase != TurnPhase.BattleEnd)
                 StartEnemyTurn();
         }
@@ -506,6 +524,15 @@ namespace TeamLog.Combat.Turn
         {
             _context.SetPhase(TurnPhase.EnemyTurn);
 
+            // ★ Phase GF (2026-07-22): 적 턴 시작 시 적 쉴드 리셋.
+            // 적이 자기 턴에 건 쉴드는 다음 플레이어 턴까지 유지 → 이번 적 턴 시작에 리셋.
+            foreach (var c in _enemies) if (c.IsAlive) c.Health.ResetShield();
+
+            // ★ Phase CC (2026-07-22): 적 특성(Regenerate, Sturdy, PhaseShift, Provoke 등) 발동.
+            // 기존 StartNewTurn(플레이어 턴 시작)에서 발동했으나 적 턴 시작으로 이동.
+            // 이제 적 턴 내에서 재생(시작) → 행동 → Charge 도트(종료)가 모두 일어남.
+            foreach (var c in _enemies) if (c.IsAlive) c.TraitHandler.OnTurnStart(_context.TurnNumber);
+
             if (_sequentialEnemyTurn)
             {
                 // 코루틴에게 제어 위임 — 동기 실행하지 않음 (런타임 시각화용)
@@ -521,14 +548,17 @@ namespace TeamLog.Combat.Turn
 
         /// <summary>
         /// 코루틴에서 적 한 명 행동 실행. 하이라이트 후 호출됨.
+        /// ★ Phase GF (2026-07-22): CC (Stun/Freeze/Sleep) 보유 시 행동 스킵 — OnEnemyActing 호출하지 않음.
         /// </summary>
         public void ExecuteSingleEnemyAction(EnemyAIController controller)
         {
-            if (controller != null && controller.Owner.IsAlive)
-            {
-                OnEnemyActing?.Invoke(controller.Owner);
-                controller.ExecuteAction();
-            }
+            if (controller == null || !controller.Owner.IsAlive) return;
+
+            // CC 행동 불가 — 하이라이트 없이 스킵 (의도는 유지하되 시각적으로 자연스럽게 넘어감)
+            if (controller.Owner.StatusEffects.IsIncapacitated) return;
+
+            OnEnemyActing?.Invoke(controller.Owner);
+            controller.ExecuteAction();
         }
 
         /// <summary>
@@ -537,7 +567,8 @@ namespace TeamLog.Combat.Turn
         /// </summary>
         public void CompleteEnemyTurn()
         {
-            ProcessTurnEnd();
+            // ★ Phase GF (2026-07-22): 적 턴 종료 처리 (양 진영이 아닌 적만).
+            ProcessEnemyTurnEnd();
             CheckBattleEnd();
 
             if (CurrentPhase != TurnPhase.BattleEnd)
@@ -559,7 +590,8 @@ namespace TeamLog.Combat.Turn
             {
                 foreach (var controller in _enemyControllers)
                 {
-                    if (controller.Owner.IsAlive)
+                    // ★ Phase GF: CC 보유 시 행동 스킵
+                    if (controller.Owner.IsAlive && !controller.Owner.StatusEffects.IsIncapacitated)
                         controller.ExecuteAction();
                 }
             }
@@ -568,12 +600,16 @@ namespace TeamLog.Combat.Turn
                 // 폴백: AI 없으면 기본 공격
                 foreach (var enemy in _enemies)
                 {
-                    if (enemy.IsAlive)
+                    // ★ Phase GF: CC 보유 시 행동 스킵
+                    if (enemy.IsAlive && !enemy.StatusEffects.IsIncapacitated)
                         ExecuteFallbackEnemyAction(enemy);
                 }
             }
 
-            ProcessTurnEnd();
+            // ★ Phase GF (2026-07-22 P0-2 수정): 적 턴 종료 처리만 —
+            // 플레이어는 이미 ConfirmActions에서 ProcessPlayerTurnEnd 처리됨.
+            // 기존 ProcessTurnEnd() (양쪽)는 플레이어 상태이상/자원 효과가 2배 적용되는 회귀가 있었음.
+            ProcessEnemyTurnEnd();
             CheckBattleEnd();
 
             if (CurrentPhase != TurnPhase.BattleEnd)
@@ -592,55 +628,60 @@ namespace TeamLog.Combat.Turn
         }
 
         /// <summary>
-        /// 턴 종료 처리 — 상태이상 DoT 적용, 지속시간 감소, 만료 효과 제거
+        /// 턴 종료 처리 — 양 진영 모두 (시뮬레이터 비순차 모드 전용).
+        /// ★ Phase GF (2026-07-22): 진영별 분리 — ProcessPlayerTurnEnd / ProcessEnemyTurnEnd로 분리됨.
+        /// 런타임(순차 모드)에서는 분리된 함수들을 별도 시점에 호출하여 CC duration이 정확히 적용.
         /// </summary>
         private void ProcessTurnEnd()
         {
+            ProcessPlayerTurnEnd();
+            ProcessEnemyTurnEnd();
+        }
+
+        /// <summary>
+        /// ★ Phase GF (2026-07-22): 플레이어 턴 종료 처리.
+        /// 플레이어 행동 종료 직후(ConfirmActions) 호출 — 플레이어 상태이상 감소.
+        /// 적 턴 중에도 플레이어 상태이상은 감소하지 않음 (StS 표준).
+        /// </summary>
+        private void ProcessPlayerTurnEnd()
+        {
             foreach (var c in _playerParty) if (c.IsAlive) c.OnTurnEnd();
-            foreach (var c in _enemies) if (c.IsAlive) c.OnTurnEnd();
 
             // Phase CC: 캐릭터 고유 자원 턴 종료 훅 (Ashe Ember×2 자해, Lumi Frost 절반 소실 등)
             foreach (var c in _playerParty)
                 if (c.IsAlive && c.Resource != null) c.Resource.OnTurnEnd(c);
 
-            // Phase CC: Taranis Charge 네트워크 연쇄
-            // 기획: 각 전하 적이 자신의 스택 수만큼 "다른 전하 적"에게 도트 (1스택당 1).
-            // 다수전에서 네트워크가 폭발, 단일(보스전)에서는 자기 자신에게만 도트 (자연 약화).
+            // 만료된 효과 제거 후 스탯 수정자 재계산 (플레이어만)
+            foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();
+
+            // ★ Phase GF (2026-07-22 P0-1 수정): FireTurnEnd — StS 표준 "플레이어 턴 종료 시" 발생.
+            // RelicHandler/CharacterTraitHandler OnTurnEnd 트리거가 적 턴 진입 전에 정상 작동.
+            // 기존에는 ProcessEnemyTurnEnd에 있어서 "적 턴 종료 시"에만 발생하는 회귀가 있었음.
+            CombatEventBus.FireTurnEnd();
+        }
+
+        /// <summary>
+        /// ★ Phase GF (2026-07-22): 적 턴 종료 처리.
+        /// 적 행동 종료 직후(CompleteEnemyTurn) 호출 — 적 상태이상 감소 + Charge 연쇄.
+        /// </summary>
+        private void ProcessEnemyTurnEnd()
+        {
+            foreach (var c in _enemies) if (c.IsAlive) c.OnTurnEnd();
+
+            // ★ Phase CC (2026-07-22 재설계): Taranis Charge 도트 — 단순화.
+            // 규칙: Charge 보유 적이 매 턴 종료 시 고정 3 데미지를 자기 자신에게 받음.
+            // 도트 후 Charge -1 (0이면 소멸). Charge 스택 = 지속 턴 수.
+            // 기존 연쇄/광역/자폭 분기 제거. 단순하게 "자기 자신에게 3".
+            const int ChargeDamage = 3;
             var chargedEnemies = _enemies.FindAll(e => e.IsAlive && e.StatusEffects.HasEffect(StatusEffectType.Charge));
-            if (chargedEnemies.Count > 1)
-            {
-                // 네트워크 연쇄: 각 Charge 적이 다른 Charge 적들에게 자신의 스택 수만큼 도트
-                foreach (var attacker in chargedEnemies)
-                {
-                    int myStacks = 0;
-                    foreach (var eff in attacker.StatusEffects.GetAllEffects())
-                        if (eff.Type == StatusEffectType.Charge) { myStacks = eff.Value; break; }
-                    if (myStacks <= 0) continue;
 
-                    foreach (var defender in chargedEnemies)
-                    {
-                        if (defender == attacker) continue;
-                        defender.Health.TakeDamage(myStacks);
-                        CombatEventBus.FireDamageReceived(defender, myStacks);
-                    }
-                }
-            }
-            else if (chargedEnemies.Count == 1)
+            foreach (var enemy in chargedEnemies)
             {
-                // 단일 Charge 적 — 자기 자신에게만 도트 (네트워크 대상 없음 = 자연 약화)
-                int stacks = 0;
-                foreach (var eff in chargedEnemies[0].StatusEffects.GetAllEffects())
-                    if (eff.Type == StatusEffectType.Charge) { stacks = eff.Value; break; }
-                if (stacks > 0)
-                {
-                    chargedEnemies[0].Health.TakeDamage(stacks);
-                    CombatEventBus.FireDamageReceived(chargedEnemies[0], stacks);
-                }
+                enemy.Health.TakeDamage(ChargeDamage);
+                CombatEventBus.FireDamageReceived(enemy, ChargeDamage);
             }
 
-            // Phase CC P0-3: Taranis Charge 자연 소멄 — 매 턴 모든 적의 Charge value -1.
-            // 기획: "2턴마다 -1스택"이나 단순화 매 턴 -1 (사용자 결정 2026-07-02).
-            // value가 0이 되면 제거. 연쇄 도트 처리 후에 실행되어 이번 턴 도트는 온전히 들어감.
+            // Charge -1 (자연 소멄)
             var toRemove = new List<Character>();
             foreach (var enemy in chargedEnemies)
             {
@@ -655,11 +696,11 @@ namespace TeamLog.Combat.Turn
             foreach (var enemy in toRemove)
                 enemy.StatusEffects.RemoveEffect(StatusEffectType.Charge);
 
-            // 만료된 효과 제거 후 스탯 수정자 재계산
-            foreach (var c in _playerParty) if (c.IsAlive) c.ApplyStatModifiers();
+            // 만료된 효과 제거 후 스탯 수정자 재계산 (적만 — 플레이어는 ProcessPlayerTurnEnd에서)
             foreach (var c in _enemies) if (c.IsAlive) c.ApplyStatModifiers();
 
-            CombatEventBus.FireTurnEnd();
+            // ★ Phase GF (2026-07-22 P0-1): FireTurnEnd 제거 — ProcessPlayerTurnEnd로 이동.
+            // CombatEventBus.FireTurnEnd();
         }
 
         private void CheckBattleEnd()

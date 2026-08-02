@@ -243,6 +243,10 @@ namespace TeamLog.Editor
             if (combatResult.Victory)
             {
                 runState.OnBattleVictory();
+                // ★ 2026-08-02 추가: 전투 종료 시 ProcessBattleEnd(true) 호출로
+                // 생존자 HP 100% 회복 + 사망자 50% 부활 (GameRunState와 동일 정책)
+                // 이전까지 누락되어 HP 누적/파티원 부족으로 사망 패턴이 왜곡되었음.
+                runState.ProcessBattleEnd(true);
                 var rewardMgr = new RewardManager();
                 var rewards = rewardMgr.GenerateRewards(battleType, runState);
                 if (rewards != null && rewards.Count > 0)
@@ -279,6 +283,9 @@ namespace TeamLog.Editor
             if (combatResult.Victory)
             {
                 runState.OnBattleVictory();
+                // ★ 2026-08-02 추가: 보스 전투 종료 시에도 ProcessBattleEnd(true)로
+                // 부활/풀힐 적용 (일반 전투와 동일 정책)
+                runState.ProcessBattleEnd(true);
                 // 보스 보상
                 var rewardMgr = new RewardManager();
                 var rewards = rewardMgr.GenerateRewards(MapNodeType.Boss, runState);

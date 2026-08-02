@@ -66,7 +66,7 @@ namespace TeamLog.Combat
             StatusEffectType.Freeze, StatusEffectType.Sleep
         };
 
-        private void OnSkillApplied(SkillData skill, Character target)
+        private void OnSkillApplied(SkillData skill, Character caster, Character target)
         {
             var panel = _battleUIManager?.GetPanelTransform(target);
 
@@ -95,6 +95,10 @@ namespace TeamLog.Combat
                     _vfxManager?.PlayPurifyEffect(panel);
                     break;
             }
+
+            // ★ Phase GF (2026-07-21): 전투 연출 시스템 (Tier S/A/B) 라우팅.
+            // 스킬 이름 팝업(A2) + 투사체(B1) + 시전자/타겟 반응(B2) 처리.
+            _directionController?.PlaySkillCastDirection(caster, skill, target);
         }
 
         private void PlayAttackSound(SkillData skill)
@@ -150,6 +154,13 @@ namespace TeamLog.Combat
             AudioManager.Instance.PlayMiss();
         }
 
+        /// <summary>★ 2026-08-02 P1-4: 크리티컬 히트 감지 — 금색 CRIT! 텍스트 표시.</summary>
+        private void HandleCriticalHit(Character target, int damage)
+        {
+            if (target == null) return;
+            SpawnCriticalText(target, damage);
+        }
+
         #endregion
 
         #region Turn & Battle Lifecycle Handlers
@@ -157,11 +168,19 @@ namespace TeamLog.Combat
         private void OnPhaseChanged(TurnPhase oldPhase, TurnPhase newPhase)
         {
             _battleUIManager?.UpdateAllPanels();
+
+            // ★ Phase GF (2026-07-21): 적 턴 진입 시 배너 (S1)
+            // OnTurnStarted는 매 턴 시작 (플레이어 턴)에만 호출되므로, 적 턴은 OnPhaseChanged에서 감지.
+            if (newPhase == TurnPhase.EnemyTurn && oldPhase != TurnPhase.EnemyTurn)
+                _directionController?.PlayTurnStartDirection(_turnManager.TurnNumber, isPlayerTurn: false);
         }
 
         private void OnTurnStarted(int turnNumber)
         {
             _battleUIManager?.UpdateAllPanels();
+
+            // ★ Phase GF (2026-07-21): 아군 턴 배너 (S1)
+            _directionController?.PlayTurnStartDirection(turnNumber, isPlayerTurn: true);
 
             foreach (var controller in _enemyControllers)
             {
@@ -311,6 +330,15 @@ namespace TeamLog.Combat
             FloatingTextUI.Spawn(panelTransform, message, color, new Vector2(0, 30));
         }
 
+        /// <summary>★ 2026-08-02 P1-4: 크리티컬 히트 전용 플로팅 텍스트 (금색 + 대형).</summary>
+        private void SpawnCriticalText(Character character, int damage)
+        {
+            var panelTransform = _battleUIManager?.GetPanelTransform(character);
+            if (panelTransform == null) return;
+            // 일반 플로팅 텍스트(0, 30)보다 위에 배치하여 겹침 방지
+            FloatingTextUI.SpawnCritical(panelTransform, damage, new Vector2(0, 80));
+        }
+
         // ── 데미지 VFX — 크리티컬 히트 감지 + 임팩트 연출 ──
 
         private bool _hitStopActive;
@@ -432,6 +460,9 @@ namespace TeamLog.Combat
                 _turnManager.OnEnemyActing -= OnEnemyActing;
             }
 
+            // Phase GF (2026-07-20): 보스 페이즈 매니저 정리 — CombatEventBus 구독 해제
+            CleanupBossPhaseManager();
+
             _actionController?.Shutdown();
 
             // 캐릭터 이벤트 해제 — 플레이어는 씬 전환 후에도 유지되므로 반드시 클린업
@@ -452,6 +483,7 @@ namespace TeamLog.Combat
             // 정적 이벤트 클린업
             SkillExecutor.OnSkillApplied -= OnSkillApplied;
             DamageCalculator.OnAttackMissed -= OnAttackMissed;
+            DamageCalculator.OnCriticalHit -= HandleCriticalHit;
             DamageCalculator.ClearEvents();
             SkillExecutor.ClearEvents();
 

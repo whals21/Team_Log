@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TeamLog.Combat.Draw;
 using TeamLog.Combat.Turn;
+using TeamLog.UI;
 using TeamLog.UI.Battle;
 using TeamLog.Skill;
 
@@ -136,6 +137,10 @@ namespace TeamLog.Combat
             _actionBar.UpdateActionSlots(slots);
             _uiManager.ClearAllHighlights();
             UpdateRerollUI();
+
+            // ★ Phase GF (2026-07-21): 드로우 완료 후 슬롯 순차 등장 애니메이션 트리거.
+            // 첫 턴 포함 매 드로우 시 확실하게 트리거 (isNewDraw 판단 불필요).
+            _actionBar.NotifyNewDraw();
         }
 
         // ── Slot Selection ──────────────────────────────────────────
@@ -390,9 +395,18 @@ namespace TeamLog.Combat
             // 발견 스킬 타겟팅 진행 중
             if (_pendingDiscoverSkill != null && _targetMode == TargetMode.SelectingEnemy)
             {
-                if (enemyIndex < 0 || enemyIndex >= _enemies.Count) return;
+                // ★ P1-3 일관성: 발견 스킬 분기에도 경고 사운드 추가
+                if (enemyIndex < 0 || enemyIndex >= _enemies.Count)
+                {
+                    AudioManager.Instance?.PlayUIWarning();
+                    return;
+                }
                 var enemy = _enemies[enemyIndex];
-                if (!enemy.IsAlive) return;
+                if (!enemy.IsAlive)
+                {
+                    AudioManager.Instance?.PlayUIWarning();
+                    return;
+                }
 
                 var slot = _drawSystem.GetSlot(_selectedSlotIndex);
                 if (slot == null) return;
@@ -404,9 +418,18 @@ namespace TeamLog.Combat
 
             if (_targetMode != TargetMode.SelectingEnemy) return;
 
-            if (enemyIndex < 0 || enemyIndex >= _enemies.Count) return;
+            // ★ 2026-08-02 P1-3: 유효하지 않은 타겟 클릭 시 피드백 (경고 사운드)
+            if (enemyIndex < 0 || enemyIndex >= _enemies.Count)
+            {
+                AudioManager.Instance?.PlayUIWarning();
+                return;
+            }
             var enemyTarget = _enemies[enemyIndex];
-            if (!enemyTarget.IsAlive) return;
+            if (!enemyTarget.IsAlive)
+            {
+                AudioManager.Instance?.PlayUIWarning();
+                return;
+            }
 
             var targetSlot = _drawSystem.GetSlot(_selectedSlotIndex);
             if (targetSlot == null) return;

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_BossVTRightHalf
+  m_EditorClassIdentifier: 
+  _characterName: "\uB179\uC0C9 \uACF5\uD3EC - \uC624\uB978\uCABD \uBD84\uC2E0"
+  _characterClass: 0
+  _description: Warrior
+  _baseHP: 18
+  _baseATK: 0
+  _baseDEF: 0
+  _enemyTrait: 1
+  _isBoss: 0
+  _skills:
+  - {fileID: 11400000, guid: cff1be6e8030ca940a588624b3e6e283, type: 2}
+  - {fileID: 11400000, guid: fcd079ac08f2af74a9daf04ec5af84d6, type: 2}
+  - {fileID: 11400000, guid: 046a880ca79fd1a419e99f3d5d76d408, type: 2}
+  - {fileID: 11400000, guid: 63e8bfe93b91b9e4eb611c0934f19e72, type: 2}
+  _isDefault: 1
+  _unlockCondition: 
+  _resourceType: 0
+  _baseCritChance: 0
+  _baseCritDamageMul: 1.5
+  _corpseBaseSkills: []

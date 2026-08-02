@@ -7,6 +7,7 @@ using TeamLog.Combat.Turn;
 using TeamLog.Combat.Draw;
 using TeamLog.Characters;
 using TeamLog.UI;
+using TeamLog.UI.Battle.Direction;  // ★ Phase GF: BattleDirectionController
 
 namespace TeamLog.UI.Battle
 {
@@ -30,6 +31,9 @@ namespace TeamLog.UI.Battle
         private int _nextExecutionOrder;
         private int _currentAP;
 
+        // ★ Phase GF (2026-07-21): 전투 연출 컨트롤러 (S2 슬롯 순차 등장용)
+        private BattleDirectionController _directionController;
+
         public event Action<int> OnSlotSelected;
         public event Action OnSlotSelectionCancelled;
         public event Action<int> OnSlotRerollRequested;
@@ -40,6 +44,12 @@ namespace TeamLog.UI.Battle
             CreateActionSlots();
             BindEvents();
             StatusEffectBadge.OnBadgeClicked += OnBadgeClicked;
+        }
+
+        /// <summary>★ Phase GF: BattleSceneSetup/DirectionController에서 주입.</summary>
+        public void SetDirectionController(BattleDirectionController controller)
+        {
+            _directionController = controller;
         }
 
         private void CreateActionSlots()
@@ -73,6 +83,15 @@ namespace TeamLog.UI.Battle
                 if (i < slots.Count)
                 {
                     var slot = slots[i];
+
+                    // ★ Phase GF (2026-07-21): slot.Skill이 null이면 죽은 캐릭터 슬롯 — 빈 슬롯 표시.
+                    // 캐릭터 순서와 슬롯 순서 일치 (SkillDrawSystem이 죽은 캐릭터도 빈 슬롯으로 포함).
+                    if (slot.Skill == null)
+                    {
+                        _actionSlots[i].SetEmpty();
+                        continue;
+                    }
+
                     _actionSlots[i].gameObject.SetActive(true);
                     _actionSlots[i].SetSkill(slot.Skill, slot.Caster);
                     _actionSlots[i].SetAssigned(slot.IsAssigned);
@@ -81,10 +100,21 @@ namespace TeamLog.UI.Battle
                 }
                 else
                 {
+                    // 파티 크기 초과 (미사용 슬롯) — 숨김
                     _actionSlots[i].Clear();
                     _actionSlots[i].gameObject.SetActive(false);
                 }
             }
+        }
+
+        /// <summary>
+        /// ★ Phase GF: 드로우 완료 알림 — PlayerActionController.OnDrawComplete에서 호출.
+        /// 이 시점에 슬롯 순차 등장 애니메이션 트리거 (매 턴 시작, 첫 턴 포함).
+        /// </summary>
+        public void NotifyNewDraw()
+        {
+            if (_directionController != null)
+                _directionController.PlaySlotDrawEntrance(_actionSlots);
         }
 
         public void SelectSlot(int slotIndex)
@@ -93,6 +123,10 @@ namespace TeamLog.UI.Battle
 
             for (int i = 0; i < _actionSlots.Count; i++)
                 _actionSlots[i].SetSelected(i == slotIndex);
+
+            // ★ Phase GF (2026-07-21): A1 — 선택된 슬롯 글로우 점화
+            if (slotIndex >= 0 && slotIndex < _actionSlots.Count && _directionController != null)
+                _directionController.PlaySlotUseGlow(_actionSlots[slotIndex]);
 
             OnSlotSelected?.Invoke(slotIndex);
         }
@@ -189,12 +223,33 @@ namespace TeamLog.UI.Battle
 
         private void Update()
         {
+            if (!isActiveAndEnabled) return;
+
+            // ★ 2026-08-02 P2-2: 숫자 키 1-6으로 슬롯 직접 선택
+            for (int i = 0; i < 6; i++)
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                {
+                    if (i < _actionSlots.Count)
+                        SelectSlot(i);
+                    return;
+                }
+            }
+
+            // ESC: 선택 취소
             if (Input.GetKeyDown(KeyCode.Escape) && _selectedSlotIndex >= 0)
             {
                 _selectedSlotIndex = -1;
                 foreach (var slot in _actionSlots)
                     slot.SetSelected(false);
                 OnSlotSelectionCancelled?.Invoke();
+            }
+
+            // ★ 2026-08-02 P2-2: Space/Enter로 턴 종료
+            if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+            {
+                if (_endTurnButton != null && _endTurnButton.interactable)
+                    OnEndTurnClicked();
             }
         }
     }

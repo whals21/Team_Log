@@ -15,19 +15,19 @@ MonoBehaviour:
   themeId: GreyForest
   displayName: "\uC7BF\uBE5B \uC232"
   stageNumber: 1
-  description: "\uD29C\uD1A0\uB9AC\uC5BC \uC2A4\uD14C\uC774\uC9C0. AP \uAD00\uB9AC\uC640
-    \uD0C0\uAC9F \uC6B0\uC120\uC21C\uC704 \uD559\uC2B5."
+  description: "\uC7AC\uC0DD\uACFC \uB3C5\uC758 \uC545\uC21C\uD658. \uB9E4 \uB7F0
+    \uB2E4\uB978 \uACF5\uB7B5\uBC95 \uC694\uAD6C \u2014 \uD55C \uBC29\uC5D0 \uC7A1\uAC70\uB098
+    \uC815\uD654\uAC00 \uD544\uC218."
   normalEnemies:
-  - {fileID: 11400000, guid: 8c3d19e253ce8cd47bdbe7c9e8bb99e9, type: 2}
-  - {fileID: 11400000, guid: 0ca3cdc3ce49dc846a6d08a5af0ae587, type: 2}
-  - {fileID: 11400000, guid: 5339d9da1d43f2c4b8f46a88dac05325, type: 2}
-  - {fileID: 11400000, guid: a0554e5b2dde08e40a682e5103410dd7, type: 2}
+  - {fileID: 11400000, guid: 891cb39a36a180145b55124e2a079283, type: 2}
+  - {fileID: 11400000, guid: ed6b77b33fb84ed4bb1aabba68dc6423, type: 2}
+  - {fileID: 11400000, guid: 20274cbaead95134c917db7d6882f85d, type: 2}
+  - {fileID: 11400000, guid: ffe4b42f7c46bf54eb8b2ffc2d418da3, type: 2}
   eliteEnemies:
-  - {fileID: 11400000, guid: d59c15a49f2731a4bb5f095cf7b7da4d, type: 2}
-  - {fileID: 11400000, guid: e3182ba91914e3f4787805291cefc6d4, type: 2}
-  - {fileID: 11400000, guid: 030262a7eea30df41a59429168f81dc6, type: 2}
+  - {fileID: 11400000, guid: 7162a0950f45c5f438c91adb866b4505, type: 2}
+  - {fileID: 11400000, guid: 5c81e7a202d6a2849ae1e3e9de316548, type: 2}
   boss: {fileID: 11400000, guid: 6c829ff463cf569479eb4a8c4d6270e8, type: 2}
-  spawnPatternTable: {fileID: 11400000, guid: 532a074e0e9831e47bf0ae32f249c650, type: 2}
+  spawnPatternTable: {fileID: 11400000, guid: a68fe03a3a9ee584b8a8226bff5bdd10, type: 2}
   themeKeywords:
   - "\uC7AC\uC0DD"
   - "\uB3C5"

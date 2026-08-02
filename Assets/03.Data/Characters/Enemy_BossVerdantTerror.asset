@@ -14,19 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _characterName: "\uC2EC\uC220\uAD82\uC740 \uB098\uBB34\uC815\uB839"
   _characterClass: 0
-  _description: Warrior
-  _baseHP: 35
-  _baseATK: 0
+  _description: "50%\uC5D0\uC11C \uBD84\uC5F4."
+  _baseHP: 0
+  _baseATK: 40
   _baseDEF: 0
-  _enemyTrait: 1
+  _enemyTrait: 0
   _isBoss: 1
-  _skills:
-  - {fileID: 11400000, guid: 2c41540f0cab3cd4eac979933c3fba66, type: 2}
-  - {fileID: 11400000, guid: 22e0d43c0d4ec474ba359d6e868002d3, type: 2}
-  - {fileID: 11400000, guid: 0a947d29f07b7cb4493642163a38fded, type: 2}
-  - {fileID: 11400000, guid: d29e244ce93af53408f0d2122402bbf5, type: 2}
-  _isDefault: 1
-  _unlockCondition: 
+  _skills: []
+  _isDefault: 0
+  _unlockCondition: 1
   _resourceType: 0
   _baseCritChance: 0
   _baseCritDamageMul: 1.5

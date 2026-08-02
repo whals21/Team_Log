@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_EliteCompostKing
+  m_EditorClassIdentifier: 
+  _characterName: "\uD1F4\uBE44 \uC655"
+  _characterClass: 0
+  _description: Mage
+  _baseHP: 14
+  _baseATK: 0
+  _baseDEF: 0
+  _enemyTrait: 14
+  _isBoss: 0
+  _skills:
+  - {fileID: 11400000, guid: 1f847c8552a2eed46807c55221db4e5b, type: 2}
+  - {fileID: 11400000, guid: ce144ffed57592a4e87f54975807a239, type: 2}
+  - {fileID: 11400000, guid: 008dee3cbf0c727478039802ceccfcab, type: 2}
+  - {fileID: 11400000, guid: 986997e823b53d8499f295007f2207d3, type: 2}
+  _isDefault: 1
+  _unlockCondition: 
+  _resourceType: 0
+  _baseCritChance: 0
+  _baseCritDamageMul: 1.5
+  _corpseBaseSkills: []

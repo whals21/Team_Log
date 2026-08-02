@@ -36,9 +36,9 @@ DarkSlime_PoisonCloud,독 구름,맹독을 내뿜습니다.,Debuff,AllEnemies,0,
 DarkSlime_DarkShield,어둠의 방패,쉴드를 얻습니다.,Shield,Self,2,0,25,None,0,0
 DarkSlime_Absorb,흡수,체력을 회복합니다.,Heal,Self,2,0,25,None,0,0
 BossVT_Strike,넝쿨 채찍,단일 물리 공격입니다.,Attack,SingleEnemy,5,0,25,None,0,0
-BossVT_PoisonBreath,독성 포자,전체에 독을 겁니다.,Attack,AllEnemies,4,0,25,Poison,3,2
-BossVT_Regrow,재생 성장,HP를 회복합니다.,Heal,Self,5,0,25,None,0,0
-BossVT_Roots,속박 뿌리,단일 적을 기절시킵니다.,Attack,SingleEnemy,5,0,25,Stun,1,0
+BossVT_PoisonBreath,독성 포자,전체에 독을 겁니다.,Attack,AllEnemies,3,0,25,Poison,3,2
+BossVT_Regrow,재생 성장,매 턴 HP를 크게 회복합니다.,Buff,Self,0,0,25,Regeneration,3,5
+BossVT_Roots,속박 뿌리,단일 적을 기절시킵니다.,Attack,SingleEnemy,4,0,25,Stun,1,0
 BossFM_IceLance,얼음 창,단일 빙결 공격입니다.,Attack,SingleEnemy,6,0,25,Freeze,1,0
 BossFM_FrostNova,서리 파열,전체 빙결 공격입니다.,Attack,AllEnemies,5,0,25,Freeze,1,0
 BossFM_IceBarrier,얼음 방벽,쉴드를 얻습니다.,Shield,Self,5,0,25,None,0,0
@@ -127,3 +127,35 @@ Alch_HealPotion,치유 물약,아군에게 치유 물약을 투여합니다.,Hea
 Alch_PoisonBomb,독 폭탄,독이 든 폭탄을 투척합니다.,Attack,AllEnemies,2,2,25,Poison,2,2
 Alch_BoostPotion,강화 물약,아군의 공격력을 강화합니다.,Buff,SingleAlly,0,1,25,AttackUp,2,2
 Alch_ShieldPotion,보호막 물약,아군에게 보호막을 부여합니다.,Shield,SingleAlly,3,2,25,None,0,0
+Wisp_Whip,잿빛 채찍,넝쿨로 가볍게 내리칩니다.,Attack,SingleEnemy,1,0,30,None,0,0
+Wisp_MoldSpore,곰팡이 포자,포자를 뿜어 적을 중독시킵니다.,Debuff,SingleEnemy,0,0,25,Poison,2,1
+Wisp_RegenLight,재생의 빛,빛으로 상처를 치유합니다.,Buff,Self,0,0,25,Regeneration,3,2
+Wisp_Wobble,출렁임,젤리 같은 몸으로 자신 또는 아군에게 실드를 부여합니다.,Shield,SingleAlly,2,0,15,None,0,0
+Crawler_AcidSting,산성 침,관통하는 산성 침입니다.,Attack,SingleEnemy,1,0,30,Poison,2,1
+Crawler_ChokingSpray,질식 분무,포자 가스를 뿜어 모든 적에게 독을 겁니다.,Debuff,AllEnemies,0,0,25,Poison,2,1
+Crawler_JawSnap,턱 물기,강력한 턱으로 깨물습니다.,Attack,SingleEnemy,2,0,25,None,0,0
+Crawler_Cling,매달리기,적에게 매달려 기절시킵니다.,Debuff,SingleEnemy,0,0,20,Stun,1,0
+Bulwark_BodySlam,몸통박치기,느리지만 무거운 일격입니다.,Attack,SingleEnemy,2,0,30,None,0,0
+Bulwark_MossShield,이끼 방패,이끼로 보호막을 얻습니다.,Shield,Self,4,0,25,None,0,0
+Bulwark_RegenNutrient,재생의 양분,영양분을 흡수하여 회복합니다.,Buff,Self,0,0,25,Regeneration,2,1
+Bulwark_RootGrasp,뿌리 휘감기,뿌리로 휘감어 방어를 약화시킵니다.,Attack,SingleEnemy,1,0,20,DefenseDown,1,1
+Sporecaller_GrowthSpurt,생장 촉진,모든 아군에게 재생을 부여합니다.,Buff,AllAllies,0,0,30,Regeneration,2,1
+Sporecaller_MoldMist,곰팡이 안개,곰팡이 안개로 모든 적에게 독을 겁니다.,Debuff,AllEnemies,0,0,25,Poison,2,1
+Sporecaller_SporeBurst,포자 폭발,단일 적에 장기 독을 겁니다.,Debuff,SingleEnemy,1,0,25,Poison,3,1
+Sporecaller_Headbutt,머리 박치기,급전용 자기방어 공격입니다.,Attack,SingleEnemy,1,0,20,None,0,0
+Wither_CorruptWhip,부패의 채찍,부패한 넝쿨로 강타합니다.,Attack,SingleEnemy,4,0,30,Poison,2,1
+Wither_RegenRitual,재생의 의식,매 턴 HP를 크게 회복합니다.,Buff,Self,0,0,25,Regeneration,3,3
+Wither_Thornbark,가시 나무,가시 껍질로 반사 데미지를 얻습니다.,Buff,Self,0,0,25,DefenseUp,3,3
+Wither_RottenRoot,썩은 뿌리,썩은 뿌리로 기절시킵니다.,Attack,SingleEnemy,3,0,20,Stun,1,0
+Compost_PlagueCloud,역병 구름,광역 장기 독을 겁니다.,Debuff,AllEnemies,0,0,30,Poison,3,1
+Compost_CorpseFeast,시체 포식,시체를 먹어 HP를 회복합니다.,Heal,Self,4,0,25,None,0,0
+Compost_RotCurse,부패의 저주,적의 방어를 영구히 약화시킵니다.,Debuff,SingleEnemy,0,0,25,DefenseDown,2,1
+Compost_SporeStorm,포자 폭풍,모든 적을 공격하고 독을 겁니다.,Attack,AllEnemies,2,0,20,Poison,1,1
+VTL_Whip,왼쪽 넝쿨,왼쪽 분신의 넝쿨 채찍.,Attack,SingleEnemy,4,0,30,Poison,2,1
+VTL_PoisonSpore,왼쪽 독성 포자,강화된 광역 독.,Attack,AllEnemies,3,0,25,Poison,3,2
+VTL_Regen,왼쪽 재생,왼쪽 분신의 재생.,Buff,Self,0,0,25,Regeneration,2,3
+VTL_Roots,왼쪽 속박,왼쪽 분신의 속박 뿌리.,Attack,SingleEnemy,3,0,20,Stun,1,0
+VTR_Whip,오른쪽 넝쿨,오른쪽 분신의 넝쿨 채찍.,Attack,SingleEnemy,4,0,30,None,0,0
+VTR_PoisonSpore,오른쪽 독성 포자,오른쪽 분신의 광역 독.,Attack,AllEnemies,2,0,25,Poison,2,3
+VTR_Regrowth,오른쪽 재생,오른쪽 분신의 강화된 재생.,Buff,Self,0,0,25,Regeneration,3,4
+VTR_Roots,오른쪽 속박,오른쪽 분신의 속박 뿌리.,Attack,SingleEnemy,3,0,20,Stun,1,0

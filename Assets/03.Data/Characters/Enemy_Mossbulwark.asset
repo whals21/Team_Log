@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feeadbc417efd1d4cbc6d9d455f57447, type: 3}
+  m_Name: Enemy_Mossbulwark
+  m_EditorClassIdentifier: 
+  _characterName: "\uC774\uB07C \uBC29\uD328\uBCD1"
+  _characterClass: 0
+  _description: Warrior
+  _baseHP: 12
+  _baseATK: 0
+  _baseDEF: 0
+  _enemyTrait: 15
+  _isBoss: 0
+  _skills:
+  - {fileID: 11400000, guid: ecf4552fbd21b674b8ae3094c7fb4966, type: 2}
+  - {fileID: 11400000, guid: e00477757743d5d498e0dc2a89679cdd, type: 2}
+  - {fileID: 11400000, guid: afea17c054d04544ebd7571686423c5f, type: 2}
+  - {fileID: 11400000, guid: 64fa14966dd51f14fb540ad9b51fafc7, type: 2}
+  _isDefault: 1
+  _unlockCondition: 
+  _resourceType: 0
+  _baseCritChance: 0
+  _baseCritDamageMul: 1.5
+  _corpseBaseSkills: []

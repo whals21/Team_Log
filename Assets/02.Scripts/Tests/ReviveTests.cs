@@ -153,8 +153,8 @@ namespace TeamLog.Tests
 
             Assert.IsFalse(ended);
             Assert.IsTrue(dead.IsAlive, "사망자 부활해야 함");
-            Assert.AreEqual(36, dead.Health.CurrentHP, "80 × 0.9 × 0.5 = 36"); // MaxHP 0.9배 후 50%
-            Assert.AreEqual(72, dead.Health.MaxHP, "MaxHP 0.9배 누적");
+            Assert.AreEqual(40, dead.Health.CurrentHP, "80 × 0.5 = 40 (MaxHP 50% 부활)");
+            Assert.AreEqual(80, dead.Health.MaxHP, "MaxHP 페널티 없음 (2026-07-20 제거)");
         }
 
         [Test]
@@ -192,9 +192,9 @@ namespace TeamLog.Tests
         }
 
         [Test]
-        public void ProcessBattleEnd_ReviveAccumulates_MaxHpAcrossMultipleBattles()
+        public void ProcessBattleEnd_ReviveDoesNotReduceMaxHp_AcrossMultipleBattles()
         {
-            // 같은 캐릭터가 연속 2회 사망/부활 — MaxHP 0.9배씩 2회 누적.
+            // 같은 캐릭터가 연속 2회 사망/부활 — MaxHP 페널티 없음 검증 (2026-07-20 제거).
             // 생존자 1명을 항상 유지해야 "전멸" 분기에 걸리지 않음.
             var survivor = CreateCharacter(200); // 생존자 (절대 죽지 않음)
             var c = CreateCharacter(100);
@@ -206,12 +206,14 @@ namespace TeamLog.Tests
             // 1차 사망/부활
             c.Health.TakeDamage(100);
             runState.ProcessBattleEnd(victory: true);
-            Assert.AreEqual(90, c.Health.MaxHP, "1회: 100 × 0.9 = 90");
+            Assert.AreEqual(100, c.Health.MaxHP, "1회 부활 후에도 MaxHP 변화 없음");
+            Assert.AreEqual(50, c.Health.CurrentHP, "1회: 100 × 0.5 = 50");
 
             // 2차 사망/부활
             c.Health.TakeDamage(100);
             runState.ProcessBattleEnd(victory: true);
-            Assert.AreEqual(81, c.Health.MaxHP, "2회: 90 × 0.9 = 81");
+            Assert.AreEqual(100, c.Health.MaxHP, "2회 부활 후에도 MaxHP 변화 없음");
+            Assert.AreEqual(50, c.Health.CurrentHP, "2회: 100 × 0.5 = 50");
         }
 
         // ── CombatEventBus.OnPartyMemberRevived ──

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0914af7ca0c602241b3c3abcafabd26e, type: 3}
+  m_Name: Pattern_Enemy_AshwoodWisp
+  m_EditorClassIdentifier: 
+  _enemyId: Enemy_AshwoodWisp
+  _skills:
+  - {fileID: 11400000, guid: 14eae9a78bab53e4d9de5a679748c2af, type: 2}
+  - {fileID: 11400000, guid: 40c25bebb085473429d8d7d095d4ba5f, type: 2}
+  - {fileID: 11400000, guid: 649b8f63cb54d9a47a105800da838a1c, type: 2}
+  - {fileID: 11400000, guid: efe193c09c13338479cba2ce8e1bb524, type: 2}
+  _weights: 1e00000019000000190000000f000000

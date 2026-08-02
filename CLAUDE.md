@@ -63,8 +63,8 @@ Assets/
 - **드로우 가중치**: 모든 플레이어 스킬 weight=25 균등
 - **자원 6종**: Ember(Ashe, 자해폭딜)/Vengeance(Duran, 복수)/Frost(Lumi, 통제)/Prophecy(Sibyl, 1턴 뒤)/Charge(Taranis, 네트워크 연쇄)/Shadows(Umbra, 치명타)
 
-### 부활 시스템 (Phase CC-0)
-- 전투 종료 시 사망자 50% 부활 + MaxHP 영구 0.9배 누적
+### 부활 시스템 (Phase CC-0, ★ 2026-07-20 페널티 제거)
+- 전투 종료 시 사망자 50% HP 부활 (MaxHP 페널티 없음 — 과거 0.9배 누적 제거)
 - 생존자 HP 100% 회복
 - 파티 전멸만 런 종료
 
@@ -184,7 +184,7 @@ Assets/
 | E | 이벤트 퀄리티 (공통 25 + 테마별 24, EventRiskLevel, 연쇄 NextEventId) |
 | ASC | 어센션 15레벨 + 보스 12종 교체 (테마별 전용) |
 | BK | BehaviorKeyword 24종 시스템 (AugmentType 통합) |
-| CC-0 | 부활 시스템 (사망자 50% 부활 + MaxHP 0.9배 누적) |
+| CC-0 | 부활 시스템 (사망자 50% 부활 — MaxHP 페널티는 2026-07-20 제거) |
 | ARCH 1-5 | 스킬 조립식 파이프라인 (ISkillBehavior + 22종 구현체) |
 | CC 1차 | 5캐릭터 구현 (Ashe/Duran/Lumi/Sibyl/Taranis) + 자원 4종 + Pipeline 통합 |
 | UNIFIED-P | 완전 통일 파이프라인 (Attack/Heal/Shield/Buff 동일 경로, ExecutionPhase ApplyMain/PostApply 일반화) |
@@ -194,6 +194,10 @@ Assets/
 | CC-2G-2~7 | 기존 8종 스킬 리워크 완료 — Duran(Bulwark/Desperation) Lumi(Bulwark/GiantSlayer) Taranis(Explosion 신규) Sibyl(FollowUp/Echo/LimitBreak 신규 3종) Umbra(FollowUp) Aster(Momentum). Character.HitThisTurn 인프라 추가. |
 | UI-2/3/EVENT/SHOP/TITLE/BATTLE | 6개 씬 UI Rework (다크 판타지 고딕 톤) — PartySelection/MapSceneRework/Event(Stained Glass)/Shop(Reliquary)/Title(Dark Sanctum)/Battle(Sleek HUD) |
 | BALANCE | 캐릭터 체력 10~30 재조정 (HP ×0.25, 위력 ×0.35, 상태이상 ×0.5, 쉴드/힐 ×0.3) |
+| GF | ★ 잿빛 숲 테마 깊이기획 (2026-07-21) — 테마 고유 적 8종 + 신규 trait 3종 (Venomous/Corpsebloom/Provoke) + BossPhaseManager 시스템 (75% 소환 / 50% 분열). 1스테이지 3테마 동일 적 풀 공유 문제 해결 첫 작업. |
+| DIR | ★ 전투 연출 시스템 Tier S+A+B (2026-07-21) — BattleDirectionController 허브 + 5개 연출 컴포넌트 (TurnBanner/SlotEntrance/SkillNamePopup/ProjectileSystem/CharacterReaction). 기존 BattleSceneSetup 회귀 최소 (2줄). code-reviewer P0 2건 사전 차단 (한국어 폰트/ScreenSpaceCamera 좌표변환). 3차 세션 Play 모드 검증 사이클에서 6건 버그 수정 (TextMeshProUGUI 타입/outlineWidth null/첫 턴 entrance/슬롯 크기 확장/슬롯 위로 올라감/슬롯 순서 틀어짐). |
+| CC | ★ CC 행동 불가 + 진영별 duration 감소 (2026-07-22) — Stun/Freeze/Sleep 행동 차단 (StatusEffectComponent.IsIncapacitated), ProcessTurnEnd 진영별 분리 (StS 표준), FireTurnEnd 위치修正. 쉴드 리셋도 진영별 분리. Wisp_Wobble 자신 또는 랜덤 아군 부여. code-reviewer P0 2건 사전 차단 (FireTurnEnd 위치/시뮬레이터 회귀). |
+| COMBAT-EXP | ★ 전투 플레이 경험 개선 11종 (2026-08-02) — Stage A 시뮬레이터 검증 (ProcessBattleEnd 누락 패치로 클리어율 17%→68%) + P0/P1/P2 11종 (5종 사전 구현 확인, 6종 신규 구현). P0: 적 AI 연속 패널티(StS 표준), 튜토리얼 3단계 인액티브. P1: 자원 비례 위력 실시간 표시("위력 8+5×3=23"), 타겟 클릭 피드백, 크리티컬 금색 CRIT!. P2: 키보드 단축키(1-6/Space/ESC), 종료 보상 통계. 상세 `2026-08-02.md`, `CombatExperience_Improvement_Plan.md` |
 
 ### 진행 중
 - **★ Phase BALANCE (체력 10~30 재조정) 완료 (2026-07-20)**: 모든 캐릭터 HP/스킬 위력/상태이상/쉴드/힐 수치 축소로 전투 긴장도 상승. 수정 4개 파일 (CharacterTable.csv / SkillTable.csv / GameRunState.cs / DataGenerator.PhaseCC.cs). 플레이어: Duran 30 / Taranis/Cael 22 / Elara/Mortis 20 / Sibyl/Calliope 18 / Lumi/Aster 16 / Umbra 14 / Ashe 12. 적: 일반 5~11 / 엘리트 12~19 / 보스 F1 33~45 / F4 54~64. 엘리트 보너스 고정값도 동기화 (HP +15→+4, ATK/DEF +2→+1). % 기반 시스템은 자동 보정. 컴파일 0에러. **잔여 (사용자 실행 필수)**: (1) `TeamLog/Generate Test Data` 메뉴 실행 — .asset에 새 수치 반영 (안 하면 기존 .asset 값이 남아 코드 수정 효과 없음). (2) BattleTestScene 플레이 모드 검증. 상세 `2026-07-20.md` (4차 세션 섹션)

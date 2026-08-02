@@ -35,9 +35,12 @@ namespace TeamLog.Combat.Turn
         private int lastActualDamage;
 
         /// <summary>
-        /// 스킬 효과 적용 후 이벤트 — 스킬 타입별 사운드/VFX 분기용
+        /// 스킬 효과 적용 후 이벤트 — 스킬 타입별 사운드/VFX 분기용.
+        /// ★ Phase GF (2026-07-21): 시그니처 확장 (skill, target) → (skill, caster, target).
+        /// BattleDirectionController가 시전자 위치에서 투사체/반응 연출을 위해 caster 정보 필요.
+        /// 유일 구독자: BattleSceneSetup.OnSkillApplied — 회귀 위험 없음.
         /// </summary>
-        public static event System.Action<SkillData, Character> OnSkillApplied;
+        public static event System.Action<SkillData, Character, Character> OnSkillApplied;
 
         public SkillExecutor(List<Character> playerParty, List<Character> enemies)
         {
@@ -64,7 +67,7 @@ namespace TeamLog.Combat.Turn
                 ApplyCorpseAction(caster, skill);
             }
 
-            OnSkillApplied?.Invoke(skill, target);
+            OnSkillApplied?.Invoke(skill, caster, target);
             CombatEventBus.FireSkillUsed(skill, caster);
         }
 

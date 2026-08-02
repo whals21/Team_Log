@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Team Log — CC Slot Visual Proposal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:wght@400;600&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-void: #050510;
+  --bg-dark: #0a0a18;
+  --bg-panel: rgba(15, 18, 35, 0.85);
+  --gold: #d4af37;
+  --gold-bright: #f0d062;
+  --crimson: #b22222;
+  --crimson-bright: #e84545;
+  --teal: #2d8b8b;
+  --frost: #5ec8e8;
+  --frost-deep: #2a6e8b;
+  --lightning: #fff066;
+  --sleep-purple: #a78bff;
+  --sleep-deep: #5a3d8b;
+  --ember: #ff6b1a;
+  --text: #e8e0c8;
+  --text-dim: #8a8270;
+  --border: rgba(212, 175, 55, 0.35);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: radial-gradient(ellipse at center, #0a0a18 0%, #050510 100%);
+  color: var(--text);
+  font-family: 'Nanum Gothic', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  user-select: none;
+  padding-bottom: 40px;
+}
+
+/* === 헤더 === */
+.header {
+  background: linear-gradient(180deg, rgba(15, 18, 35, 0.95), rgba(10, 10, 24, 0.85));
+  border-bottom: 1px solid var(--border);
+  padding: 18px 30px;
+  text-align: center;
+}
+.header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  color: var(--gold);
+  letter-spacing: 4px;
+  margin-bottom: 4px;
+}
+.header p {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* === 컨트롤 === */
+.controls {
+  text-align: center;
+  margin: 24px auto 20px;
+  padding: 0 20px;
+}
+.control-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.btn {
+  background: rgba(20, 22, 40, 0.8);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+  cursor: pointer;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.2s;
+  border-radius: 2px;
+}
+.btn:hover { background: rgba(40, 42, 80, 0.9); border-color: var(--gold); }
+.btn.active { background: rgba(212, 175, 55, 0.2); border-color: var(--gold); color: var(--gold-bright); }
+.btn-play {
+  background: linear-gradient(180deg, rgba(180, 50, 50, 0.6), rgba(120, 30, 30, 0.6));
+  border-color: var(--crimson);
+  padding: 12px 24px;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 3px;
+  font-size: 13px;
+}
+.btn-play:hover { background: linear-gradient(180deg, rgba(220, 70, 70, 0.7), rgba(160, 40, 40, 0.7)); }
+.note {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-top: 6px;
+}
+
+/* === 슬롯 컨테이너 === */
+.slot-row {
+  display: flex;
+  gap: 28px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.slot-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 160px;
+}
+
+.cc-label {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-align: center;
+  height: 20px;
+}
+.cc-label.normal { color: var(--text-dim); }
+.cc-label.stun { color: var(--lightning); text-shadow: 0 0 8px var(--lightning); }
+.cc-label.freeze { color: var(--frost); text-shadow: 0 0 8px var(--frost); }
+.cc-label.sleep { color: var(--sleep-purple); text-shadow: 0 0 8px var(--sleep-purple); }
+
+.cc-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  font-style: italic;
+  line-height: 1.4;
+  min-height: 30px;
+  max-width: 150px;
+}
+
+/* === 슬롯 본체 === */
+.skill-slot {
+  width: 130px;
+  height: 150px;
+  background: linear-gradient(180deg, rgba(35, 25, 15, 0.95), rgba(20, 12, 5, 0.98));
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: filter 0.3s, border-color 0.3s, transform 0.3s;
+  cursor: pointer;
+}
+
+.skill-slot:hover {
+  transform: translateY(-4px);
+}
+
+.skill-icon {
+  font-family: 'Cinzel', serif;
+  font-size: 36px;
+  color: var(--gold-bright);
+  margin-bottom: 8px;
+  text-shadow: 0 0 10px currentColor;
+}
+.skill-icon.fire { color: var(--ember); }
+
+.skill-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.skill-power {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ember);
+}
+
+.skill-cost {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  color: var(--teal);
+  background: rgba(0, 20, 30, 0.9);
+  padding: 2px 6px;
+  border-radius: 50%;
+  border: 1px solid var(--teal);
+}
+
+/* === CC별 효과 === */
+
+/* 기본 — CC 없는 정상 슬롯 */
+.skill-slot.normal {
+  border-color: var(--border);
+}
+
+/* Stun (기절) */
+.skill-slot.stun {
+  border-color: var(--lightning);
+  box-shadow: 0 0 18px rgba(255, 240, 102, 0.5), inset 0 0 12px rgba(255, 240, 102, 0.15);
+  filter: grayscale(0.4) brightness(0.85);
+  animation: stunShake 0.6s ease-in-out infinite;
+}
+@keyframes stunShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+}
+
+/* Freeze (빙결) */
+.skill-slot.freeze {
+  border-color: var(--frost);
+  box-shadow: 0 0 18px rgba(94, 200, 232, 0.5), inset 0 0 16px rgba(94, 200, 232, 0.2);
+  filter: hue-rotate(170deg) brightness(0.8) saturate(0.8);
+}
+.skill-slot.freeze::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(45deg, transparent 48%, rgba(94, 200, 232, 0.3) 49%, rgba(94, 200, 232, 0.3) 51%, transparent 52%),
+    linear-gradient(-45deg, transparent 48%, rgba(94, 200, 232, 0.25) 49%, rgba(94, 200, 232, 0.25) 51%, transparent 52%);
+  background-size: 20px 20px;
+  pointer-events: none;
+  border-radius: 5px;
+  animation: frostShimmer 2s ease-in-out infinite;
+}
+@keyframes frostShimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Sleep (수면) */
+.skill-slot.sleep {
+  border-color: var(--sleep-purple);
+  box-shadow: 0 0 18px rgba(167, 139, 255, 0.4), inset 0 0 12px rgba(167, 139, 255, 0.15);
+  filter: grayscale(0.3) brightness(0.9) sepia(0.2);
+}
+
+/* === CC 오버레이 아이콘 (슬롯 위) === */
+.cc-overlay {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  width: 100%;
+  height: 0;
+  z-index: 10;
+}
+
+/* Stun: 별 3개 회전 */
+.stun-stars {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  transform: translateX(-50%);
+  animation: starOrbit 2s linear infinite;
+}
+.stun-star {
+  position: absolute;
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: var(--lightning);
+  text-shadow: 0 0 8px var(--lightning), 0 0 16px var(--gold);
+  top: 50%;
+  left: 50%;
+}
+.stun-star:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translateY(-18px) rotate(0deg); }
+.stun-star:nth-child(2) { transform: translate(-50%, -50%) rotate(120deg) translateY(-18px) rotate(-120deg); }
+.stun-star:nth-child(3) { transform: translate(-50%, -50%) rotate(240deg) translateY(-18px) rotate(-240deg); }
+@keyframes starOrbit {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+
+/* Freeze: 얼음 결정 정지 */
+.freeze-crystal {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  color: white;
+  text-shadow: 0 0 12px var(--frost), 0 0 24px var(--frost);
+  animation: crystalGlow 1.5s ease-in-out infinite alternate;
+}
+@keyframes crystalGlow {
+  from { text-shadow: 0 0 8px var(--frost), 0 0 16px var(--frost); transform: translateX(-50%) scale(1); }
+  to { text-shadow: 0 0 16px var(--frost), 0 0 28px white; transform: translateX(-50%) scale(1.1); }
+}
+
+/* Sleep: z 떠다님 */
+.sleep-z-container {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 50px;
+  pointer-events: none;
+}
+.sleep-z {
+  position: absolute;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sleep-purple);
+  text-shadow: 0 0 8px var(--sleep-purple);
+  opacity: 0;
+}
+.sleep-z:nth-child(1) {
+  left: 10px;
+  animation: floatZ 2.4s ease-out infinite;
+  animation-delay: 0s;
+}
+.sleep-z:nth-child(2) {
+  left: 20px;
+  font-size: 18px;
+  animation: floatZ 2.4s ease-out infinite;
+  animation-delay: 0.8s;
+}
+.sleep-z:nth-child(3) {
+  left: 5px;
+  font-size: 12px;
+  animation: floatZ 2.4s ease-out infinite;
+  animation-delay: 1.6s;
+}
+@keyframes floatZ {
+  0% { top: 30px; opacity: 0; transform: scale(0.7); }
+  20% { opacity: 1; }
+  100% { top: -20px; opacity: 0; transform: scale(1.2) rotate(10deg); }
+}
+
+/* === CC 라벨 (슬롯 하단 오버레이) === */
+.cc-tag {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+.cc-tag.stun {
+  background: rgba(255, 240, 102, 0.25);
+  color: var(--lightning);
+  border: 1px solid var(--lightning);
+  text-shadow: 0 0 4px var(--lightning);
+}
+.cc-tag.freeze {
+  background: rgba(94, 200, 232, 0.25);
+  color: var(--frost);
+  border: 1px solid var(--frost);
+  text-shadow: 0 0 4px var(--frost);
+}
+.cc-tag.sleep {
+  background: rgba(167, 139, 255, 0.25);
+  color: var(--sleep-purple);
+  border: 1px solid var(--sleep-purple);
+  text-shadow: 0 0 4px var(--sleep-purple);
+}
+
+/* === 현재 버전 (CC 표시 없음) === */
+.skill-slot.current-mode {
+  filter: none;
+  border-color: var(--border);
+  box-shadow: none;
+  animation: none;
+  cursor: pointer;
+}
+.skill-slot.current-mode:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold-bright);
+}
+
+/* "행동 불가" 토스트 */
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(20, 5, 5, 0.95);
+  border: 2px solid var(--crimson-bright);
+  padding: 14px 24px;
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  color: var(--crimson-bright);
+  letter-spacing: 3px;
+  text-shadow: 0 0 8px var(--crimson);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1000;
+  border-radius: 3px;
+}
+.toast.show {
+  animation: toastPop 1.5s ease-out forwards;
+}
+@keyframes toastPop {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.7); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -70%) scale(0.9); }
+}
+
+/* === 범례 === */
+.legend {
+  max-width: 900px;
+  margin: 30px auto 0;
+  padding: 0 20px;
+}
+.legend h3 {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 14px;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.legend-item {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 12px;
+  border-radius: 3px;
+}
+.legend-item-header {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-item-header.stun { color: var(--lightning); }
+.legend-item-header.freeze { color: var(--frost); }
+.legend-item-header.sleep { color: var(--sleep-purple); }
+.legend-item p {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚔ CC SLOT VISUAL</h1>
+  <p>상태이상별 슬롯 연출 시안 · Stun / Freeze / Sleep · 2026-07-22</p>
+</div>
+
+<div class="controls">
+  <div class="control-row">
+    <button class="btn active" id="modeProposed">★ 제안 버전 (CC 연출)</button>
+    <button class="btn" id="modeCurrent">현재 버전 (CC 표시 없음)</button>
+  </div>
+  <button class="btn-play" id="btnPlay">▶ 연출 재생</button>
+  <div class="note" id="modeNote">
+    각 CC별 전용 연출 — Stun(별 회전), Freeze(얼음 결정), Sleep(z 떠다님)
+  </div>
+</div>
+
+<div class="slot-row" id="slotRow">
+
+  <!-- 정상 슬롯 -->
+  <div class="slot-wrapper">
+    <div class="cc-label normal">NORMAL</div>
+    <div class="skill-slot normal" data-cc="none">
+      <div class="skill-cost">1</div>
+      <div class="skill-icon fire">🔥</div>
+      <div class="skill-name">Ember Strike</div>
+      <div class="skill-power">+5</div>
+    </div>
+    <div class="cc-desc">정상 — 행동 가능</div>
+  </div>
+
+  <!-- Stun -->
+  <div class="slot-wrapper">
+    <div class="cc-label stun">STUN</div>
+    <div class="skill-slot stun" data-cc="stun" data-cc-name="기절">
+      <div class="cc-overlay">
+        <div class="stun-stars">
+          <div class="stun-star">✦</div>
+          <div class="stun-star">✦</div>
+          <div class="stun-star">✦</div>
+        </div>
+      </div>
+      <div class="skill-cost">1</div>
+      <div class="skill-icon fire">🔥</div>
+      <div class="skill-name">Ember Strike</div>
+      <div class="skill-power">+5</div>
+      <div class="cc-tag stun">기절</div>
+    </div>
+    <div class="cc-desc">행동 불가 · 별 회전 + 흔들림</div>
+  </div>
+
+  <!-- Freeze -->
+  <div class="slot-wrapper">
+    <div class="cc-label freeze">FREEZE</div>
+    <div class="skill-slot freeze" data-cc="freeze" data-cc-name="빙결">
+      <div class="cc-overlay">
+        <div class="freeze-crystal">❄</div>
+      </div>
+      <div class="skill-cost">1</div>
+      <div class="skill-icon fire">🔥</div>
+      <div class="skill-name">Ember Strike</div>
+      <div class="skill-power">+5</div>
+      <div class="cc-tag freeze">빙결</div>
+    </div>
+    <div class="cc-desc">행동 불가 · 얼음 결정 + 서리 틴트</div>
+  </div>
+
+  <!-- Sleep -->
+  <div class="slot-wrapper">
+    <div class="cc-label sleep">SLEEP</div>
+    <div class="skill-slot sleep" data-cc="sleep" data-cc-name="수면">
+      <div class="cc-overlay">
+        <div class="sleep-z-container">
+          <div class="sleep-z">z</div>
+          <div class="sleep-z">z</div>
+          <div class="sleep-z">z</div>
+        </div>
+      </div>
+      <div class="skill-cost">1</div>
+      <div class="skill-icon fire">🔥</div>
+      <div class="skill-name">Ember Strike</div>
+      <div class="skill-power">+5</div>
+      <div class="cc-tag sleep">수면</div>
+    </div>
+    <div class="cc-desc">행동 불가 · z 떠다님 + 보라 부드러운 빛</div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <h3>⟩ CC TIER BREAKDOWN</h3>
+  <div class="legend-grid">
+    <div class="legend-item">
+      <div class="legend-item-header stun">✦ STUN (기절)</div>
+      <p>금색 별 3개가 머리 위에서 빙빙 돎. 슬롯 자체가 미세하게 흔들림. 회색 처리 + 금색 테두리 글로우.</p>
+    </div>
+    <div class="legend-item">
+      <div class="legend-item-header freeze">❄ FREEZE (빙결)</div>
+      <p>얼음 결정이 슬롯 위에서 반짝임. 슬롯 전체에 서리 패턴 + 시안색 틴트. 정지된 느낌 강조.</p>
+    </div>
+    <div class="legend-item">
+      <div class="legend-item-header sleep">z SLEEP (수면)</div>
+      <p>z자가 위로 천천히 떠다님 (3개가 시차 배치). 보라색 부드러운 글로우. 느슨한 분위기.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">행동 불가</div>
+
+<script>
+let currentMode = 'proposed';
+const slots = document.querySelectorAll('.skill-slot');
+const toast = document.getElementById('toast');
+const modeNote = document.getElementById('modeNote');
+
+document.getElementById('modeProposed').addEventListener('click', () => setMode('proposed'));
+document.getElementById('modeCurrent').addEventListener('click', () => setMode('current'));
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeProposed').classList.toggle('active', mode === 'proposed');
+  document.getElementById('modeCurrent').classList.toggle('active', mode === 'current');
+
+  if (mode === 'proposed') {
+    modeNote.textContent = '각 CC별 전용 연출 — Stun(별 회전), Freeze(얼음 결정), Sleep(z 떠다님). 회색 처리 + 클릭 차단.';
+    // 모든 슬롯에 원래 CC 클래스 복원
+    slots.forEach(s => {
+      s.classList.remove('current-mode');
+      const cc = s.dataset.cc;
+      if (cc !== 'none') {
+        s.classList.add(cc);
+      }
+    });
+  } else {
+    modeNote.textContent = '현재 버전 — CC 표시 없음. 슬롯이 정상처럼 보임. 클릭 시 차단되지만 시각적 피드백 없음.';
+    // 모든 슬롯을 current-mode로
+    slots.forEach(s => {
+      s.classList.remove('stun', 'freeze', 'sleep');
+      s.classList.add('current-mode');
+    });
+  }
+}
+
+// 재생 버튼 — 각 CC 슬롯 펀치 + 토스트
+document.getElementById('btnPlay').addEventListener('click', () => {
+  slots.forEach((s, i) => {
+    setTimeout(() => {
+      s.style.transition = 'transform 0.3s';
+      s.style.transform = 'scale(1.08)';
+      setTimeout(() => { s.style.transform = ''; }, 300);
+    }, i * 150);
+  });
+});
+
+// CC 슬롯 클릭 — "행동 불가" 토스트
+slots.forEach(s => {
+  s.addEventListener('click', () => {
+    if (currentMode !== 'proposed') return;
+    const cc = s.dataset.cc;
+    if (cc === 'none') return;
+
+    const ccName = s.dataset.ccName;
+    toast.textContent = `${ccName} — 행동 불가`;
+    toast.classList.remove('show');
+    void toast.offsetWidth;
+    toast.classList.add('show');
+  });
+});
+
+setMode('proposed');
+</script>
+
+</body>
+</html>

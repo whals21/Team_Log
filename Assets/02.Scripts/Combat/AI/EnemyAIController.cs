@@ -20,6 +20,9 @@ namespace TeamLog.Combat.AI
         private readonly Character _owner;
         private readonly EnemyActionPattern _pattern;
         private readonly List<Character> _players;
+        // ★ Phase GF (2026-07-22): 아군 리스트 — SingleAlly 스킬(자신 또는 랜덤 아군)에 사용.
+        // null이면 자신만 (기존 동작 하위 호환).
+        private List<Character> _allies;
 
         private EnemyIntent _currentIntent;
         private SkillData _nextSkill;
@@ -37,6 +40,9 @@ namespace TeamLog.Combat.AI
             _players = players;
             _nextTargets = new List<Character>();
         }
+
+        /// <summary>★ Phase GF (2026-07-22): 아군 리스트 주입 — SingleAlly 스킬이 자신 또는 랜덤 아군 선택.</summary>
+        public void SetAllies(List<Character> allies) => _allies = allies;
 
         /// <summary>
         /// 턴 시작 시 다음 스킬과 타겟을 결정하여 의도 표시
@@ -86,7 +92,25 @@ namespace TeamLog.Combat.AI
                     break;
 
                 case TargetType.SingleAlly:
-                    targets.Add(_owner);
+                    // ★ Phase GF (2026-07-22): 자신 또는 랜덤 아군 부여 (Wisp_Wobble 등).
+                    // _allies가 null이면 기존 동작 (자신만). 설정 시 자신 포함 랜덤 선택.
+                    if (_allies == null || _allies.Count == 0)
+                    {
+                        targets.Add(_owner);
+                    }
+                    else
+                    {
+                        var aliveAllies = _allies.FindAll(a => a != null && a.IsAlive);
+                        if (aliveAllies.Count == 0)
+                        {
+                            targets.Add(_owner);
+                        }
+                        else
+                        {
+                            // 자신 포함 랜덤 (자신이 aliveAllies에 포함되어 있으므로 자연스럽게 자신도 후보)
+                            targets.Add(aliveAllies[UnityEngine.Random.Range(0, aliveAllies.Count)]);
+                        }
+                    }
                     break;
 
                 case TargetType.AllAllies:

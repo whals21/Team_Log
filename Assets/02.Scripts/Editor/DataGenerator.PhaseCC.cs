@@ -120,22 +120,26 @@ namespace TeamLog.Editor
                     new(BehaviorKeyword.GiantSlayer, 5)    // 적 MaxHP 100+ 시 +5 (보스전)
                 });
 
-            // ── Taranis (Stormcaller) Charge Network 연동 스킬 ──
-            // Charge 상태이상(value=스택수, duration=3 — 자연 소멄은 value 기반으로 매 턴 -1, StatusEffectComponent에서 duration 소멸 스킵).
-            // 매 턴 종료 시 다른 Charge 적에게 자신의 스택 수만큼 도트 데미지 (TurnManager.ProcessTurnEnd).
-            CreatePhaseCCSkill("Taranis_Wire", "와이어", SkillType.Attack, TargetType.SingleEnemy,
-                power: 1, cost: 1, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 1,
-                behaviors: new BehaviorTag(BehaviorKeyword.Propagate, 1)); // Propagate=전파 (메인 타겟 + 다른 적 1명 추가 Charge 1스택)
+            // ── Taranis (Stormcaller) Charge 메커니즘 (★ 2026-07-22 단순화 재설계) ──
+            // 핵심 규칙 1개: Charge 보유 적이 매 턴 종료 시 고정 3 데미지를 자기 자신에게 받고 Charge -1.
+            // Charge 스택 = 지속 턴 수. 데미지는 항상 3 고정.
+            // 즉발 데미지 없음 → 타이밍이 늦지만 지속딜+광역딜로 총량 높음.
 
-            CreatePhaseCCSkill("Taranis_Branch", "브랜치", SkillType.Attack, TargetType.AllEnemies,
-                power: 1, cost: 2, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 1);
+            // Wire (cost 1): 단일 적에게 Charge 3 → 3턴 × 3 = 총 9 도트
+            CreatePhaseCCSkill("Taranis_Wire", "와이어", SkillType.Debuff, TargetType.SingleEnemy,
+                power: 0, cost: 1, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 3);
 
+            // Branch (cost 2): 모든 적에게 Charge 1 → 각 1턴 × 3 = 총 3 도트/적
+            CreatePhaseCCSkill("Taranis_Branch", "브랜치", SkillType.Debuff, TargetType.AllEnemies,
+                power: 0, cost: 2, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 1);
+
+            // Grounding Field (cost 2): 아군 전체 쉴드 3
             CreatePhaseCCSkill("Taranis_GroundingField", "접지 장벽", SkillType.Shield, TargetType.AllAllies,
-                power: 3, cost: 2, shieldFlags: ShieldFlag.GivesChargeOnAbsorb);
+                power: 3, cost: 2);
 
-            CreatePhaseCCSkill("Taranis_Thunderstorm", "뇌우", SkillType.Attack, TargetType.AllEnemies,
-                power: 4, cost: 3, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 2,
-                behaviors: new BehaviorTag(BehaviorKeyword.Explosion, 3));
+            // Thunderstorm (cost 3): 모든 적에게 Charge 2 → 각 2턴 × 3 = 총 6 도트/적
+            CreatePhaseCCSkill("Taranis_Thunderstorm", "뇌우", SkillType.Debuff, TargetType.AllEnemies,
+                power: 0, cost: 3, statusEffect: StatusEffectType.Charge, effectDuration: 3, effectValue: 2);
 
             // ── Sibyl (Oracle) Prophecy 연동 스킬 (간소화 — 일반 힐/딜로 처리, Prophecy 메카닉은 추후) ──
             // Phase CC-2G-5: BehaviorTag 3종 추가로 조립식 시너지 혜택.

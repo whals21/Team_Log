@@ -45,16 +45,20 @@ namespace TeamLog.Editor
             GenerateThemeSpecificEvents();
 
             // ── Stage 1: 튜토리얼 (F1 적 풀 기반) ──
+            // ★ Phase GF (2026-07-20): 잿빛 숲 테마 고유 적 풀로 재정의.
+            // 기존 Slime/Goblin/Wolf/Mushroom 공통 풀 → 잿빛 숲 전용 4종으로 교체.
+            // 기존 EliteKnight/EliteMage/EliteDarkSlime → Witherwarden/CompostKing 신규 엘리트.
+            // 키워드 "재생 + 독"이 일반/엘리트/보스 전체에 관통.
             CreateTheme(
                 themeId: "GreyForest",
                 displayName: "잿빛 숲",
                 stageNumber: 1,
-                normals: new[] { "Enemy_Slime", "Enemy_Goblin", "Enemy_Wolf", "Enemy_Mushroom" },
-                elites: new[] { "Enemy_EliteKnight", "Enemy_EliteMage", "Enemy_EliteDarkSlime" },
+                normals: new[] { "Enemy_AshwoodWisp", "Enemy_BlightbedCrawler", "Enemy_Mossbulwark", "Enemy_Sporecaller" },
+                elites: new[] { "Enemy_EliteWitherwarden", "Enemy_EliteCompostKing" },
                 boss: "Enemy_BossVerdantTerror",
-                spawnTable: "SpawnPatterns_F1",
+                spawnTable: "SpawnPatterns_GreyForest",
                 keywords: new[] { "재생", "독" },
-                desc: "튜토리얼 스테이지. AP 관리와 타겟 우선순위 학습.",
+                desc: "재생과 독의 악순환. 매 런 다른 공략법 요구 — 한 방에 잡거나 정화가 필수.",
                 themeEventIds: new[] { "Event_T_GF_MistMerchant", "Event_T_GF_RegenSpring" });
 
             CreateTheme(

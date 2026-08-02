@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _skillName: "\uBE0C\uB79C\uCE58"
   _description: 
-  _skillType: 0
+  _skillType: 3
   _targetType: 1
-  _power: 1
+  _power: 0
   _cost: 2
   _weight: 50
   _icon: {fileID: 0}

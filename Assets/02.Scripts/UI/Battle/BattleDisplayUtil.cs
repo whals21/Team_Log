@@ -300,12 +300,28 @@ namespace TeamLog.UI.Battle
                 };
 
                 // Phase CC: 자원 비례 위력 표시 (+Ember×3 등)
+                // ★ 2026-08-02 P1-1: caster 현재 자원 스택 반영하여 최종 위력 자동 표시
+                //   예시: Ember 5스택 + Brand of Ash (8+잿×3) → "위력 8+5×3=23"
                 string powerSuffix = "";
                 if (skill.ResourcePowerPerStack > 0)
                 {
                     ResourceType resType = InferResourceType(skill, caster);
                     if (resType != ResourceType.None)
-                        powerSuffix = $"+{GetResourceInitial(resType)}×{skill.ResourcePowerPerStack}";
+                    {
+                        int currentStacks = (caster?.Resource != null && caster.Resource.Resource == resType)
+                            ? caster.Resource.CurrentStacks
+                            : 0;
+                        if (currentStacks > 0)
+                        {
+                            // 자원 보유 중: 최종 위력 자동 계산 표시
+                            powerSuffix = $"+{currentStacks}×{skill.ResourcePowerPerStack}={displayPower + currentStacks * skill.ResourcePowerPerStack}";
+                        }
+                        else
+                        {
+                            // 자원 미보유: 기본 표시 유지
+                            powerSuffix = $"+{GetResourceInitial(resType)}×{skill.ResourcePowerPerStack}";
+                        }
+                    }
                 }
                 parts.Add($"{label} {displayPower}{powerSuffix}");
             }

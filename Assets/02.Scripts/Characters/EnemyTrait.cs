@@ -23,7 +23,12 @@ namespace TeamLog.Characters
         // === 보스 특성 ===
         Rally,          // 소집령: HP 50% 이하 시 AttackUp+DefenseUp 획득
         Rampage,        // 연소: 피해를 입지 않은 턴마다 ATK +3 누적, 피해를 입으면 초기화
-        Immortal        // 불사: 치명적 피해 시 HP 1로 생존 (1회)
+        Immortal,       // 불사: 치명적 피해 시 HP 1로 생존 (1회)
+
+        // === Phase GF (잿빛 숲) 전용 특성 ===
+        Venomous,       // 맹독: 공격 적중 시 대상에게 Poison 1 (2턴) 부여 — Blightbed Crawler
+        Corpsebloom,    // 시체개화: 아군 사망 시 30% HP로 부활 (전투당 1회) — The Compost King
+        Provoke         // 도발부: 매 턴 시작 시 자동 Taunt 부여 — Mossbulwark
     }
 
     /// <summary>
@@ -53,6 +58,9 @@ namespace TeamLog.Characters
         // Shell: 매 턴 1회 차단
         private bool _shellUsedThisTurn;
 
+        // Corpsebloom: 1회용 부활
+        private bool _corpsebloomUsed;
+
         public EnemyTrait Trait => _trait;
         public bool HasTrait => _trait != EnemyTrait.None;
 
@@ -72,10 +80,13 @@ namespace TeamLog.Characters
             switch (_trait)
             {
                 case EnemyTrait.Regenerate:
-                    // 도트 데미지 상태가 아니면 HP 5 회복
+                    // 도트 데미지 상태가 아니면 HP 회복.
+                    // ★ Phase BALANCE (2026-07-22): 5 → 2로 축소.
+                    // 기존 5는 밸런스 축소(HP ×0.25) 전 수치. HP 7 적이 매 턴 +5면 사실상 안 죽음.
+                    // 2로 축소하여 Charge 3 데미지가 재생 2를 초과 → 순 1/턴 데미지.
                     if (!_owner.StatusEffects.HasEffect(StatusEffectType.Poison)
                         && !_owner.StatusEffects.HasEffect(StatusEffectType.Burn))
-                        _owner.Health.Heal(5);
+                        _owner.Health.Heal(2);
                     break;
 
                 case EnemyTrait.Sturdy:
@@ -92,6 +103,11 @@ namespace TeamLog.Characters
 
                 case EnemyTrait.Shell:
                     _shellUsedThisTurn = false;
+                    break;
+
+                // Phase GF: Provoke — 매 턴 자동 도발 부여
+                case EnemyTrait.Provoke:
+                    _owner.StatusEffects.ApplyEffect(StatusEffectType.Taunt, 1, 0);
                     break;
             }
         }
@@ -168,16 +184,46 @@ namespace TeamLog.Characters
         }
 
         /// <summary>
-        /// 상대에게 데미지를 입혔을 때 발동 (Corrosive 방어감소 디버프)
+        /// 상대에게 데미지를 입혔을 때 발동 (Corrosive 방어감소 디버프 / Venomous 독 부여)
         /// </summary>
         public void OnDamageDealtTo(Character target)
         {
-            if (_trait != EnemyTrait.Corrosive) return;
             if (target == null || target.IsDead) return;
 
-            target.StatusEffects.ApplyEffect(StatusEffectType.DefenseDown, 2, 2);
-            target.ApplyStatModifiers();
+            switch (_trait)
+            {
+                case EnemyTrait.Corrosive:
+                    target.StatusEffects.ApplyEffect(StatusEffectType.DefenseDown, 2, 2);
+                    target.ApplyStatModifiers();
+                    break;
+
+                // Phase GF: Venomous — 공격 적중 시 Poison 1 (2턴) 부여
+                case EnemyTrait.Venomous:
+                    target.StatusEffects.ApplyEffect(StatusEffectType.Poison, 2, 1);
+                    break;
+            }
         }
+
+        /// <summary>
+        /// Phase GF: Corpsebloom — 아군 사망 시 30% HP로 부활 (전투당 1회).
+        /// 호출부(TurnManager/BattleSceneSetup)가 CombatEventBus.OnEnemyDied 구독에서
+        /// 살아있는 모든 아군의 TryReviveAlly를 호출하여 첫 번째 성공자가 부활 처리.
+        /// </summary>
+        public bool TryReviveAlly(Character deadAlly)
+        {
+            if (_trait != EnemyTrait.Corpsebloom || _corpsebloomUsed) return false;
+            if (!_owner.IsAlive) return false;          // 부활자 본인이 죽었으면 불가
+            if (deadAlly == null || deadAlly.IsAlive) return false;  // 대상이 이미 살아있으면 불가
+
+            _corpsebloomUsed = true;
+            deadAlly.Health.Revive(0.3f);  // MaxHP의 30%로 부활
+            return true;
+        }
+
+        /// <summary>
+        /// Phase GF: Corpsebloom — 현재 부홬 가능 여부 (UI 표시/디버그용)
+        /// </summary>
+        public bool CanReviveAlly => _trait == EnemyTrait.Corpsebloom && !_corpsebloomUsed && _owner.IsAlive;
 
         /// <summary>
         /// 치명적 피해 시 사망 방지 (Immortal: HP 1로 생존, 1회)

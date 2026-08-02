@@ -36,7 +36,9 @@ namespace TeamLog.Combat.Draw
         }
 
         /// <summary>
-        /// 새 턴 드로우 실행
+        /// 새 턴 드로우 실행.
+        /// ★ Phase GF (2026-07-21): 죽은 캐릭터도 빈 슬롯(instance=null)로 포함 —
+        /// 슬롯 순서가 캐릭터 순서와 일치하도록 보장. 중간 캐릭터 사망 시 슬롯 밀림 방지.
         /// </summary>
         public void ExecuteDraw()
         {
@@ -50,11 +52,15 @@ namespace TeamLog.Combat.Draw
                 if (character.IsAlive)
                 {
                     var instance = character.SkillInventory.DrawSkillInstance(bonusWeight);
-                    if (instance != null)
-                    {
-                        var slot = new DrawnSkillSlot(character, instance, _drawnSlots.Count);
-                        _drawnSlots.Add(slot);
-                    }
+                    // instance가 null이어도 슬롯은 추가 (캐릭터 순서 보장)
+                    var slot = new DrawnSkillSlot(character, instance, _drawnSlots.Count);
+                    _drawnSlots.Add(slot);
+                }
+                else
+                {
+                    // ★ 죽은 캐릭터 — 자리 유지용 빈 슬롯. 캐릭터 순서 보장.
+                    var slot = new DrawnSkillSlot(character, null, _drawnSlots.Count);
+                    _drawnSlots.Add(slot);
                 }
             }
 

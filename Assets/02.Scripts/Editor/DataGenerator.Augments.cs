@@ -295,7 +295,28 @@ namespace TeamLog.Editor
                     ("주술사 강화",    new[]{("Enemy_EliteGoblinShaman",1),("Enemy_Gargoyle",2),("Enemy_Shadow",2)}),
                 });
 
-            Debug.Log($"[DataGenerator] 스폰 패턴 테이블 3개(층별) 생성 완료");
+            // ★ Phase GF (2026-07-20): 잿빛 숲 전용 스폰 패턴.
+            // 일반 적 4종: AshwoodWisp(7) / BlightbedCrawler(5) / Mossbulwark(12) / Sporecaller(5)
+            // 엘리트 2종: Witherwarden(18) / CompostKing(14)
+            // 각 패턴은 "재생+독 악순환" 시연하도록 설계.
+            CreateSpawnPatternTable("SpawnPatterns_GreyForest",
+                normalPatterns: new[]
+                {
+                    ("잿빛 정령 무리", new[]{("Enemy_AshwoodWisp",3),("Enemy_Sporecaller",1)}),           // 21+5=26 — 재생 악순환 시연
+                    ("독 벌레 떼",     new[]{("Enemy_BlightbedCrawler",3),("Enemy_AshwoodWisp",1)}),      // 15+7=22 — 독 누적 시연
+                    ("이끼 요새",      new[]{("Enemy_Mossbulwark",1),("Enemy_Sporecaller",2)}),           // 12+10=22 — 탱커+서포터 (까다로움)
+                    ("포자 확산",      new[]{("Enemy_Sporecaller",2),("Enemy_BlightbedCrawler",2)}),      // 10+10=20 — 재생+독 동시
+                    ("정령 순찰대",    new[]{("Enemy_AshwoodWisp",2),("Enemy_BlightbedCrawler",2),("Enemy_Mossbulwark",1)}), // 14+10+12=36 — 혼성
+                    ("썩은 덤불",      new[]{("Enemy_Mossbulwark",1),("Enemy_AshwoodWisp",3)}),            // 12+21=33 — 탱커+재생
+                },
+                elitePatterns: new[]
+                {
+                    ("시든 수호자의 영지", new[]{("Enemy_EliteWitherwarden",1),("Enemy_AshwoodWisp",2)}),       // 18+14=32
+                    ("퇴비 왕의 둥지",     new[]{("Enemy_EliteCompostKing",1),("Enemy_BlightbedCrawler",2)}),   // 14+10=24
+                    ("잿빛 숲의 변이체",   new[]{("Enemy_EliteWitherwarden",1),("Enemy_Sporecaller",1)}),       // 18+5=23 — 위험 조합
+                });
+
+            Debug.Log($"[DataGenerator] 스폰 패턴 테이블 4개(F1/F2/F3/GreyForest) 생성 완료");
         }
 
         private static void CreateSpawnPatternTable(string fileName,

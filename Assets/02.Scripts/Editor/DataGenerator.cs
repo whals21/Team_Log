@@ -62,6 +62,7 @@ namespace TeamLog.Editor
             GenerateVFXPalette();
             GenerateTraitData();
             GenerateMetaUpgradeData();
+            GenerateStageThemes();   // ★ Phase GF (2026-07-21): 테마 .asset 갱신 — normalEnemies/elites/boss/spawnTable 포함. 이전에는 별도 메뉴(TeamLog/Generate Stage Themes)로만 실행 가능했음.
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

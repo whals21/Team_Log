@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Team Log — Battle Direction Proposal v2 (Full Tier)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:wght@400;600&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-void: #050510;
+  --bg-dark: #0a0a18;
+  --bg-panel: rgba(15, 18, 35, 0.85);
+  --bg-panel-light: rgba(25, 28, 50, 0.92);
+  --gold: #d4af37;
+  --gold-bright: #f0d062;
+  --crimson: #b22222;
+  --crimson-bright: #e84545;
+  --teal: #2d8b8b;
+  --teal-bright: #4dffff;
+  --ember: #ff6b1a;
+  --frost: #5ec8e8;
+  --lightning: #fff066;
+  --heal-gold: #ffe066;
+  --text: #e8e0c8;
+  --text-dim: #8a8270;
+  --border: rgba(212, 175, 55, 0.35);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: radial-gradient(ellipse at center, #0a0a18 0%, #050510 100%);
+  color: var(--text);
+  font-family: 'Nanum Gothic', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  user-select: none;
+}
+
+/* === 메인 컨테이너 === */
+.battle-scene {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* === 헤더 === */
+.header {
+  height: 60px;
+  background: linear-gradient(180deg, rgba(15, 18, 35, 0.95), rgba(10, 10, 24, 0.85));
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  z-index: 10;
+}
+.header-title {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  color: var(--gold);
+  letter-spacing: 4px;
+}
+.header-info { font-size: 12px; color: var(--text-dim); }
+
+/* === 컨트롤 패널 === */
+.controls {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 14px 18px;
+  border-radius: 4px;
+  z-index: 100;
+  min-width: 280px;
+}
+.controls h3 {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.control-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.btn {
+  flex: 1;
+  background: rgba(20, 22, 40, 0.8);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  cursor: pointer;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.2s;
+  border-radius: 2px;
+}
+.btn:hover { background: rgba(40, 42, 80, 0.9); border-color: var(--gold); }
+.btn.active { background: rgba(212, 175, 55, 0.2); border-color: var(--gold); color: var(--gold-bright); }
+.btn-play {
+  background: linear-gradient(180deg, rgba(180, 50, 50, 0.6), rgba(120, 30, 30, 0.6));
+  border-color: var(--crimson);
+  color: var(--text);
+  width: 100%;
+  padding: 10px;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 3px;
+  font-size: 13px;
+}
+.btn-play:hover { background: linear-gradient(180deg, rgba(220, 70, 70, 0.7), rgba(160, 40, 40, 0.7)); }
+.note {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 8px;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* === 적 영역 === */
+.enemy-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 30px;
+  padding: 30px 60px 10px;
+  position: relative;
+}
+.enemy-card {
+  width: 160px;
+  height: 200px;
+  background: linear-gradient(180deg, rgba(30, 15, 15, 0.85), rgba(15, 8, 8, 0.95));
+  border: 1px solid rgba(178, 34, 34, 0.4);
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.enemy-portrait {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(60, 20, 20, 0.8), rgba(20, 5, 5, 0.95));
+  border-radius: 50%;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  color: var(--crimson-bright);
+  border: 1px solid rgba(232, 69, 69, 0.5);
+  transition: all 0.3s;
+}
+.enemy-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.enemy-hp-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(40, 10, 10, 0.8);
+  border: 1px solid rgba(178, 34, 34, 0.5);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.enemy-hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b0000, #dc143c);
+  transition: width 0.5s ease-out;
+}
+.enemy-hp-text { font-size: 10px; color: var(--text-dim); }
+.enemy-card.targeted {
+  transform: translateY(-12px) scale(1.05);
+  border-color: var(--crimson-bright);
+  box-shadow: 0 0 30px rgba(232, 69, 69, 0.6);
+}
+.enemy-card.hit { animation: hitShake 0.5s; }
+@keyframes hitShake {
+  0%, 100% { transform: translateY(-12px) translateX(0); }
+  20% { transform: translateY(-8px) translateX(-8px); }
+  40% { transform: translateY(-14px) translateX(8px); }
+  60% { transform: translateY(-10px) translateX(-5px); }
+  80% { transform: translateY(-12px) translateX(5px); }
+}
+.enemy-card.knockback {
+  animation: knockback 0.6s ease-out;
+}
+@keyframes knockback {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(15px) translateX(8px); }
+  60% { transform: translateY(8px) translateX(-4px); }
+  100% { transform: translateY(0); }
+}
+.enemy-card.acting-enemy {
+  border-color: var(--crimson-bright);
+  box-shadow: 0 0 40px var(--crimson);
+}
+.enemy-card.acting-enemy .enemy-portrait {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px var(--crimson-bright);
+}
+.enemy-card.threatening {
+  transform: translateY(8px) scale(1.03);
+  border-color: var(--crimson);
+}
+
+/* === 중앙 전투 영역 === */
+.battle-center {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* === 턴 배너 === */
+.turn-banner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Cinzel', serif;
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+  text-shadow: 0 0 30px currentColor;
+}
+.turn-banner.player { color: var(--teal-bright); }
+.turn-banner.enemy { color: var(--crimson-bright); }
+.turn-banner.show-player { animation: bannerShow 1.6s ease-out forwards; }
+.turn-banner.show-enemy { animation: bannerShow 1.6s ease-out forwards; }
+@keyframes bannerShow {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); letter-spacing: 24px; }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1); letter-spacing: 8px; }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(1); letter-spacing: 8px; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+}
+
+/* === 스킬 이름 팝업 === */
+.skill-name-popup {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+.skill-name-popup.show { animation: skillNamePop 1.4s ease-out forwards; }
+@keyframes skillNamePop {
+  0% { opacity: 0; transform: translate(-50%, 20px) scale(0.7); }
+  15% { opacity: 1; transform: translate(-50%, 0) scale(1.15); }
+  30% { transform: translate(-50%, 0) scale(1); }
+  70% { opacity: 1; transform: translate(-50%, -10px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -30px) scale(0.95); }
+}
+.skill-name-label {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold-bright);
+  letter-spacing: 4px;
+  text-shadow: 0 0 20px var(--gold), 0 2px 6px black;
+}
+.skill-name-power {
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--ember);
+  text-shadow: 0 0 15px var(--ember);
+  margin-top: 4px;
+}
+.skill-name-power.heal { color: var(--heal-gold); text-shadow: 0 0 15px var(--heal-gold); }
+.skill-name-power.frost { color: var(--frost); text-shadow: 0 0 15px var(--frost); }
+.skill-name-power.lightning { color: var(--lightning); text-shadow: 0 0 15px var(--lightning); }
+
+/* === 플레이어 영역 === */
+.player-area {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 30px;
+  gap: 20px;
+}
+.player-card {
+  width: 110px;
+  height: 140px;
+  background: linear-gradient(180deg, rgba(15, 25, 40, 0.85), rgba(8, 12, 22, 0.95));
+  border: 1px solid rgba(45, 139, 139, 0.3);
+  border-radius: 3px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.player-portrait {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(20, 40, 60, 0.8), rgba(5, 10, 20, 0.95));
+  border-radius: 50%;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  color: var(--teal-bright);
+  border: 1px solid rgba(77, 255, 255, 0.4);
+  transition: all 0.3s;
+}
+.player-card.acting {
+  border-color: var(--teal-bright);
+  box-shadow: 0 0 20px var(--teal-bright);
+}
+.player-card.acting .player-portrait {
+  animation: actingPulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes actingPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+.player-card.cast-forward {
+  /* 시전자 앞으로 슬라이드 */
+  animation: castForward 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes castForward {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-18px) scale(1.1); }
+  60% { transform: translateY(-12px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+.player-card.hit-by-enemy {
+  animation: playerHit 0.5s;
+}
+@keyframes playerHit {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px) translateY(4px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-4px); }
+}
+.player-card.healed {
+  animation: healedFloat 0.8s ease-out;
+}
+@keyframes healedFloat {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-10px); filter: drop-shadow(0 0 15px var(--heal-gold)); }
+  100% { transform: translateY(0); }
+}
+.player-card.targeted-by-enemy {
+  border-color: var(--crimson-bright);
+  box-shadow: 0 0 20px rgba(232, 69, 69, 0.6);
+}
+.player-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.player-hp-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(20, 30, 20, 0.8);
+  border: 1px solid rgba(45, 139, 90, 0.4);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+.player-hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2d6b2d, #4d9f4d);
+  transition: width 0.6s ease-out;
+}
+.player-hp-text { font-size: 9px; color: var(--text-dim); }
+
+/* === 액션 바 (스킬 슬롯) === */
+.action-bar {
+  height: 130px;
+  background: linear-gradient(180deg, rgba(8, 10, 20, 0.7), rgba(15, 18, 35, 0.95));
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 30px;
+  gap: 18px;
+  position: relative;
+}
+.action-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.skill-slot {
+  width: 120px;
+  height: 110px;
+  background: linear-gradient(180deg, rgba(35, 25, 15, 0.95), rgba(20, 12, 5, 0.98));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  opacity: 0;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.skill-slot:hover {
+  transform: translateY(-8px) scale(1.05);
+  border-color: var(--gold-bright);
+  box-shadow: 0 6px 25px rgba(212, 175, 55, 0.5);
+}
+.skill-icon {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  margin-bottom: 4px;
+  text-shadow: 0 0 10px currentColor;
+}
+.skill-icon.fire { color: var(--ember); }
+.skill-icon.lightning { color: var(--lightning); }
+.skill-icon.frost { color: var(--frost); }
+.skill-icon.heal { color: var(--heal-gold); }
+.skill-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 12px;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.skill-power {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ember);
+}
+.skill-power.heal { color: var(--heal-gold); }
+.skill-cost {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  color: var(--teal-bright);
+  background: rgba(0, 20, 30, 0.9);
+  padding: 2px 5px;
+  border-radius: 50%;
+  border: 1px solid var(--teal);
+}
+
+/* 현재 버전 */
+.skill-slot.current-version { animation: currentDraw 0.3s ease-out forwards; }
+@keyframes currentDraw {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 제안 버전: 순차 등장 */
+.skill-slot.proposed-version.entrance {
+  animation: proposedDraw 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes proposedDraw {
+  0% { opacity: 0; transform: translateY(30px) scale(0.4); }
+  60% { opacity: 1; transform: translateY(-6px) scale(1.15); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 슬롯 글로우 파티클 (A1) */
+.skill-slot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  background: linear-gradient(45deg, var(--gold-bright), transparent, var(--gold-bright)) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.skill-slot.ignited::after {
+  opacity: 1;
+  animation: borderGlow 1.2s ease-out;
+}
+@keyframes borderGlow {
+  0% { opacity: 0; }
+  30% { opacity: 1; filter: blur(2px); }
+  100% { opacity: 0; filter: blur(4px); }
+}
+
+/* 사용된 슬롯 */
+.skill-slot.used {
+  animation: slotUsed 0.7s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes slotUsed {
+  0% { transform: translateY(-6px) scale(1); opacity: 1; filter: brightness(1); }
+  20% { transform: translateY(-20px) scale(1.15); opacity: 1; filter: brightness(1.5) drop-shadow(0 0 20px var(--gold-bright)); }
+  100% { transform: translateY(20px) scale(0.6); opacity: 0; filter: brightness(0.5); }
+}
+
+/* === 투사체 (B1) === */
+.projectile {
+  position: fixed;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 70;
+  transform: translate(-50%, -50%);
+}
+.projectile.fire {
+  background: radial-gradient(circle, var(--gold-bright), var(--ember), transparent);
+  box-shadow: 0 0 30px var(--ember), 0 0 60px var(--gold-bright);
+  animation: fireFlicker 0.15s infinite alternate;
+}
+.projectile.lightning {
+  background: radial-gradient(circle, white, var(--lightning), transparent);
+  box-shadow: 0 0 25px var(--lightning), 0 0 50px white;
+  width: 6px;
+  height: 30px;
+  border-radius: 3px;
+}
+.projectile.frost {
+  background: radial-gradient(circle, white, var(--frost), transparent);
+  box-shadow: 0 0 25px var(--frost), 0 0 50px white;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.projectile.heal {
+  background: radial-gradient(circle, white, var(--heal-gold), transparent);
+  box-shadow: 0 0 25px var(--heal-gold), 0 0 50px white;
+  width: 30px;
+  height: 30px;
+}
+@keyframes fireFlicker {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* 투사체 잔상 */
+.trail {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 65;
+  transform: translate(-50%, -50%);
+  animation: trailFade 0.5s ease-out forwards;
+}
+@keyframes trailFade {
+  0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+}
+
+/* === 충돌 폭발 (B1) === */
+.explosion {
+  position: fixed;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 75;
+  transform: translate(-50%, -50%);
+  animation: explode 0.6s ease-out forwards;
+}
+.explosion.fire {
+  background: radial-gradient(circle, var(--gold-bright), var(--ember), transparent);
+  box-shadow: 0 0 50px var(--ember);
+}
+.explosion.lightning {
+  background: radial-gradient(circle, white, var(--lightning), transparent);
+  box-shadow: 0 0 50px var(--lightning);
+}
+.explosion.frost {
+  background: radial-gradient(circle, white, var(--frost), transparent);
+  box-shadow: 0 0 50px var(--frost);
+}
+.explosion.heal {
+  background: radial-gradient(circle, white, var(--heal-gold), transparent);
+  box-shadow: 0 0 50px var(--heal-gold);
+}
+@keyframes explode {
+  0% { width: 20px; height: 20px; opacity: 1; }
+  60% { opacity: 1; }
+  100% { width: 120px; height: 120px; opacity: 0; }
+}
+
+/* === 데미지 텍스트 === */
+.damage-text {
+  position: absolute;
+  font-family: 'Cinzel', serif;
+  font-size: 48px;
+  font-weight: 900;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0;
+  text-shadow: 0 0 25px currentColor, 0 4px 10px black;
+  transform: translate(-50%, -50%);
+}
+.damage-text.damage { color: var(--crimson-bright); }
+.damage-text.heal-text { color: var(--heal-gold); }
+.damage-text.show { animation: damagePop 1.3s ease-out forwards; }
+@keyframes damagePop {
+  0% { opacity: 0; transform: translate(-50%, 20px) scale(0.5); }
+  15% { opacity: 1; transform: translate(-50%, -10px) scale(1.3); }
+  30% { transform: translate(-50%, -15px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -70px) scale(0.9); }
+}
+
+/* === 화면 플래시 === */
+.screen-flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 200;
+}
+.screen-flash.show { animation: flashFade 0.18s ease-out forwards; }
+@keyframes flashFade { 0% { opacity: 0.7; } 100% { opacity: 0; } }
+
+/* === 비교 범례 === */
+.legend {
+  position: absolute;
+  bottom: 145px;
+  left: 30px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: 4px;
+  z-index: 100;
+  max-width: 320px;
+}
+.legend h4 {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.legend p { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+.legend strong { color: var(--text); }
+.legend ul { margin-top: 6px; padding-left: 16px; font-size: 10px; color: var(--text-dim); }
+.legend li { margin-bottom: 2px; }
+.legend .tier-badge {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+.legend .tier-s { background: rgba(212, 175, 55, 0.3); color: var(--gold-bright); }
+.legend .tier-a { background: rgba(45, 139, 139, 0.3); color: var(--teal-bright); }
+.legend .tier-b { background: rgba(178, 34, 34, 0.3); color: var(--crimson-bright); }
+
+/* === AP 표시 === */
+.ap-display {
+  position: absolute;
+  bottom: 145px;
+  right: 30px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-family: 'Cinzel', serif;
+  color: var(--teal-bright);
+  font-size: 16px;
+  z-index: 100;
+}
+.ap-display .label { color: var(--text-dim); font-size: 10px; letter-spacing: 2px; }
+
+/* === 적 의도 표시 === */
+.enemy-intent {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(40, 10, 10, 0.95);
+  border: 1px solid var(--crimson);
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  color: var(--crimson-bright);
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<div class="battle-scene">
+
+  <div class="header">
+    <div class="header-title">⚔ TEAM LOG — BATTLE DIRECTION v2</div>
+    <div class="header-info">Full Tier (S+A+B) · 2026-07-21</div>
+  </div>
+
+  <div class="controls">
+    <h3>⟩ DIRECTION MODE</h3>
+    <div class="control-row">
+      <button class="btn active" id="modeCurrent">현재 버전</button>
+      <button class="btn" id="modeProposed">★ Full Tier</button>
+    </div>
+    <button class="btn-play" id="btnPlay">▶ 재생</button>
+    <button class="btn-play" id="btnEnemyTurn" style="margin-top: 6px; background: linear-gradient(180deg, rgba(120, 30, 30, 0.6), rgba(80, 15, 15, 0.6));">▶ 적 턴 시뮬레이션</button>
+    <div class="note" id="modeNote">
+      턴 시작 시 슬롯이 한 번에 표시. 턴 배너 없음. 투사체 없음.
+    </div>
+  </div>
+
+  <!-- 적 영역 -->
+  <div class="enemy-area">
+    <div class="enemy-card" data-enemy="0" data-hp="7">
+      <div class="enemy-intent">⚔ 5</div>
+      <div class="enemy-portrait">W</div>
+      <div class="enemy-name">잿나무 정령</div>
+      <div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width: 100%;"></div></div>
+      <div class="enemy-hp-text">7 / 7</div>
+    </div>
+    <div class="enemy-card" data-enemy="1" data-hp="5">
+      <div class="enemy-intent">⚔ 3</div>
+      <div class="enemy-portrait">B</div>
+      <div class="enemy-name">역병 벌레</div>
+      <div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width: 100%;"></div></div>
+      <div class="enemy-hp-text">5 / 5</div>
+    </div>
+    <div class="enemy-card" data-enemy="2" data-hp="5">
+      <div class="enemy-intent">✦ 독</div>
+      <div class="enemy-portrait">S</div>
+      <div class="enemy-name">포자 부르는 자</div>
+      <div class="enemy-hp-bar"><div class="enemy-hp-fill" style="width: 100%;"></div></div>
+      <div class="enemy-hp-text">5 / 5</div>
+    </div>
+  </div>
+
+  <div class="battle-center">
+    <div class="turn-banner" id="turnBanner"></div>
+    <div class="skill-name-popup" id="skillNamePopup">
+      <div class="skill-name-label" id="skillNameLabel"></div>
+      <div class="skill-name-power" id="skillNamePower"></div>
+    </div>
+  </div>
+
+  <!-- 플레이어 영역 -->
+  <div class="player-area">
+    <div class="player-card" data-player="0" data-hp="30">
+      <div class="player-portrait">D</div>
+      <div class="player-name">Duran</div>
+      <div class="player-hp-bar"><div class="player-hp-fill" style="width: 100%;"></div></div>
+      <div class="player-hp-text">30 / 30</div>
+    </div>
+    <div class="player-card acting" data-player="1" data-hp="12">
+      <div class="player-portrait">A</div>
+      <div class="player-name">Ashe</div>
+      <div class="player-hp-bar"><div class="player-hp-fill" style="width: 100%;"></div></div>
+      <div class="player-hp-text">12 / 12</div>
+    </div>
+    <div class="player-card" data-player="2" data-hp="16">
+      <div class="player-portrait">L</div>
+      <div class="player-name">Lumi</div>
+      <div class="player-hp-bar"><div class="player-hp-fill" style="width: 100%;"></div></div>
+      <div class="player-hp-text">16 / 16</div>
+    </div>
+    <div class="player-card" data-player="3" data-hp="18">
+      <div class="player-portrait">S</div>
+      <div class="player-name">Sibyl</div>
+      <div class="player-hp-bar"><div class="player-hp-fill" style="width: 100%;"></div></div>
+      <div class="player-hp-text">18 / 18</div>
+    </div>
+  </div>
+
+  <!-- 액션 바 -->
+  <div class="action-bar" id="actionBar">
+    <div class="skill-slot current-version" data-slot="0" data-skill-type="fire">
+      <div class="skill-cost">1</div>
+      <div class="skill-icon fire">🔥</div>
+      <div class="skill-name">Ember Strike</div>
+      <div class="skill-power">+5</div>
+    </div>
+    <div class="skill-slot current-version" data-slot="1" data-skill-type="lightning">
+      <div class="skill-cost">2</div>
+      <div class="skill-icon lightning">⚡</div>
+      <div class="skill-name">Wire</div>
+      <div class="skill-power">+3</div>
+    </div>
+    <div class="skill-slot current-version" data-slot="2" data-skill-type="frost">
+      <div class="skill-cost">1</div>
+      <div class="skill-icon frost">❄</div>
+      <div class="skill-name">Frostbolt</div>
+      <div class="skill-power">+4</div>
+    </div>
+    <div class="skill-slot current-version" data-slot="3" data-skill-type="heal">
+      <div class="skill-cost">2</div>
+      <div class="skill-icon heal">✦</div>
+      <div class="skill-name">Vision of Renewal</div>
+      <div class="skill-power heal">Heal 4</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <h4>⟩ TIER BREAKDOWN</h4>
+    <p id="legendText"><strong>현재 버전:</strong> 단순 fade in + 데미지 텍스트.</p>
+    <ul id="legendList" style="display: none;">
+      <li><span class="tier-badge tier-s">S1</span>턴 배너 ("아군 턴" / "적 턴")</li>
+      <li><span class="tier-badge tier-s">S2</span>슬롯 순차 등장 (0.11초 간격 펀치)</li>
+      <li><span class="tier-badge tier-a">A1</span>슬롯 하이라이트 (호버/사용 글로우)</li>
+      <li><span class="tier-badge tier-a">A2</span>스킬 이름 팝업 (중앙 상단)</li>
+      <li><span class="tier-badge tier-b">B1</span>투사체 (시전자→타겟, 스킬별 색상)</li>
+      <li><span class="tier-badge tier-b">B2</span>캐릭터 반응 (시전자 슬라이드, 타겟 넉백)</li>
+    </ul>
+  </div>
+
+  <div class="ap-display">
+    <div class="label">AP</div>
+    <span id="apCount">5</span> / 5
+  </div>
+
+  <div class="screen-flash" id="screenFlash"></div>
+
+</div>
+
+<script>
+// ============================================
+// ★ v2.1 — 3가지 핵심 버그 수정
+//   1. inline style.opacity/animation 제거 → CSS animation 정상 작동
+//   2. 모드 전환 시 자동 재생 (재생 버튼 안 눌러도 됨)
+//   3. className 변경 시 reflow로 animation 强制 재트리거
+// ============================================
+
+let currentMode = 'current';
+let autoPlayTimer = null;
+
+const slots = document.querySelectorAll('.skill-slot');
+const turnBanner = document.getElementById('turnBanner');
+const skillNamePopup = document.getElementById('skillNamePopup');
+const skillNameLabel = document.getElementById('skillNameLabel');
+const skillNamePower = document.getElementById('skillNamePower');
+const screenFlash = document.getElementById('screenFlash');
+const enemies = document.querySelectorAll('.enemy-card');
+const players = document.querySelectorAll('.player-card');
+const modeNote = document.getElementById('modeNote');
+const legendText = document.getElementById('legendText');
+const legendList = document.getElementById('legendList');
+
+const SKILL_DATA = [
+  { label: 'Ember Strike', power: '+5 DMG', type: 'fire', dmg: 5, color: 'fire' },
+  { label: 'Wire', power: '+3 DMG', type: 'lightning', dmg: 3, color: 'lightning' },
+  { label: 'Frostbolt', power: '+4 DMG', type: 'frost', dmg: 4, color: 'frost' },
+  { label: 'Vision of Renewal', power: 'Heal 4', type: 'heal', heal: 4, color: 'heal' }
+];
+
+document.getElementById('modeCurrent').addEventListener('click', () => setMode('current'));
+document.getElementById('modeProposed').addEventListener('click', () => setMode('proposed'));
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeCurrent').classList.toggle('active', mode === 'current');
+  document.getElementById('modeProposed').classList.toggle('active', mode === 'proposed');
+
+  if (mode === 'current') {
+    modeNote.textContent = '턴 시작 시 슬롯이 한 번에 표시. 턴 배너 없음. 투사체 없음.';
+    legendText.innerHTML = '<strong>현재 버전:</strong> 단순 fade in + 데미지 텍스트.';
+    legendList.style.display = 'none';
+  } else {
+    modeNote.textContent = '★ 자동 재생 — S1 배너 → S2 순차 등장 → A1 글로우 → A2 이름 → B1 투사체 → B2 반응.';
+    legendText.innerHTML = '<strong>Full Tier (S+A+B):</strong> 3단계 리듬 + 투사체 + 캐릭터 연출.';
+    legendList.style.display = 'block';
+  }
+
+  resetBattle();
+  // ★ 모드 전환 시 자동 재생 (200ms 후)
+  if (autoPlayTimer) clearTimeout(autoPlayTimer);
+  autoPlayTimer = setTimeout(() => playPlayerTurnStart(), 250);
+}
+
+document.getElementById('btnPlay').addEventListener('click', () => {
+  resetBattle();
+  setTimeout(() => playPlayerTurnStart(), 100);
+});
+
+document.getElementById('btnEnemyTurn').addEventListener('click', () => {
+  resetBattle();
+  setTimeout(() => playEnemyTurn(), 100);
+});
+
+slots.forEach((slot, idx) => {
+  slot.addEventListener('click', () => {
+    // ★ slot이 보이지 않거나 used면 클릭 무시 (inline style 대신 class로 체크)
+    if (slot.classList.contains('used')) return;
+    if (currentMode === 'proposed' && !slot.classList.contains('entrance')) return;
+    triggerSkillUse(idx, slot);
+  });
+});
+
+function resetBattle() {
+  // ★ slot 처리: inline style 제거, className으로만 관리
+  slots.forEach((s, i) => {
+    s.className = 'skill-slot'; // 모든 클래스 초기화
+    // reflow 강제로 animation trigger 가능하게
+    void s.offsetWidth;
+    // base 모드 클래스 부여 (CSS animation 자동 시작)
+    if (currentMode === 'current') {
+      s.classList.add('current-version');
+    } else {
+      // proposed mode에서는 entrance 대기 상태 (opacity 0)
+      s.classList.add('proposed-version');
+    }
+  });
+
+  // 적/플레이어 초기화
+  enemies.forEach(e => {
+    e.classList.remove('targeted', 'hit', 'knockback', 'acting-enemy', 'threatening');
+    e.querySelector('.enemy-hp-fill').style.width = '100%';
+    const baseHp = parseInt(e.dataset.hp);
+    e.querySelector('.enemy-hp-text').textContent = baseHp + ' / ' + baseHp;
+  });
+  players.forEach(p => {
+    p.classList.remove('cast-forward', 'hit-by-enemy', 'healed', 'targeted-by-enemy');
+    p.querySelector('.player-hp-fill').style.width = '100%';
+    const baseHp = parseInt(p.dataset.hp);
+    p.querySelector('.player-hp-text').textContent = baseHp + ' / ' + baseHp;
+  });
+  players[1].classList.add('acting'); // Ashe 기본 시전자
+
+  turnBanner.classList.remove('show-player', 'show-enemy');
+  skillNamePopup.classList.remove('show');
+  screenFlash.classList.remove('show');
+  document.querySelectorAll('.damage-text, .projectile, .trail, .explosion').forEach(d => d.remove());
+}
+
+function playPlayerTurnStart() {
+  if (currentMode === 'current') {
+    // ★ 현재 버전: slot들이 이미 current-version 클래스로 보임 (CSS animation 자동)
+    // 1.5초 후 첫 슬롯 자동 사용
+    setTimeout(() => {
+      if (!slots[0].classList.contains('used')) triggerSkillUse(0, slots[0]);
+    }, 1500);
+  } else {
+    // ★ S1: 턴 배너
+    turnBanner.textContent = '아군 턴';
+    turnBanner.classList.remove('show-player', 'show-enemy');
+    void turnBanner.offsetWidth; // reflow
+    turnBanner.classList.add('show-player');
+
+    // ★ S2: 슬롯 순차 등장 (0.5초 후 시작, 0.11초 간격)
+    setTimeout(() => {
+      slots.forEach((s, i) => {
+        setTimeout(() => {
+          // entrance 추가 전 기존 entrance 제거 + reflow
+          s.classList.remove('entrance');
+          void s.offsetWidth;
+          s.classList.add('entrance');
+        }, i * 110);
+      });
+    }, 500);
+
+    // 2.4초 후 첫 슬롯 자동 사용
+    setTimeout(() => {
+      if (!slots[0].classList.contains('used')) triggerSkillUse(0, slots[0]);
+    }, 2400);
+  }
+}
+
+function playEnemyTurn() {
+  // ★ S1: 적 턴 배너
+  turnBanner.textContent = '적 턴';
+  turnBanner.classList.remove('show-player', 'show-enemy');
+  void turnBanner.offsetWidth;
+  turnBanner.classList.add('show-enemy');
+
+  // 적들이 위협 자세
+  setTimeout(() => {
+    enemies.forEach(e => e.classList.add('threatening'));
+  }, 600);
+
+  // 1.4초 후 첫 적이 행동
+  setTimeout(() => {
+    const actingEnemy = enemies[0];
+    const targetPlayer = players[0];
+    actingEnemy.classList.remove('threatening');
+    actingEnemy.classList.add('acting-enemy');
+    targetPlayer.classList.add('targeted-by-enemy');
+
+    setTimeout(() => {
+      spawnProjectile(actingEnemy, targetPlayer, 'fire', () => {
+        targetPlayer.classList.add('hit-by-enemy');
+        spawnDamageText(targetPlayer, 5, 'damage');
+        screenFlash.classList.add('show');
+        updatePlayerHp(targetPlayer, 5);
+      });
+    }, 400);
+
+    setTimeout(() => {
+      actingEnemy.classList.remove('acting-enemy');
+      targetPlayer.classList.remove('targeted-by-enemy', 'hit-by-enemy');
+      screenFlash.classList.remove('show');
+    }, 2200);
+  }, 1400);
+}
+
+function triggerSkillUse(idx, slot) {
+  const skill = SKILL_DATA[idx];
+
+  // ★ A1: 슬롯 글로우 점화
+  slot.classList.remove('ignited');
+  void slot.offsetWidth;
+  slot.classList.add('ignited');
+
+  // 0.2초 후 used (슬롯 사라짐 연출)
+  setTimeout(() => {
+    slot.classList.add('used');
+  }, 200);
+
+  // ★ A2: 스킬 이름 팝업 (제안만)
+  if (currentMode === 'proposed') {
+    setTimeout(() => {
+      skillNameLabel.textContent = skill.label;
+      skillNamePower.textContent = skill.power;
+      skillNamePower.className = 'skill-name-power ' + skill.color;
+      skillNamePopup.classList.remove('show');
+      void skillNamePopup.offsetWidth;
+      skillNamePopup.classList.add('show');
+    }, 200);
+
+    // ★ B2: 시전자 앞으로 슬라이드
+    setTimeout(() => {
+      players[1].classList.remove('cast-forward');
+      void players[1].offsetWidth;
+      players[1].classList.add('cast-forward');
+    }, 250);
+  }
+
+  const targetEnemy = enemies[0];
+  const targetAlly = skill.type === 'heal' ? players[1] : null;
+
+  setTimeout(() => {
+    if (targetEnemy && skill.dmg) targetEnemy.classList.add('targeted');
+  }, 500);
+
+  // ★ B1: 투사체 (제안만)
+  if (currentMode === 'proposed') {
+    setTimeout(() => {
+      const caster = players[1];
+      const target = skill.type === 'heal' ? targetAlly : targetEnemy;
+      spawnProjectile(caster, target, skill.type, () => {
+        spawnExplosion(target, skill.type);
+        if (skill.dmg) {
+          target.classList.add('hit');
+          setTimeout(() => target.classList.add('knockback'), 400);
+          spawnDamageText(target, skill.dmg, 'damage');
+          if (skill.dmg >= 4) screenFlash.classList.add('show');
+          updateEnemyHp(target, skill.dmg);
+        } else if (skill.heal) {
+          target.classList.add('healed');
+          spawnDamageText(target, '+' + skill.heal, 'heal-text');
+          updatePlayerHp(players[1], -skill.heal);
+        }
+      });
+    }, 700);
+  } else {
+    setTimeout(() => {
+      if (skill.dmg) {
+        targetEnemy.classList.add('hit');
+        spawnDamageText(targetEnemy, skill.dmg, 'damage');
+        if (skill.dmg >= 4) screenFlash.classList.add('show');
+        updateEnemyHp(targetEnemy, skill.dmg);
+      }
+    }, 700);
+  }
+
+  setTimeout(() => {
+    if (targetEnemy) targetEnemy.classList.remove('targeted', 'hit', 'knockback');
+    if (targetAlly) targetAlly.classList.remove('healed');
+    skillNamePopup.classList.remove('show');
+    screenFlash.classList.remove('show');
+  }, 2400);
+}
+
+function spawnProjectile(fromEl, toEl, type, onArrive) {
+  const from = fromEl.getBoundingClientRect();
+  const to = toEl.getBoundingClientRect();
+  const fromX = from.left + from.width / 2;
+  const fromY = from.top + from.height / 2;
+  const toX = to.left + to.width / 2;
+  const toY = to.top + to.height / 2;
+  const distance = Math.hypot(toX - fromX, toY - fromY);
+  const duration = Math.max(400, Math.min(900, distance * 1.5));
+
+  const proj = document.createElement('div');
+  proj.className = 'projectile ' + type;
+  proj.style.left = fromX + 'px';
+  proj.style.top = fromY + 'px';
+  document.body.appendChild(proj);
+
+  let trailInterval = setInterval(() => {
+    const rect = proj.getBoundingClientRect();
+    const trail = document.createElement('div');
+    trail.className = 'trail';
+    trail.style.background = type === 'fire' ? 'radial-gradient(circle, var(--ember), transparent)'
+                            : type === 'lightning' ? 'radial-gradient(circle, var(--lightning), transparent)'
+                            : type === 'frost' ? 'radial-gradient(circle, var(--frost), transparent)'
+                            : 'radial-gradient(circle, var(--heal-gold), transparent)';
+    trail.style.left = (rect.left + rect.width / 2) + 'px';
+    trail.style.top = (rect.top + rect.height / 2) + 'px';
+    document.body.appendChild(trail);
+    setTimeout(() => trail.remove(), 500);
+  }, 40);
+
+  let curve;
+  if (type === 'lightning') curve = 0;
+  else if (type === 'heal') curve = -80;
+  else curve = -100;
+
+  const midX = (fromX + toX) / 2;
+  const midY = (fromY + toY) / 2 + curve;
+
+  proj.style.transition = `left ${duration}ms cubic-bezier(0.45, 0.05, 0.55, 0.95), top ${duration}ms cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
+
+  setTimeout(() => {
+    proj.style.left = midX + 'px';
+    proj.style.top = midY + 'px';
+  }, 10);
+
+  setTimeout(() => {
+    proj.style.left = toX + 'px';
+    proj.style.top = toY + 'px';
+  }, duration / 2);
+
+  setTimeout(() => {
+    clearInterval(trailInterval);
+    proj.remove();
+    if (onArrive) onArrive();
+  }, duration);
+}
+
+function spawnExplosion(target, type) {
+  const rect = target.getBoundingClientRect();
+  const ex = document.createElement('div');
+  ex.className = 'explosion ' + type;
+  ex.style.left = (rect.left + rect.width / 2) + 'px';
+  ex.style.top = (rect.top + rect.height / 2) + 'px';
+  document.body.appendChild(ex);
+
+  for (let i = 0; i < 8; i++) {
+    const frag = document.createElement('div');
+    frag.style.position = 'fixed';
+    frag.style.width = '6px';
+    frag.style.height = '6px';
+    frag.style.borderRadius = '50%';
+    frag.style.pointerEvents = 'none';
+    frag.style.zIndex = 80;
+    frag.style.background = type === 'fire' ? 'var(--ember)'
+                          : type === 'lightning' ? 'var(--lightning)'
+                          : type === 'frost' ? 'var(--frost)'
+                          : 'var(--heal-gold)';
+    frag.style.boxShadow = '0 0 8px currentColor';
+    frag.style.left = (rect.left + rect.width / 2) + 'px';
+    frag.style.top = (rect.top + rect.height / 2) + 'px';
+    frag.style.transform = 'translate(-50%, -50%)';
+    document.body.appendChild(frag);
+
+    const angle = (i / 8) * Math.PI * 2;
+    const dist = 50 + Math.random() * 30;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    frag.style.transition = 'all 0.6s ease-out';
+    setTimeout(() => {
+      frag.style.left = (rect.left + rect.width / 2 + dx) + 'px';
+      frag.style.top = (rect.top + rect.height / 2 + dy) + 'px';
+      frag.style.opacity = '0';
+      frag.style.transform = 'translate(-50%, -50%) scale(0.3)';
+    }, 10);
+    setTimeout(() => frag.remove(), 700);
+  }
+
+  setTimeout(() => ex.remove(), 600);
+}
+
+function spawnDamageText(target, amount, type) {
+  const rect = target.getBoundingClientRect();
+  const txt = document.createElement('div');
+  txt.className = 'damage-text ' + type;
+  txt.textContent = amount;
+  txt.style.left = (rect.left + rect.width / 2) + 'px';
+  txt.style.top = (rect.top + rect.height / 2) + 'px';
+  document.body.appendChild(txt);
+  txt.classList.add('show');
+  setTimeout(() => txt.remove(), 1400);
+}
+
+function updateEnemyHp(enemy, dmg) {
+  const baseHp = parseInt(enemy.dataset.hp);
+  const currentTxt = enemy.querySelector('.enemy-hp-text').textContent;
+  const currentHp = parseInt(currentTxt.split(' / ')[0]) || baseHp;
+  const newHp = Math.max(0, currentHp - dmg);
+  enemy.querySelector('.enemy-hp-fill').style.width = (newHp / baseHp * 100) + '%';
+  enemy.querySelector('.enemy-hp-text').textContent = newHp + ' / ' + baseHp;
+}
+
+function updatePlayerHp(player, delta) {
+  const baseHp = parseInt(player.dataset.hp);
+  const currentTxt = player.querySelector('.player-hp-text').textContent;
+  const currentHp = parseInt(currentTxt.split(' / ')[0]) || baseHp;
+  const newHp = Math.max(0, Math.min(baseHp, currentHp - delta));
+  player.querySelector('.player-hp-fill').style.width = (newHp / baseHp * 100) + '%';
+  player.querySelector('.player-hp-text').textContent = newHp + ' / ' + baseHp;
+}
+
+// ★ 초기 모드를 proposed로 설정하여 사용자가 바로 S/A/B 연출 확인
+setMode('proposed');
+</script>
+
+</body>
+</html>

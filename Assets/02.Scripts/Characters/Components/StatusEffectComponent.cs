@@ -16,6 +16,16 @@ namespace TeamLog.Characters
 
         public bool HasEffect(StatusEffectType type) => _activeEffects.ContainsKey(type);
 
+        /// <summary>
+        /// ★ Phase GF (2026-07-22): CC (행동 불가) 상태 — Stun/Freeze/Sleep 보유 시 true.
+        /// TurnManager.ExecuteSkillImmediately / ExecuteSingleEnemyAction에서 행동 차단 판정에 사용.
+        /// Sleep은 피격 시 해제 로직 미구현 (TODO), Freeze는 해제 시 데미지 미구현 (TODO).
+        /// </summary>
+        public bool IsIncapacitated =>
+            HasEffect(StatusEffectType.Stun) ||
+            HasEffect(StatusEffectType.Freeze) ||
+            HasEffect(StatusEffectType.Sleep);
+
         public void ApplyEffect(StatusEffectType type, int duration, int value)
         {
             if (_activeEffects.TryGetValue(type, out var existing))

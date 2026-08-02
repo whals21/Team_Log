@@ -2,12 +2,14 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using TMPro;
 using TeamLog.Characters;
 using TeamLog.Combat.Turn;
 using SkillExecutor = TeamLog.Combat.Turn.SkillExecutor;
 using TeamLog.Combat.AI;
 using TeamLog.UI;
 using TeamLog.UI.Battle;
+using TeamLog.UI.Battle.Direction;  // ★ Phase GF: BattleDirectionController
 using TeamLog.Map;
 using TeamLog.Meta;
 using TeamLog.Reward;
@@ -27,6 +29,10 @@ namespace TeamLog.Combat
         [SerializeField] private RectTransform _mainCanvasRect;
         [SerializeField] private BattleRelicBarUI _relicBarUI;
         [SerializeField] private BattleTitleManager _titleManager;
+
+        // ★ Phase GF (2026-07-21): 전투 연출 컨트롤러 (Tier S+A+B)
+        // InitializeBattle에서 자동 생성. null이면 모든 연출 no-op.
+        private BattleDirectionController _directionController;
 
         [Header("Test Mode")]
         [SerializeField] private bool _useTestData = true;
@@ -197,6 +203,8 @@ namespace TeamLog.Combat
                 var enemy = _enemies[i];
                 var pattern = LoadEnemyPattern(i, enemy);
                 var controller = new EnemyAIController(enemy, pattern, _playerParty);
+                // ★ Phase GF (2026-07-22): SingleAlly 스킬이 자신 또는 랜덤 아군 선택하도록 아군 리스트 주입.
+                controller.SetAllies(_enemies);
                 int index = i; // 클로저 캡처
                 controller.OnIntentChanged += intent => OnEnemyIntentChanged(index, intent);
                 _enemyControllers.Add(controller);
@@ -267,6 +275,9 @@ namespace TeamLog.Combat
             // 특성: 회피 시 MISS 플로팅 텍스트 + 사운드
             DamageCalculator.OnAttackMissed += OnAttackMissed;
 
+            // ★ 2026-08-02 P1-4: 크리티컬 히트 시 금색 CRIT! 플로팅 텍스트
+            DamageCalculator.OnCriticalHit += HandleCriticalHit;
+
             // 유물 이벤트 구독 — 전투 시작 전에 연결
             var relicHandler = GameRunState.Instance?.RelicHandler;
             if (relicHandler != null)
@@ -274,6 +285,10 @@ namespace TeamLog.Combat
                 relicHandler.SetPlayerParty(_playerParty);
                 relicHandler.SubscribeEvents();
             }
+
+            // ★ Phase GF (2026-07-21): 전투 연출 컨트롤러 초기화 — StartBattle "이전"에 호출해야
+            // 첫 드로우(StartBattle 안에서 발생) 시점에 DirectionController가 준비됨.
+            InitializeDirectionController();
 
             // 전투 시작
             _turnManager.StartBattle();
@@ -285,6 +300,47 @@ namespace TeamLog.Combat
             // 전투 시작 타이틀
             if (_titleManager != null)
                 _titleManager.ShowBattleStart();
+
+            // Phase GF (2026-07-20): 보스 페이즈 관리자 초기화 — 보스 있으면 임계값(75%/50%) 모니터링 시작
+            InitializeBossPhaseManager();
+
+            // ★ 2026-08-02 P0-3: 첫 전투 시 튜토리얼 가이드 활성화 (BattlesWon==0 && Floor==1)
+            // BattleTestScene(_useTestData=true)에서는 스킵 — 매 전투마다 튜토리얼 뜨는 것 방지
+            if (!_useTestData)
+                BattleTutorialGuide.TryActivate(_mainCanvasRect);
+        }
+
+        /// <summary>★ Phase GF: 전투 연출 컨트롤러 생성 및 초기화.</summary>
+        private void InitializeDirectionController()
+        {
+            if (_mainCanvasRect == null) return;
+
+            // 기존 컴포넌트가 있으면 재사용 (씬에서 인스펙터 할당한 경우)
+            if (_directionController == null)
+                _directionController = GetComponentInChildren<BattleDirectionController>(true);
+
+            if (_directionController == null)
+            {
+                var go = new GameObject("BattleDirection");
+                go.transform.SetParent(transform);
+                _directionController = go.AddComponent<BattleDirectionController>();
+            }
+
+            // 한국어 폰트는 BattleTitleManager에서 가져오거나 null 허용
+            TMP_FontAsset koreanFont = null;
+            if (_titleManager != null)
+            {
+                var field = typeof(BattleTitleManager).GetField("_koreanFont",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (field != null)
+                    koreanFont = field.GetValue(_titleManager) as TMP_FontAsset;
+            }
+
+            _directionController.Initialize(_mainCanvasRect, _battleUIManager, koreanFont);
+
+            // ★ ActionBarUI에 DirectionController 주입 (S2 순차 등장 트리거용)
+            if (_actionBar != null)
+                _actionBar.SetDirectionController(_directionController);
         }
 
         /// <summary>

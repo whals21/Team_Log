@@ -14,18 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _skillName: "\uC640\uC774\uC5B4"
   _description: 
-  _skillType: 0
+  _skillType: 3
   _targetType: 0
-  _power: 1
+  _power: 0
   _cost: 1
   _weight: 50
   _icon: {fileID: 0}
   _statusEffect: 16
   _effectDuration: 3
-  _effectValue: 1
-  _behaviors:
-  - Keyword: 46
-    Rank: 1
+  _effectValue: 3
+  _behaviors: []
   _resourceGainType: 0
   _resourceGainAmount: 0
   _resourceCostType: 0

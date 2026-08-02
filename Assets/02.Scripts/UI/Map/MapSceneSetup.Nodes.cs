@@ -214,8 +214,7 @@ namespace TeamLog.UI.Map
             // _previewedEnemies는 StartBattle이 소비할 수 있으므로 여기서 클리어하지 않음.
 
             // UI 갱신
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
+            RefreshMapUI();
 
             // 노드 타입별 처리
             switch (node.NodeType)
@@ -322,8 +321,7 @@ namespace TeamLog.UI.Map
                     break;
             }
 
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
+            RefreshMapUI();
 
             SaveManager.Save();
         }
@@ -384,16 +382,14 @@ namespace TeamLog.UI.Map
 
         private void OnEventComplete()
         {
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
+            RefreshMapUI();
             RefreshRelicBar();
             SaveManager.Save();
         }
 
         private void OnShopExit()
         {
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
+            RefreshMapUI();
             RefreshRelicBar();
             SaveManager.Save();
         }
@@ -441,8 +437,7 @@ namespace TeamLog.UI.Map
                 SaveManager.Save();
             }
 
-            if (_mapView != null)
-                _mapView.Refresh(_runState.Gold);
+            RefreshMapUI();
             RefreshRelicBar();
         }
 
@@ -450,6 +445,22 @@ namespace TeamLog.UI.Map
         {
             if (_relicBarUI != null && _runState != null)
                 _relicBarUI.Refresh();
+        }
+
+        /// <summary>
+        /// ★ Phase GF (2026-07-21): 맵 UI 통합 갱신 헬퍼.
+        /// MapSceneRework를 사용 중일 때는 _mapReworkView.Refresh() 호출,
+        /// 기존 MapView를 사용 중일 때는 _mapView.Refresh() 호출.
+        /// 둘 다 없으면 no-op.
+        /// ★ 버그 수정: 기존에는 _mapView.Refresh()만 호출해서 MapRework 환경에서
+        /// 상점/이벤트/보상 완료 후 다음 노드가 UI에 안 열리는 현상 발생.
+        /// </summary>
+        private void RefreshMapUI()
+        {
+            if (_mapReworkView != null)
+                _mapReworkView.Refresh();
+            else if (_mapView != null)
+                _mapView.Refresh(_runState.Gold);
         }
 
         private void OnDeckButtonClicked()

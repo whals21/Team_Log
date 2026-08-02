@@ -160,6 +160,23 @@ namespace TeamLog.Map
                     var pool = _themeCandidates[stage - 1];
                     if (pool != null && pool.Count > 0)
                     {
+                        // ★ 임시 하드코딩 (2026-07-21): 1스테이지는 무조건 잿빛 숲 (GreyForest) 강제 선택.
+                        // 테스트 목적 — 잿빛 숲 테마 깊이 검증용. 나중에 랜덤으로 원복 필요.
+                        // 원복 방법: 아래 if 블록 삭제.
+                        if (stage == 1)
+                        {
+                            var greyForest = pool.Find(t => t != null && t.themeId == "GreyForest");
+                            if (greyForest != null)
+                            {
+                                SelectedThemes.Add(greyForest);
+                                continue;
+                            }
+                            // GreyForest를 못 찾으면 폴백: 풀에서 첫 번째
+                            UnityEngine.Debug.LogWarning("[GameRunState] GreyForest 테마를 못 찾음 — 인스펙터 연결 확인 필요. 첫 번째 후보로 폴백.");
+                            SelectedThemes.Add(pool[0]);
+                            continue;
+                        }
+
                         SelectedThemes.Add(pool[_rng.Next(pool.Count)]);
                         continue;
                     }
@@ -222,7 +239,7 @@ namespace TeamLog.Map
 
         /// <summary>
         /// Phase CC-0: 전투 종료 처리.
-        /// - victory=true: 생존자 HP 100% 회복, 사망자 50% 부활 + MaxHP 0.9배 누적.
+        /// - victory=true: 생존자 HP 100% 회복, 사망자 50% HP로 부활 (MaxHP 페널티 없음).
         ///   파티가 완전히 전멸한 상태라면(이론적으로 victory=false와 동일) 패배 처리.
         /// - victory=false: 파티 전멸 → 런 종료.
         /// 반환값 true = 런 종료, false = 계속 진행.
@@ -244,8 +261,7 @@ namespace TeamLog.Map
                 }
                 else
                 {
-                    // 사망자: MaxHP 0.9배 누적 후 50% HP 부활
-                    c.Health.ApplyMaxHpModifier(0.9f);
+                    // 사망자: 50% HP로 부활 (MaxHP 페널티 없음 — 2026-07-20 제거)
                     c.Health.Revive(0.5f);
                     CombatEventBus.FirePartyMemberRevived(c);
                     revived++;
@@ -253,7 +269,7 @@ namespace TeamLog.Map
             }
 
             if (revived > 0)
-                AddLog($"사망자 {revived}명 부활 (MaxHP -10% 누적)");
+                AddLog($"사망자 {revived}명 부활");
 
             return false;
         }

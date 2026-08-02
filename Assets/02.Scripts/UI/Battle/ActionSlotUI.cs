@@ -77,6 +77,9 @@ namespace TeamLog.UI.Battle
             _skill = skill;
             _caster = caster;
 
+            // ★ Phase GF (2026-07-21): 활성 슬롯은 클릭 가능 (SetEmpty 반대 처리)
+            if (_button != null) _button.interactable = true;
+
             SetSkillVisualsOnly(skill, caster);
 
             // 색상 캐싱 (Affordable 토글용)
@@ -222,6 +225,21 @@ namespace TeamLog.UI.Battle
                 _typeTagText.text = "";
 
             SetSelected(false);
+
+            // ★ Phase GF (2026-07-21): 빈 슬롯 클릭 차단
+            if (_button != null) _button.interactable = false;
+        }
+
+        /// <summary>
+        /// ★ Phase GF (2026-07-21): 빈 슬롯을 activeSelf=true로 유지하되 내용만 비움.
+        /// LayoutGroup이 비활성 자식을 자리에서 제외하여 다른 슬롯이 커지는 것을 방지.
+        /// 죽은 캐릭터의 슬롯 자리를 그대로 유지.
+        /// </summary>
+        public void SetEmpty()
+        {
+            Clear();
+            // activeSelf=true 유지 (자리 차지). 내용은 Clear()로 비움.
+            gameObject.SetActive(true);
         }
 
         public void SetSelected(bool selected)

@@ -5229,6 +5229,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad9388b753d940244b8530a31413a974, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _greyForestSummonPool:
+  - {fileID: 11400000, guid: 891cb39a36a180145b55124e2a079283, type: 2}
+  - {fileID: 11400000, guid: ffe4b42f7c46bf54eb8b2ffc2d418da3, type: 2}
+  _greyForestSplitPool:
+  - {fileID: 11400000, guid: 86ed68a7d7a6bc741a84026dff884052, type: 2}
+  - {fileID: 11400000, guid: fa8a769ffd341ec4d9e04bef7c65a679, type: 2}
   _battleUIManager: {fileID: 158669386}
   _actionBar: {fileID: 1763459591}
   _battleEndOverlay: {fileID: 592820219}

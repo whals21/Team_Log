@@ -55,7 +55,11 @@ namespace TeamLog.Editor
 
         // 기본 파티 — Phase CC-2A 가비지 컬렉션 이후 신규 캐릭터 기반
         // (Warrior→Duran, Mage→Ashe 분할 대체, Umbra는 Rogue 슬롯 계승)
-        private static readonly string[] DefaultPartyIds = { "Char_Duran", "Char_Ashe", "Char_Healer", "Char_Umbra" };
+        // ★ 2026-08-02 실험: 딜러 1명 추가 (Healer→Taranis 교체)
+        //   원본: { "Char_Duran", "Char_Ashe", "Char_Healer", "Char_Umbra" }
+        //   변경: 힐러(유틸) 제거, Taranis(네트워크 딜러, Charge 자원) 추가
+        //   목적: 딜러 3명 구성이 평균 턴 수 단축에 미치는 영향 측정
+        private static readonly string[] DefaultPartyIds = { "Char_Duran", "Char_Ashe", "Char_Taranis", "Char_Umbra" };
 
         // 층별 대표 보스 에셋 파일명 — Phase B: 보스 12종 교체.
         // 각 층마다 3종 후보 중 시뮬레이터는 가장 강한 대표 보스 1종 사용.

@@ -87,5 +87,29 @@ namespace TeamLog.UI.Battle
         public static Color DamageColor => UIPalette.Default.DamageColor;
         public static Color HealColor => UIPalette.Default.HealColor;
         public static Color ShieldColor => UIPalette.Default.ShieldBrown;
+
+        /// <summary>★ 2026-08-02 P1-4: 크리티컬 데미지 전용 색 (금색).</summary>
+        public static Color CriticalColor => new Color(1.0f, 0.84f, 0.20f);
+
+        /// <summary>★ 2026-08-02 P1-4: 크리티컬 플로팅 텍스트 — 금색 + 대형 폰트 + "CRIT!" 접두.</summary>
+        public static FloatingTextUI SpawnCritical(Transform parent, int damage, Vector2 position)
+        {
+            var go = new GameObject("FloatingText_Critical");
+            go.transform.SetParent(parent, false);
+            var rect = go.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(280, 56);
+            var tmp = go.AddComponent<TextMeshProUGUI>();
+            tmp.fontSize = 36;                  // 일반 24의 1.5배
+            tmp.fontStyle = FontStyles.Bold | FontStyles.Italic;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;
+            UIKoreanFont.EnsureFont(tmp);
+
+            var floating = go.AddComponent<FloatingTextUI>();
+            floating._duration = 1.5f;          // 일반 1.2초보다 0.3초 길게
+            floating._riseHeight = 80f;         // 더 높이 떠오름
+            floating.Show($"CRIT! -{damage}", CriticalColor, position);
+            return floating;
+        }
     }
 }

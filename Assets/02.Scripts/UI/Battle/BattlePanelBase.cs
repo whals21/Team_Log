@@ -17,6 +17,9 @@ namespace TeamLog.UI.Battle
         protected CanvasGroup _canvasGroup;
         protected Image _panelBgImage;
 
+        // ★ Phase CC (2026-07-22): CC 시각 연출 — Stun/Freeze/Sleep 별표/결정/z
+        private CCVisualizer _ccVisualizer;
+
         [SerializeField] protected TextMeshProUGUI _statText;
         [SerializeField] protected Transform _statusEffectContainer;
 
@@ -29,6 +32,11 @@ namespace TeamLog.UI.Battle
             if (_canvasGroup == null)
                 _canvasGroup = gameObject.AddComponent<CanvasGroup>();
             _panelBgImage = GetComponent<Image>();
+
+            // ★ Phase CC: CCVisualizer 자동 부착
+            _ccVisualizer = GetComponent<CCVisualizer>();
+            if (_ccVisualizer == null)
+                _ccVisualizer = gameObject.AddComponent<CCVisualizer>();
         }
 
         protected T FindComponent<T>(string path) where T : Component
@@ -77,7 +85,26 @@ namespace TeamLog.UI.Battle
             for (int i = _statusEffectContainer.childCount - 1; i >= 0; i--)
                 Destroy(_statusEffectContainer.GetChild(i).gameObject);
 
-            if (effects == null) return;
+            if (effects == null)
+            {
+                _ccVisualizer?.Hide();
+                return;
+            }
+
+            // ★ Phase CC: Stun/Freeze/Sleep 체크 — CCVisualizer에 전달
+            StatusEffectType activeCC = StatusEffectType.None;
+            foreach (var effect in effects)
+            {
+                if (effect.Type == StatusEffectType.Stun) { activeCC = StatusEffectType.Stun; break; }
+                if (effect.Type == StatusEffectType.Freeze) { activeCC = StatusEffectType.Freeze; break; }
+                if (effect.Type == StatusEffectType.Sleep) { activeCC = StatusEffectType.Sleep; break; }
+            }
+
+            if (activeCC != StatusEffectType.None)
+                _ccVisualizer?.Show(activeCC);
+            else
+                _ccVisualizer?.Hide();
+
             foreach (var effect in effects)
                 StatusEffectBadge.Create(_statusEffectContainer, effect);
         }

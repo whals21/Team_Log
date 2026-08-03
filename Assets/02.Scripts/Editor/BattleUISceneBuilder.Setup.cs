@@ -387,12 +387,12 @@ namespace TeamLog.Editor
             nameTmp.raycastTarget = false; nameTmp.enableWordWrapping = false;
             nameTmp.overflowMode = TextOverflowModes.Ellipsis;
 
-            // ── EffectText — top=78, h=18 ──
+            // ── EffectText — top=78, h=22 (★ 2026-08-03: 글자 크기 8→11, 높이 18→22 가독성 개선)
             var effectT = NewRect("EffectText", rect);
-            AnchorTopFill(effectT, 78, 18);
+            AnchorTopFill(effectT, 78, 22);
             var effectTmp = effectT.gameObject.AddComponent<TextMeshProUGUI>();
             effectTmp.font = GetOrCreateKoreanFont(); effectTmp.text = "";
-            effectTmp.fontSize = 8; effectTmp.alignment = TextAlignmentOptions.Center;
+            effectTmp.fontSize = 11; effectTmp.alignment = TextAlignmentOptions.Center;
             effectTmp.color = TextDim; effectTmp.raycastTarget = false;
             effectTmp.enableWordWrapping = true; effectTmp.overflowMode = TextOverflowModes.Ellipsis;
 

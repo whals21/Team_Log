@@ -104,9 +104,8 @@ namespace TeamLog.Combat
             {
                 slotUI.PlayRerollShuffle(finalSkill, caster, shufflePool, () =>
                 {
-                    // 애니메이션 완료 후 Affordable 상태 갱신
-                    int effectiveCost = newSlot.Instance?.EffectiveCost ?? finalSkill.Cost;
-                    slotUI.SetAffordable(newSlot.IsSelected || _turnManager.Context.CurrentAP >= effectiveCost);
+                    // ★ 2026-08-03 C3 수정: 리롤 직후 RefreshAffordability로 자원/LimitBreak까지 반영
+                    _actionBar.RefreshAffordability();
 
                     // 리롤이 남아있으면 리롤 버튼 다시 표시
                     if (_drawSystem.CanReroll && !newSlot.IsSelected)

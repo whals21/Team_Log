@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _traitId: healer_blessing
   _displayName: "\uCD95\uBCF5"
-  _description: "\uC5F0\uACB0\uACE0\uB9AC \uC790\uB3D9 \uD790 \uC704\uB825 +2 (3\u21925)"
+  _description: "\uC5F0\uACB0\uACE0\uB9AC \uC790\uB3D9 \uD790 \uC704\uB825 +2 (1\u21923)"
   _targetClass: 2
   _keywords:
   - Type: 28

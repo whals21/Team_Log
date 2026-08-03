@@ -98,10 +98,12 @@ namespace TeamLog.UI.Battle
                 if (tooltip == null) tooltip = gameObject.AddComponent<TooltipTarget>();
 
                 string subtitle = BuildSkillSubtitle(skill);
-                string desc = BattleDisplayUtil.BuildSkillDescription(skill, caster);
-                string fullDesc = string.IsNullOrEmpty(skill.Description) ? desc : skill.Description;
-                if (!string.IsNullOrEmpty(desc) && !string.IsNullOrEmpty(skill.Description) && skill.Description != desc)
-                    fullDesc = skill.Description + "\n" + desc;
+                // ★ 2026-08-03 P0-R3: 툴팁은 자연어 풀어쓰기 (StS 한국어 표준)
+                // 슬롯 내장(_effectText)은 BuildSkillDescription(축약형) 유지
+                string tooltipDesc = BattleDisplayUtil.BuildTooltipDescription(skill, caster);
+                string fullDesc = string.IsNullOrEmpty(skill.Description) ? tooltipDesc : skill.Description;
+                if (!string.IsNullOrEmpty(tooltipDesc) && !string.IsNullOrEmpty(skill.Description))
+                    fullDesc = skill.Description + "\n" + tooltipDesc;
 
                 tooltip.SetContent(skill.SkillName, subtitle, fullDesc);
             }
@@ -260,7 +262,19 @@ namespace TeamLog.UI.Battle
         public void SetAffordable(bool affordable)
         {
             if (_skillIcon != null && _colorsStored)
-                _skillIcon.color = affordable ? _originalSkillColor : new Color(_originalSkillColor.r, _originalSkillColor.g, _originalSkillColor.b, 0.3f);
+            {
+                if (affordable)
+                {
+                    _skillIcon.color = _originalSkillColor;
+                }
+                else
+                {
+                    // ★ 2026-08-03: 비활성 시 스킬 타입 무관 일관된 어두운 회색 톤
+                    // 기존: alpha 0.3 + RGB 유지 → 타입별 잔색 차이 (Heal=초록, Attack=빨강)로 사용자 혼란
+                    // 수정: 모든 슬롯이 동일한 어두운 회색으로 "사용 불가" 일관성 확보
+                    _skillIcon.color = new Color(0.22f, 0.22f, 0.22f, 0.75f);
+                }
+            }
 
             if (_costText != null)
                 _costText.color = affordable ? _originalCostColor : Color.red;

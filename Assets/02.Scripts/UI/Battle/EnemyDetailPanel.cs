@@ -421,7 +421,7 @@ namespace TeamLog.UI.Battle
         {
             if (intent.Skill == null) return "";
 
-            var desc = BattleDisplayUtil.BuildSkillDescription(intent.Skill, intent.Skill.Type == SkillType.Attack ? null : null);
+            var desc = BattleDisplayUtil.BuildTooltipDescription(intent.Skill, null);
             string skillDesc = string.IsNullOrEmpty(intent.Skill.Description) ? desc : intent.Skill.Description;
             if (!string.IsNullOrEmpty(desc) && !string.IsNullOrEmpty(intent.Skill.Description) && intent.Skill.Description != desc)
                 skillDesc = intent.Skill.Description + "\n" + desc;

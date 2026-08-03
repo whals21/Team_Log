@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using TeamLog.Combat.Turn;
 using TeamLog.Combat.Draw;
 using TeamLog.Characters;
+using TeamLog.Skill;  // ★ P1-Q2: BehaviorKeyword/LimitBreak
 using TeamLog.UI;
 using TeamLog.UI.Battle.Direction;  // ★ Phase GF: BattleDirectionController
 
@@ -96,7 +97,7 @@ namespace TeamLog.UI.Battle
                     _actionSlots[i].SetSkill(slot.Skill, slot.Caster);
                     _actionSlots[i].SetAssigned(slot.IsAssigned);
                     _actionSlots[i].SetExecutionOrder(slot.ExecutionOrder);
-                    _actionSlots[i].SetAffordable(slot.Skill == null || slot.IsSelected || _currentAP >= slot.Skill.Cost);
+                    _actionSlots[i].SetAffordable(IsSlotAffordable(slot));
                 }
                 else
                 {
@@ -205,9 +206,69 @@ namespace TeamLog.UI.Battle
             for (int i = 0; i < _actionSlots.Count && i < slots.Count; i++)
             {
                 if (!_actionSlots[i].gameObject.activeSelf) continue;
-                var skill = slots[i].Skill;
-                _actionSlots[i].SetAffordable(skill == null || slots[i].IsSelected || _currentAP >= skill.Cost);
+                _actionSlots[i].SetAffordable(IsSlotAffordable(slots[i]));
             }
+        }
+
+        /// <summary>★ 2026-08-03 P0-P2: 외부에서 슬롯 활성화 상태 강제 갱신 (PlayerActionController 등).</summary>
+        public void RefreshAffordability() => UpdateSlotAffordability();
+
+        /// <summary>★ 2026-08-03 P0-Q1: AP + 자원 조건 통합 검사 (StS/Hearthstone 표준).</summary>
+        /// <remarks>
+        /// AP 부족 + 자원 부족(Mercy/Ember/Shadows 등) 모두 슬롯 비활성화.
+        /// 사용자가 클릭 전에 "사용 불가" 상태를 시각적으로 인지하도록.
+        /// ★ 2026-08-03 P1-Q2: LimitBreak(전투당 1회) 사용 시에도 비활성화.
+        /// </remarks>
+        private bool IsSlotAffordable(DrawnSkillSlot slot)
+        {
+            if (slot?.Skill == null) return true;   // 빈 슬롯 폴백
+            // ★ 2026-08-03: 이미 이번 턴에 사용한 슬롯(IsSelected)은 재사용 불가 → 비활성화
+            // StS/Hearthstone 표준 — 사용된 카드는 어두워지고 클릭 불가
+            if (slot.IsSelected) return false;
+            if (slot.Caster == null) return true;  // 캐스터 미확정 시 활성화 폴백
+
+            // AP 검사 (EffectiveCost 반영 — Fatigue/Escalation 등)
+            int effectiveCost = slot.Instance?.EffectiveCost ?? slot.Skill.Cost;
+            if (_currentAP < effectiveCost) return false;
+
+            // ★ 자원 검사 (C1 + I1 수정: TurnManager와 일치)
+            // - caster 자원 타입과 스킬 비용 자원 타입이 일치할 때만 검사
+            // - ConsumeAllResource=true면 자원 0이어도 통과 (위력만 낮아짐, TurnManager 정책과 일치)
+            // - MinResourceRequired 명시 시 그 값 요구
+            var skill = slot.Skill;
+            if (skill.ResourceCostType != ResourceType.None
+                && slot.Caster.Resource != null
+                && skill.ResourceCostType == slot.Caster.Resource.Resource)
+            {
+                int current = slot.Caster.Resource.CurrentStacks;
+                if (skill.MinResourceRequired > 0 && current < skill.MinResourceRequired)
+                    return false;
+                if (!skill.ConsumeAllResource
+                    && skill.ResourceCostAmount > 0
+                    && current < skill.ResourceCostAmount)
+                    return false;
+            }
+
+            // ★ P1-Q2: LimitBreak(전투당 1회) 이미 사용 시 비활성화
+            if (slot.Instance != null && slot.Instance.UsedThisBattle)
+            {
+                var behaviors = slot.Instance.GetCombinedBehaviors();
+                if (behaviors != null)
+                {
+                    foreach (var tag in behaviors)
+                    {
+                        if (tag.Keyword == BehaviorKeyword.LimitBreak)
+                            return false;
+                    }
+                }
+            }
+
+            // ★ 2026-08-03 P1-Q5: CC(Stun/Freeze/Sleep) 걸린 캐릭터 슬롯 비활성화
+            // StS/Hearthstone 표준 — CC 상태 시 카드 어두워짐
+            if (slot.Caster.StatusEffects != null && slot.Caster.StatusEffects.IsIncapacitated)
+                return false;
+
+            return true;
         }
 
         private void OnBadgeClicked(string title, string description)

@@ -77,9 +77,9 @@ namespace TeamLog.UI.Battle
                 _typeLabel.color = GetTypeColor(skill);
             }
 
-            // 효과 요약 — BattleDisplayUtil 재사용
+            // 효과 요약 — ★ 2026-08-03 P0-R3: 자연어 풀어쓰기
             if (_descLabel != null && skill != null)
-                _descLabel.text = BattleDisplayUtil.BuildSkillDescription(skill, caster);
+                _descLabel.text = BattleDisplayUtil.BuildTooltipDescription(skill, caster);
 
             // 배경색 — 스킬 타입별
             if (_backgroundImage != null && skill != null)

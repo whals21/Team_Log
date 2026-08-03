@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Team Log — 스킬 설명 포맷 비교</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Cinzel:wght@600;800&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: linear-gradient(135deg, #0a0a12 0%, #14141e 50%, #0a0a12 100%);
+  color: #e8e0d0;
+  font-family: 'Nanum Gothic', sans-serif;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+.container { max-width: 1200px; margin: 0 auto; }
+
+h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: #d4af37;
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #8a7a60;
+  font-size: 14px;
+  margin-bottom: 40px;
+  font-style: italic;
+}
+
+.section {
+  background: rgba(20, 16, 28, 0.6);
+  border: 1px solid #3a2e1f;
+  border-radius: 8px;
+  padding: 28px;
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #d4af37;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #3a2e1f;
+  padding-bottom: 12px;
+}
+
+.section-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.tag-bad { background: #5a1818; color: #ffb0b0; }
+.tag-good { background: #1a4a1a; color: #b0ffb0; }
+
+.section-desc {
+  color: #9a8a70;
+  font-size: 13px;
+  margin: 8px 0 20px;
+  line-height: 1.6;
+}
+
+/* ── 슬롯 그리드 ── */
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.slot {
+  background: linear-gradient(180deg, #1a1622 0%, #0f0d16 100%);
+  border: 1px solid #2a2438;
+  border-radius: 6px;
+  padding: 10px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.slot-current {
+  border-color: #4a2424;
+}
+
+.slot-improved {
+  border-color: #1a4a1a;
+}
+
+.slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.skill-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #f0e8d0;
+}
+
+.skill-cost {
+  background: #b8962c;
+  color: #1a1410;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 28px;
+  text-align: center;
+}
+
+.caster {
+  font-size: 10px;
+  color: #7a6a50;
+  margin-bottom: 8px;
+}
+
+.effect-text {
+  font-size: 11px;
+  color: #b0a890;
+  line-height: 1.4;
+  flex: 1;
+  padding: 4px 2px;
+  word-wrap: break-word;
+}
+
+.effect-current {
+  color: #d0a8a8;
+  /* 난해함 강조 */
+  letter-spacing: -0.3px;
+}
+
+.effect-improved {
+  color: #a8c8a8;
+  font-size: 12px;
+}
+
+.cost-line {
+  margin-top: 6px;
+  font-size: 10px;
+  color: #8a7a60;
+  border-top: 1px solid #2a2438;
+  padding-top: 4px;
+}
+
+/* ── 툴팁 ── */
+.tooltip-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.tooltip {
+  background: linear-gradient(180deg, #1f1a2a 0%, #14101c 100%);
+  border: 1px solid #4a3a1f;
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+
+.tooltip-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: #d4af37;
+  margin-bottom: 4px;
+}
+
+.tooltip-meta {
+  font-size: 11px;
+  color: #7a6a50;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2a2438;
+}
+
+.tooltip-body {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #d0c8b0;
+}
+
+.tooltip-body p {
+  margin-bottom: 6px;
+}
+
+.tooltip-body .num {
+  color: #ffd47a;
+  font-weight: 700;
+}
+
+.tooltip-body .resource {
+  color: #ff9a4a;
+  font-weight: 700;
+}
+
+.tooltip-body .condition {
+  color: #c0a050;
+  font-style: italic;
+}
+
+/* ── 비교표 ── */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #2a2438;
+}
+
+.comparison-table th {
+  background: #1a1622;
+  color: #d4af37;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.comparison-table .col-bad { color: #d0a0a0; }
+.comparison-table .col-good { color: #a0d0a0; }
+
+/* ── 포인터 박스 ── */
+.point-box {
+  background: rgba(212, 175, 55, 0.08);
+  border-left: 3px solid #d4af37;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #c0b090;
+}
+
+.point-box strong {
+  color: #d4af37;
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>SKILL DESCRIPTION FORMAT COMPARISON</h1>
+<p class="subtitle">Team Log — 현재(축약형) vs 개선(자연어) 슬롯/툴팁 분담</p>
+
+<!-- ════════════ 섹션 1: 현재 버전 ════════════ -->
+<div class="section">
+  <h2 class="section-title">현재 버전 (축약형) <span class="section-tag tag-bad">난해함</span></h2>
+  <p class="section-desc">
+    모든 정보를 슬롯 한 칸에 " | " 구분자로 압축. 수식/기호/이니셜 남용.<br>
+    11pt 폰트에 30~40글자를 우겨넣어 읽기 벅참. 초보자는 "잿×3", "HP≤50%"가 무슨 뜻인지 모름.
+  </p>
+
+  <div class="slot-grid">
+    <!-- Ashe 잿빛 응축 -->
+    <div class="slot slot-current">
+      <div class="slot-header">
+        <span class="skill-name">잿빛 응축</span>
+        <span class="skill-cost">1</span>
+      </div>
+      <div class="caster">Ashe</div>
+      <div class="effect-text effect-current">
+        위력 2 | 화상 2 (2턴) | 잿빛 +2 | 풀피 적 +3
+      </div>
+    </div>
+
+    <!-- Ashe 불타는 낙인 -->
+    <div class="slot slot-current">
+      <div class="slot-header">
+        <span class="skill-name">불타는 낙인</span>
+        <span class="skill-cost">2</span>
+      </div>
+      <div class="caster">Ashe</div>
+      <div class="effect-text effect-current">
+        위력 3+잿×1 | HP≤50% 2배 | 잃은 HP 비례 + | 잿빛 2 소모
+      </div>
+    </div>
+
+    <!-- Ashe 잿불의 포옹 -->
+    <div class="slot slot-current">
+      <div class="slot-header">
+        <span class="skill-name">잿불의 포옹</span>
+        <span class="skill-cost">3</span>
+      </div>
+      <div class="caster">Ashe</div>
+      <div class="effect-text effect-current">
+        위력 11+잿×5 | AP 0 시 +10 | 잿빛 5 소모
+      </div>
+    </div>
+
+    <!-- Duran 복수의 일격 -->
+    <div class="slot slot-current">
+      <div class="slot-header">
+        <span class="skill-name">복수의 일격</span>
+        <span class="skill-cost">2</span>
+      </div>
+      <div class="caster">Duran</div>
+      <div class="effect-text effect-current">
+        위력 4+복×1 | 잃은 HP 비례 + | 복수 전량 소모
+      </div>
+    </div>
+
+    <!-- Elara 축복의 자비 -->
+    <div class="slot slot-current">
+      <div class="slot-header">
+        <span class="skill-name">자비의 축복</span>
+        <span class="skill-cost">2</span>
+      </div>
+      <div class="caster">Elara</div>
+      <div class="effect-text effect-current">
+        수치 0 | 공격력 증가 2 (3턴) | Mercy 5 소모
+      </div>
+    </div>
+  </div>
+
+  <div class="point-box">
+    <strong>문제:</strong> "잿×1"이 뭔지, "HP≤50% 2배"가 언제 발동하는지, "수치 0"이 왜 표시되는지,
+    "복×1"과 "잿빛 2"가 같은 자원인지 다른 자원인지 — <strong>처음 보는 사람은 셀프 해독 불가</strong>.
+  </div>
+</div>
+
+<!-- ════════════ 섹션 2: 개선 버전 ════════════ -->
+<div class="section">
+  <h2 class="section-title">개선 버전 (슬롯 간결 + 툴팁 자연어) <span class="section-tag tag-good">가독성</span></h2>
+  <p class="section-desc">
+    슬롯에는 <strong>자원 비용만</strong> 표시. 위력/효과는 슬롯 중앙 아이콘+숫자로 직관 처리.<br>
+    자세한 효과는 <strong>툴팁(hover)에서 풀어 쓴 자연어</strong>로. StS 한국어 표준 ("피해를 N 줍니다").
+  </p>
+
+  <div class="slot-grid">
+    <!-- Ashe 잿빛 응축 - 개선 -->
+    <div class="slot slot-improved">
+      <div class="slot-header">
+        <span class="skill-name">잿빛 응축</span>
+        <span class="skill-cost">1</span>
+      </div>
+      <div class="caster">Ashe · 공격</div>
+      <div class="effect-text effect-improved" style="text-align:center; font-size:18px; padding:8px 0;">
+        <span style="color:#ff7a4a; font-weight:800;">피해 2</span>
+      </div>
+      <div class="cost-line">잿빛 +2 획득</div>
+    </div>
+
+    <!-- Ashe 불타는 낙인 - 개선 -->
+    <div class="slot slot-improved">
+      <div class="slot-header">
+        <span class="skill-name">불타는 낙인</span>
+        <span class="skill-cost">2</span>
+      </div>
+      <div class="caster">Ashe · 공격</div>
+      <div class="effect-text effect-improved" style="text-align:center; font-size:18px; padding:8px 0;">
+        <span style="color:#ff7a4a; font-weight:800;">피해 3+</span>
+      </div>
+      <div class="cost-line">잿빛 2 소모</div>
+    </div>
+
+    <!-- Ashe 잿불의 포옹 - 개선 -->
+    <div class="slot slot-improved">
+      <div class="slot-header">
+        <span class="skill-name">잿불의 포옹</span>
+        <span class="skill-cost">3</span>
+      </div>
+      <div class="caster">Ashe · 궁극기</div>
+      <div class="effect-text effect-improved" style="text-align:center; font-size:18px; padding:8px 0;">
+        <span style="color:#ff7a4a; font-weight:800;">피해 11+</span>
+      </div>
+      <div class="cost-line">잿빛 5 소모 · 자살</div>
+    </div>
+
+    <!-- Duran 복수의 일격 - 개선 -->
+    <div class="slot slot-improved">
+      <div class="slot-header">
+        <span class="skill-name">복수의 일격</span>
+        <span class="skill-cost">2</span>
+      </div>
+      <div class="caster">Duran · 공격</div>
+      <div class="effect-text effect-improved" style="text-align:center; font-size:18px; padding:8px 0;">
+        <span style="color:#ff7a4a; font-weight:800;">피해 4+</span>
+      </div>
+      <div class="cost-line">복수 전량 소모</div>
+    </div>
+
+    <!-- Elara 축복의 자비 - 개선 -->
+    <div class="slot slot-improved">
+      <div class="slot-header">
+        <span class="skill-name">자비의 축복</span>
+        <span class="skill-cost">2</span>
+      </div>
+      <div class="caster">Elara · 강화</div>
+      <div class="effect-text effect-improved" style="text-align:center; font-size:15px; padding:8px 0;">
+        <span style="color:#ffd47a; font-weight:800;">공격력 +2 (3턴)</span>
+      </div>
+      <div class="cost-line">Mercy 5 소모</div>
+    </div>
+  </div>
+
+  <div class="point-box">
+    <strong>슬롯 개선:</strong> "잿×1", "HP≤50% 2배" 같은 축약 제거. 슬롯은 <strong>숫자 1개 + 자원 비용 1줄</strong>만으로 직관적.
+    자세한 건 툴팁에서.
+  </div>
+
+  <!-- 툴팁 비교 -->
+  <h3 style="color:#d4af37; margin-top:30px; margin-bottom:14px; font-family:'Cinzel',serif; font-size:16px;">
+    툴팁 (hover 시) — 풀어 쓴 자연어
+  </h3>
+
+  <div class="tooltip-section">
+    <!-- 불타는 낙인 툴팁 -->
+    <div class="tooltip">
+      <div class="tooltip-title">불타는 낙인</div>
+      <div class="tooltip-meta">Ashe · 공격 · AP 2 · 잿빛 2 소모</div>
+      <div class="tooltip-body">
+        <p>적에게 <span class="num">3</span>의 피해를 줍니다.</p>
+        <p>잿빛 <span class="num">1</span>스택마다 추가로 <span class="num">1</span>의 피해를 줍니다.</p>
+        <p><span class="condition">체력이 절반 이하일 때</span> 피해가 <span class="num">2배</span>가 됩니다.</p>
+        <p><span class="condition">잃은 체력 1당</span> 피해가 <span class="num">1</span> 증가합니다.</p>
+      </div>
+    </div>
+
+    <!-- 잿불의 포옹 툴팁 -->
+    <div class="tooltip">
+      <div class="tooltip-title">잿불의 포옹</div>
+      <div class="tooltip-meta">Ashe · 궁극기 · AP 3 · 잿빛 5 소모 · 자살</div>
+      <div class="tooltip-body">
+        <p>적에게 <span class="num">11</span>의 피해를 줍니다.</p>
+        <p>잿빛 <span class="num">1</span>스택마다 추가로 <span class="num">5</span>의 피해를 줍니다.</p>
+        <p><span class="condition">잿빛이 5스택일 때</span> 추가로 <span class="num">75</span>의 피해를 줍니다.</p>
+        <p>시전 후 <span class="resource">Ashe가 사망</span>합니다. (부활 시 50% HP로)</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tooltip-section" style="margin-top:20px;">
+    <!-- 복수의 일격 툴팁 -->
+    <div class="tooltip">
+      <div class="tooltip-title">복수의 일격</div>
+      <div class="tooltip-meta">Duran · 공격 · AP 2 · 복수 전량 소모</div>
+      <div class="tooltip-body">
+        <p>적에게 <span class="num">4</span>의 피해를 줍니다.</p>
+        <p>복수 <span class="num">1</span>스택마다 추가로 <span class="num">1</span>의 피해를 줍니다.</p>
+        <p><span class="condition">잃은 체력 1당</span> 피해가 <span class="num">1</span> 증가합니다.</p>
+        <p>보유한 복수를 <span class="resource">모두 소모</span>합니다.</p>
+      </div>
+    </div>
+
+    <!-- 자비의 축복 툴팁 -->
+    <div class="tooltip">
+      <div class="tooltip-title">자비의 축복</div>
+      <div class="tooltip-meta">Elara · 강화 · AP 2 · Mercy 5 소모</div>
+      <div class="tooltip-body">
+        <p>아군 1명의 공격력을 <span class="num">3턴</span> 동안 <span class="num">2</span> 높입니다.</p>
+        <p><span class="resource">Mercy 5</span>를 소모합니다. (현재 보유량 필요)</p>
+        <p><span class="condition">Mercy가 15 이상일 때</span> 자동 버스트가 발동되어
+          가장 많이 회복받은 파티원에게 추가 공격력 버프가 부여됩니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="point-box">
+    <strong>툴팁 개선:</strong> StS 한국어 표준 ("~줍니다", "~높입니다") + 마침표로 항목 분리.
+    숫자는 <span style="color:#ffd47a;">골드</span>, 자원은 <span style="color:#ff9a4a;">주황</span>, 조건은 <span style="color:#c0a050; font-style:italic;">이탤릭 금색</span>으로 색상 분리.
+    <strong>초보자도 한 번에 이해 가능</strong>.
+  </div>
+</div>
+
+<!-- ════════════ 섹션 3: 핵심 차이 요약 ════════════ -->
+<div class="section">
+  <h2 class="section-title">핵심 차이 요약</h2>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th style="width:25%;">항목</th>
+        <th style="width:37.5%;">현재 (축약형)</th>
+        <th style="width:37.5%;">개선 (자연어)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>슬롯 정보량</strong></td>
+        <td class="col-bad">위력+상태이상+자원+조건부 4~5개 항목 (30~40글자)</td>
+        <td class="col-good">숫자 1개 + 자원 비용 1줄 (10글자 내외)</td>
+      </tr>
+      <tr>
+        <td><strong>표기 방식</strong></td>
+        <td class="col-bad">"위력 3+잿×1 | HP≤50% 2배" (수식+기호)</td>
+        <td class="col-good">"피해 3+" (큰 숫자) + 툴팁에 "잿빛 1스택마다 추가로 1 피해"</td>
+      </tr>
+      <tr>
+        <td><strong>자원 표현</strong></td>
+        <td class="col-bad">"잿", "복", "설" 이니셜 (이해 불가)</td>
+        <td class="col-good">"잿빛", "복수", "서리" 전체 이름 + 색상</td>
+      </tr>
+      <tr>
+        <td><strong>조건부 효과</strong></td>
+        <td class="col-bad">"HP≤50% 2배" (수학 기호)</td>
+        <td class="col-good">"체력이 절반 이하일 때 피해가 2배" (자연어)</td>
+      </tr>
+      <tr>
+        <td><strong>상세 설명</strong></td>
+        <td class="col-bad">슬롯에 다 우겨넣음 → 잘림(Ellipsis)</td>
+        <td class="col-good">툴팁에서 풀어 쓴 자연어 문장 (StS 표준)</td>
+      </tr>
+      <tr>
+        <td><strong>처음 유저 이해도</strong></td>
+        <td class="col-bad">셀프 해독 불가 (잿×3이 뭔지 모름)</td>
+        <td class="col-good">직관적 (숫자+동사 "피해를 N 줍니다")</td>
+      </tr>
+      <tr>
+        <td><strong>명작 벤치마크</strong></td>
+        <td class="col-bad">해당 없음 (이런 포맷 없음)</td>
+        <td class="col-good">StS 자연어 + Balatro 색상 강조</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="point-box" style="margin-top:20px;">
+    <strong>결론:</strong> 슬롯에는 <strong>"무엇을 하는 스킬인가"를 숫자로</strong> (공격=빨간 숫자, 힐=초록 숫자),
+    툴팁에는 <strong>"어떤 조건에서 얼마나 효과가 있는가"를 자연어로</strong>.
+    이 분담이 StS/Hearthstone/Monster Train이 채택한 패턴.
+  </div>
+</div>
+
+</div>
+</body>
+</html>

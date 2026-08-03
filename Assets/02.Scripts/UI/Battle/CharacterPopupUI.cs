@@ -327,7 +327,8 @@ namespace TeamLog.UI.Battle
         /// </summary>
         private string BuildSkillSummary(SkillData skill)
         {
-            return BattleDisplayUtil.BuildSkillDescription(skill, _currentCharacter, " | ");
+            // ★ 2026-08-03 P0-R3: 자연어 풀어쓰기 (StS 한국어 표준)
+            return BattleDisplayUtil.BuildTooltipDescription(skill, _currentCharacter);
         }
 
         /// <summary>

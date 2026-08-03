@@ -10,13 +10,15 @@ namespace TeamLog.Characters
     /// Mercy 자원 — Elara (Healer) 고유 메카닉 (Phase CC-2C).
     ///
     /// 핵심 루프 (기획: ReworkDrafts/01_Healer.md):
-    /// - 매 턴 시작 시 연결된 파티원(생존자)에게 자동 힐 3 (BondBoost 시 6)
+    /// - 매 턴 시작 시 연결된 파티원(생존자)에게 자동 힐 1 (BondBoost 시 +3 = 4)
     /// - 자동 힐 + Healer 직접 힐 시전이 Mercy 축전
     /// - Mercy 15 도달 시 자동 버스트: 가장 많이 회복받은 파티원에게 ATK+3 (3턴)
     /// - Mercy 0 리셋 + 해당 파티원 회복량 추적도 리셋
     ///
     /// 전략: 파티원 행동을 보조하며 Mercy 축전 → 자동 버스트로 파티 강화.
     /// "힐과 버프의 영원한 순환" — 사용자 제안 컨셉.
+    ///
+    /// ★ 2026-08-03 밸런스 조정: BaseAutoHeal 3 → 1 (자동 힐 과다로 인한 밸런스 완화)
     /// </summary>
     public class MercyResourceComponent : CharacterResourceComponent
     {
@@ -26,8 +28,8 @@ namespace TeamLog.Characters
         /// <summary>Mercy 버스트 임계값 (15 누적 시 자동 발동).</summary>
         public const int BurstThreshold = 15;
 
-        /// <summary>기본 자동 힐 위력 (BondBoost 시 +3).</summary>
-        public const int BaseAutoHeal = 3;
+        /// <summary>기본 자동 힐 위력 (BondBoost 시 +3 = 4, 축복 특성 시 +2 = 3).</summary>
+        public const int BaseAutoHeal = 1;
 
         /// <summary>BondBoost 상태일 때 추가 힐 위력.</summary>
         public const int BondBoostBonus = 3;

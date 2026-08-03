@@ -65,7 +65,7 @@ namespace TeamLog.Editor
             //   - MercyCleanseBonus → Mend Wounds 정화 시 Mercy +N (후속 Behavior 확장)
             //   - MercyBurstTargets → Mercy 버스트 대상 수 (기본 1 → N)
             CreateTrait("Trait_Healer_Blessing", "healer_blessing", "축복",
-                "연결고리 자동 힐 위력 +2 (3→5)",
+                "연결고리 자동 힐 위력 +2 (1→3)",
                 CharacterClass.Healer, isDefault: true, unlockCost: 0, soulCost: 0,
                 keywords: new[] { Kw(KeywordType.AutoHealBonus, 2) });
 
